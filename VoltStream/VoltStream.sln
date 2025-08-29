@@ -9,6 +9,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{95C9
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoltStream.Domain", "src\backend\VoltStream.Domain\VoltStream.Domain.csproj", "{53CA4900-4A99-477B-A423-0DC3D691828B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoltStream.Application", "src\backend\VoltStream.Application\VoltStream.Application.csproj", "{CD680BFA-650C-4112-8E06-757FDBBE15D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoltStream.Infrastructure", "src\backend\VoltStream.Infrastructure\VoltStream.Infrastructure.csproj", "{BAE87FF8-8D13-4660-9A4E-DD614CBFEB27}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VoltStream.WebApi", "src\backend\VoltStream.WebApi\VoltStream.WebApi.csproj", "{EDE29B4E-090E-4706-8481-5470F0E11294}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +25,18 @@ Global
 		{53CA4900-4A99-477B-A423-0DC3D691828B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53CA4900-4A99-477B-A423-0DC3D691828B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53CA4900-4A99-477B-A423-0DC3D691828B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD680BFA-650C-4112-8E06-757FDBBE15D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD680BFA-650C-4112-8E06-757FDBBE15D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD680BFA-650C-4112-8E06-757FDBBE15D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD680BFA-650C-4112-8E06-757FDBBE15D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAE87FF8-8D13-4660-9A4E-DD614CBFEB27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAE87FF8-8D13-4660-9A4E-DD614CBFEB27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAE87FF8-8D13-4660-9A4E-DD614CBFEB27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAE87FF8-8D13-4660-9A4E-DD614CBFEB27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDE29B4E-090E-4706-8481-5470F0E11294}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDE29B4E-090E-4706-8481-5470F0E11294}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDE29B4E-090E-4706-8481-5470F0E11294}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDE29B4E-090E-4706-8481-5470F0E11294}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -26,6 +44,9 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{95C9440C-E9CD-462F-9C8E-82405CE04378} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{53CA4900-4A99-477B-A423-0DC3D691828B} = {95C9440C-E9CD-462F-9C8E-82405CE04378}
+		{CD680BFA-650C-4112-8E06-757FDBBE15D7} = {95C9440C-E9CD-462F-9C8E-82405CE04378}
+		{BAE87FF8-8D13-4660-9A4E-DD614CBFEB27} = {95C9440C-E9CD-462F-9C8E-82405CE04378}
+		{EDE29B4E-090E-4706-8481-5470F0E11294} = {95C9440C-E9CD-462F-9C8E-82405CE04378}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5E2D1F20-4151-4F4C-9BA3-1F8168A1AB90}

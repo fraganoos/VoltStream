@@ -6,4 +6,6 @@ public class DebtKredit : Auditable
     public decimal BeginSumm { get; set; }
     public decimal CurrencySumm { get; set; }
     public bool IsActive { get; set; }
+
+    public Customer Customer { get; set; } = default!;
 }

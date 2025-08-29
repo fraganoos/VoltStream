@@ -9,4 +9,7 @@ public class Sale : Auditable
     public decimal Summa { get; set; } // jami summa
     public long CustomerOperationId { get; set; }
     public decimal? Discount { get; set; } // chegirma
+
+    public CustomerOperation CustomerOperation { get; set; } = default!;
+    public Customer Customer { get; set; } = default!;
 }

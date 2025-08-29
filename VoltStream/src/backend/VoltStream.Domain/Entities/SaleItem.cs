@@ -9,4 +9,7 @@ public class SaleItem : Auditable
     public decimal TotalQuantity { get; set; } // jami uzunlik
     public decimal Price { get; set; } // 1 metr narxi
     public decimal TotalSumm { get; set; } // jami summa
+
+    public Sale Sale { get; set; } = default!;
+    public Product Product { get; set; } = default!;
 }
