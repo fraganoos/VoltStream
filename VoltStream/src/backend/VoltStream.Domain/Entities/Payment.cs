@@ -14,5 +14,5 @@ public class Payment : Auditable
     public string Description { get; set; } = null!;
     public long CustomerOperation { get; set; }
 
-    public Customer Customer { get; set; }
+    public Customer Customer { get; set; } = default!;
 }

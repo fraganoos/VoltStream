@@ -10,6 +10,6 @@ public class ProductMappingProfile : Profile
     public ProductMappingProfile()
     {
         CreateMap<CreateProductCommand, Product>();
-        CreateMap<Product, ProductDto>();
+        CreateMap<Product, ProductDTO>();
     }
 }

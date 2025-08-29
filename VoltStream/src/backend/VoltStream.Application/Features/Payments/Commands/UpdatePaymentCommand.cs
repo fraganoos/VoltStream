@@ -2,11 +2,16 @@
 
 using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using System.Threading;
+using System.Threading.Tasks;
+using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
 
-public record CreatePaymentCommand(
+public record UpdatePaymentCommand(
+    long Id,
     DateTimeOffset PaidDate,
     long CustomerId,
     PaymentType PaymentType,
@@ -17,29 +22,30 @@ public record CreatePaymentCommand(
     string Description,
     long CustomerOperation) : IRequest<long>;
 
-public class CreatePaymentCommandHandler(
+public class UpdatePaymentCommandHandler(
     IAppDbContext context,
-    IMapper mapper)
-    : IRequestHandler<CreatePaymentCommand, long>
+    IMapper mapper) : IRequestHandler<UpdatePaymentCommand, long>
 {
-    public async Task<long> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
+    public async Task<long> Handle(UpdatePaymentCommand request, CancellationToken cancellationToken)
     {
+        var payment = await context.Payments.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
+            ?? throw new NotFoundException(nameof(Payment), nameof(request.Id), request.Id);
+
+        var customer = await context.CustomerOperations.FirstOrDefaultAsync(co => co.Id == request.CustomerOperation, cancellationToken)
+            ?? throw new NotFoundException(nameof(CustomerOperation), nameof(request.Id), request.Id);
+
         await using var transaction = await context.BeginTransactionAsync(cancellationToken);
 
         try
         {
-            var payment = mapper.Map<Payment>(request);
+            mapper.Map(request, payment);
 
-            var customerOperation = mapper.Map<CustomerOperation>(request);
-            customerOperation.OperationType = OperationType.Payment;
-            customerOperation.Description = GenerateDescription(request);
-
-            context.Payments.Add(payment);
-            context.CustomerOperations.Add(customerOperation);
+            mapper.Map(request, customer);
+            customer.Description = GenerateDescription(request);
 
             await context.SaveAsync(cancellationToken);
-
             await transaction.CommitAsync(cancellationToken);
+
             return payment.Id;
         }
         catch
@@ -49,8 +55,9 @@ public class CreatePaymentCommandHandler(
         }
     }
 
-    private static string GenerateDescription(CreatePaymentCommand request)
-        => request.PaymentType switch
+    private static string GenerateDescription(UpdatePaymentCommand request)
+    {
+        return request.PaymentType switch
         {
             PaymentType.Cash => request.CurrencyType switch
             {
@@ -75,4 +82,5 @@ public class CreatePaymentCommandHandler(
             },
             _ => request.Description
         };
+    }
 }
