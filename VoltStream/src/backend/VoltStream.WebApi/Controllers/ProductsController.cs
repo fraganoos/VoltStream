@@ -1,6 +1,7 @@
 ﻿namespace VoltStream.WebApi.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
+
 using VoltStream.Application.Features.Products.Commands;
 using VoltStream.Application.Features.Products.Queries;
 using VoltStream.WebApi.Models;

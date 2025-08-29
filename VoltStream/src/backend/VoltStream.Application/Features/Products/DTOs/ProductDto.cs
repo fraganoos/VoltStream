@@ -1,6 +1,6 @@
 ﻿namespace VoltStream.Application.Features.Products.DTOs;
 
-public class ProductDto
+public record ProductDTO
 {
     public long Id { get; set; }
     public long CategoryId { get; set; }

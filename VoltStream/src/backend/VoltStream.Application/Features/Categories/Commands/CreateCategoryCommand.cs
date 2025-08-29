@@ -1,13 +1,14 @@
-﻿using MediatR;
+﻿namespace VoltStream.Application.Features.Categories.Commands;
+
 using AutoMapper;
-using VoltStream.Domain.Entities;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
+using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
+using VoltStream.Domain.Entities;
 
-namespace VoltStream.Application.Features.Categories.Commands;
-
-public record CreateCategoryCommand(string name) : IRequest<long>;
+public record CreateCategoryCommand(string Name) : IRequest<long>;
 
 public class CreateCategoryCommandHandler(
     IAppDbContext context,
@@ -16,7 +17,7 @@ public class CreateCategoryCommandHandler(
     public async Task<long> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
         var categoryExists = await context.Products
-            .AnyAsync(p => p.Name.Equals(request.name, StringComparison.CurrentCultureIgnoreCase), cancellationToken);
+            .AnyAsync(p => p.NormalizedName == request.Name.ToNormalized(), cancellationToken);
 
         if (categoryExists)
             throw new AlreadyExistException(nameof(Category));

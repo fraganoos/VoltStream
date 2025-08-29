@@ -11,8 +11,9 @@ public class Payment : Auditable
     public CurrencyType CurrencyType { get; set; } = default!;
     public decimal Kurs { get; set; } //dollar kurs yoki pul o'tkazish foizi
     public decimal DefaultSumm { get; set; } // qarz summadan ochiraldigan summa
-    public string Description { get; set; } = null!;
-    public long CustomerOperation { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public long CustomerOperationId { get; set; }
 
-    public Customer Customer { get; set; }
+    public Customer Customer { get; set; } = default!;
+    public CustomerOperation CustomerOperation { get; set; } = default!;
 }

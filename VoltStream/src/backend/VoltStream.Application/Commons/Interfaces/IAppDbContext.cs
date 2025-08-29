@@ -1,6 +1,7 @@
 ﻿namespace VoltStream.Application.Commons.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using VoltStream.Domain.Entities;
 
 public interface IAppDbContext
@@ -18,4 +19,8 @@ public interface IAppDbContext
     DbSet<Warehouse> Warehouses { get; }
 
     Task<int> SaveAsync(CancellationToken cancellationToken);
+
+    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
+    Task<bool> CommitTransactionAsync(CancellationToken cancellationToken = default);
+    Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
 }
