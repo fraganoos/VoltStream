@@ -28,31 +28,19 @@ public class UpdatePaymentCommandHandler(
 {
     public async Task<long> Handle(UpdatePaymentCommand request, CancellationToken cancellationToken)
     {
-        var payment = await context.Payments.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
+        var payment = await context.Payments
+            .Include(payment => payment.CustomerOperation)
+            .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Payment), nameof(request.Id), request.Id);
-
-        var customer = await context.CustomerOperations.FirstOrDefaultAsync(co => co.Id == request.CustomerOperation, cancellationToken)
-            ?? throw new NotFoundException(nameof(CustomerOperation), nameof(request.Id), request.Id);
 
         await using var transaction = await context.BeginTransactionAsync(cancellationToken);
 
-        try
-        {
-            mapper.Map(request, payment);
+        mapper.Map(request, payment);
+        mapper.Map(request, payment.CustomerOperation);
+        payment.CustomerOperation.Description = GenerateDescription(request);
 
-            mapper.Map(request, customer);
-            customer.Description = GenerateDescription(request);
-
-            await context.SaveAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-
-            return payment.Id;
-        }
-        catch
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+        await context.CommitTransactionAsync(cancellationToken);
+        return payment.Id;
     }
 
     private static string GenerateDescription(UpdatePaymentCommand request)

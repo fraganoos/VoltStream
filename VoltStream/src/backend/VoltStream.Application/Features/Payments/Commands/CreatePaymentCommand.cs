@@ -14,8 +14,7 @@ public record CreatePaymentCommand(
     CurrencyType CurrencyType,
     decimal Kurs,
     decimal DefaultSumm,
-    string Description,
-    long CustomerOperation) : IRequest<long>;
+    string Description) : IRequest<long>;
 
 public class CreatePaymentCommandHandler(
     IAppDbContext context,
@@ -24,29 +23,20 @@ public class CreatePaymentCommandHandler(
 {
     public async Task<long> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
     {
-        await using var transaction = await context.BeginTransactionAsync(cancellationToken);
+        await context.BeginTransactionAsync(cancellationToken);
 
-        try
-        {
-            var payment = mapper.Map<Payment>(request);
+        var customerOperation = mapper.Map<CustomerOperation>(request);
+        customerOperation.OperationType = OperationType.Payment;
+        customerOperation.Description = GenerateDescription(request);
 
-            var customerOperation = mapper.Map<CustomerOperation>(request);
-            customerOperation.OperationType = OperationType.Payment;
-            customerOperation.Description = GenerateDescription(request);
+        var payment = mapper.Map<Payment>(request);
+        payment.CustomerOperation = customerOperation;
 
-            context.Payments.Add(payment);
-            context.CustomerOperations.Add(customerOperation);
+        context.Payments.Add(payment);
+        context.CustomerOperations.Add(customerOperation);
 
-            await context.SaveAsync(cancellationToken);
-
-            await transaction.CommitAsync(cancellationToken);
-            return payment.Id;
-        }
-        catch
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+        await context.CommitTransactionAsync(cancellationToken);
+        return payment.Id;
     }
 
     private static string GenerateDescription(CreatePaymentCommand request)

@@ -14,26 +14,17 @@ public class DeletePaymentCommandHandler(
 {
     public async Task<bool> Handle(DeletePaymentCommand request, CancellationToken cancellationToken)
     {
-        var payment = await context.Payments.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
+        var payment = await context.Payments
+            .Include(p => p.CustomerOperation)
+            .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Payment), nameof(request.Id), request.Id);
 
-        var customerOperation = await context.CustomerOperations.FirstOrDefaultAsync(co => co.CustomerId == payment.CustomerId, cancellationToken)
-            ?? throw new NotFoundException(nameof(CustomerOperation), nameof(payment.CustomerId), payment.CustomerId);
+        await context.BeginTransactionAsync(cancellationToken);
 
-        await using var transaction = await context.BeginTransactionAsync(cancellationToken);
-        try
-        {
-            payment.IsDeleted = true;
-            customerOperation.IsDeleted = true;
+        payment.IsDeleted = true;
+        payment.CustomerOperation.IsDeleted = true;
 
-            var result = await context.SaveAsync(cancellationToken) > 0;
-            await transaction.CommitAsync(cancellationToken);
-            return result;
-        }
-        catch
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+        return await context.CommitTransactionAsync(cancellationToken);
     }
+
 }

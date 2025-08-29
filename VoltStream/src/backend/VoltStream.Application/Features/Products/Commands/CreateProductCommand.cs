@@ -23,7 +23,6 @@ public class CreateProductCommandHandler(
 
         var product = mapper.Map<Product>(request);
         context.Products.Add(product);
-        await context.SaveAsync(cancellationToken);
-        return product.Id;
+        return await context.SaveAsync(cancellationToken).ContinueWith(product => product.Id);
     }
 }

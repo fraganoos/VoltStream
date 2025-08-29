@@ -12,4 +12,6 @@ public class Sale : Auditable
 
     public CustomerOperation CustomerOperation { get; set; } = default!;
     public Customer Customer { get; set; } = default!;
+
+    public ICollection<SaleItem> SaleItems { get; set; } = default!;
 }

@@ -21,6 +21,6 @@ public interface IAppDbContext
     Task<int> SaveAsync(CancellationToken cancellationToken);
 
     Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
-    Task CommitTransactionAsync(CancellationToken cancellationToken = default);
+    Task<bool> CommitTransactionAsync(CancellationToken cancellationToken = default);
     Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
 }
