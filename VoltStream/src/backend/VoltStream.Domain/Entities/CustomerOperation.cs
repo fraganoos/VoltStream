@@ -8,4 +8,6 @@ public class CustomerOperation : Auditable
     public decimal Summa { get; set; }
     public OperationType OperationType { get; set; }
     public string Description { get; set; } = string.Empty;
+
+    public Customer Customer { get; set; } = default!;
 }

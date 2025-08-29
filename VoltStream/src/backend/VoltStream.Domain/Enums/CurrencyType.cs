@@ -2,13 +2,6 @@
 
 public enum CurrencyType
 {
+    UZS,
     USD,
-    EUR,
-    GBP,
-    JPY,
-    CHF,
-    CAD,
-    AUD,
-    CNY,
-    RUB
 }

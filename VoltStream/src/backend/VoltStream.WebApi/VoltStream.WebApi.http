@@ -1,0 +1,6 @@
+@VoltStream.WebApi_HostAddress = http://localhost:5123
+
+GET {{VoltStream.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
