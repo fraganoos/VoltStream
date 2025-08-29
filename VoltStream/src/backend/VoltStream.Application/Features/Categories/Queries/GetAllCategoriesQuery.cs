@@ -1,10 +1,10 @@
-﻿using AutoMapper;
+﻿namespace VoltStream.Application.Features.Categories.Queries;
+
+using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Categories.DTOs;
-
-namespace VoltStream.Application.Features.Categories.Queries;
 
 public record GetAllCategoriesQuery : IRequest<List<CategoryDto>>;
 

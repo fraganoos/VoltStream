@@ -4,6 +4,7 @@ using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
+using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
@@ -16,7 +17,7 @@ public class CreateProductCommandHandler(
     public async Task<long> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
         var productExists = await context.Products
-            .AnyAsync(p => p.Name.Equals(request.Name, StringComparison.CurrentCultureIgnoreCase), cancellationToken);
+            .AnyAsync(p => p.NormalizedName == request.Name.ToNormalized(), cancellationToken);
 
         if (productExists)
             throw new AlreadyExistException(nameof(Product));

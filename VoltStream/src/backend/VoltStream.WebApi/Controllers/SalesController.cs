@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+
 using VoltStream.Application.Features.Sales.Commands;
 using VoltStream.WebApi.Models;
 

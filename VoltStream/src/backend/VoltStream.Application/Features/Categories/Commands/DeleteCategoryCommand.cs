@@ -1,10 +1,10 @@
-﻿using MediatR;
-using VoltStream.Domain.Entities;
+﻿namespace VoltStream.Application.Features.Categories.Commands;
+
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
-
-namespace VoltStream.Application.Features.Categories.Commands;
+using VoltStream.Domain.Entities;
 
 public record DeleteCategoryCommand(long Id) : IRequest<bool>;
 
@@ -18,7 +18,6 @@ public class DeleteCategoryCommandHandler(
             ?? throw new NotFoundException(nameof(Category), nameof(request.Id), request.Id);
 
         category.IsDeleted = true;
-        context.Categories.Update(category);
         return await context.SaveAsync(cancellationToken) > 0;
     }
 }

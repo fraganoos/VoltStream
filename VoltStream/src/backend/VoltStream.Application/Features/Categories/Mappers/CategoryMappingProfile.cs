@@ -1,16 +1,23 @@
-﻿using AutoMapper;
-using VoltStream.Domain.Entities;
-using VoltStream.Application.Features.Categories.DTOs;
+﻿namespace VoltStream.Application.Features.Categories.Mappers;
+
+using AutoMapper;
+using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Features.Categories.Commands;
-
-
-namespace VoltStream.Application.Features.Categories.Mappers;
+using VoltStream.Application.Features.Categories.DTOs;
+using VoltStream.Domain.Entities;
 
 public class CategoryMappingProfile : Profile
 {
     public CategoryMappingProfile()
     {
-        CreateMap<CreateCategoryCommand, Category>();
+        CreateMap<CreateCategoryCommand, Category>()
+            .ForMember(dest => dest.NormalizedName,
+            opt => opt.MapFrom(src => src.Name.ToNormalized()));
+
+        CreateMap<UpdateCategoryCommand, Category>()
+            .ForMember(dest => dest.NormalizedName,
+            opt => opt.MapFrom(src => src.Name.ToNormalized()));
+
         CreateMap<Category, CategoryDto>();
     }
 }
