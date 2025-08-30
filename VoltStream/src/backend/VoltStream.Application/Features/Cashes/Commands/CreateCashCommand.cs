@@ -1,0 +1,22 @@
+﻿namespace VoltStream.Application.Features.Cash.Commands;
+
+using MediatR;
+using AutoMapper;
+using VoltStream.Domain.Entities;
+using VoltStream.Application.Commons.Interfaces;
+
+public record CreateCashCommand(decimal UzsBalance, decimal UsdBalance, decimal Kurs) : IRequest<long>;
+
+public class CreateCashCommandHandler(
+    IAppDbContext context,
+    IMapper mapper) : IRequestHandler<CreateCashCommand, long>
+{
+    public async Task<long> Handle(CreateCashCommand request, CancellationToken cancellationToken)
+    {
+
+        var cash = mapper.Map<Cash>(request);
+        context.Cashes.Add(cash);
+        await context.SaveAsync(cancellationToken);
+        return cash.Id;
+    }
+}
