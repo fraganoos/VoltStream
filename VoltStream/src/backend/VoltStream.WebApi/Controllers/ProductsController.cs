@@ -20,7 +20,7 @@ public class ProductsController : BaseController
     public async Task<IActionResult> Update(UpdateProductCommand command)
         => Ok(new Response { Data = await Mediator.Send(command) });
 
-    [HttpGet("get-all")]
+    [HttpGet]
     public async Task<IActionResult> GetAll()
         => Ok(new Response { Data = await Mediator.Send(new GetAllProductsQuery()) });
 

@@ -19,7 +19,7 @@ public class DebtKreditsController : BaseController
     public async Task<IActionResult> Update(UpdateDebtKreditCommand command)
         => Ok(new Response { Data = await Mediator.Send(command) });
 
-    [HttpGet("get-all")]
+    [HttpGet]
     public async Task<IActionResult> GetAll()
         => Ok(new Response { Data = await Mediator.Send(new GetAllDebtKreditQuery()) });
 

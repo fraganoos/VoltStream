@@ -1,8 +1,9 @@
 ﻿namespace VoltStream.WebApi.Controllers;
+
 using Microsoft.AspNetCore.Mvc;
+using VoltStream.WebApi.Models;
 using VoltStream.Application.Features.Warehouses.Commands;
 using VoltStream.Application.Features.Warehouses.Queries;
-using VoltStream.WebApi.Models;
 
 public class WarehousesController : BaseController
 {
@@ -18,7 +19,7 @@ public class WarehousesController : BaseController
     public async Task<IActionResult> Update(UpdateWarehouseCommand command)
         => Ok(new Response { Data = await Mediator.Send(command) });
 
-    [HttpGet("get-all")]
+    [HttpGet]
     public async Task<IActionResult> GetAll()
         => Ok(new Response { Data = await Mediator.Send(new GetAllWarehouseQuery()) });
 
