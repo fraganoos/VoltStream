@@ -2,9 +2,9 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using VoltStream.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using VoltStream.Application.Commons.Interfaces;
-using VoltStream.Infrastructure.Persistence;
 
 public static class DependencyInjection
 {
