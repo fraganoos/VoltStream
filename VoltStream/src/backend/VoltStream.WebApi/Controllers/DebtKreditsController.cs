@@ -5,7 +5,7 @@ using VoltStream.WebApi.Models;
 using VoltStream.Application.Features.DebtKredits.Queries;
 using VoltStream.Application.Features.DebtKredits.Commands;
 
-public class DebtKreditController : BaseController
+public class DebtKreditsController : BaseController
 {
     [HttpPost("create")]
     public async Task<IActionResult> Create(CreateDebtKreditCommand command)

@@ -4,7 +4,7 @@ using VoltStream.WebApi.Models;
 using VoltStream.Application.Features.Warehouses.Queries;
 using VoltStream.Application.Features.Warehouses.Commands;
 
-public class WarehouseController : BaseController
+public class WarehousesController : BaseController
 {
     [HttpPost("create")]
     public async Task<IActionResult> Create(CreateWarehouseCommand command)
