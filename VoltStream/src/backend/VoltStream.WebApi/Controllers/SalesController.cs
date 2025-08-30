@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿namespace VoltStream.WebApi.Controllers;
 
-using VoltStream.Application.Features.Sales.Commands;
+using Microsoft.AspNetCore.Mvc;
 using VoltStream.WebApi.Models;
+using VoltStream.Application.Features.Sales.Commands;
 
-namespace VoltStream.WebApi.Controllers;
 
 public class SalesController : BaseController
 {

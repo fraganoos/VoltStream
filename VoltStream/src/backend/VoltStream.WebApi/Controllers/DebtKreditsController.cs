@@ -5,7 +5,7 @@ using VoltStream.Application.Features.DebtKredits.Commands;
 using VoltStream.Application.Features.DebtKredits.Queries;
 using VoltStream.WebApi.Models;
 
-public class DebtKreditController : BaseController
+public class DebtKreditsController : BaseController
 {
     [HttpPost("create")]
     public async Task<IActionResult> Create(CreateDebtKreditCommand command)
@@ -19,7 +19,7 @@ public class DebtKreditController : BaseController
     public async Task<IActionResult> Update(UpdateDebtKreditCommand command)
         => Ok(new Response { Data = await Mediator.Send(command) });
 
-    [HttpGet("get-all")]
+    [HttpGet]
     public async Task<IActionResult> GetAll()
         => Ok(new Response { Data = await Mediator.Send(new GetAllDebtKreditQuery()) });
 
