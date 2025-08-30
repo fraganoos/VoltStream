@@ -1,12 +1,12 @@
 ﻿namespace VoltStream.Application.Features.Warehouses.Queries;
 
-using MediatR;
 using AutoMapper;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Warehouses.DTOs;
 
-public record GetAllWarehouseQuery:IRequest<List<WarehouseDTO>>;
+public record GetAllWarehouseQuery : IRequest<List<WarehouseDTO>>;
 
 
 public class GetAllWarehouseQueryHandler(

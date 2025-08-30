@@ -1,9 +1,9 @@
 ﻿namespace VoltStream.Application.Features.Cash.Commands;
 
-using MediatR;
 using AutoMapper;
-using VoltStream.Domain.Entities;
+using MediatR;
 using VoltStream.Application.Commons.Interfaces;
+using VoltStream.Domain.Entities;
 
 public record CreateCashCommand(decimal UzsBalance, decimal UsdBalance, decimal Kurs) : IRequest<long>;
 

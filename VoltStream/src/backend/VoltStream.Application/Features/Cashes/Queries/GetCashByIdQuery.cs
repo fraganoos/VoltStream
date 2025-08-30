@@ -1,14 +1,14 @@
 ﻿namespace VoltStream.Application.Features.Cashes.Queries;
 
-using MediatR;
 using AutoMapper;
-using VoltStream.Domain.Entities;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Cashes.DTOs;
+using VoltStream.Domain.Entities;
 
-public record GetCashByIdQuery(long Id):IRequest<CashDTO>;
+public record GetCashByIdQuery(long Id) : IRequest<CashDTO>;
 
 
 public class GetCashByIdQueryHandler(
