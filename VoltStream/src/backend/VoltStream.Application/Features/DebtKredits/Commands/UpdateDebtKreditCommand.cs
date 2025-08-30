@@ -1,11 +1,11 @@
 ﻿namespace VoltStream.Application.Features.DebtKredits.Commands;
 
-using MediatR;
 using AutoMapper;
-using VoltStream.Domain.Entities;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
-using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Commons.Exceptions;
+using VoltStream.Application.Commons.Interfaces;
+using VoltStream.Domain.Entities;
 
 public record UpdateDebtKreditCommand(
     long Id,
@@ -15,7 +15,7 @@ public record UpdateDebtKreditCommand(
     bool IsActive) : IRequest<long>;
 
 public class UpdateDebtKreditCommandHandler(
-    IAppDbContext context,IMapper mapper)
+    IAppDbContext context, IMapper mapper)
     : IRequestHandler<UpdateDebtKreditCommand, long>
 {
     public async Task<long> Handle(UpdateDebtKreditCommand request, CancellationToken cancellationToken)

@@ -2,9 +2,8 @@
 
 using AutoMapper;
 using MediatR;
-using VoltStream.Domain.Entities;
-using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
+using VoltStream.Domain.Entities;
 
 public record CreateWarehouseCommand(
     long ProductId,
