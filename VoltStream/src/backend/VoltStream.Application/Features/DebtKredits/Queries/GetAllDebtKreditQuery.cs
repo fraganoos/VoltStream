@@ -1,7 +1,7 @@
 ﻿namespace VoltStream.Application.Features.DebtKredits.Queries;
 
-using MediatR;
 using AutoMapper;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.DebtKredits.DTOs;

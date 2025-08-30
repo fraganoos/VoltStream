@@ -1,16 +1,16 @@
 ﻿namespace VoltStream.Application.Features.Cashes.Commands;
 
 using MediatR;
-using VoltStream.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
+using VoltStream.Domain.Entities;
 
 public record UpdateCashCommand(
     long Id,
-    decimal UzsBalance, 
-    decimal UsdBalance, 
-    decimal Kurs) :IRequest<long>;
+    decimal UzsBalance,
+    decimal UsdBalance,
+    decimal Kurs) : IRequest<long>;
 
 public class UpdateCashCommandHandler(
     IAppDbContext context)

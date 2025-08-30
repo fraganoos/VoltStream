@@ -1,12 +1,12 @@
 ﻿namespace VoltStream.Application.Features.Cashes.Queries;
 
-using MediatR;
 using AutoMapper;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Cashes.DTOs;
 
-public record GetAllCashesQuery:IRequest<List<CashDTO>>;
+public record GetAllCashesQuery : IRequest<List<CashDTO>>;
 
 
 public class GetAllCashesQueryHandler(

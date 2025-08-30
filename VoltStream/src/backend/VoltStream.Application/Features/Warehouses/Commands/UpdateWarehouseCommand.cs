@@ -1,23 +1,23 @@
 ﻿namespace VoltStream.Application.Features.Warehouses.Commands;
 
-using MediatR;
 using AutoMapper;
-using VoltStream.Domain.Entities;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
+using VoltStream.Domain.Entities;
 
-public record UpdateWarehouseCommand(long Id) :IRequest<long>;
+public record UpdateWarehouseCommand(long Id) : IRequest<long>;
 
 public class UpdateWarehouseCommandHandler(
     IAppDbContext context,
-    IMapper mapper) 
-    : IRequestHandler<UpdateWarehouseCommand,long>
+    IMapper mapper)
+    : IRequestHandler<UpdateWarehouseCommand, long>
 {
     public async Task<long> Handle(UpdateWarehouseCommand request, CancellationToken cancellationToken)
     {
-        var warehouse = await context.Warehouses.FirstOrDefaultAsync(w =>w.Id == request.Id,cancellationToken )
-            ?? throw new NotFoundException(nameof(Warehouse),nameof(request.Id), request.Id);
+        var warehouse = await context.Warehouses.FirstOrDefaultAsync(w => w.Id == request.Id, cancellationToken)
+            ?? throw new NotFoundException(nameof(Warehouse), nameof(request.Id), request.Id);
 
         mapper.Map(request, warehouse);
         warehouse.UpdatedAt = DateTime.UtcNow;
