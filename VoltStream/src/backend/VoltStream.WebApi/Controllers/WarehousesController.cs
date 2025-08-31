@@ -1,29 +1,29 @@
 ﻿namespace VoltStream.WebApi.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
-using VoltStream.WebApi.Models;
 using VoltStream.Application.Features.Warehouses.Commands;
 using VoltStream.Application.Features.Warehouses.Queries;
+using VoltStream.WebApi.Models;
 
 public class WarehousesController : BaseController
 {
-    [HttpPost("create")]
+    [HttpPost]
     public async Task<IActionResult> Create(CreateWarehouseCommand command)
        => Ok(new Response { Data = await Mediator.Send(command) });
 
-    [HttpDelete("delete")]
-    public async Task<IActionResult> Delete(long id)
-        => Ok(new Response { Data = await Mediator.Send(new DeleteWarehouseCommand(id)) });
-
-    [HttpPut("update")]
+    [HttpPut]
     public async Task<IActionResult> Update(UpdateWarehouseCommand command)
         => Ok(new Response { Data = await Mediator.Send(command) });
+
+    [HttpDelete("{Id:long}")]
+    public async Task<IActionResult> Delete(long Id)
+        => Ok(new Response { Data = await Mediator.Send(new DeleteWarehouseCommand(Id)) });
+
+    [HttpGet("{Id:long}")]
+    public async Task<IActionResult> GetById(long Id)
+        => Ok(new Response { Data = await Mediator.Send(new GetWarehouseByIdQuery(Id)) });
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
         => Ok(new Response { Data = await Mediator.Send(new GetAllWarehouseQuery()) });
-
-    [HttpGet("get-by-id")]
-    public async Task<IActionResult> GetById(long id)
-        => Ok(new Response { Data = await Mediator.Send(new GetWarehouseByIdQuery(id)) });
 }

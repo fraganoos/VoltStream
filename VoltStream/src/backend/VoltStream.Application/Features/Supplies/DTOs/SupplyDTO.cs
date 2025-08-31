@@ -7,4 +7,4 @@ public record SupplyDTO
     public decimal CountRoll { get; set; }
     public decimal QuantityPerRoll { get; set; }
     public decimal TotalQuantity { get; set; }
-}   
+}

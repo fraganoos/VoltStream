@@ -1,8 +1,8 @@
 ﻿namespace VoltStream.Application.Features.Supplies.Mappers;
 
 using AutoMapper;
-using VoltStream.Domain.Entities;
 using VoltStream.Application.Features.Supplies.Commands;
+using VoltStream.Domain.Entities;
 
 public class SupplyMappingProfile : Profile
 {

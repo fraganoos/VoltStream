@@ -16,3 +16,4 @@ public class GetAllProductsQueryHandler(
     public async Task<List<ProductDTO>> Handle(GetAllProductsQuery request, CancellationToken cancellationToken)
         => mapper.Map<List<ProductDTO>>(await context.Products.ToListAsync(cancellationToken));
 }
+

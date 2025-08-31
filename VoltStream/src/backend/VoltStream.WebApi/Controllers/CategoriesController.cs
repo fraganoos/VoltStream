@@ -7,15 +7,15 @@ using VoltStream.WebApi.Models;
 
 public class CategoriesController : BaseController
 {
-    [HttpPost("create")]
+    [HttpPost]
     public async Task<IActionResult> Create(CreateCategoryCommand command)
         => Ok(new Response { Data = await Mediator.Send(command) });
 
-    [HttpPut("update")]
+    [HttpPut]
     public async Task<IActionResult> Update(UpdateCategoryCommand command)
         => Ok(new Response { Data = await Mediator.Send(command) });
 
-    [HttpDelete("delete/{Id:long}")]
+    [HttpDelete("{Id:long}")]
     public async Task<IActionResult> Delete(long Id)
         => Ok(new Response { Data = await Mediator.Send(new DeleteCategoryCommand(Id)) });
 
