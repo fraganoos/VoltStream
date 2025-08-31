@@ -1,7 +1,6 @@
 ﻿namespace VoltStream.WebApi.Controllers;
 
 using MediatR;
-
 using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]

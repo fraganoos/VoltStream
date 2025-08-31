@@ -1,7 +1,7 @@
-﻿namespace VoltStream.Application.Features.Cash.Mappers;
+﻿namespace VoltStream.Application.Features.Cashes.Mappers;
 
 using AutoMapper;
-using VoltStream.Application.Features.Cash.Commands;
+using VoltStream.Application.Features.Cashes.Commands;
 using VoltStream.Application.Features.Cashes.DTOs;
 using VoltStream.Domain.Entities;
 
