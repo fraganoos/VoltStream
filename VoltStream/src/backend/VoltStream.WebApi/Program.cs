@@ -1,3 +1,4 @@
+using Scalar.AspNetCore;
 using VoltStream.Application;
 using VoltStream.Infrastructure;
 
@@ -11,7 +12,6 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -19,11 +19,18 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwaggerUI();
-    app.UseSwagger();
+    app.MapScalarApiReference(opt =>
+    {
+        opt.WithTheme(ScalarTheme.BluePlanet);
+        opt.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+    });
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(s => s.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader());
 
 app.UseAuthorization();
 

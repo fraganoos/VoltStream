@@ -1,16 +1,16 @@
 ﻿namespace VoltStream.Application.Features.Supplies.Commands;
 
-using MediatR;
 using AutoMapper;
-using VoltStream.Domain.Entities;
+using MediatR;
 using VoltStream.Application.Commons.Interfaces;
+using VoltStream.Domain.Entities;
 
 public record CreateSupplyCommand(
     DateTimeOffset OperationDate,
     long ProductId,
     decimal CountRoll,
     decimal QuantityPerRoll,
-    decimal TotalQuantity) :IRequest<long>;
+    decimal TotalQuantity) : IRequest<long>;
 
 public class CreateSupplyCommandHandler(
     IAppDbContext context,

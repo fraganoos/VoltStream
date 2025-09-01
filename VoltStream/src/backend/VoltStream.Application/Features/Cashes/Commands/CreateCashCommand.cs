@@ -1,4 +1,4 @@
-﻿namespace VoltStream.Application.Features.Cash.Commands;
+﻿namespace VoltStream.Application.Features.Cashes.Commands;
 
 using AutoMapper;
 using MediatR;
