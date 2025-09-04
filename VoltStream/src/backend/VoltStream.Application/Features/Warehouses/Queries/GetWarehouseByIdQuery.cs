@@ -8,15 +8,16 @@ using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Warehouses.DTOs;
 using VoltStream.Domain.Entities;
 
-public record GetWarehouseByIdQuery(long Id) : IRequest<WarehouseItemDTO>;
+public record GetWarehouseByIdQuery(long Id) : IRequest<WarehouseDTO>;
 
 public class GetWarehouseByIdQueryHandler(
     IAppDbContext context,
     IMapper mapper)
-    : IRequestHandler<GetWarehouseByIdQuery, WarehouseItemDTO>
+    : IRequestHandler<GetWarehouseByIdQuery, WarehouseDTO>
 {
-    public async Task<WarehouseItemDTO> Handle(GetWarehouseByIdQuery request, CancellationToken cancellationToken)
-        => mapper.Map<WarehouseItemDTO>(await context.WarehouseItems
+    public async Task<WarehouseDTO> Handle(GetWarehouseByIdQuery request, CancellationToken cancellationToken)
+        => mapper.Map<WarehouseDTO>(await context.Warehouses
+            .Include(wh => wh.Items)
             .FirstOrDefaultAsync(w => w.Id == request.Id, cancellationToken))
-        ?? throw new NotFoundException(nameof(WarehouseItem), nameof(request.Id), request.Id);
+        ?? throw new NotFoundException(nameof(Warehouse), nameof(request.Id), request.Id);
 }

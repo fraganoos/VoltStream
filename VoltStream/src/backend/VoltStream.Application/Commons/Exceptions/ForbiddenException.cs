@@ -4,4 +4,4 @@ using System;
 using System.Net;
 
 [Serializable]
-public class ConflictException(string? message) : AppException(message, HttpStatusCode.Conflict);
+internal class ForbiddenException(string? message) : AppException(message, HttpStatusCode.Forbidden);

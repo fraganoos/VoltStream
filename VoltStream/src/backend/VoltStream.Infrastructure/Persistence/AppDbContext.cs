@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
+using VoltStream.Infrastructure.Persistence.Interceptors;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options)
     : DbContext(options), IAppDbContext
@@ -26,6 +27,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Warehouse> Warehouses { get; set; }
 
     private IDbContextTransaction? currentTransaction;
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.AddInterceptors(new AuditInterceptor());
+    }
 
     public async Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {

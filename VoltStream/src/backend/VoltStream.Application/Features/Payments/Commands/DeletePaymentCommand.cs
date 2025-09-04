@@ -18,12 +18,13 @@ public class DeletePaymentCommandHandler(
         var payment = await context.Payments
             .Include(p => p.CustomerOperation)
             .Include(p => p.CashOperation)
-                .ThenInclude(co => co.Cash)
             .Include(p => p.Account)
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Payment), nameof(request.Id), request.Id);
 
-        var cash = payment.CashOperation.Cash;
+        var cash = await context.Cashes.FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException(nameof(Cash));
+
         if (payment.CashOperation.CurrencyType == CurrencyType.USD &&
             payment.CashOperation.Summa <= cash.UsdBalance)
             cash.UsdBalance -= payment.CashOperation.Summa;

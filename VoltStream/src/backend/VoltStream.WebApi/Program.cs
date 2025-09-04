@@ -1,40 +1,15 @@
-using Scalar.AspNetCore;
-using VoltStream.Application;
-using VoltStream.Infrastructure;
+using VoltStream.WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
-
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// Service registrations
+builder.Services.AddDependencies(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference(opt =>
-    {
-        opt.WithTheme(ScalarTheme.BluePlanet);
-        opt.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-        opt.WithTitle("VoltStream API Documentation");
-        opt.WithLayout(ScalarLayout.Modern);
-    });
-}
-
-app.UseHttpsRedirection();
-
-app.UseCors(s => s.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader());
-
-app.UseAuthorization();
+// Middleware pipeline
+app.UseInfrastructure(); // HTTPS, CORS, Auth
+app.UseOpenApiDocumentation(); // Scalar UI
 
 app.MapControllers();
 

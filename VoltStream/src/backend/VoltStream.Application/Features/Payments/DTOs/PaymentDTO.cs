@@ -13,5 +13,5 @@ public record PaymentDTO
     public decimal Kurs { get; set; }
     public decimal DefaultSumm { get; set; }
     public string Description { get; set; } = null!;
-    public long CustomerOperation { get; set; }
+    public long CustomerOperationId { get; set; }
 }

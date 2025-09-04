@@ -31,20 +31,20 @@ public class UpdatePaymentCommandHandler(
         var payment = await context.Payments
             .Include(payment => payment.CustomerOperation)
             .Include(p => p.CashOperation)
-                .ThenInclude(co => co.Cash)
             .Include(p => p.Account)
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Payment), nameof(request.Id), request.Id);
 
-        var cash = payment.CashOperation.Cash;
-        if (payment.CashOperation.CurrencyType == CurrencyType.USD &&
-            payment.CashOperation.Summa <= cash.UsdBalance)
-            cash.UsdBalance -= payment.CashOperation.Summa + request.Summa;
-        else if (payment.CashOperation.CurrencyType == CurrencyType.UZS &&
-            payment.CashOperation.Summa <= cash.UzsBalance)
-        {
-            cash.UzsBalance -= payment.CashOperation.Summa + request.Summa;
-        }
+        var cash = await context.Cashes.FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException(nameof(Cash));
+
+        var difference = payment.CashOperation.Summa - request.Summa;
+        var isAvailable = difference <= cash.UsdBalance;
+
+        if (payment.CashOperation.CurrencyType == CurrencyType.USD && isAvailable)
+            cash.UsdBalance -= difference;
+        else if (payment.CashOperation.CurrencyType == CurrencyType.UZS && isAvailable)
+            cash.UzsBalance -= difference;
         else
             throw new ConflictException("Kassada mablag' yetarli emas!");
 
@@ -54,39 +54,34 @@ public class UpdatePaymentCommandHandler(
         mapper.Map(request, payment.CustomerOperation);
         payment.CustomerOperation.Description = GenerateDescription(request);
 
-
-
-
         await context.CommitTransactionAsync(cancellationToken);
         return payment.Id;
     }
 
     private static string GenerateDescription(UpdatePaymentCommand request)
-    {
-        return request.PaymentType switch
+        => request.PaymentType switch
         {
             PaymentType.Cash => request.CurrencyType switch
             {
-                CurrencyType.UZS => $"Naqd pul orqali. Summa: {request.Summa} UZS.",
-                CurrencyType.USD => $"Naqd pul orqali. Summa: {request.Summa} USD. Kurs: {request.Kurs} UZS'dan jami: {request.DefaultSumm}.",
+                CurrencyType.UZS => $"Naqd: {request.Summa} UZS.",
+                CurrencyType.USD => $"Naqd: {request.Summa} USD. Kurs: {request.Kurs} UZS",
                 _ => request.Description
             },
             PaymentType.BankAccount => request.CurrencyType switch
             {
-                CurrencyType.UZS => $"Hisob raqami orqali. Summa: {request.Summa} UZS. {request.Kurs}% dan jami: {request.DefaultSumm} UZS.",
+                CurrencyType.UZS => $"Bank: {request.Summa} UZS. {request.Kurs}% dan",
                 _ => request.Description
             },
             PaymentType.Mobile => request.CurrencyType switch
             {
-                CurrencyType.UZS => $"Online orqali. Summa: {request.Summa} UZS. {request.Kurs}% dan jami: {request.DefaultSumm} UZS.",
+                CurrencyType.UZS => $"Online: {request.Summa} UZS. {request.Kurs}% dan.",
                 _ => request.Description
             },
             PaymentType.Card => request.CurrencyType switch
             {
-                CurrencyType.UZS => $"Plastik karta orqali. Summa: {request.Summa} UZS. {request.Kurs}% dan jami: {request.DefaultSumm} UZS.",
+                CurrencyType.UZS => $"Plastik: {request.Summa} UZS. {request.Kurs}% dan",
                 _ => request.Description
             },
             _ => request.Description
         };
-    }
 }

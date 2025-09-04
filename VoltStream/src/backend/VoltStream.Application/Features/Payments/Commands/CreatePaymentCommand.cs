@@ -25,16 +25,17 @@ public class CreatePaymentCommandHandler(
 {
     public async Task<long> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
     {
-        var cash = await context.Cashes.FirstOrDefaultAsync(cancellationToken)
-            ?? throw new NotFoundException(nameof(Cash));
-
-        var account = context.Accounts.FirstOrDefault(dk => dk.CustomerId == request.CustomerId)
+        var customer = context.Customers
+            .Include(c => c.Account)
+            .FirstOrDefault(dk => dk.Id == request.CustomerId)
             ?? throw new NotFoundException(nameof(Account));
-
-        await context.BeginTransactionAsync(cancellationToken);
+        var account = customer.Account;
 
         if (request.PaymentType == PaymentType.Cash)
         {
+            var cash = await context.Cashes.FirstOrDefaultAsync(cancellationToken)
+                ?? throw new NotFoundException(nameof(Cash));
+
             context.CashOperations.Add(new CashOperation
             {
                 CurrencyType = request.CurrencyType,
@@ -43,8 +44,13 @@ public class CreatePaymentCommandHandler(
                 Summa = request.Summa
             });
 
-            cash.UzsBalance += request.Summa;
+            if (request.CurrencyType == CurrencyType.UZS)
+                cash.UzsBalance += request.Summa;
+            else
+                cash.UsdBalance += request.Summa;
         }
+
+        await context.BeginTransactionAsync(cancellationToken);
 
         account.CurrentSumm += request.DefaultSumm;
 
