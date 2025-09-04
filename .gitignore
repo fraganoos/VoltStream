@@ -418,3 +418,4 @@ FodyWeavers.xsd
 *.msp
 /VoltStream/src/backend/VoltStream.WebApi/appsettings.Development.json
 /VoltStream/src/backend/VoltStream.Infrastructure/Persistence/Migrations
+/VoltStream/src/backend/VoltStream.Infrastructure/Migrations

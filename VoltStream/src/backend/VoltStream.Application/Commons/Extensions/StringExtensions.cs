@@ -7,4 +7,15 @@ public static class StringExtensions
 
     public static string ToNormalized(this string value) =>
         value.ToUpperInvariant();
+
+    public static string Trimmer(this string value, int length)
+    {
+        if (string.IsNullOrEmpty(value) || length <= 3)
+            return value;
+
+        if (value.Length <= length)
+            return value;
+
+        return string.Concat(value.AsSpan(0, length - 3), "...");
+    }
 }

@@ -19,6 +19,8 @@ public class GetSupplyByIdQueryHandler(
 {
     public async Task<SupplyDTO> Handle(GetSupplyByIdQuery request, CancellationToken cancellationToken)
         => mapper.Map<SupplyDTO>(await context.Supplies
+            .Include(supply => supply.Product)
+                .ThenInclude(product => product.Category)
             .FirstOrDefaultAsync(s => s.Id == request.Id, cancellationToken))
         ?? throw new NotFoundException(nameof(Supply), nameof(request.Id), request.Id);
 }

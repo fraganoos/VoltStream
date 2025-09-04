@@ -15,7 +15,10 @@ public record CreateCustomerCommand(
     string NormalizedName,
     string? Phone,
     string? Address,
-    string? Description) : IRequest<long>;
+    string? Description,
+    decimal BeginningSum,
+    decimal DiscountSumm)
+    : IRequest<long>;
 
 public class CreateCustomerComandHandler(
     IAppDbContext context,
@@ -30,10 +33,17 @@ public class CreateCustomerComandHandler(
         if (isExist)
             throw new AlreadyExistException(nameof(Customer), nameof(request.Name), request.Name);
 
-        var user = mapper.Map<Customer>(request);
-        context.Customers.Add(user);
+        var customer = mapper.Map<Customer>(request);
+        context.Accounts.Add(new()
+        {
+            BeginningSumm = request.BeginningSum,
+            Customer = customer,
+            CurrentSumm = request.BeginningSum,
+            DiscountSumm = request.DiscountSumm
+        });
+        context.Customers.Add(customer);
 
         await context.SaveAsync(cancellationToken);
-        return user.Id;
+        return customer.Id;
     }
 }

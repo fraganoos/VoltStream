@@ -6,23 +6,32 @@ using System.Threading;
 using System.Threading.Tasks;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
+using VoltStream.Infrastructure.Persistence.Interceptors;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options)
     : DbContext(options), IAppDbContext
 {
-    public DbSet<Product> Products { get; set; } = default!;
-    public DbSet<Category> Categories { get; set; } = default!;
-    public DbSet<Payment> Payments { get; set; } = default!;
-    public DbSet<Sale> Sales { get; set; } = default!;
-    public DbSet<SaleItem> SaleItems { get; set; } = default!;
-    public DbSet<Customer> Customers { get; set; } = default!;
-    public DbSet<CustomerOperation> CustomerOperations { get; set; } = default!;
-    public DbSet<Cash> Cashes { get; set; } = default!;
-    public DbSet<DebtKredit> DebtKredits { get; set; } = default!;
-    public DbSet<Supply> Supplies { get; set; } = default!;
-    public DbSet<Warehouse> Warehouses { get; set; } = default!;
+    public DbSet<Customer> Customers { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<Supply> Supplies { get; set; }
+    public DbSet<Sale> Sales { get; set; }
+    public DbSet<SaleItem> SaleItems { get; set; }
+    public DbSet<WarehouseItem> WarehouseItems { get; set; }
+    public DbSet<Payment> Payments { get; set; }
+    public DbSet<Account> Accounts { get; set; }
+    public DbSet<CustomerOperation> CustomerOperations { get; set; }
+    public DbSet<DiscountOperation> DiscountsOperations { get; set; }
+    public DbSet<Cash> Cashes { get; set; }
+    public DbSet<CashOperation> CashOperations { get; set; }
+    public DbSet<Warehouse> Warehouses { get; set; }
 
     private IDbContextTransaction? currentTransaction;
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.AddInterceptors(new AuditInterceptor());
+    }
 
     public async Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {

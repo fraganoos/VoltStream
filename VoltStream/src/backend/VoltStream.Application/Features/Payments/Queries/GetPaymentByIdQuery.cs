@@ -16,10 +16,7 @@ public class GetPaymentByIdQueryHandler(
     : IRequestHandler<GetPaymentByIdQuery, PaymentDTO>
 {
     public async Task<PaymentDTO> Handle(GetPaymentByIdQuery request, CancellationToken cancellationToken)
-    {
-        var payment = await context.Payments.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
+        => mapper.Map<PaymentDTO>(await context.Payments
+            .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken))
             ?? throw new NotFoundException(nameof(Payment), nameof(request.Id), request.Id);
-
-        return mapper.Map<PaymentDTO>(payment);
-    }
 }

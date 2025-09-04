@@ -2,10 +2,8 @@
 
 public class Warehouse : Auditable
 {
-    public long ProductId { get; set; }
-    public decimal CountRoll { get; set; }  // rulon soni
-    public decimal QuantityPerRoll { get; set; }  //rulon uzunligi
-    public decimal TotalQuantity { get; set; } // jami uzunlik
+    public string Name { get; set; } = string.Empty;
+    public string NormalizedName { get; set; } = string.Empty;
 
-    public Product Product { get; set; } = default!;
+    public ICollection<WarehouseItem> Items { get; set; } = default!;
 }

@@ -1,10 +1,11 @@
-﻿namespace VoltStream.Infrastructure.Migrations;
+﻿#nullable disable
 
+namespace VoltStream.Infrastructure.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+
 /// <inheritdoc />
-#nullable disable
-public partial class Initial : Migration
+public partial class InitialMigrate : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -114,7 +115,7 @@ public partial class Initial : Migration
             });
 
         migrationBuilder.CreateTable(
-            name: "DebtKredits",
+            name: "Accounts",
             columns: table => new
             {
                 Id = table.Column<long>(type: "bigint", nullable: false)
@@ -165,7 +166,7 @@ public partial class Initial : Migration
             });
 
         migrationBuilder.CreateTable(
-            name: "Warehouses",
+            name: "WarehouseItems",
             columns: table => new
             {
                 Id = table.Column<long>(type: "bigint", nullable: false)
@@ -174,6 +175,7 @@ public partial class Initial : Migration
                 CountRoll = table.Column<decimal>(type: "numeric", nullable: false),
                 QuantityPerRoll = table.Column<decimal>(type: "numeric", nullable: false),
                 TotalQuantity = table.Column<decimal>(type: "numeric", nullable: false),
+                DiscountPercent = table.Column<decimal>(type: "numeric", nullable: false),
                 IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                 CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                 UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
@@ -271,6 +273,8 @@ public partial class Initial : Migration
                 QuantityPerRoll = table.Column<decimal>(type: "numeric", nullable: false),
                 TotalQuantity = table.Column<decimal>(type: "numeric", nullable: false),
                 Price = table.Column<decimal>(type: "numeric", nullable: false),
+                DiscountPersent = table.Column<decimal>(type: "numeric", nullable: false),
+                Discount = table.Column<decimal>(type: "numeric", nullable: false),
                 TotalSumm = table.Column<decimal>(type: "numeric", nullable: false),
                 IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                 CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -300,7 +304,7 @@ public partial class Initial : Migration
 
         migrationBuilder.CreateIndex(
             name: "IX_DebtKredits_CustomerId",
-            table: "DebtKredits",
+            table: "Accounts",
             column: "CustomerId");
 
         migrationBuilder.CreateIndex(
@@ -345,7 +349,7 @@ public partial class Initial : Migration
 
         migrationBuilder.CreateIndex(
             name: "IX_Warehouses_ProductId",
-            table: "Warehouses",
+            table: "WarehouseItems",
             column: "ProductId");
     }
 
@@ -356,7 +360,7 @@ public partial class Initial : Migration
             name: "Cashes");
 
         migrationBuilder.DropTable(
-            name: "DebtKredits");
+            name: "Accounts");
 
         migrationBuilder.DropTable(
             name: "Payments");
@@ -368,7 +372,7 @@ public partial class Initial : Migration
             name: "Supplies");
 
         migrationBuilder.DropTable(
-            name: "Warehouses");
+            name: "WarehouseItems");
 
         migrationBuilder.DropTable(
             name: "Sales");

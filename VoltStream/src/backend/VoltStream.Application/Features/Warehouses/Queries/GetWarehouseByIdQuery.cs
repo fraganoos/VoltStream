@@ -17,6 +17,7 @@ public class GetWarehouseByIdQueryHandler(
 {
     public async Task<WarehouseDTO> Handle(GetWarehouseByIdQuery request, CancellationToken cancellationToken)
         => mapper.Map<WarehouseDTO>(await context.Warehouses
+            .Include(wh => wh.Items)
             .FirstOrDefaultAsync(w => w.Id == request.Id, cancellationToken))
         ?? throw new NotFoundException(nameof(Warehouse), nameof(request.Id), request.Id);
 }
