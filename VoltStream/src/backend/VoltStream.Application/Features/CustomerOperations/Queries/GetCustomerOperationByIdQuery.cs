@@ -17,7 +17,7 @@ public class GetCustomerOperationByIdQueryHandler(
 {
     public async Task<CustomerOperationDto> Handle(GetCustomerOperationByIdQuery request, CancellationToken cancellationToken)
         => mapper.Map<CustomerOperationDto>(await context.CustomerOperations
-            .Include(co => co.Customer)
+            .Include(co => co.Account)
             .FirstOrDefaultAsync(co => co.Id == request.Id, cancellationToken))
         ?? throw new NotFoundException(nameof(CustomerOperation), nameof(request.Id), request.Id);
 }

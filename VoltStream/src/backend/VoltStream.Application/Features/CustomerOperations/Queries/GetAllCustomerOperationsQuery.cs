@@ -17,6 +17,6 @@ public class GetAllCustomerOperationsQueryHandler(
 {
     public async Task<List<CustomerOperationDto>> Handle(GetAllCustomerOperationsQuery request, CancellationToken cancellationToken)
         => mapper.Map<List<CustomerOperationDto>>(await context.CustomerOperations
-            .Include(co => co.Customer)
+            .Include(co => co.Account)
             .ToListAsync(cancellationToken));
 }

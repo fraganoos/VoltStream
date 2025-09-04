@@ -16,8 +16,20 @@ public class DeleteSupplyCommandHandler(
     {
         var supply = await context.Supplies.FirstOrDefaultAsync(s => s.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Supply), nameof(request.Id), request.Id);
+
+        var warehouse = await context.WarehouseItems
+            .FirstOrDefaultAsync(wh => wh.ProductId == supply.ProductId &&
+                wh.QuantityPerRoll == supply.QuantityPerRoll, cancellationToken)
+            ?? throw new NotFoundException(nameof(WarehouseItem), nameof(request.Id), request.Id);
+
+        if (warehouse.TotalQuantity < supply.TotalQuantity)
+            throw new ConflictException($"Omborda bu maxsulotdan faqat {warehouse.TotalQuantity} metr mavjud!");
+
+        await context.BeginTransactionAsync(cancellationToken);
+
+        warehouse.TotalQuantity -= supply.TotalQuantity;
         supply.IsDeleted = true;
-        context.Supplies.Update(supply);
-        return await context.SaveAsync(cancellationToken) > 0;
+
+        return await context.CommitTransactionAsync(cancellationToken);
     }
 }

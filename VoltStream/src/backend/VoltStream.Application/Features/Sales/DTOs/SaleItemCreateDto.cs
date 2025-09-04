@@ -1,7 +1,8 @@
-﻿namespace VoltStream.Domain.Entities;
+﻿namespace VoltStream.Application.Features.Sales.DTOs;
 
-public class SaleItem : Auditable
+public class SaleItemCreateDto
 {
+    public long Id { get; set; }
     public long SaleId { get; set; }
     public long ProductId { get; set; }
     public decimal CountRoll { get; set; }  // rulon soni
@@ -11,7 +12,4 @@ public class SaleItem : Auditable
     public decimal DiscountPersent { get; set; }
     public decimal Discount { get; set; }
     public decimal TotalSumm { get; set; } // jami summa
-
-    public Sale Sale { get; set; } = default!;
-    public Product Product { get; set; } = default!;
 }

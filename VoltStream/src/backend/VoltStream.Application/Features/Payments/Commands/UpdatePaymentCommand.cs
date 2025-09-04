@@ -30,14 +30,32 @@ public class UpdatePaymentCommandHandler(
     {
         var payment = await context.Payments
             .Include(payment => payment.CustomerOperation)
+            .Include(p => p.CashOperation)
+                .ThenInclude(co => co.Cash)
+            .Include(p => p.Account)
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Payment), nameof(request.Id), request.Id);
 
-        await using var transaction = await context.BeginTransactionAsync(cancellationToken);
+        var cash = payment.CashOperation.Cash;
+        if (payment.CashOperation.CurrencyType == CurrencyType.USD &&
+            payment.CashOperation.Summa <= cash.UsdBalance)
+            cash.UsdBalance -= payment.CashOperation.Summa + request.Summa;
+        else if (payment.CashOperation.CurrencyType == CurrencyType.UZS &&
+            payment.CashOperation.Summa <= cash.UzsBalance)
+        {
+            cash.UzsBalance -= payment.CashOperation.Summa + request.Summa;
+        }
+        else
+            throw new ConflictException("Kassada mablag' yetarli emas!");
+
+        await context.BeginTransactionAsync(cancellationToken);
 
         mapper.Map(request, payment);
         mapper.Map(request, payment.CustomerOperation);
         payment.CustomerOperation.Description = GenerateDescription(request);
+
+
+
 
         await context.CommitTransactionAsync(cancellationToken);
         return payment.Id;

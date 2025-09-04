@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using VoltStream.Application.Features.Supplies.Commands;
+using VoltStream.Application.Features.Supplies.DTOs;
 using VoltStream.Domain.Entities;
 
 public class SupplyMappingProfile : Profile
@@ -10,5 +11,7 @@ public class SupplyMappingProfile : Profile
     {
         CreateMap<CreateSupplyCommand, Supply>();
         CreateMap<UpdateSupplyCommand, Supply>();
+        CreateMap<CreateSupplyCommand, WarehouseItem>();
+        CreateMap<Supply, SupplyDTO>();
     }
 }

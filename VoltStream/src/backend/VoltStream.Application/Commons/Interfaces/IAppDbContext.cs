@@ -14,9 +14,12 @@ public interface IAppDbContext
     DbSet<Customer> Customers { get; }
     DbSet<CustomerOperation> CustomerOperations { get; }
     DbSet<Cash> Cashes { get; }
-    DbSet<DebtKredit> DebtKredits { get; }
+    DbSet<Account> Accounts { get; }
     DbSet<Supply> Supplies { get; }
+    DbSet<WarehouseItem> WarehouseItems { get; }
     DbSet<Warehouse> Warehouses { get; }
+    DbSet<DiscountOperation> DiscountsOperations { get; }
+    DbSet<CashOperation> CashOperations { get; }
 
     Task<int> SaveAsync(CancellationToken cancellationToken);
 

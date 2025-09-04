@@ -2,6 +2,8 @@
 
 using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
@@ -23,17 +25,36 @@ public class CreatePaymentCommandHandler(
 {
     public async Task<long> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
     {
+        var cash = await context.Cashes.FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException(nameof(Cash));
+
+        var account = context.Accounts.FirstOrDefault(dk => dk.CustomerId == request.CustomerId)
+            ?? throw new NotFoundException(nameof(Account));
+
         await context.BeginTransactionAsync(cancellationToken);
 
+        if (request.PaymentType == PaymentType.Cash)
+        {
+            context.CashOperations.Add(new CashOperation
+            {
+                CurrencyType = request.CurrencyType,
+                Date = DateTimeOffset.UtcNow,
+                Description = $"ID = {request.CustomerId}. Mijozdan kirim",
+                Summa = request.Summa
+            });
+
+            cash.UzsBalance += request.Summa;
+        }
+
+        account.CurrentSumm += request.DefaultSumm;
+
+        var payment = mapper.Map<Payment>(request);
         var customerOperation = mapper.Map<CustomerOperation>(request);
         customerOperation.OperationType = OperationType.Payment;
         customerOperation.Description = GenerateDescription(request);
-
-        var payment = mapper.Map<Payment>(request);
         payment.CustomerOperation = customerOperation;
 
         context.Payments.Add(payment);
-        context.CustomerOperations.Add(customerOperation);
 
         await context.CommitTransactionAsync(cancellationToken);
         return payment.Id;
@@ -44,23 +65,23 @@ public class CreatePaymentCommandHandler(
         {
             PaymentType.Cash => request.CurrencyType switch
             {
-                CurrencyType.UZS => $"Naqd pul orqali. Summa: {request.Summa} UZS.",
-                CurrencyType.USD => $"Naqd pul orqali. Summa: {request.Summa} USD. Kurs: {request.Kurs} UZS'dan jami: {request.DefaultSumm}.",
+                CurrencyType.UZS => $"Naqd: {request.Summa} UZS.",
+                CurrencyType.USD => $"Naqd: {request.Summa} USD. Kurs: {request.Kurs} UZS",
                 _ => request.Description
             },
             PaymentType.BankAccount => request.CurrencyType switch
             {
-                CurrencyType.UZS => $"Hisob raqami orqali. Summa: {request.Summa} UZS. {request.Kurs}% dan jami: {request.DefaultSumm} UZS.",
+                CurrencyType.UZS => $"Bank: {request.Summa} UZS. {request.Kurs}% dan",
                 _ => request.Description
             },
             PaymentType.Mobile => request.CurrencyType switch
             {
-                CurrencyType.UZS => $"Online orqali. Summa: {request.Summa} UZS. {request.Kurs}% dan jami: {request.DefaultSumm} UZS.",
+                CurrencyType.UZS => $"Online: {request.Summa} UZS. {request.Kurs}% dan.",
                 _ => request.Description
             },
             PaymentType.Card => request.CurrencyType switch
             {
-                CurrencyType.UZS => $"Plastik karta orqali. Summa: {request.Summa} UZS. {request.Kurs}% dan jami: {request.DefaultSumm} UZS.",
+                CurrencyType.UZS => $"Plastik: {request.Summa} UZS. {request.Kurs}% dan",
                 _ => request.Description
             },
             _ => request.Description

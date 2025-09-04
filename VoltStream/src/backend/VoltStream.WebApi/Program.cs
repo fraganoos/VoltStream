@@ -23,6 +23,8 @@ if (app.Environment.IsDevelopment())
     {
         opt.WithTheme(ScalarTheme.BluePlanet);
         opt.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+        opt.WithTitle("VoltStream API Documentation");
+        opt.WithLayout(ScalarLayout.Modern);
     });
 }
 
