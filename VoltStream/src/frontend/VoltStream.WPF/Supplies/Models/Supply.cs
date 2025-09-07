@@ -1,0 +1,16 @@
+﻿namespace VoltStream.WPF.Supplies.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+public class Supply
+{
+    public DateTimeOffset OperationDate { get; set; }
+    public long ProductId { get; set; }
+    public string ProductName { get; set; } = string.Empty;
+    public decimal CountRoll { get; set; }
+    public decimal QuantityPerRoll { get; set; }
+    public decimal TotalQuantity { get; set; }
+}
