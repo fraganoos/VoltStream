@@ -18,6 +18,6 @@ public interface ICategoriesApi
     [Get("/api/categories​/{id}")]
     Task<ApiResponse<Category>> GetByIdCategoryAsync(long id);
 
-    [Get("/api/categories​")]
-    Task<ApiResponse<List<Category>>> GetAllCategoriesAsync();
+    [Get("/api/categories")]
+    Task<ApiResponse<Response<List<Category>>>> GetAllCategoriesAsync();
 }

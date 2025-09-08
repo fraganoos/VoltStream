@@ -19,5 +19,5 @@ public interface IProductsApi
     Task<ApiResponse<Product>> GetByIdProductAsync(long id);
 
     [Get("/api/products")]
-    Task<ApiResponse<List<Product>>> GetAllProductsAsync();
+    Task<ApiResponse<Response<List<Product>>>> GetAllProductsAsync();
 }
