@@ -8,581 +8,805 @@ using VoltStream.Infrastructure.Persistence;
 
 #nullable disable
 
-namespace VoltStream.Infrastructure.Migrations;
-
-[DbContext(typeof(AppDbContext))]
-partial class AppDbContextModelSnapshot : ModelSnapshot
+namespace VoltStream.Infrastructure.Migrations
 {
-    protected override void BuildModel(ModelBuilder modelBuilder)
+    [DbContext(typeof(AppDbContext))]
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+        {
 #pragma warning disable 612, 618
-        modelBuilder
-            .HasAnnotation("ProductVersion", "9.0.8")
-            .HasAnnotation("Relational:MaxIdentifierLength", 63);
+            modelBuilder
+                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-        NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Cash", b =>
-            {
-                b.Property<long>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
+            modelBuilder.Entity("VoltStream.Domain.Entities.Account", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                b.Property<DateTimeOffset>("CreatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<decimal>("BeginningSumm")
+                        .HasColumnType("numeric");
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("boolean");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<decimal>("Kurs")
-                    .HasColumnType("numeric");
+                    b.Property<decimal>("CurrentSumm")
+                        .HasColumnType("numeric");
 
-                b.Property<DateTimeOffset>("UpdatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<long>("CustomerId")
+                        .HasColumnType("bigint");
 
-                b.Property<decimal>("UsdBalance")
-                    .HasColumnType("numeric");
+                    b.Property<decimal>("DiscountSumm")
+                        .HasColumnType("numeric");
 
-                b.Property<decimal>("UzsBalance")
-                    .HasColumnType("numeric");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                b.HasKey("Id");
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.ToTable("Cashes");
-            });
+                    b.HasKey("Id");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Category", b =>
-            {
-                b.Property<long>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
+                    b.HasIndex("CustomerId")
+                        .IsUnique();
 
-                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.ToTable("Accounts");
+                });
 
-                b.Property<DateTimeOffset>("CreatedAt")
-                    .HasColumnType("timestamp with time zone");
+            modelBuilder.Entity("VoltStream.Domain.Entities.Cash", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("boolean");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                b.Property<string>("Name")
-                    .IsRequired()
-                    .HasColumnType("text");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<string>("NormalizedName")
-                    .IsRequired()
-                    .HasColumnType("text");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                b.Property<DateTimeOffset>("UpdatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<decimal>("Kurs")
+                        .HasColumnType("numeric");
 
-                b.HasKey("Id");
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.ToTable("Categories");
-            });
+                    b.Property<decimal>("UsdBalance")
+                        .HasColumnType("numeric");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Customer", b =>
-            {
-                b.Property<long>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
+                    b.Property<decimal>("UzsBalance")
+                        .HasColumnType("numeric");
 
-                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.HasKey("Id");
 
-                b.Property<string>("Address")
-                    .HasColumnType("text");
+                    b.ToTable("Cashes");
+                });
 
-                b.Property<DateTimeOffset>("CreatedAt")
-                    .HasColumnType("timestamp with time zone");
+            modelBuilder.Entity("VoltStream.Domain.Entities.CashOperation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-                b.Property<string>("Description")
-                    .HasColumnType("text");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("boolean");
+                    b.Property<long>("CashId")
+                        .HasColumnType("bigint");
 
-                b.Property<string>("Name")
-                    .IsRequired()
-                    .HasColumnType("text");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<string>("NormalizedName")
-                    .IsRequired()
-                    .HasColumnType("text");
+                    b.Property<int>("CurrencyType")
+                        .HasColumnType("integer");
 
-                b.Property<string>("Phone")
-                    .HasColumnType("text");
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<DateTimeOffset>("UpdatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                b.HasKey("Id");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                b.ToTable("Customers");
-            });
+                    b.Property<decimal>("Summa")
+                        .HasColumnType("numeric");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.CustomerOperation", b =>
-            {
-                b.Property<long>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.HasKey("Id");
 
-                b.Property<DateTimeOffset>("CreatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.HasIndex("CashId");
 
-                b.Property<long>("CustomerId")
-                    .HasColumnType("bigint");
+                    b.ToTable("CashOperations");
+                });
 
-                b.Property<string>("Description")
-                    .IsRequired()
-                    .HasColumnType("text");
+            modelBuilder.Entity("VoltStream.Domain.Entities.Category", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("boolean");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                b.Property<int>("OperationType")
-                    .HasColumnType("integer");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<decimal>("Summa")
-                    .HasColumnType("numeric");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                b.Property<DateTimeOffset>("UpdatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                b.HasKey("Id");
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                b.HasIndex("CustomerId");
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.ToTable("CustomerOperations");
-            });
+                    b.HasKey("Id");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Account", b =>
-            {
-                b.Property<long>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
+                    b.ToTable("Categories");
+                });
 
-                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+            modelBuilder.Entity("VoltStream.Domain.Entities.Customer", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-                b.Property<decimal>("BeginSumm")
-                    .HasColumnType("numeric");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                b.Property<DateTimeOffset>("CreatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Address")
+                        .HasColumnType("text");
 
-                b.Property<decimal>("CurrencySumm")
-                    .HasColumnType("numeric");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<long>("CustomerId")
-                    .HasColumnType("bigint");
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
 
-                b.Property<bool>("IsActive")
-                    .HasColumnType("boolean");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("boolean");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                b.Property<DateTimeOffset>("UpdatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                b.HasKey("Id");
+                    b.Property<string>("Phone")
+                        .HasColumnType("text");
 
-                b.HasIndex("CustomerId");
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.ToTable("Accounts");
-            });
+                    b.HasKey("Id");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Payment", b =>
-            {
-                b.Property<long>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
+                    b.ToTable("Customers");
+                });
 
-                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+            modelBuilder.Entity("VoltStream.Domain.Entities.CustomerOperation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-                b.Property<DateTimeOffset>("CreatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                b.Property<int>("CurrencyType")
-                    .HasColumnType("integer");
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint");
 
-                b.Property<long>("CustomerId")
-                    .HasColumnType("bigint");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<long>("CustomerOperationId")
-                    .HasColumnType("bigint");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                b.Property<decimal>("DefaultSumm")
-                    .HasColumnType("numeric");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                b.Property<string>("Description")
-                    .IsRequired()
-                    .HasColumnType("text");
+                    b.Property<int>("OperationType")
+                        .HasColumnType("integer");
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("boolean");
+                    b.Property<decimal>("Summa")
+                        .HasColumnType("numeric");
 
-                b.Property<decimal>("Kurs")
-                    .HasColumnType("numeric");
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<DateTimeOffset>("PaidDate")
-                    .HasColumnType("timestamp with time zone");
+                    b.HasKey("Id");
 
-                b.Property<int>("PaymentType")
-                    .HasColumnType("integer");
+                    b.HasIndex("AccountId");
 
-                b.Property<decimal>("Summa")
-                    .HasColumnType("numeric");
+                    b.ToTable("CustomerOperations");
+                });
 
-                b.Property<DateTimeOffset>("UpdatedAt")
-                    .HasColumnType("timestamp with time zone");
+            modelBuilder.Entity("VoltStream.Domain.Entities.DiscountOperation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-                b.HasKey("Id");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                b.HasIndex("CustomerId");
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint");
 
-                b.HasIndex("CustomerOperationId");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.ToTable("Payments");
-            });
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("timestamp with time zone");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Product", b =>
-            {
-                b.Property<long>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.Property<decimal>("DiscountSumm")
+                        .HasColumnType("numeric");
 
-                b.Property<long>("CategoryId")
-                    .HasColumnType("bigint");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                b.Property<DateTimeOffset>("CreatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<bool>("IsDiscountUsed")
+                        .HasColumnType("boolean");
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("boolean");
+                    b.Property<decimal>("Summa")
+                        .HasColumnType("numeric");
 
-                b.Property<string>("Name")
-                    .IsRequired()
-                    .HasColumnType("text");
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<string>("NormalizedName")
-                    .IsRequired()
-                    .HasColumnType("text");
+                    b.HasKey("Id");
 
-                b.Property<DateTimeOffset>("UpdatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.HasIndex("AccountId");
 
-                b.HasKey("Id");
+                    b.ToTable("DiscountsOperations");
+                });
 
-                b.HasIndex("CategoryId");
+            modelBuilder.Entity("VoltStream.Domain.Entities.Payment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-                b.ToTable("Products");
-            });
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Sale", b =>
-            {
-                b.Property<long>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint");
 
-                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.Property<long>("CashOperationId")
+                        .HasColumnType("bigint");
 
-                b.Property<decimal>("CountRoll")
-                    .HasColumnType("numeric");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<DateTimeOffset>("CreatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<int>("CurrencyType")
+                        .HasColumnType("integer");
 
-                b.Property<long>("CustomerId")
-                    .HasColumnType("bigint");
+                    b.Property<long>("CustomerOperationId")
+                        .HasColumnType("bigint");
 
-                b.Property<long>("CustomerOperationId")
-                    .HasColumnType("bigint");
+                    b.Property<decimal>("DefaultSumm")
+                        .HasColumnType("numeric");
 
-                b.Property<decimal?>("Discount")
-                    .HasColumnType("numeric");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("boolean");
+                    b.Property<long>("DiscountOperationId")
+                        .HasColumnType("bigint");
 
-                b.Property<DateTimeOffset>("OperationDate")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                b.Property<decimal>("Summa")
-                    .HasColumnType("numeric");
+                    b.Property<decimal>("Kurs")
+                        .HasColumnType("numeric");
 
-                b.Property<decimal>("TotalQuantity")
-                    .HasColumnType("numeric");
+                    b.Property<DateTimeOffset>("PaidDate")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<DateTimeOffset>("UpdatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<int>("PaymentType")
+                        .HasColumnType("integer");
 
-                b.HasKey("Id");
+                    b.Property<decimal>("Summa")
+                        .HasColumnType("numeric");
 
-                b.HasIndex("CustomerId");
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.HasIndex("CustomerOperationId");
+                    b.HasKey("Id");
 
-                b.ToTable("Sales");
-            });
+                    b.HasIndex("AccountId");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.SaleItem", b =>
-            {
-                b.Property<long>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
+                    b.HasIndex("CashOperationId");
 
-                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.HasIndex("CustomerOperationId");
 
-                b.Property<decimal>("CountRoll")
-                    .HasColumnType("numeric");
+                    b.HasIndex("DiscountOperationId");
 
-                b.Property<DateTimeOffset>("CreatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.ToTable("Payments");
+                });
 
-                b.Property<decimal>("Discount")
-                    .HasColumnType("numeric");
+            modelBuilder.Entity("VoltStream.Domain.Entities.Product", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-                b.Property<decimal>("DiscountPersent")
-                    .HasColumnType("numeric");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("boolean");
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint");
 
-                b.Property<decimal>("Price")
-                    .HasColumnType("numeric");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<long>("ProductId")
-                    .HasColumnType("bigint");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                b.Property<decimal>("QuantityPerRoll")
-                    .HasColumnType("numeric");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                b.Property<long>("SaleId")
-                    .HasColumnType("bigint");
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                b.Property<decimal>("TotalQuantity")
-                    .HasColumnType("numeric");
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<decimal>("TotalSumm")
-                    .HasColumnType("numeric");
+                    b.HasKey("Id");
 
-                b.Property<DateTimeOffset>("UpdatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.HasIndex("CategoryId");
 
-                b.HasKey("Id");
+                    b.ToTable("Products");
+                });
 
-                b.HasIndex("ProductId");
+            modelBuilder.Entity("VoltStream.Domain.Entities.Sale", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-                b.HasIndex("SaleId");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                b.ToTable("SaleItems");
-            });
+                    b.Property<decimal>("CountRoll")
+                        .HasColumnType("numeric");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Supply", b =>
-            {
-                b.Property<long>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.Property<long>("CustomerId")
+                        .HasColumnType("bigint");
 
-                b.Property<decimal>("CountRoll")
-                    .HasColumnType("numeric");
+                    b.Property<long>("CustomerOperationId")
+                        .HasColumnType("bigint");
 
-                b.Property<DateTimeOffset>("CreatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("boolean");
+                    b.Property<decimal>("Discount")
+                        .HasColumnType("numeric");
 
-                b.Property<DateTimeOffset>("OperationDate")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<long>("DiscountOperationId")
+                        .HasColumnType("bigint");
 
-                b.Property<long>("ProductId")
-                    .HasColumnType("bigint");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                b.Property<decimal>("QuantityPerRoll")
-                    .HasColumnType("numeric");
+                    b.Property<DateTimeOffset>("OperationDate")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<decimal>("TotalQuantity")
-                    .HasColumnType("numeric");
+                    b.Property<decimal>("Summa")
+                        .HasColumnType("numeric");
 
-                b.Property<DateTimeOffset>("UpdatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<decimal>("TotalQuantity")
+                        .HasColumnType("numeric");
 
-                b.HasKey("Id");
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.HasIndex("ProductId");
+                    b.HasKey("Id");
 
-                b.ToTable("Supplies");
-            });
+                    b.HasIndex("CustomerId");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Residue", b =>
-            {
-                b.Property<long>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("bigint");
+                    b.HasIndex("CustomerOperationId");
 
-                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.HasIndex("DiscountOperationId");
 
-                b.Property<decimal>("CountRoll")
-                    .HasColumnType("numeric");
+                    b.ToTable("Sales");
+                });
 
-                b.Property<DateTimeOffset>("CreatedAt")
-                    .HasColumnType("timestamp with time zone");
+            modelBuilder.Entity("VoltStream.Domain.Entities.SaleItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-                b.Property<decimal>("DiscountPercent")
-                    .HasColumnType("numeric");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("boolean");
+                    b.Property<decimal>("CountRoll")
+                        .HasColumnType("numeric");
 
-                b.Property<long>("ProductId")
-                    .HasColumnType("bigint");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Property<decimal>("QuantityPerRoll")
-                    .HasColumnType("numeric");
+                    b.Property<decimal>("Discount")
+                        .HasColumnType("numeric");
 
-                b.Property<decimal>("TotalQuantity")
-                    .HasColumnType("numeric");
+                    b.Property<decimal>("DiscountPersent")
+                        .HasColumnType("numeric");
 
-                b.Property<DateTimeOffset>("UpdatedAt")
-                    .HasColumnType("timestamp with time zone");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                b.HasKey("Id");
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
 
-                b.HasIndex("ProductId");
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
 
-                b.ToTable("WarehouseItems");
-            });
+                    b.Property<decimal>("QuantityPerRoll")
+                        .HasColumnType("numeric");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.CustomerOperation", b =>
-            {
-                b.HasOne("VoltStream.Domain.Entities.Customer", "Customer")
-                    .WithMany()
-                    .HasForeignKey("CustomerId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.Property<long>("SaleId")
+                        .HasColumnType("bigint");
 
-                b.Navigation("Customer");
-            });
+                    b.Property<decimal>("TotalQuantity")
+                        .HasColumnType("numeric");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Account", b =>
-            {
-                b.HasOne("VoltStream.Domain.Entities.Customer", "Customer")
-                    .WithMany()
-                    .HasForeignKey("CustomerId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.Property<decimal>("TotalSumm")
+                        .HasColumnType("numeric");
 
-                b.Navigation("Customer");
-            });
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Payment", b =>
-            {
-                b.HasOne("VoltStream.Domain.Entities.Customer", "Customer")
-                    .WithMany()
-                    .HasForeignKey("CustomerId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.HasKey("Id");
 
-                b.HasOne("VoltStream.Domain.Entities.CustomerOperation", "CustomerOperation")
-                    .WithMany()
-                    .HasForeignKey("CustomerOperationId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.HasIndex("ProductId");
 
-                b.Navigation("Customer");
+                    b.HasIndex("SaleId");
 
-                b.Navigation("CustomerOperation");
-            });
+                    b.ToTable("SaleItems");
+                });
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Product", b =>
-            {
-                b.HasOne("VoltStream.Domain.Entities.Category", "Category")
-                    .WithMany("Products")
-                    .HasForeignKey("CategoryId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+            modelBuilder.Entity("VoltStream.Domain.Entities.Supply", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-                b.Navigation("Category");
-            });
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Sale", b =>
-            {
-                b.HasOne("VoltStream.Domain.Entities.Customer", "Customer")
-                    .WithMany()
-                    .HasForeignKey("CustomerId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.Property<decimal>("CountRoll")
+                        .HasColumnType("numeric");
 
-                b.HasOne("VoltStream.Domain.Entities.CustomerOperation", "CustomerOperation")
-                    .WithMany()
-                    .HasForeignKey("CustomerOperationId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-                b.Navigation("Customer");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
-                b.Navigation("CustomerOperation");
-            });
+                    b.Property<DateTimeOffset>("OperationDate")
+                        .HasColumnType("timestamp with time zone");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.SaleItem", b =>
-            {
-                b.HasOne("VoltStream.Domain.Entities.Product", "Product")
-                    .WithMany()
-                    .HasForeignKey("ProductId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
 
-                b.HasOne("VoltStream.Domain.Entities.Sale", "Sale")
-                    .WithMany("SaleItems")
-                    .HasForeignKey("SaleId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.Property<decimal>("QuantityPerRoll")
+                        .HasColumnType("numeric");
 
-                b.Navigation("Product");
+                    b.Property<decimal>("TotalQuantity")
+                        .HasColumnType("numeric");
 
-                b.Navigation("Sale");
-            });
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Supply", b =>
-            {
-                b.HasOne("VoltStream.Domain.Entities.Product", "Product")
-                    .WithMany()
-                    .HasForeignKey("ProductId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.HasKey("Id");
 
-                b.Navigation("Product");
-            });
+                    b.HasIndex("ProductId");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Residue", b =>
-            {
-                b.HasOne("VoltStream.Domain.Entities.Product", "Product")
-                    .WithMany()
-                    .HasForeignKey("ProductId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.ToTable("Supplies");
+                });
 
-                b.Navigation("Product");
-            });
+            modelBuilder.Entity("VoltStream.Domain.Entities.Warehouse", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Category", b =>
-            {
-                b.Navigation("Products");
-            });
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-        modelBuilder.Entity("VoltStream.Domain.Entities.Sale", b =>
-            {
-                b.Navigation("SaleItems");
-            });
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Warehouses");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.WarehouseItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<decimal>("CountRoll")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("DiscountPercent")
+                        .HasColumnType("numeric");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal>("QuantityPerRoll")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("TotalQuantity")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("WarehouseId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("WarehouseId");
+
+                    b.ToTable("WarehouseItems");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.Account", b =>
+                {
+                    b.HasOne("VoltStream.Domain.Entities.Customer", "Customer")
+                        .WithOne("Account")
+                        .HasForeignKey("VoltStream.Domain.Entities.Account", "CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.CashOperation", b =>
+                {
+                    b.HasOne("VoltStream.Domain.Entities.Cash", "Cash")
+                        .WithMany("CashOperations")
+                        .HasForeignKey("CashId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cash");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.CustomerOperation", b =>
+                {
+                    b.HasOne("VoltStream.Domain.Entities.Account", "Account")
+                        .WithMany("CustomerOperations")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.DiscountOperation", b =>
+                {
+                    b.HasOne("VoltStream.Domain.Entities.Account", "Account")
+                        .WithMany("DiscountOperations")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.Payment", b =>
+                {
+                    b.HasOne("VoltStream.Domain.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoltStream.Domain.Entities.CashOperation", "CashOperation")
+                        .WithMany()
+                        .HasForeignKey("CashOperationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoltStream.Domain.Entities.CustomerOperation", "CustomerOperation")
+                        .WithMany()
+                        .HasForeignKey("CustomerOperationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoltStream.Domain.Entities.DiscountOperation", "DiscountOperation")
+                        .WithMany()
+                        .HasForeignKey("DiscountOperationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("CashOperation");
+
+                    b.Navigation("CustomerOperation");
+
+                    b.Navigation("DiscountOperation");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.Product", b =>
+                {
+                    b.HasOne("VoltStream.Domain.Entities.Category", "Category")
+                        .WithMany("Products")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.Sale", b =>
+                {
+                    b.HasOne("VoltStream.Domain.Entities.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoltStream.Domain.Entities.CustomerOperation", "CustomerOperation")
+                        .WithMany()
+                        .HasForeignKey("CustomerOperationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoltStream.Domain.Entities.DiscountOperation", "DiscountOperation")
+                        .WithMany()
+                        .HasForeignKey("DiscountOperationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("CustomerOperation");
+
+                    b.Navigation("DiscountOperation");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.SaleItem", b =>
+                {
+                    b.HasOne("VoltStream.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoltStream.Domain.Entities.Sale", "Sale")
+                        .WithMany("SaleItems")
+                        .HasForeignKey("SaleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Sale");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.Supply", b =>
+                {
+                    b.HasOne("VoltStream.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.WarehouseItem", b =>
+                {
+                    b.HasOne("VoltStream.Domain.Entities.Product", "Product")
+                        .WithMany("WarehouseItems")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VoltStream.Domain.Entities.Warehouse", "Warehouse")
+                        .WithMany("Items")
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Warehouse");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.Account", b =>
+                {
+                    b.Navigation("CustomerOperations");
+
+                    b.Navigation("DiscountOperations");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.Cash", b =>
+                {
+                    b.Navigation("CashOperations");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.Category", b =>
+                {
+                    b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.Customer", b =>
+                {
+                    b.Navigation("Account")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.Product", b =>
+                {
+                    b.Navigation("WarehouseItems");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.Sale", b =>
+                {
+                    b.Navigation("SaleItems");
+                });
+
+            modelBuilder.Entity("VoltStream.Domain.Entities.Warehouse", b =>
+                {
+                    b.Navigation("Items");
+                });
 #pragma warning restore 612, 618
+        }
     }
 }

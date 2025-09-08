@@ -47,7 +47,7 @@
                     </StackPanel>
                 </RadioButton>
                 <RadioButton Style="{DynamicResource menuButton}" 
-                         Tag="{DynamicResource color2}"
+                             Tag="{DynamicResource color2}"
                              Command="{Binding ShowSuppliesViewCommand}">
                     <StackPanel Orientation="Horizontal">
                         <fa:IconImage Icon="ProjectDiagram" Style="{StaticResource menuButtonIcon}"/>
