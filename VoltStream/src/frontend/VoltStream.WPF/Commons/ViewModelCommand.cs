@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 
 namespace VoltStream.WPF.Commons
 {
-    public class ViewModelCommand: ICommand
+    public class ViewModelCommand : ICommand
     {
         private readonly Action<object> _executeAction;
         private readonly Predicate<object> _canExecuteAction;
@@ -30,7 +25,7 @@ namespace VoltStream.WPF.Commons
         }
         public bool CanExecute(object parameter)
         {
-            return _canExecuteAction == null ? true: _canExecuteAction(parameter);
+            return _canExecuteAction == null ? true : _canExecuteAction(parameter);
         }
         public void Execute(object parameter)
         {
