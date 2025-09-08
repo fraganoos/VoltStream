@@ -1,9 +1,8 @@
-﻿namespace VoltStream.WPF;
-
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Supplies.Views;
 
+namespace VoltStream.WPF;
 
 public class MineViewModel : ViewModelBase
 {
@@ -34,7 +33,7 @@ public class MineViewModel : ViewModelBase
 
     private void ExicuteShowSuppliesViewCommand(object obj)
     {
-        var view = new SuppliesPage();
+        var view = new SuppliesPage(_serviceProvider);
         CurrentChildView = view;
     }
 }

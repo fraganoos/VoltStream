@@ -5,7 +5,7 @@ using Refit;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-public static class ApiServices
+public static class ApiService
 {
     public static IServiceCollection ConfigureServices(IServiceCollection services, string baseApiUrl)
     {
@@ -18,7 +18,7 @@ public static class ApiServices
                 })
         };
 
-        typeof(ApiServices).Assembly.GetTypes()
+        typeof(ApiService).Assembly.GetTypes()
             .Where(t => t.IsInterface && t.Name.EndsWith("Api"))
             .ToList()
             .ForEach(apiType => services.AddSingleton(apiType, RestService.For(apiType, baseApiUrl, refitSettings)));
