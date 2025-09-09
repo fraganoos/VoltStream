@@ -1,13 +1,13 @@
 ﻿namespace VoltStream.WPF.Supplies.Views;
 
 
-using ApiServices.DTOs.Products;
-using ApiServices.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Windows;
+using ApiServices.Interfaces;
+using System.Threading.Tasks;
 using System.Windows.Controls;
+using ApiServices.DTOs.Products;
+using System.Collections.Generic;
+using Microsoft.Extensions.DependencyInjection;
 
 public partial class SuppliesPage : Page
 {

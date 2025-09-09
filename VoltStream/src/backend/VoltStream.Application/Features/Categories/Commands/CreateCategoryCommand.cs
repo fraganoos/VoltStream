@@ -16,7 +16,7 @@ public class CreateCategoryCommandHandler(
 {
     public async Task<long> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var categoryExists = await context.Products
+        var categoryExists = await context.Categories
             .AnyAsync(p => p.NormalizedName == request.Name.ToNormalized(), cancellationToken);
 
         if (categoryExists)
