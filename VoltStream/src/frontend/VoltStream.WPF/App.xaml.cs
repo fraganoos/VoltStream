@@ -1,9 +1,9 @@
 ﻿namespace VoltStream.WPF;
 
-using System.Windows;
 using ApiServices.Services;
-using System.Windows.Forms.Design;
 using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
+using System.Windows.Forms.Design;
 
 /// <summary>
 /// Interaction logic for App.xaml

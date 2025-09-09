@@ -1,19 +1,24 @@
 ﻿namespace VoltStream.WPF.Supplies.Views;
 
 
-using System.Windows;
-using ApiServices.Interfaces;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 using ApiServices.DTOs.Products;
-using System.Collections.Generic;
+using ApiServices.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 public partial class SuppliesPage : Page
 {
     private readonly IServiceProvider services;
     private readonly IProductsApi productsApi;
     private readonly ICategoriesApi categoriesApi;
+    private readonly ISuppliesApi suppliesApi;
+    private readonly IWarehouseItemsApi warehouseItemsApi;
+
+
 
     public SuppliesPage(IServiceProvider services)
     {
@@ -23,7 +28,8 @@ public partial class SuppliesPage : Page
         // API xizmatlarini DI orqali olish
         productsApi = services.GetRequiredService<IProductsApi>();
         categoriesApi = services.GetRequiredService<ICategoriesApi>();
-
+        suppliesApi = services.GetRequiredService<ISuppliesApi>();
+        warehouseItemsApi = services.GetRequiredService<IWarehouseItemsApi>();
         // Sahifa yuklanganda kategoriyalarni chaqirish
         this.Loaded += SuppliesPage_Loaded;
     }
@@ -89,8 +95,86 @@ public partial class SuppliesPage : Page
         }
     }
 
+    private void cbxCategory_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter || e.Key == Key.Tab)
+        {
+            // Fokus boshqa joyga o‘tayotgandek qilamiz
+            cbxCategory_LostFocus(sender, new RoutedEventArgs());
+        }
+    }
+    private void cbxCategory_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (cbxCategory.SelectedItem == null && !string.IsNullOrWhiteSpace(cbxCategory.Text))
+        {
+            string newCategoryName = cbxCategory.Text.Trim().ToLower();
+
+            // ItemsSource ni Category listiga cast qilamiz
+            var categories = cbxCategory.ItemsSource as List<Category>;
+            if (categories != null && !categories.Any(c =>
+                    c.Name.ToLower().Equals(newCategoryName, StringComparison.OrdinalIgnoreCase)))
+            {
+                // Ha yoki Yo‘q so‘rovi
+                var result = MessageBox.Show(
+                    $"\"{newCategoryName}\" nomli kategoriya mavjud emas.\n" +
+                    "Yangi kategoriya yaratmoqchimisiz?",
+                    "Yangi kategoriya",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    cbxProduct.Focus();
+                }
+                else if (result == MessageBoxResult.No)
+                {
+                    cbxCategory.Text = null;
+                    cbxCategory.Focus();
+                }
+            }
+        }
+    }
+    private void cbxProduct_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter || e.Key == Key.Tab)
+        {
+            // Enter/Tab bosilganda ham LostFocus tekshiruvini ishlatamiz
+            cbxProduct_LostFocus(sender, new RoutedEventArgs());
+        }
+    }
+    private async Task cbxProduct_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (cbxProduct.SelectedItem == null && !string.IsNullOrWhiteSpace(cbxProduct.Text))
+        {
+            string newProductName = cbxProduct.Text.Trim();
+
+            var products = cbxProduct.ItemsSource as List<Product>;
+            if (products != null && !products.Any(p =>
+                    p.Name.Equals(newProductName, StringComparison.OrdinalIgnoreCase)))
+            {
+                var result = MessageBox.Show(
+                    $"\"{newProductName}\" nomli mahsulot mavjud emas.\n" +
+                    "Yangi mahsulot yaratmoqchimisiz?",
+                    "Yangi mahsulot",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    tbxPerRollCount.Focus(); // keyingi textboxga o‘tadi
+                    var warehouseItems = await warehouseItemsApi.GetAllWarehouseItemsAsync();
+                }
+                else
+                {
+                    cbxProduct.Text = null;
+                    cbxProduct.Focus(); // qaytib productga fokus beradi
+                }
+            }
+        }
+    }
     private void addSupplyBtn_Click(object sender, RoutedEventArgs e)
     {
         // Bu yerda keyinchalik qo‘shish funksiyasi yoziladi
     }
+
 }

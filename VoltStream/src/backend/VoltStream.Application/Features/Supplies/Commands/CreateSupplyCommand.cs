@@ -1,10 +1,10 @@
 ﻿namespace VoltStream.Application.Features.Supplies.Commands;
 
-using MediatR;
 using AutoMapper;
-using VoltStream.Domain.Entities;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Interfaces;
+using VoltStream.Domain.Entities;
 
 public record CreateSupplyCommand(
     DateTimeOffset OperationDate,
@@ -38,10 +38,10 @@ public class CreateSupplyCommandHandler(
         long newCategoryId = request.CategoryId;
         if (request.CategoryId <= 0)
         {
-            var category = new Category() 
+            var category = new Category()
             {
-                 Name = request.CategoryName.Trim(),
-                 NormalizedName = request.CategoryName.Trim().ToUpper(),
+                Name = request.CategoryName.Trim(),
+                NormalizedName = request.CategoryName.Trim().ToUpper(),
             };
             context.Categories.Add(category);
             await context.SaveAsync(cancellationToken);
@@ -49,7 +49,7 @@ public class CreateSupplyCommandHandler(
         }
 
         long newProductId = request.ProductId;
-        if (request.ProductId <= 0) 
+        if (request.ProductId <= 0)
         {
             var product = new Product()
             {
@@ -69,12 +69,12 @@ public class CreateSupplyCommandHandler(
         if (warehouseItem is null)
             warehouse.Items.Add(new WarehouseItem()
             {
-                 CountRoll = request.CountRoll,
-                 DiscountPercent = request.DiscountPercent,
-                 Price = request.Price,
-                 ProductId = newProductId,
-                 QuantityPerRoll = request.QuantityPerRoll,
-                 TotalQuantity = request.TotalQuantity,
+                CountRoll = request.CountRoll,
+                DiscountPercent = request.DiscountPercent,
+                Price = request.Price,
+                ProductId = newProductId,
+                QuantityPerRoll = request.QuantityPerRoll,
+                TotalQuantity = request.TotalQuantity,
             });
         else
         {
