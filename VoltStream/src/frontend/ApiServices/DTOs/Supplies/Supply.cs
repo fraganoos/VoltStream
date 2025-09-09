@@ -1,5 +1,7 @@
-﻿namespace ApiServices.DTOs.Products;
-public class Supply
+﻿using ApiServices.DTOs.Products;
+
+namespace ApiServices.DTOs.Supplies;
+public record Supply
 {
     public long Id { get; set; }
     public DateTimeOffset OperationDate { get; set; }

@@ -65,7 +65,8 @@
                               VerticalAlignment="Center" 
                               HorizontalAlignment="Stretch"  
                               FontSize="14"
-                              utils:EnterKeyTab.IsEnabled="True"/>
+                              LostFocus="cbxCategory_LostFocus"
+                              PreviewKeyDown="cbxCategory_PreviewKeyDown"/>
                     <Label Grid.Column="1" 
                            Content="Nomi:" 
                            VerticalAlignment="Center" 
@@ -78,9 +79,10 @@
                               DisplayMemberPath = "Name"
                               VerticalAlignment="Center" 
                               HorizontalAlignment="Stretch" 
-                              FontSize="14" 
+                              FontSize="14"
                               Margin="0,0,10,0"
-                              utils:EnterKeyTab.IsEnabled="True"/>
+                              LostFocus="cbxProduct_LostFocus"
+                              PreviewKeyDown="cbxProduct_PreviewKeyDown"/>
                 </Grid>
                 <Grid Grid.Row="2" Grid.Column="0">
                     <Label Content="Rulon metr:" VerticalAlignment="Center" Margin="10,0" FontSize="14"/>
@@ -131,13 +133,25 @@
                         utils:EnterKeyTab.IsEnabled="True"/>
                     
                 </Grid>
+                <Grid Grid.Row="4" Grid.Column="0">
+                    <Label Content="Chegir %:" VerticalAlignment="Center" Margin="10,0" FontSize="14"/>
+                </Grid>
 
                 <Grid Grid.Row="4" Grid.Column="1">
+
+                    <TextBox Grid.Column="1" x:Name="tbxDiscountPercent" 
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Left" 
+                        MinWidth="197"
+                        HorizontalContentAlignment="Right" 
+                        FontSize="14" Margin="0,0,10,0" 
+                        utils:EnterKeyTab.IsEnabled="True"/>
                     <Button x:Name="addSupplyBtn" 
                             Content="➕ Qo'shish" 
-                            Width="150" 
-                            Height="25" 
-                            HorizontalAlignment="Center" 
+                            Width="197" 
+                            Height="25"
+                            Margin="10 0"
+                            HorizontalAlignment="Right" 
                             VerticalAlignment="Center" 
                             FontSize="14" Click="addSupplyBtn_Click"/>
                 </Grid>
