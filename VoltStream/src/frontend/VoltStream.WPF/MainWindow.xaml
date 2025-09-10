@@ -54,6 +54,14 @@
                         <TextBlock Text="Ishlab chiqarish" Style="{StaticResource menuButtonText}"/>
                     </StackPanel>
                 </RadioButton>
+                <RadioButton Style="{DynamicResource menuButton}" 
+                             Tag="{DynamicResource color3}"
+                             Command="{Binding ShowSalesViewCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <fa:IconImage Icon="ShoppingCart" Style="{StaticResource menuButtonIcon}"/>
+                        <TextBlock Text="Savdo" Style="{StaticResource menuButtonText}"/>
+                    </StackPanel>
+                </RadioButton>
             </StackPanel>
             <!--Header and content-->
             <Grid Grid.Column="1">
