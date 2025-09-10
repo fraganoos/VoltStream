@@ -31,7 +31,10 @@ public class CreateSupplyCommandHandler(
             .FirstOrDefaultAsync(cancellationToken);
 
         if (warehouse is null)
+        { 
             context.Warehouses.Add(warehouse = new());
+            warehouse.Items = new List<WarehouseItem>();
+        }
 
         await context.BeginTransactionAsync(cancellationToken);
 
@@ -62,7 +65,8 @@ public class CreateSupplyCommandHandler(
             newProductId = product.Id;
         }
 
-        var warehouseItem = warehouse!.Items.FirstOrDefault(wh
+
+        var warehouseItem = warehouse.Items.FirstOrDefault(wh
             => wh.ProductId == newProductId && wh.QuantityPerRoll == request.QuantityPerRoll);
 
 
@@ -84,9 +88,14 @@ public class CreateSupplyCommandHandler(
             warehouseItem.DiscountPercent = request.DiscountPercent;
         }
 
-        var supply = mapper.Map<Supply>(request);
-        context.Supplies.Add(mapper.Map<Supply>(request));
+       // var supply = mapper.Map<Supply>(request);
+        //context.Supplies.Add(mapper.Map<Supply>(request));
 
+        var supply = mapper.Map<Supply>(request);
+        supply.ProductId = newProductId;
+        context.Supplies.Add(supply);
+
+        await context.SaveAsync(cancellationToken);
         await context.CommitTransactionAsync(cancellationToken);
         return supply.Id;
     }
