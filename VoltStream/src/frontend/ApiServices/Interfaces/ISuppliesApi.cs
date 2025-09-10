@@ -7,18 +7,15 @@ using Refit;
 [Headers("accept: application/json")]
 public interface ISuppliesApi
 {
-    [Post("/api/Supplies​")]
-    Task<ApiResponse<Supply>> CreateSupplyAsync([Body] Supply supplyCreate);
+    [Post("/api/supplies")]
+    Task<ApiResponse<Supply>> CreateSupplyAsync(Supply supplyCreate);
 
-    [Put("/api/Supplies​")]
+    [Put("/api/supplies")]
     Task<ApiResponse<Supply>> UpdateSupplyAsync([Body] Supply supplyUpdate);
 
-    [Delete("/api/Supplies​/{id}")]
-    Task<ApiResponse<string>> DeleteSupplyAsync(long id);
+    [Delete("/api/supplies/{id}")]
+    Task<ApiResponse<string>> DeleteSupplyAsync(long    id);
 
-    [Get("/api/Supplies​/{id}")]
+    [Get("/api/supplies/{id}")]
     Task<ApiResponse<Supply>> GetByIdSupplyAsync(long id);
-
-    [Get("/api/Supplies")]
-    Task<ApiResponse<Response<List<Supply>>>> GetAllSuppliesAsync();
 }
