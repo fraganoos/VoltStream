@@ -1,6 +1,7 @@
-﻿using ApiServices.DTOs.Products;
+﻿namespace ApiServices.DTOs.Supplies;
 
-namespace ApiServices.DTOs.Supplies;
+using ApiServices.DTOs.Products;
+
 public record Supply
 {
     public long Id { get; set; }
@@ -12,5 +13,6 @@ public record Supply
     public decimal TotalQuantity { get; set; }
     public string ProductName { get; set; } = string.Empty;
     public string CategoryName { get; set; } = string.Empty;
+    public decimal Price { get; set; }
     public Product Product { get; set; } = default!;
 }
