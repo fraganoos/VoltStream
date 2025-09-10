@@ -105,6 +105,7 @@
                              HorizontalAlignment="Stretch" 
                              HorizontalContentAlignment="Right" 
                              FontSize="14" Margin="0,0,10,0"
+                             LostFocus="tbxRollCount_GotFocus"
                              utils:EnterKeyTab.IsEnabled="True"/>
                 </Grid>
                 <Grid Grid.Row="3" Grid.Column="0">
