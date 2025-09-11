@@ -4,6 +4,7 @@ using System;
 public class Supply
 {
     public DateTimeOffset OperationDate { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
     public long ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty;
     public decimal CountRoll { get; set; }
