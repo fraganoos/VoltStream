@@ -68,7 +68,7 @@
                               VerticalAlignment="Center" 
                               HorizontalAlignment="Stretch"  
                               FontSize="14"
-                              utils:EnterKeyTab.IsEnabled="True"
+                              GotFocus="cbxCategory_GotFocus"
                               LostFocus="cbxCategory_LostFocus"
                               PreviewKeyDown="cbxCategory_PreviewKeyDown"/>
                     <Label Grid.Column="1" 
