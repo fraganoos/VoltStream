@@ -36,8 +36,6 @@ public partial class SuppliesPage : Page
 
     private async void SuppliesPage_Loaded(object sender, RoutedEventArgs e)
     {
-        await LoadCategoriesAsync();
-        await LoadProductsAsync();
         await LoadSuppliesAsync(); // DataGrid ni dastlabki yuklash
     }
 
@@ -140,7 +138,7 @@ public partial class SuppliesPage : Page
         }
     }
 
-    private void cbxCategory_LostFocus(object sender, RoutedEventArgs e)
+    private async void cbxCategory_LostFocus(object sender, RoutedEventArgs e)
     {
         // Agar hodisa allaqachon ishlayotgan bo'lsa, qayta ishlashni to'xtatamiz
         if (isProcessingCategoryLostFocus)
@@ -169,6 +167,7 @@ public partial class SuppliesPage : Page
 
                     if (result == MessageBoxResult.Yes)
                     {
+                        await LoadProductsAsync();
                         cbxProduct.Focus();
                     }
                     else if (result == MessageBoxResult.No)
@@ -186,6 +185,9 @@ public partial class SuppliesPage : Page
             else if (cbxCategory.SelectedItem != null)
             {
                 // Agar element tanlangan bo'lsa, to'g'ridan-to'g'ri cbxProduct ga o'tamiz
+                long categoryId = Convert.ToInt64(cbxCategory.SelectedValue);
+                var products = await categoriesApi.GetByIdCategoryAsync(categoryId);
+
                 cbxProduct.Focus();
             }
         }
@@ -241,7 +243,6 @@ public partial class SuppliesPage : Page
                     if (result == MessageBoxResult.Yes)
                     {
                         tbxPerRollCount.Focus(); // Keyingi textboxga o'tadi
-                        var warehouseItems = await warehouseItemsApi.GetAllWarehouseItemsAsync();
                     }
                     else
                     {
@@ -411,5 +412,55 @@ public partial class SuppliesPage : Page
                 MessageBoxButton.OK, MessageBoxImage.Error);
             System.Diagnostics.Debug.WriteLine($"Xato: {ex.StackTrace}");
         }
+    }
+
+    //private async Task LoadProductsByCategoryIDAsync(long categoryId)
+    //{
+    //    try
+    //    {
+    //        // categoryId validligini tekshirish
+    //        if (categoryId <= 0)
+    //        {
+    //            MessageBox.Show("Noto‘g‘ri kategoriya ID.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+    //            return;
+    //        }
+
+    //        // API orqali kategoriya ma'lumotlarini olish
+    //        var response = await categoriesApi.GetByIdCategoryAsync(categoryId);
+    //        if (response.IsSuccessStatusCode && response.Content?.Data != null)
+    //        {
+    //            // CategoryDto dan Products ro‘yxatini olish
+    //            var category = response.Content.Data;
+    //            List<Product> products = category.Products?.ToList() ?? new List<Product>();
+
+    //            // cbxProduct ga ma'lumotlarni o‘rnatish
+    //            cbxProduct.ItemsSource = products;
+    //            cbxProduct.DisplayMemberPath = "Name";
+    //            cbxProduct.SelectedValuePath = "Id";
+
+    //            // Mahsulotlar ro‘yxati bo‘sh bo‘lsa
+    //            if (products.Count == 0)
+    //            {
+    //                MessageBox.Show("Mahsulotlar topilmadi.", "Ma'lumot", MessageBoxButton.OK, MessageBoxImage.Information);
+    //            }
+    //        }
+    //        else
+    //        {
+    //            // Xatolik xabari
+    //            MessageBox.Show($"Mahsulotlar olishda xatolik: {response.Error?.Message ?? "Ma'lumotlar yo‘q"}",
+    //                "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        // Umumiy xatolikni log qilish va foydalanuvchiga ko‘rsatish
+    //        MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}", "Xatolik",
+    //            MessageBoxButton.OK, MessageBoxImage.Error);
+    //        System.Diagnostics.Debug.WriteLine($"Xato: {ex.Message}\nStackTrace: {ex.StackTrace}");
+    //    }
+    //}
+    private async void cbxCategory_GotFocus(object sender, RoutedEventArgs e)
+    {
+        await LoadCategoriesAsync();
     }
 }
