@@ -18,4 +18,7 @@ public interface ISuppliesApi
 
     [Get("/api/supplies/{id}")]
     Task<ApiResponse<Supply>> GetByIdSupplyAsync(long id);
+
+    [Get("/api/supplies")]
+    Task<ApiResponse<Response<List<Supply>>>> GetAllSuppliesAsync();
 }
