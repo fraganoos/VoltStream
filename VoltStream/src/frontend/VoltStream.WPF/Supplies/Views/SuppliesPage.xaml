@@ -9,6 +9,9 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="SupplyPage">
+    <Page.Resources>
+        <utils:UtcToUzbekistanTimeConverter x:Key="UtcToUzbekistanTimeConverter"/>
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -163,13 +166,73 @@
                 </Border>
             </Grid>
         </Grid>
-        <DataGrid Grid.Row="1" x:Name="supplyDataGrid" AutoGenerateColumns="False" CanUserAddRows="False" Margin="10">
+        <DataGrid Grid.Row="1" x:Name="supplyDataGrid" HorizontalAlignment="Center" AutoGenerateColumns="False" CanUserAddRows="False" Margin="10" Foreground="Black">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Sana" Binding="{Binding SupplyDate, StringFormat=d}" Width="*" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Maxsulot" Binding="{Binding ProductName}" Width="2*" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Rulon soni" Binding="{Binding RollCount}" Width="*" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Rulon metr" Binding="{Binding PerRollCount}" Width="*" IsReadOnly="True"/>
-                <DataGridTextColumn Header="Jami metr" Binding="{Binding TotalMeters}" Width="*" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Sana" Width="*" Binding="{Binding OperationDate, Converter={StaticResource UtcToUzbekistanTimeConverter},StringFormat=dd.MM.yyyy}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Maxsulot" Binding="{Binding ProductName}" Width="2*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="Padding" Value="10 0 5 0"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Rulon soni" Binding="{Binding CountRoll, StringFormat=N2}" Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Rulon metr" Binding="{Binding QuantityPerRoll, StringFormat=N2}" Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Jami metr" Binding="{Binding TotalQuantity, StringFormat=N2}" Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

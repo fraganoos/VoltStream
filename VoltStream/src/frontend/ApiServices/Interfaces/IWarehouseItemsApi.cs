@@ -7,6 +7,6 @@ using ApiServices.DTOs.Supplies;
 [Headers("accept: application/json")]
 public interface IWarehouseItemsApi
 {
-    [Get("/api/WarehouseItems")]
+    [Get("/api/warehouse-items")]
     Task<ApiResponse<Response<List<WarehouseItem>>>> GetAllWarehouseItemsAsync();
 }
