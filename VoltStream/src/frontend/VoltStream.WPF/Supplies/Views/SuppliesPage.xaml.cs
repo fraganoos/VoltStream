@@ -105,7 +105,7 @@ public partial class SuppliesPage : Page
             if (response.IsSuccessStatusCode && response.Content?.Data != null)
             {
                 // OperationDate bo‘yicha teskari tartibda (eng so‘nggi birinchi)
-                List<Supply> supplies = response.Content.Data.OrderByDescending(s => s.OperationDate).ToList();
+                List<Supply> supplies = response.Content.Data.OrderByDescending(s => s.CreatedAt).ToList();
                 supplyDataGrid.ItemsSource = supplies;
             }
             else

@@ -15,6 +15,7 @@ public record SupplyDTO
     public decimal QuantityPerRoll { get; set; }
     public decimal TotalQuantity { get; set; }
     public decimal DiscountPercent { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 
     public ProductDTO Product { get; set; } = default!;
 }

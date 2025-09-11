@@ -37,4 +37,8 @@ public record Supply
     
     [JsonPropertyName("discountPercent")]
     public decimal DiscountPercent { get; set; }
+    
+    [JsonPropertyName("createdAt")]
+    public DateTimeOffset CreatedAt { get; set; }
+
 }
