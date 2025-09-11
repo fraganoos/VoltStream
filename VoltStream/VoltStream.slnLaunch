@@ -1,0 +1,37 @@
+[
+  {
+    "Name": "Новый профиль",
+    "Projects": [
+      {
+        "Path": "src\\backend\\VoltStream.Infrastructure\\VoltStream.Infrastructure.csproj",
+        "Action": "Start",
+        "DebugTarget": "VoltStream.Infrastructure"
+      },
+      {
+        "Path": "src\\backend\\VoltStream.WebApi\\VoltStream.WebApi.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      },
+      {
+        "Path": "src\\frontend\\VoltStream.WPF\\VoltStream.WPF.csproj",
+        "Action": "Start",
+        "DebugTarget": "VoltStream.WPF"
+      },
+      {
+        "Path": "src\\backend\\VoltStream.Domain\\VoltStream.Domain.csproj",
+        "Action": "Start",
+        "DebugTarget": "VoltStream.Domain"
+      },
+      {
+        "Path": "src\\backend\\VoltStream.Application\\VoltStream.Application.csproj",
+        "Action": "Start",
+        "DebugTarget": "VoltStream.Application"
+      },
+      {
+        "Path": "src\\frontend\\ApiServices\\ApiServices.csproj",
+        "Action": "Start",
+        "DebugTarget": "ApiServices"
+      }
+    ]
+  }
+]
