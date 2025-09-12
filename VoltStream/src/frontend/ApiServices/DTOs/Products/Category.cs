@@ -8,4 +8,6 @@ public class Category
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
+    [JsonPropertyName("products")]
+    public List<Product> Products { get; set; } = new List<Product>();
 }

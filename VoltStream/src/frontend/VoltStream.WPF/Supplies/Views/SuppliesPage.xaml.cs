@@ -30,6 +30,8 @@ public partial class SuppliesPage : Page
         categoriesApi = services.GetRequiredService<ICategoriesApi>();
         suppliesApi = services.GetRequiredService<ISuppliesApi>();
         warehouseItemsApi = services.GetRequiredService<IWarehouseItemsApi>();
+
+        supplyDate.calendarPopup.Focus();
         // Sahifa yuklanganda kategoriyalarni chaqirish
         this.Loaded += SuppliesPage_Loaded;
     }
@@ -154,8 +156,8 @@ public partial class SuppliesPage : Page
 
                 // ItemsSource ni Category listiga cast qilamiz
                 var categories = cbxCategory.ItemsSource as List<Category>;
-                if (categories != null && !categories.Any(c =>
-                        c.Name.ToLower().Equals(newCategoryName, StringComparison.OrdinalIgnoreCase)))
+                if ((categories == null)||(categories != null && !categories.Any(c =>
+                        c.Name.ToLower().Equals(newCategoryName, StringComparison.OrdinalIgnoreCase))))
                 {
                     // Ha yoki Yo‘q so‘rovi
                     var result = MessageBox.Show(
@@ -176,17 +178,37 @@ public partial class SuppliesPage : Page
                         cbxCategory.Focus();
                     }
                 }
-                else
+                else 
                 {
                     // Agar kategoriya matni mavjud elementlardan biriga mos kelsa
                     cbxProduct.Focus();
                 }
             }
-            else if (cbxCategory.SelectedItem != null)
+            else           
             {
-                // Agar element tanlangan bo'lsa, to'g'ridan-to'g'ri cbxProduct ga o'tamiz
                 long categoryId = Convert.ToInt64(cbxCategory.SelectedValue);
-                var products = await categoriesApi.GetByIdCategoryAsync(categoryId);
+                try
+                {
+                    var response = await productsApi.GetAllProductsByCategoryIdAsync(categoryId);
+                    if (response.IsSuccessStatusCode && response.Content?.Data != null)
+                    {
+                        List<Product> products = response.Content.Data;
+                        cbxProduct.ItemsSource = products;
+                        cbxProduct.DisplayMemberPath = "Name";
+                        cbxProduct.SelectedValuePath = "Id";
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Mahsulotlar olishda xatolik: {response.Error?.Message ?? "Ma'lumotlar yo'q"}",
+                            "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}", "Xatolik",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Diagnostics.Debug.WriteLine($"Xato: {ex.StackTrace}");
+                }
 
                 cbxProduct.Focus();
             }
@@ -215,7 +237,7 @@ public partial class SuppliesPage : Page
         }
     }
 
-    private async void cbxProduct_LostFocus(object sender, RoutedEventArgs e)
+    private void cbxProduct_LostFocus(object sender, RoutedEventArgs e)
     {
         // Agar hodisa allaqachon ishlayotgan bo'lsa, qayta ishlashni to'xtatamiz
         if (isProcessingProductLostFocus)
@@ -371,8 +393,6 @@ public partial class SuppliesPage : Page
                 DiscountPercent = discountPercent
             };
 
-            // Yuborilayotgan ma'lumotlarni log qilish
-            System.Diagnostics.Debug.WriteLine($"Yuborilayotgan Supply: CategoryId={supply.CategoryId}, ProductId={supply.ProductId}, ProductName={supply.ProductName}, TotalQuantity={supply.TotalQuantity}, Price={supply.Price}");
 
             // API orqali ta'minotni saqlash
             var response = await suppliesApi.CreateSupplyAsync(supply);
@@ -380,7 +400,7 @@ public partial class SuppliesPage : Page
 
             if (response.IsSuccessStatusCode && response.Content != null)
             {
-                MessageBox.Show($"Ta'minot muvaffaqiyatli qo‘shildi! ID: {response.Content.Id}",
+                MessageBox.Show($"Ta'minot muvaffaqiyatli qo‘shildi!",
                     "Muvaffaqiyat", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Formani tozalash
@@ -396,8 +416,6 @@ public partial class SuppliesPage : Page
                 tbxDiscountPercent.Text = string.Empty;
 
                 // Kategoriya va mahsulotlarni qayta yuklash
-                await LoadCategoriesAsync();
-                await LoadProductsAsync();
                 await LoadSuppliesAsync(); // DataGrid ni yangilash
             }
             else
@@ -414,53 +432,16 @@ public partial class SuppliesPage : Page
         }
     }
 
-    //private async Task LoadProductsByCategoryIDAsync(long categoryId)
-    //{
-    //    try
-    //    {
-    //        // categoryId validligini tekshirish
-    //        if (categoryId <= 0)
-    //        {
-    //            MessageBox.Show("Noto‘g‘ri kategoriya ID.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-    //            return;
-    //        }
-
-    //        // API orqali kategoriya ma'lumotlarini olish
-    //        var response = await categoriesApi.GetByIdCategoryAsync(categoryId);
-    //        if (response.IsSuccessStatusCode && response.Content?.Data != null)
-    //        {
-    //            // CategoryDto dan Products ro‘yxatini olish
-    //            var category = response.Content.Data;
-    //            List<Product> products = category.Products?.ToList() ?? new List<Product>();
-
-    //            // cbxProduct ga ma'lumotlarni o‘rnatish
-    //            cbxProduct.ItemsSource = products;
-    //            cbxProduct.DisplayMemberPath = "Name";
-    //            cbxProduct.SelectedValuePath = "Id";
-
-    //            // Mahsulotlar ro‘yxati bo‘sh bo‘lsa
-    //            if (products.Count == 0)
-    //            {
-    //                MessageBox.Show("Mahsulotlar topilmadi.", "Ma'lumot", MessageBoxButton.OK, MessageBoxImage.Information);
-    //            }
-    //        }
-    //        else
-    //        {
-    //            // Xatolik xabari
-    //            MessageBox.Show($"Mahsulotlar olishda xatolik: {response.Error?.Message ?? "Ma'lumotlar yo‘q"}",
-    //                "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-    //        }
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        // Umumiy xatolikni log qilish va foydalanuvchiga ko‘rsatish
-    //        MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}", "Xatolik",
-    //            MessageBoxButton.OK, MessageBoxImage.Error);
-    //        System.Diagnostics.Debug.WriteLine($"Xato: {ex.Message}\nStackTrace: {ex.StackTrace}");
-    //    }
-    //}
     private async void cbxCategory_GotFocus(object sender, RoutedEventArgs e)
     {
         await LoadCategoriesAsync();
+        cbxCategory.IsDropDownOpen = true;
+        cbxProduct.ItemsSource = null;
+    }
+
+    private void cbxProduct_GotFocus(object sender, RoutedEventArgs e)
+    {
+        cbxProduct.IsDropDownOpen = true;
+
     }
 }

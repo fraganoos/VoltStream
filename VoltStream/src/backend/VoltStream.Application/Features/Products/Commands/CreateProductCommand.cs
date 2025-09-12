@@ -1,12 +1,12 @@
 ﻿namespace VoltStream.Application.Features.Products.Commands;
 
-using AutoMapper;
 using MediatR;
+using AutoMapper;
+using VoltStream.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
-using VoltStream.Domain.Entities;
 
 public record CreateProductCommand(string Name, long CategoryId) : IRequest<long>;
 
