@@ -168,7 +168,7 @@
             </Grid>
             <Grid Grid.Column="2">
                 <Border BorderBrush="Gray" BorderThickness="1" Margin="10">
-                    <Label Content="Maxsulot xaqida ma'lumotlar" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"/>
+                    <Label Content="Mahsulot haqida ma'lumotlar" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"/>
                 </Border>
             </Grid>
         </Grid>
@@ -187,7 +187,7 @@
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Maxsulot turi" Binding="{Binding CategoryName}" Width="1.5*">
+                <DataGridTextColumn Header="Mahsulot turi" Binding="{Binding CategoryName}" Width="1.5*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="Foreground" Value="Black"/>
@@ -200,7 +200,7 @@
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Maxsulot" Binding="{Binding ProductName}" Width="2*">
+                <DataGridTextColumn Header="Mahsulot" Binding="{Binding ProductName}" Width="2*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="Foreground" Value="Black"/>

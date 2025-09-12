@@ -31,7 +31,7 @@ public partial class SuppliesPage : Page
         suppliesApi = services.GetRequiredService<ISuppliesApi>();
         warehouseItemsApi = services.GetRequiredService<IWarehouseItemsApi>();
 
-        supplyDate.calendarPopup.Focus();
+        supplyDate.dateTextBox.Focus();
         // Sahifa yuklanganda kategoriyalarni chaqirish
         this.Loaded += SuppliesPage_Loaded;
     }
@@ -118,7 +118,6 @@ public partial class SuppliesPage : Page
         {
             MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}", "Xatolik",
                 MessageBoxButton.OK, MessageBoxImage.Error);
-            System.Diagnostics.Debug.WriteLine($"Xato: {ex.StackTrace}");
         }
     }
 
@@ -207,7 +206,6 @@ public partial class SuppliesPage : Page
                 {
                     MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}", "Xatolik",
                         MessageBoxButton.OK, MessageBoxImage.Error);
-                    System.Diagnostics.Debug.WriteLine($"Xato: {ex.StackTrace}");
                 }
 
                 cbxProduct.Focus();
@@ -404,7 +402,7 @@ public partial class SuppliesPage : Page
                     "Muvaffaqiyat", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Formani tozalash
-                supplyDate.SelectedDate = null;
+                supplyDate.dateTextBox = null;
                 cbxCategory.SelectedItem = null;
                 cbxCategory.Text = null;
                 cbxProduct.SelectedItem = null;
@@ -442,6 +440,5 @@ public partial class SuppliesPage : Page
     private void cbxProduct_GotFocus(object sender, RoutedEventArgs e)
     {
         cbxProduct.IsDropDownOpen = true;
-
     }
 }
