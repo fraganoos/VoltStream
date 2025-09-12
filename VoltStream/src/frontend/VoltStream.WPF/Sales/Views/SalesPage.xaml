@@ -149,13 +149,18 @@
                       Margin="4,3"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="5" Text="Narxi" 
-                       VerticalAlignment="Center" 
-                       Foreground="#b0b9c6" Margin="10,2"
-                       IsHitTestVisible="False" Panel.ZIndex="1"
-                       Visibility="{Binding ElementName=tbxPrice,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibility}}"/>
+                       Style="{StaticResource FloatingLabelStyle}"
+                       Tag="{Binding ElementName=tbxPrice}"
+                       IsHitTestVisible="False" Panel.ZIndex="1"/>
             <TextBox Grid.Column="5" x:Name="tbxPrice"
                       Margin="4,3"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+            <TextBlock Grid.Column="6" Text="Jami summa" 
+                       Style="{StaticResource FloatingLabelStyle}"
+                       Tag="{Binding ElementName=tbxTotalPrice}"
+                       IsHitTestVisible="False" Panel.ZIndex="1"/>
+            <TextBox Grid.Column="6" x:Name="tbxTotalPrice" Margin="2,3"
+                     FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
 
         </Grid>
     </Grid>
