@@ -329,6 +329,7 @@ public partial class SuppliesPage : Page
 
     private async void addSupplyBtn_Click(object sender, RoutedEventArgs e)
     {
+        addSupplyBtn.IsEnabled = false;
         try
         {
             // Kiritilgan ma'lumotlarni olish
@@ -402,7 +403,7 @@ public partial class SuppliesPage : Page
                     "Muvaffaqiyat", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Formani tozalash
-                supplyDate.dateTextBox = null;
+                supplyDate.dateTextBox.Text = string.Empty;
                 cbxCategory.SelectedItem = null;
                 cbxCategory.Text = null;
                 cbxProduct.SelectedItem = null;
@@ -427,6 +428,11 @@ public partial class SuppliesPage : Page
             MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}", "Xatolik",
                 MessageBoxButton.OK, MessageBoxImage.Error);
             System.Diagnostics.Debug.WriteLine($"Xato: {ex.StackTrace}");
+        }
+        finally
+        {
+            addSupplyBtn.IsEnabled = true;
+            supplyDate.dateTextBox.Focus();
         }
     }
 
