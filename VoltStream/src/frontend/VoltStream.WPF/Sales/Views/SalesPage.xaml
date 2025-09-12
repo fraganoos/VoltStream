@@ -165,7 +165,7 @@
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
             <TextBox Grid.Column="7" x:Name="tbxDiscount" Margin="4,3"
                      FontSize="14" utils:EnterKeyTab.IsEnabled="True"/> 
-<TextBlock Grid.Column="8" Text="Umumiy summa" 
+            <TextBlock Grid.Column="8" Text="Umumiy summa" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=tbxFinalPrice}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
