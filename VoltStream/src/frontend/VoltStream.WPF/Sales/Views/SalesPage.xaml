@@ -100,6 +100,9 @@
         </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="120"/>
+                <ColumnDefinition Width="*" MinWidth="120"/>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -109,42 +112,37 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="Maxsulot turi" 
-                       VerticalAlignment="Center" 
-                       Foreground="#b0b9c6" Margin="10,2"
-                       IsHitTestVisible="False" Panel.ZIndex="1"
-                       Visibility="{Binding ElementName=cbxCategory,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibility}}"/>
+                       Style="{StaticResource FloatingLabelStyle}"
+                       Tag="{Binding ElementName=cbxCategory}"
+                       IsHitTestVisible="False" Panel.ZIndex="1"/>
             <ComboBox Grid.Column="0" x:Name="cbxCategory"
                       IsEditable="True" Margin="4,3"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="1" Text="Maxsulot nomi" 
-                       VerticalAlignment="Center" 
-                       Foreground="#b0b9c6" Margin="10,2"
-                       IsHitTestVisible="False" Panel.ZIndex="1"
-                       Visibility="{Binding ElementName=cbxProduct,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibility}}"/>
+                       Style="{StaticResource FloatingLabelStyle}"
+                       Tag="{Binding ElementName=cbxProduct}"
+                       IsHitTestVisible="False" Panel.ZIndex="1"/>
             <ComboBox Grid.Column="1" x:Name="cbxProduct"
                       IsEditable="True" Margin="4,3"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="2" Text="Rulon metr" 
-                       VerticalAlignment="Center" 
-                       Foreground="#b0b9c6" Margin="10,2"
-                       IsHitTestVisible="False" Panel.ZIndex="1"
-                       Visibility="{Binding ElementName=tbxPerRollCount,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibility}}"/>
+                       Style="{StaticResource FloatingLabelStyle}"
+                       Tag="{Binding ElementName=tbxPerRollCount}"
+                       IsHitTestVisible="False" Panel.ZIndex="1"/>
             <TextBox Grid.Column="2" x:Name="tbxPerRollCount"
                       Margin="4,3"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="3" Text="Rulon soni" 
-                       VerticalAlignment="Center" 
-                       Foreground="#b0b9c6" Margin="10,2"
-                       IsHitTestVisible="False" Panel.ZIndex="1"
-                       Visibility="{Binding ElementName=tbxRollCount,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibility}}"/>
+                       Style="{StaticResource FloatingLabelStyle}"
+                       Tag="{Binding ElementName=tbxRollCount}"
+                       IsHitTestVisible="False" Panel.ZIndex="1"/>
             <TextBox Grid.Column="3" x:Name="tbxRollCount"
                       Margin="4,3"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="4" Text="Jami metr" 
-                       VerticalAlignment="Center" 
-                       Foreground="#b0b9c6" Margin="10,2"
-                       IsHitTestVisible="False" Panel.ZIndex="1"
-                       Visibility="{Binding ElementName=totalMeters,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibility}}"/>
+                       Style="{StaticResource FloatingLabelStyle}"
+                       Tag="{Binding ElementName=totalMeters}"
+                       IsHitTestVisible="False" Panel.ZIndex="1"/>
             <TextBox Grid.Column="4" x:Name="totalMeters"
                       Margin="4,3"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
@@ -161,7 +159,21 @@
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
             <TextBox Grid.Column="6" x:Name="tbxTotalPrice" Margin="2,3"
                      FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
-
+            <TextBlock Grid.Column="7" Text="Chegirma" 
+                       Style="{StaticResource FloatingLabelStyle}"
+                       Tag="{Binding ElementName=tbxDiscount}"
+                       IsHitTestVisible="False" Panel.ZIndex="1"/>
+            <TextBox Grid.Column="7" x:Name="tbxDiscount" Margin="4,3"
+                     FontSize="14" utils:EnterKeyTab.IsEnabled="True"/> 
+            <TextBlock Grid.Column="8" Text="Umumiy summa" 
+                       Style="{StaticResource FloatingLabelStyle}"
+                       Tag="{Binding ElementName=tbxFinalPrice}"
+                       IsHitTestVisible="False" Panel.ZIndex="1"/>
+            <TextBox Grid.Column="8" x:Name="tbxFinalPrice" Margin="4,3"
+                     FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+            <Button Grid.Column="9" x:Name="addButton" Content="Qo'shish"
+                    Margin="4,3"
+                    FontSize="14"/>
         </Grid>
     </Grid>
 </Page>

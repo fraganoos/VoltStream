@@ -403,7 +403,7 @@ public partial class SuppliesPage : Page
                     "Muvaffaqiyat", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Formani tozalash
-                supplyDate.dateTextBox.Text = string.Empty;
+                //supplyDate.dateTextBox.Text = string.Empty;
                 cbxCategory.SelectedItem = null;
                 cbxCategory.Text = null;
                 cbxProduct.SelectedItem = null;

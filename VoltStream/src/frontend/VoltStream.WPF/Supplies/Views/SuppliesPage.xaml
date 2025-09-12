@@ -68,7 +68,7 @@
                        Visibility="{Binding ElementName=cbxCategory,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibility}}"/>
                     <ComboBox x:Name="cbxCategory"
                               Grid.Column="0"  
-                              IsEditable="True" Margin="0,2,10,2"
+                              IsEditable="True" Margin="0,1,10,1"
                               DisplayMemberPath = "Name"
                               VerticalAlignment="Center"  
                               FontSize="14"
@@ -86,7 +86,7 @@
                               DisplayMemberPath = "Name"
                               VerticalAlignment="Center" 
                               FontSize="14"
-                              Margin="0,2,10,2"
+                              Margin="0,1,10,1"
                               GotFocus="cbxProduct_GotFocus"
                               utils:EnterKeyTab.IsEnabled="True"
                               LostFocus="cbxProduct_LostFocus"
