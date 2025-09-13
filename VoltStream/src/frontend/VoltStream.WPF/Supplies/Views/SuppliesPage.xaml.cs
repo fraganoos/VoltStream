@@ -1,14 +1,14 @@
 ﻿namespace VoltStream.WPF.Supplies.Views;
 
+using System.Windows;
+using System.Windows.Input;
+using ApiServices.Interfaces;
+using System.Threading.Tasks;
+using System.Windows.Controls;
 using ApiServices.DTOs.Products;
 using ApiServices.DTOs.Supplies;
-using ApiServices.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
 
 public partial class SuppliesPage : Page
 {
@@ -125,7 +125,7 @@ public partial class SuppliesPage : Page
     {
         if (e.Key == Key.Enter || e.Key == Key.Tab)
         {
-            // Agar element tanlangan bo'lsa, to'g'ridan-to'g'ri cbxProduct ga o'tamiz
+            //Agar element tanlangan bo'lsa, to'g'ridan-to'g'ri cbxProduct ga o'tamiz
             if (cbxCategory.SelectedItem != null)
             {
                 cbxProduct.Focus();
@@ -447,4 +447,41 @@ public partial class SuppliesPage : Page
     {
         cbxProduct.IsDropDownOpen = true;
     }
+
+    private void txtPrice_GotFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox tb)
+        {
+            tb.Dispatcher.BeginInvoke(new Action(tb.SelectAll));
+        }
+    }
+
+    private void txtPrice_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        var tb = sender as TextBox;
+        if (tb != null && !tb.IsKeyboardFocusWithin)
+        {
+            e.Handled = true;
+            tb.Focus();
+        }
+    }
+
+    private void tbxDiscountPercent_GotFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox tb)
+        {
+            tb.Dispatcher.BeginInvoke(new Action(tb.SelectAll));
+        }
+    }
+
+    private void tbxDiscountPercent_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        var tb = sender as TextBox;
+        if (tb != null && !tb.IsKeyboardFocusWithin)
+        {
+            e.Handled = true;
+            tb.Focus();
+        }
+    }
+
 }
