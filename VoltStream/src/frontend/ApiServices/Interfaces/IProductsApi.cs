@@ -20,4 +20,6 @@ public interface IProductsApi
 
     [Get("/api/products")]
     Task<ApiResponse<Response<List<Product>>>> GetAllProductsAsync();
+    [Get("/api/products/categoryId={Id}")]
+    Task<ApiResponse<Response<List<Product>>>> GetAllProductsByCategoryIdAsync(long id);
 }

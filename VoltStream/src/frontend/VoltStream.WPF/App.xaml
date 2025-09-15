@@ -7,6 +7,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Styles/ButtonStyles.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Styles/Colors.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Styles/FloatingLable.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
 

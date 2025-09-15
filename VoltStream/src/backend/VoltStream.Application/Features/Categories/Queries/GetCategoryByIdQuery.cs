@@ -19,7 +19,6 @@ public class GetCategoryByIdQueryHandler(
 {
     public async Task<CategoryDto> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
         => mapper.Map<CategoryDto>(await context.Categories
-            .Include(c => c.Products)
             .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken))
         ?? throw new NotFoundException(nameof(Category), nameof(request.Id), request.Id);
 }

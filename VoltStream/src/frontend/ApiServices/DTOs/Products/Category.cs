@@ -8,4 +8,5 @@ public class Category
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
+
 }

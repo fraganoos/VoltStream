@@ -1,5 +1,6 @@
 ﻿namespace VoltStream.Application.Features.Supplies.DTOs;
 
+using VoltStream.Application.Features.Categories.DTOs;
 using VoltStream.Application.Features.Products.DTOs;
 
 public record SupplyDTO
@@ -18,4 +19,6 @@ public record SupplyDTO
     public DateTimeOffset CreatedAt { get; set; }
 
     public ProductDTO Product { get; set; } = default!;
+    public CategoryDto Category { get; set; } = default!;
+
 }

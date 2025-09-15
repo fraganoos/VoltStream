@@ -17,7 +17,9 @@ public class GetAllWarehouseItemQueryHandler(
     : IRequestHandler<GetAllWarehouseItemQuery, List<WarehouseItemDTO>>
 {
     public async Task<List<WarehouseItemDTO>> Handle(GetAllWarehouseItemQuery request, CancellationToken cancellationToken)
-         => mapper.Map<List<WarehouseItemDTO>>(await context.WarehouseItems.ToListAsync(cancellationToken));
+         => mapper.Map<List<WarehouseItemDTO>>(await context.WarehouseItems
+             .Where(w => w.IsDeleted != true)
+             .ToListAsync(cancellationToken));
 
 }
 
