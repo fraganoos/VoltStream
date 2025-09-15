@@ -18,7 +18,7 @@ public record WarehouseItem
 
     [JsonPropertyName("price")]
     public decimal Price { get; set; }
-    
+
     [JsonPropertyName("discountPercent")]
     public decimal DiscountPercent { get; set; }
 

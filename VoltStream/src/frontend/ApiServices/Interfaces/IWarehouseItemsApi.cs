@@ -1,8 +1,8 @@
 ﻿namespace ApiServices.Interfaces;
 
-using Refit;
 using ApiServices.DTOs.Products;
 using ApiServices.DTOs.Supplies;
+using Refit;
 
 [Headers("accept: application/json")]
 public interface IWarehouseItemsApi

@@ -379,7 +379,7 @@ public partial class SuppliesPage : Page
             // Supply ob'ektini yaratish
             var supply = new Supply
             {
-                
+
                 OperationDate = supplyDate.SelectedDate.Value.ToUniversalTime(),
                 CategoryId = categoryId,
                 ProductId = productId,
