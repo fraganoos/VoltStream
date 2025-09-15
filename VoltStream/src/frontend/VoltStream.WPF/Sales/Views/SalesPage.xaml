@@ -39,18 +39,22 @@
                 </Grid.RowDefinitions>
                 <Label Grid.Row="0" Grid.Column="0" Content="Sana:" 
                        VerticalAlignment="Center"
-                       FontSize="14" Margin="10,0"/>
+                       FontSize="14" Margin="5,0,0,0"/>
                 <Label Grid.Row="1" Grid.Column="0" Content="Mijoz:" 
                        VerticalAlignment="Center" 
-                       FontSize="14" Margin="10,0"/>
+                       FontSize="14" Margin="5,0,0,0"/>
                 <Label Grid.Row="2" Grid.Column="0" Content="Val. turi:"
                        VerticalAlignment="Center" 
-                       FontSize="14" Margin="10,0"/>
-                <Label Grid.Row="3" Grid.Column="0" Content="Izox:"
+                       FontSize="14" Margin="5,0,0,0"/>
+                <Label Grid.Row="3" Grid.Column="0" Content="Chegirma:"
                           VerticalAlignment="Center" 
-                          FontSize="14" Margin="10,0"/>
+                          FontSize="14" Margin="5,0,0,0"/>
+                <Label Grid.Row="4" Grid.Column="0" Content="Izox:"
+                          VerticalAlignment="Center" 
+                          FontSize="14" Margin="5,0,0,0"/>
                 <Grid Grid.Row="0" Grid.Column="1">
-                    <controls:UserCalendar x:Name="supplyDate" 
+                    <controls:UserCalendar x:Name="supplyDate"
+                      SelectedDate="{Binding OperationDate}"
                       VerticalAlignment="Center" 
                       HorizontalAlignment="Left"
                       Width="150" FontSize="14"
@@ -58,8 +62,9 @@
                       utils:EnterKeyTab.IsEnabled="True"/>
                 </Grid>
                 <Grid Grid.Row="1" Grid.Column="1">
-                    <ComboBox x:Name="customerTextBox" 
-                             IsEditable="True" StaysOpenOnEdit="True"
+                    <ComboBox x:Name="CustomerName" 
+                             IsEditable="True"
+                             Text="{Binding CustomerName}"
                              VerticalAlignment="Center" 
                              HorizontalAlignment="Stretch"
                              FontSize="14" Margin="0,2,0,2"
@@ -71,8 +76,9 @@
                         <ColumnDefinition Width="90"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <ComboBox Grid.Column="0" x:Name="currencyComboBox" 
-                             IsEditable="True"
+                    <ComboBox Grid.Column="0" x:Name="CurrencyType" 
+                             Text="{Binding CurrencyType}"
+                              IsEditable="True"
                              VerticalAlignment="Center" 
                              HorizontalAlignment="Stretch"
                              FontSize="14"
@@ -82,7 +88,8 @@
                             VerticalAlignment="Center" 
                             HorizontalAlignment="Right" 
                             FontSize="14" />
-                    <TextBox Grid.Column="2" x:Name="totalSumm" 
+                    <TextBox Grid.Column="2" x:Name="TotalSum"
+                             Text="{Binding TotalSum}"
                              VerticalAlignment="Stretch" 
                              HorizontalAlignment="Stretch"
                              FontSize="14" Margin="0,2,0,2"
@@ -90,6 +97,42 @@
                              utils:EnterKeyTab.IsEnabled="True"/>
                 </Grid>
                 <Grid Grid.Row="3" Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="25"/>
+                        <ColumnDefinition Width="*" MaxWidth="90"/>
+                        <ColumnDefinition Width="1.2*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" x:Name="TotalDiscount"
+                             Text="{Binding TotalDiscount}"
+                             VerticalAlignment="Center" 
+                             HorizontalAlignment="Stretch"
+                             FontSize="14"
+                             utils:EnterKeyTab.IsEnabled="True"/>
+                    <Border Grid.Column="1" 
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch" 
+                            BorderThickness="0.5"
+                            Margin="2,4" BorderBrush="#888">
+                        <CheckBox x:Name="chkIsPercent" 
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="14" 
+                            utils:EnterKeyTab.IsEnabled="True"/>
+                    </Border>
+                    <Label Grid.Column="2" Content="To'lashga:"
+                           VerticalAlignment="Center" 
+                           HorizontalAlignment="Left" 
+                           FontSize="14" Margin="1,0,0,0"/>
+                    <TextBox Grid.Column="3" x:Name="finalSumm" 
+                             VerticalAlignment="Center" 
+                             HorizontalAlignment="Stretch"
+                             FontSize="14" Margin="0,2,0,2"
+                             IsReadOnly="True"
+                             utils:EnterKeyTab.IsEnabled="True"/>
+
+                </Grid>
+                <Grid Grid.Row="4" Grid.Column="1">
                     <TextBox x:Name="noteTextBox" 
                              VerticalAlignment="Center" 
                              HorizontalAlignment="Stretch"
@@ -100,13 +143,14 @@
         </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="120"/>
-                <ColumnDefinition Width="*" MinWidth="120"/>
+                <ColumnDefinition Width="1.5*" MinWidth="120"/>
+                <ColumnDefinition Width="1.8*" MinWidth="120"/>
+                <ColumnDefinition Width="*" MaxWidth="90"/>
+                <ColumnDefinition Width="*" MaxWidth="80"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*" MaxWidth="100"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*" MaxWidth="85"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -116,62 +160,69 @@
                        Tag="{Binding ElementName=cbxCategory}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
             <ComboBox Grid.Column="0" x:Name="cbxCategory"
-                      IsEditable="True" Margin="4,3"
+                      IsEditable="True" Margin="1,3"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="1" Text="Maxsulot nomi" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=cbxProduct}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
             <ComboBox Grid.Column="1" x:Name="cbxProduct"
-                      IsEditable="True" Margin="4,3"
+                      Text="{Binding productName, Mode=TwoWay}"
+                      IsEditable="True" Margin="1,3"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="2" Text="Rulon metr" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=tbxPerRollCount}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
-            <TextBox Grid.Column="2" x:Name="tbxPerRollCount"
-                      Margin="4,3"
+            <ComboBox Grid.Column="2" x:Name="tbxPerRollCount"
+                      Margin="2,3" IsEditable="True"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="3" Text="Rulon soni" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=tbxRollCount}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
             <TextBox Grid.Column="3" x:Name="tbxRollCount"
-                      Margin="4,3"
+                      Margin="1,3"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="4" Text="Jami metr" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=totalMeters}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
             <TextBox Grid.Column="4" x:Name="totalMeters"
-                      Margin="4,3"
+                      Margin="1,3"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="5" Text="Narxi" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=tbxPrice}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
             <TextBox Grid.Column="5" x:Name="tbxPrice"
-                      Margin="4,3"
+                      Margin="1,3"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="6" Text="Jami summa" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=tbxTotalPrice}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
-            <TextBox Grid.Column="6" x:Name="tbxTotalPrice" Margin="2,3"
+            <TextBox Grid.Column="6" x:Name="tbxTotalPrice" Margin="1,3"
                      FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
-            <TextBlock Grid.Column="7" Text="Chegirma" 
+            <TextBlock Grid.Column="7" Text="Chegirma%" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=tbxDiscount}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
-            <TextBox Grid.Column="7" x:Name="tbxDiscount" Margin="4,3"
-                     FontSize="14" utils:EnterKeyTab.IsEnabled="True"/> 
-            <TextBlock Grid.Column="8" Text="Umumiy summa" 
+            <TextBox Grid.Column="7" x:Name="tbxDiscount" Margin="1,3"
+                     FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+            <TextBlock Grid.Column="8" Text="Chegirma summasi" 
+                       Style="{StaticResource FloatingLabelStyle}"
+                       Tag="{Binding ElementName=tbxDiscountAmount}"
+                       IsHitTestVisible="False" Panel.ZIndex="1"/>
+            <TextBox Grid.Column="8" x:Name="tbxDiscountAmount" Margin="1,3"
+                        FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+            <TextBlock Grid.Column="9" Text="Umumiy summa" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=tbxFinalPrice}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
-            <TextBox Grid.Column="8" x:Name="tbxFinalPrice" Margin="4,3"
+            <TextBox Grid.Column="9" x:Name="tbxFinalPrice" Margin="1,3"
                      FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
-            <Button Grid.Column="9" x:Name="addButton" Content="Qo'shish"
+            <Button Grid.Column="10" x:Name="addButton" Content="Qo'shish"
                     Margin="4,3"
                     FontSize="14"/>
         </Grid>
