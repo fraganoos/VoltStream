@@ -26,4 +26,9 @@ public class SuppliesController : BaseController
     [HttpGet]
     public async Task<IActionResult> GetAll()
         => Ok(new Response { Data = await Mediator.Send(new GetAllSuppliesQuery()) });
+
+    [HttpGet("by-date")]
+    public async Task<IActionResult> GetAll([FromQuery] DateTimeOffset date)
+        => Ok(new Response { Data = await Mediator.Send(new GetAllSuppliesByDateQuery(date)) });
+
 }

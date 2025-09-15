@@ -1,14 +1,15 @@
 ﻿namespace VoltStream.WPF.Supplies.Views;
 
-using System.Windows;
-using System.Windows.Input;
-using ApiServices.Interfaces;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 using ApiServices.DTOs.Products;
 using ApiServices.DTOs.Supplies;
-using System.Collections.Generic;
+using ApiServices.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 public partial class SuppliesPage : Page
 {
@@ -32,13 +33,6 @@ public partial class SuppliesPage : Page
         warehouseItemsApi = services.GetRequiredService<IWarehouseItemsApi>();
 
         supplyDate.dateTextBox.Focus();
-        // Sahifa yuklanganda kategoriyalarni chaqirish
-        this.Loaded += SuppliesPage_Loaded;
-    }
-
-    private async void SuppliesPage_Loaded(object sender, RoutedEventArgs e)
-    {
-        await LoadSuppliesAsync(); // DataGrid ni dastlabki yuklash
     }
 
     private async Task LoadCategoriesAsync()
@@ -101,18 +95,21 @@ public partial class SuppliesPage : Page
     {
         try
         {
-            var response = await suppliesApi.GetAllSuppliesAsync();
-            if (response.IsSuccessStatusCode && response.Content?.Data != null)
-            {
-                // OperationDate bo‘yicha teskari tartibda (eng so‘nggi birinchi)
-                List<Supply> supplies = response.Content.Data.OrderByDescending(s => s.CreatedAt).ToList();
-                supplyDataGrid.ItemsSource = supplies;
-            }
-            else
-            {
-                MessageBox.Show($"Ta'minotlarni olishda xatolik: {response.Error?.Message ?? "Ma'lumotlar yo'q"}",
-                    "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            var operationDate = supplyDate.SelectedDate.Value;
+
+                var response = await suppliesApi.GetAllSuppliesByDateAsync(operationDate);
+                if (response.IsSuccessStatusCode && response.Content?.Data != null)
+                {
+                    // OperationDate bo‘yicha teskari tartibda (eng so‘nggi birinchi)
+                    List<Supply> supplies = response.Content.Data.OrderByDescending(s => s.CreatedAt).ToList();
+                    supplyDataGrid.ItemsSource = supplies;
+                }
+                else
+                {
+                    MessageBox.Show($"Ta'minotlarni olishda xatolik: {response.Error?.Message ?? "Ma'lumotlar yo'q"}",
+                        "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            
         }
         catch (Exception ex)
         {
@@ -399,11 +396,8 @@ public partial class SuppliesPage : Page
 
             if (response.IsSuccessStatusCode && response.Content != null)
             {
-                MessageBox.Show($"Ta'minot muvaffaqiyatli qo‘shildi!",
-                    "Muvaffaqiyat", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Formani tozalash
-                //supplyDate.dateTextBox.Text = string.Empty;
                 cbxCategory.SelectedItem = null;
                 cbxCategory.Text = null;
                 cbxProduct.SelectedItem = null;
@@ -415,7 +409,7 @@ public partial class SuppliesPage : Page
                 tbxDiscountPercent.Text = string.Empty;
 
                 // Kategoriya va mahsulotlarni qayta yuklash
-                await LoadSuppliesAsync(); // DataGrid ni yangilash
+                await LoadSuppliesAsync();
             }
             else
             {
@@ -484,4 +478,8 @@ public partial class SuppliesPage : Page
         }
     }
 
+    private async void supplyDate_LostFocus(object sender, RoutedEventArgs e)
+    {
+        await LoadSuppliesAsync();
+    }
 }
