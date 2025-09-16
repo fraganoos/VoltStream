@@ -23,5 +23,6 @@
         public decimal? PerDiscount { get; set; } // chegirma
         public decimal? Discount { get; set; } // chegirma summasi
         public decimal? FinalSumProduct { get; set; } // chegirmadan keyingi narxi
+        public List<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
     }
 }
