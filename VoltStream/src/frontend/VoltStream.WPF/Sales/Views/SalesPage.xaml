@@ -171,7 +171,6 @@
             <ComboBox Grid.Column="0" x:Name="cbxCategoryName"
                       Text="{Binding CategoryName}"
                       IsEditable="True" Margin="1,3"
-                      GotFocus="cbxCategoryName_GotFocus"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="1" Text="Maxsulot nomi" 
                        Style="{StaticResource FloatingLabelStyle}"
@@ -180,7 +179,6 @@
             <ComboBox Grid.Column="1" x:Name="cbxProductName"
                       Text="{Binding ProductName}"
                       IsEditable="True" Margin="1,3"
-                        GotFocus="cbxPoductName_GotFocus"
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="2" Text="Rulon metr" 
                        Style="{StaticResource FloatingLabelStyle}"
