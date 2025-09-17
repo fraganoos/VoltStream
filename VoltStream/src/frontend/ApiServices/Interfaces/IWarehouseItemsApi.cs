@@ -10,6 +10,6 @@ public interface IWarehouseItemsApi
 {
     [Get("/api/warehouse-items")]
     Task<ApiResponse<Response<List<WarehouseItem>>>> GetAllWarehouseItemsAsync();
-    [Get("/api/warehouse-items/{id}")]
-    Task<ApiResponse<List<WarehouseItem>>> GetProductDitailsFromWarehouseAsync(long id);
+    [Get("/api/warehouse-items/productId={id}")]
+    Task<ApiResponse<Response<List<WarehouseItem>>>> GetProductDetailsFromWarehouseAsync(long id);
 }

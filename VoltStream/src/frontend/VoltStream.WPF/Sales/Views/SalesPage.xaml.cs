@@ -32,12 +32,67 @@ namespace VoltStream.WPF.Sales.Views
             productsApi = services.GetRequiredService<IProductsApi>();
             warehouseItemsApi = services.GetRequiredService<IWarehouseItemsApi>();
 
-            cbxProductName.PreviewLostKeyboardFocus += cbxProductName_PreviewLostKeyboardFocus;
+            CustomerName.GotFocus += CustomerName_GotFocus;
+            cbxCategoryName.GotFocus += cbxCategoryName_GotFocus;
             cbxCategoryName.PreviewLostKeyboardFocus += CbxCategoryName_PreviewLostKeyboardFocus;
-            cbxPerRollCount.PreviewLostKeyboardFocus += CbxPerRollCount_PreviewLostKeyboardFocus;
+
+            cbxProductName.GotFocus += cbxProductName_GotFocus;
             cbxProductName.SelectionChanged += CbxProductName_SelectionChanged;
+            cbxProductName.PreviewLostKeyboardFocus += cbxProductName_PreviewLostKeyboardFocus;
+            cbxProductName.LostFocus += cbxProductName_LostFocus;
+
+            cbxPerRollCount.GotFocus += cbxPerRollCount_GotFocus;
+            cbxPerRollCount.SelectionChanged += cbxPerRollCount_SelectionChanged;
+            cbxPerRollCount.PreviewLostKeyboardFocus += CbxPerRollCount_PreviewLostKeyboardFocus;
         }
 
+        private void cbxPerRollCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbxPerRollCount.SelectedItem is WarehouseItem selectedWarehouseItem)
+            {
+                // Rulon tanlanganda, uning narxi, chegirmasi o'zgartiramiz
+                tbxPrice.Text = selectedWarehouseItem.Price.ToString();
+                tbxPerDiscount.Text = selectedWarehouseItem.DiscountPercent.ToString();
+            }
+        }
+
+        private async void CustomerName_GotFocus(object sender, RoutedEventArgs e) /// API Qilish kerak
+        {
+            //await LoadCustomerNameAsync();
+        }
+
+        private async Task LoadCustomerNameAsync()
+        {
+            try { 
+                // Сохраняем текущее выбранное значение
+                var selectedValue = CustomerName.SelectedValue;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred: " + ex.Message);
+            }
+        }
+
+        private async void cbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
+        {
+            await LoadCategoryAsync();
+            cbxCategoryName.IsDropDownOpen = true;
+        }
+        private void CbxCategoryName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot turi");
+        }
+
+        private async void cbxProductName_GotFocus(object sender, RoutedEventArgs e)
+        {
+            long? categoryId = null;
+            if (cbxCategoryName.SelectedValue != null)
+            {
+                categoryId = (long)cbxCategoryName.SelectedValue;
+            }
+            await LoadProductAsync(categoryId);
+            cbxProductName.IsDropDownOpen = true;
+        }
         private void CbxProductName_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (cbxProductName.SelectedItem is Product selectedProduct)
@@ -49,39 +104,29 @@ namespace VoltStream.WPF.Sales.Views
                 //    .FirstOrDefault(c => c.Id == selectedProduct.CategoryId)?.Name ?? string.Empty;
             }
         }
-
-        private void CbxPerRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-        {
-            ComboBoxHelper.BeforeUpdate(sender, e, "Rulon uzunlugi", true);
-        }
-
-        private void CbxCategoryName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-        {
-            ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot turi");
-        }
-
         private void cbxProductName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot");
         }
-
-        private async void cbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
+        private async void cbxProductName_LostFocus(object sender, RoutedEventArgs e)
         {
-            await LoadCategoryAsync();
-            cbxCategoryName.IsDropDownOpen = true;
-
-        }
-
-        private async void cbxPoductName_GotFocus(object sender, RoutedEventArgs e)
-        {
-            long? categoryId = null;
-            if (cbxCategoryName.SelectedValue != null)
+            long? productId = null;
+            if (cbxProductName.SelectedValue != null)
             {
-                categoryId = (long)cbxCategoryName.SelectedValue;
+                productId = (long)cbxProductName.SelectedValue;
             }
-            await LoadProductAsync(categoryId);
-            cbxProductName.IsDropDownOpen = true;
+            await LoadWarehouseItemsAsync(productId);
         }
+
+        private void cbxPerRollCount_GotFocus(object sender, RoutedEventArgs e)
+        {
+            cbxPerRollCount.IsDropDownOpen = true;
+        }
+        private void CbxPerRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            ComboBoxHelper.BeforeUpdate(sender, e, "Rulon uzunlugi");
+        }
+
 
         private async Task LoadCategoryAsync() // Загрузка категорий
         {
@@ -154,5 +199,45 @@ namespace VoltStream.WPF.Sales.Views
             }
         }
 
+        private async Task LoadWarehouseItemsAsync(long? productId) // Загрузка данных со склада по productId
+        {
+            try
+            {
+                // Сохраняем текущее выбранное значение
+                var selectedValue = cbxPerRollCount.SelectedValue;
+                ApiResponse<Response<List<WarehouseItem>>> response;
+                if (productId.HasValue && productId.Value != 0)
+                {
+                    response = await warehouseItemsApi.GetProductDetailsFromWarehouseAsync(productId.Value);
+                }
+                else
+                {
+                    // Если productId не задан, можно либо не загружать данные, либо загрузить все элементы склада
+                    // Здесь я выбрал не загружать ничего
+                    cbxPerRollCount.ItemsSource = null;
+                    return;
+                }
+                if (response.IsSuccessStatusCode && response.Content?.Data != null)
+                {
+                    var warehouseItems = response.Content.Data;
+                    cbxPerRollCount.ItemsSource = warehouseItems;
+                    cbxPerRollCount.DisplayMemberPath = "QuantityPerRoll";
+                    cbxPerRollCount.SelectedValuePath = "QuantityPerRoll";
+                    // Восстанавливаем выбранное значение
+                    if (selectedValue != null)
+                        cbxPerRollCount.SelectedValue = selectedValue;
+                }
+                else
+                {
+                    var errorMsg = response.Error?.Message ?? "Unknown error";
+                    MessageBox.Show("Ошибка при получении данных со склада: " + errorMsg);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Произошла ошибка: " + ex.Message);
+            }
+        }
     }
 }
+

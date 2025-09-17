@@ -81,11 +81,15 @@ public static class ComboBoxHelper
                     comboBox.Text = "";
                     comboBox.SelectedItem = null;
                     e.Handled = true;
+                    comboBox.IsDropDownOpen = true;
                     return;
                 }
             }
+            comboBox.Text = "";
+            comboBox.SelectedItem = null;
             e.Handled = true;
             MessageBox.Show($"{inputText} - {strInfo}: ro'yxatda yo'q.", "Tekshiruv");
+            comboBox.IsDropDownOpen = true;
         }
     }
 }

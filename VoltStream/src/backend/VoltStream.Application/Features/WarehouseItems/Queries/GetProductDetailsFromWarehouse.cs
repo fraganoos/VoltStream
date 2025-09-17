@@ -11,12 +11,12 @@ using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Warehouses.DTOs;
 using VoltStream.Domain.Entities;
 
-public record GetProductDitailsFromWarehouse(long id): IRequest<List<WarehouseItemDTO>>;
-internal class GetProductDitailsFromWarehouseHandler(
+public record GetProductDetailsFromWarehouse(long id): IRequest<List<WarehouseItemDTO>>;
+internal class GetProductDetailsFromWarehouseHandler(
     IAppDbContext context, IMapper mapper
-    ) : IRequestHandler<GetProductDitailsFromWarehouse, List<WarehouseItemDTO>>
+    ) : IRequestHandler<GetProductDetailsFromWarehouse, List<WarehouseItemDTO>>
 {
-    public async Task<List<WarehouseItemDTO>> Handle(GetProductDitailsFromWarehouse request, CancellationToken cancellationToken)
+    public async Task<List<WarehouseItemDTO>> Handle(GetProductDetailsFromWarehouse request, CancellationToken cancellationToken)
     {
         return mapper.Map<List<WarehouseItemDTO>>(await context.WarehouseItems
                  .Where(w => !w.IsDeleted && w.ProductId == request.id)
