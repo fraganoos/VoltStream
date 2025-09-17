@@ -1,11 +1,12 @@
 ﻿using ApiServices.DTOs.Products;
+using ApiServices.DTOs.Supplies;
 using ApiServices.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using VoltStream.WPF.Commons.Utils;
+using VoltStream.WPF.Commons;
 using VoltStream.WPF.Sales.Models;
 
 namespace VoltStream.WPF.Sales.Views
@@ -18,6 +19,7 @@ namespace VoltStream.WPF.Sales.Views
         private readonly IServiceProvider services;
         private readonly ICategoriesApi categoriesApi;
         private readonly IProductsApi productsApi;
+        private readonly IWarehouseItemsApi warehouseItemsApi;
 
         public Sale _sale = new Sale();
 
@@ -28,33 +30,39 @@ namespace VoltStream.WPF.Sales.Views
             DataContext = _sale;
             categoriesApi = services.GetRequiredService<ICategoriesApi>();
             productsApi = services.GetRequiredService<IProductsApi>();
+            warehouseItemsApi = services.GetRequiredService<IWarehouseItemsApi>();
+
             cbxProductName.PreviewLostKeyboardFocus += cbxProductName_PreviewLostKeyboardFocus;
             cbxCategoryName.PreviewLostKeyboardFocus += CbxCategoryName_PreviewLostKeyboardFocus;
             cbxPerRollCount.PreviewLostKeyboardFocus += CbxPerRollCount_PreviewLostKeyboardFocus;
-            cbxCategoryName.SelectionChanged += CbxCategoryName_SelectionChanged;
+            cbxProductName.SelectionChanged += CbxProductName_SelectionChanged;
         }
 
-        private void CbxCategoryName_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void CbxProductName_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cbxCategoryName.SelectedItem != null)
+            if (cbxProductName.SelectedItem is Product selectedProduct)
             {
-                //cbxProductName.Focus();
+                // maxsulot tanlanganda, uning categoryId sini ham olamiz va cbxCategoryName dagini o'zgartiramiz
+                cbxCategoryName.SelectedValue = selectedProduct.CategoryId;
+                //_sale.CategoryId = selectedProduct.CategoryId;
+                //_sale.CategoryName = (cbxCategoryName.ItemsSource as IEnumerable<Category>)?
+                //    .FirstOrDefault(c => c.Id == selectedProduct.CategoryId)?.Name ?? string.Empty;
             }
         }
 
         private void CbxPerRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            ComboBox_BeforeUpdate(sender, e, "Rulon uzunlugi", true);
+            ComboBoxHelper.BeforeUpdate(sender, e, "Rulon uzunlugi", true);
         }
 
         private void CbxCategoryName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            ComboBox_BeforeUpdate(sender, e, "Maxsulot turi");
+            ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot turi");
         }
 
         private void cbxProductName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            ComboBox_BeforeUpdate(sender, e, "Maxsulot");
+            ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot");
         }
 
         private async void cbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
@@ -143,84 +151,6 @@ namespace VoltStream.WPF.Sales.Views
             catch (Exception ex)
             {
                 MessageBox.Show("Произошла ошибка: " + ex.Message);
-            }
-        }
-
-
-        private void ComboBox_BeforeUpdate(object sender, KeyboardFocusChangedEventArgs e, string? strInfo, bool allow = false) // ComboBox лар учун Универсал обработчик для, ItemsSource билан солиштиради
-        {
-            var comboBox = sender as ComboBox;
-            if (comboBox == null) return;
-            var inputText = comboBox.Text?.Trim();
-            if (string.IsNullOrEmpty(inputText)) return;
-
-            // Определяем тип элементов в ItemsSource
-            var items = comboBox.ItemsSource;
-            if (items == null)
-            {
-                if (allow)
-                {
-                    var result = MessageBox.Show($"{inputText} - {strInfo}: ro'yxatda yo'q. Yangi {strInfo} qo'shilsinmi?",
-                        "Tekshiruv", MessageBoxButton.YesNo);
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        return; // Yangi element qo'shishga ruxsat beriladi
-                    }
-                    else
-                    {
-                        comboBox.Text = ""; // Matnni tozalash
-                        comboBox.SelectedItem = null; // Tanlangan elementni tozalash
-                        e.Handled = true;
-                        return;
-                    }
-                }
-                e.Handled = true;
-                MessageBox.Show($"{strInfo} - Ro'yxati bo'sh.", "Tekshiruv");
-                return;
-            }
-
-            // Получаем свойство для сравнения (DisplayMemberPath)
-            var displayMember = comboBox.DisplayMemberPath;
-            bool found = false;
-
-            foreach (var item in items)
-            {
-                string value = item?.ToString() ?? "";
-                if (!string.IsNullOrEmpty(displayMember))
-                {
-                    var prop = item.GetType().GetProperty(displayMember);
-                    if (prop != null)
-                    {
-                        value = prop.GetValue(item)?.ToString() ?? "";
-                    }
-                }
-                if (string.Equals(value, inputText, StringComparison.OrdinalIgnoreCase))
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                if (allow)
-                {
-                    var result = MessageBox.Show($"{inputText} - {strInfo}: ro'yxatda yo'q. Yangi {strInfo} qo'shilsinmi?",
-                        "Tekshiruv", MessageBoxButton.YesNo);
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        return; // Yangi element qo'shishga ruxsat beriladi
-                    }
-                    else
-                    {
-                        comboBox.Text = ""; // Matnni tozalash
-                        comboBox.SelectedItem = null; // Tanlangan elementni tozalash
-                        e.Handled = true;
-                        return;
-                    }
-                }
-                e.Handled = true;
-                MessageBox.Show($"{inputText} - {strInfo}: ro'yxatda yo'q.", "Tekshiruv");
             }
         }
 
