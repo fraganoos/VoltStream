@@ -5,6 +5,7 @@ using Refit;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using VoltStream.WPF.Commons.Utils;
 using VoltStream.WPF.Sales.Models;
 
 namespace VoltStream.WPF.Sales.Views
@@ -29,35 +30,31 @@ namespace VoltStream.WPF.Sales.Views
             productsApi = services.GetRequiredService<IProductsApi>();
             cbxProductName.PreviewLostKeyboardFocus += cbxProductName_PreviewLostKeyboardFocus;
             cbxCategoryName.PreviewLostKeyboardFocus += CbxCategoryName_PreviewLostKeyboardFocus;
+            cbxPerRollCount.PreviewLostKeyboardFocus += CbxPerRollCount_PreviewLostKeyboardFocus;
+            cbxCategoryName.SelectionChanged += CbxCategoryName_SelectionChanged;
+        }
 
+        private void CbxCategoryName_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbxCategoryName.SelectedItem != null)
+            {
+                //cbxProductName.Focus();
+            }
+        }
+
+        private void CbxPerRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            ComboBox_BeforeUpdate(sender, e, "Rulon uzunlugi", true);
         }
 
         private void CbxCategoryName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            ComboBox_PreviewLostKeyboardFocus(sender, e, "Maxsulot turi");
+            ComboBox_BeforeUpdate(sender, e, "Maxsulot turi");
         }
 
         private void cbxProductName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            var comboBox = sender as ComboBox;
-            if (comboBox == null) return;
-            var inputText = comboBox.Text?.Trim();
-            if (string.IsNullOrEmpty(inputText)) return;
-
-            var products = comboBox.ItemsSource as IEnumerable<Product>;
-            if (products == null || !products.Any())
-            {
-                e.Handled = true; // отменяем потерю фокуса
-                MessageBox.Show("Список продукции пуст.");
-                return;
-            }
-
-            bool found = products.Any(p => string.Equals(p.Name, inputText, StringComparison.OrdinalIgnoreCase));
-            if (!found)
-            {
-                e.Handled = true; // отменяем потерю фокуса
-                MessageBox.Show("Продукция не найдена в списке");
-            }
+            ComboBox_BeforeUpdate(sender, e, "Maxsulot");
         }
 
         private async void cbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
@@ -66,6 +63,7 @@ namespace VoltStream.WPF.Sales.Views
             cbxCategoryName.IsDropDownOpen = true;
 
         }
+
         private async void cbxPoductName_GotFocus(object sender, RoutedEventArgs e)
         {
             long? categoryId = null;
@@ -147,9 +145,9 @@ namespace VoltStream.WPF.Sales.Views
                 MessageBox.Show("Произошла ошибка: " + ex.Message);
             }
         }
-        
-        
-        private void ComboBox_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e, string? strInfo) // ComboBox лар учун Универсал обработчик для, ItemsSource билан солиштиради
+
+
+        private void ComboBox_BeforeUpdate(object sender, KeyboardFocusChangedEventArgs e, string? strInfo, bool allow = false) // ComboBox лар учун Универсал обработчик для, ItemsSource билан солиштиради
         {
             var comboBox = sender as ComboBox;
             if (comboBox == null) return;
@@ -160,8 +158,24 @@ namespace VoltStream.WPF.Sales.Views
             var items = comboBox.ItemsSource;
             if (items == null)
             {
+                if (allow)
+                {
+                    var result = MessageBox.Show($"{inputText} - {strInfo}: ro'yxatda yo'q. Yangi {strInfo} qo'shilsinmi?",
+                        "Tekshiruv", MessageBoxButton.YesNo);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        return; // Yangi element qo'shishga ruxsat beriladi
+                    }
+                    else
+                    {
+                        comboBox.Text = ""; // Matnni tozalash
+                        comboBox.SelectedItem = null; // Tanlangan elementni tozalash
+                        e.Handled = true;
+                        return;
+                    }
+                }
                 e.Handled = true;
-                MessageBox.Show($"{strInfo} - Ro'yxati bo'sh.","Tekshiruv");
+                MessageBox.Show($"{strInfo} - Ro'yxati bo'sh.", "Tekshiruv");
                 return;
             }
 
@@ -189,10 +203,26 @@ namespace VoltStream.WPF.Sales.Views
 
             if (!found)
             {
+                if (allow)
+                {
+                    var result = MessageBox.Show($"{inputText} - {strInfo}: ro'yxatda yo'q. Yangi {strInfo} qo'shilsinmi?",
+                        "Tekshiruv", MessageBoxButton.YesNo);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        return; // Yangi element qo'shishga ruxsat beriladi
+                    }
+                    else
+                    {
+                        comboBox.Text = ""; // Matnni tozalash
+                        comboBox.SelectedItem = null; // Tanlangan elementni tozalash
+                        e.Handled = true;
+                        return;
+                    }
+                }
                 e.Handled = true;
                 MessageBox.Show($"{inputText} - {strInfo}: ro'yxatda yo'q.", "Tekshiruv");
             }
         }
-        
+
     }
 }
