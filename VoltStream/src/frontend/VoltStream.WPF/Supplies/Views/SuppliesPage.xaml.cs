@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using VoltStream.WPF.Commons.Services;
 
 public partial class SuppliesPage : Page
 {
@@ -329,111 +330,114 @@ public partial class SuppliesPage : Page
 
     private async void addSupplyBtn_Click(object sender, RoutedEventArgs e)
     {
-        addSupplyBtn.IsEnabled = false;
-        try
-        {
-            // Kiritilgan ma'lumotlarni olish
-            if (supplyDate.SelectedDate == null)
-            {
-                MessageBox.Show("Sana tanlanmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-                supplyDate.Focus();
-                return;
-            }
-
-            if (!decimal.TryParse(tbxPerRollCount.Text, out decimal perRollCount) || perRollCount <= 0)
-            {
-                MessageBox.Show("Rulon metr noto‘g‘ri kiritilgan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-                tbxPerRollCount.Focus();
-                return;
-            }
-
-            if (!decimal.TryParse(tbxRollCount.Text, out decimal rollCount) || rollCount <= 0)
-            {
-                MessageBox.Show("Rulon soni noto‘g‘ri kiritilgan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-                tbxRollCount.Focus();
-                return;
-            }
-
-            if (!decimal.TryParse(txtPrice.Text, out decimal price) || price < 0)
-            {
-                MessageBox.Show("Narx noto‘g‘ri kiritilgan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-                txtPrice.Focus();
-                return;
-            }
-
-            // Chegirma foizini olish (ixtiyoriy)
-            if (!decimal.TryParse(tbxDiscountPercent.Text, out decimal discountPercent) || discountPercent < 0)
-            {
-                MessageBox.Show("Chegirma foizi noto‘g‘ri kiritilgan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-                tbxDiscountPercent.Focus();
-                return;
-            }
-
-            // Jami metrni hisoblash
-            decimal totalQuantity = perRollCount * rollCount;
-
-            // CategoryId va ProductId ni olish, null bo‘lsa 0 qo‘yiladi
-            long categoryId = cbxCategory.SelectedValue != null ? Convert.ToInt64(cbxCategory.SelectedValue) : 0;
-            long productId = cbxProduct.SelectedValue != null ? Convert.ToInt64(cbxProduct.SelectedValue) : 0;
-
-            // Supply ob'ektini yaratish
-            var supply = new Supply
-            {
-
-                OperationDate = supplyDate.SelectedDate.Value.ToUniversalTime(),
-                CategoryId = categoryId,
-                ProductId = productId,
-                CountRoll = rollCount,
-                QuantityPerRoll = perRollCount,
-                TotalQuantity = totalQuantity,
-                ProductName = ((Product)cbxProduct.SelectedItem)?.Name ?? cbxProduct.Text ?? string.Empty,
-                CategoryName = ((Category)cbxCategory.SelectedItem)?.Name ?? cbxCategory.Text ?? string.Empty,
-                Price = price,
-                DiscountPercent = discountPercent
-            };
+        NotificationService.Show("dskjhfgl skdfj hgslkdfjhgk lsdfhgklsdhfgkl jjhsdklgfsdkjfhsd kljf");
 
 
-            // API orqali ta'minotni saqlash
-            var response = await suppliesApi.CreateSupplyAsync(supply);
-            System.Diagnostics.Debug.WriteLine($"API javobi: StatusCode={response.StatusCode}, ContentId={response.Content?.Id}, Error={response.Error?.Message}");
+        //addSupplyBtn.IsEnabled = false;
+        //try
+        //{
+        //    // Kiritilgan ma'lumotlarni olish
+        //    if (supplyDate.SelectedDate == null)
+        //    {
+        //        MessageBox.Show("Sana tanlanmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+        //        supplyDate.Focus();
+        //        return;
+        //    }
 
-            if (response.IsSuccessStatusCode && response.Content != null)
-            {
-                MessageBox.Show($"Ta'minot muvaffaqiyatli qo‘shildi!",
-                    "Muvaffaqiyat", MessageBoxButton.OK, MessageBoxImage.Information);
+        //    if (!decimal.TryParse(tbxPerRollCount.Text, out decimal perRollCount) || perRollCount <= 0)
+        //    {
+        //        MessageBox.Show("Rulon metr noto‘g‘ri kiritilgan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+        //        tbxPerRollCount.Focus();
+        //        return;
+        //    }
 
-                // Formani tozalash
-                //supplyDate.dateTextBox.Text = string.Empty;
-                cbxCategory.SelectedItem = null;
-                cbxCategory.Text = null;
-                cbxProduct.SelectedItem = null;
-                cbxProduct.Text = null;
-                tbxPerRollCount.Text = string.Empty;
-                tbxRollCount.Text = string.Empty;
-                totalMeters.Text = string.Empty;
-                txtPrice.Text = string.Empty;
-                tbxDiscountPercent.Text = string.Empty;
+        //    if (!decimal.TryParse(tbxRollCount.Text, out decimal rollCount) || rollCount <= 0)
+        //    {
+        //        MessageBox.Show("Rulon soni noto‘g‘ri kiritilgan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+        //        tbxRollCount.Focus();
+        //        return;
+        //    }
 
-                // Kategoriya va mahsulotlarni qayta yuklash
-                await LoadSuppliesAsync(); // DataGrid ni yangilash
-            }
-            else
-            {
-                MessageBox.Show($"Ta'minot qo‘shishda xatolik: {response.Error?.Message ?? "Ma'lumotlar yo‘q"}",
-                    "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}", "Xatolik",
-                MessageBoxButton.OK, MessageBoxImage.Error);
-            System.Diagnostics.Debug.WriteLine($"Xato: {ex.StackTrace}");
-        }
-        finally
-        {
-            addSupplyBtn.IsEnabled = true;
-            supplyDate.dateTextBox.Focus();
-        }
+        //    if (!decimal.TryParse(txtPrice.Text, out decimal price) || price < 0)
+        //    {
+        //        MessageBox.Show("Narx noto‘g‘ri kiritilgan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+        //        txtPrice.Focus();
+        //        return;
+        //    }
+
+        //    // Chegirma foizini olish (ixtiyoriy)
+        //    if (!decimal.TryParse(tbxDiscountPercent.Text, out decimal discountPercent) || discountPercent < 0)
+        //    {
+        //        MessageBox.Show("Chegirma foizi noto‘g‘ri kiritilgan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+        //        tbxDiscountPercent.Focus();
+        //        return;
+        //    }
+
+        //    // Jami metrni hisoblash
+        //    decimal totalQuantity = perRollCount * rollCount;
+
+        //    // CategoryId va ProductId ni olish, null bo‘lsa 0 qo‘yiladi
+        //    long categoryId = cbxCategory.SelectedValue != null ? Convert.ToInt64(cbxCategory.SelectedValue) : 0;
+        //    long productId = cbxProduct.SelectedValue != null ? Convert.ToInt64(cbxProduct.SelectedValue) : 0;
+
+        //    // Supply ob'ektini yaratish
+        //    var supply = new Supply
+        //    {
+
+        //        OperationDate = supplyDate.SelectedDate.Value.ToUniversalTime(),
+        //        CategoryId = categoryId,
+        //        ProductId = productId,
+        //        CountRoll = rollCount,
+        //        QuantityPerRoll = perRollCount,
+        //        TotalQuantity = totalQuantity,
+        //        ProductName = ((Product)cbxProduct.SelectedItem)?.Name ?? cbxProduct.Text ?? string.Empty,
+        //        CategoryName = ((Category)cbxCategory.SelectedItem)?.Name ?? cbxCategory.Text ?? string.Empty,
+        //        Price = price,
+        //        DiscountPercent = discountPercent
+        //    };
+
+
+        //    // API orqali ta'minotni saqlash
+        //    var response = await suppliesApi.CreateSupplyAsync(supply);
+        //    System.Diagnostics.Debug.WriteLine($"API javobi: StatusCode={response.StatusCode}, ContentId={response.Content?.Id}, Error={response.Error?.Message}");
+
+        //    if (response.IsSuccessStatusCode && response.Content != null)
+        //    {
+        //        MessageBox.Show($"Ta'minot muvaffaqiyatli qo‘shildi!",
+        //            "Muvaffaqiyat", MessageBoxButton.OK, MessageBoxImage.Information);
+
+        //        // Formani tozalash
+        //        //supplyDate.dateTextBox.Text = string.Empty;
+        //        cbxCategory.SelectedItem = null;
+        //        cbxCategory.Text = null;
+        //        cbxProduct.SelectedItem = null;
+        //        cbxProduct.Text = null;
+        //        tbxPerRollCount.Text = string.Empty;
+        //        tbxRollCount.Text = string.Empty;
+        //        totalMeters.Text = string.Empty;
+        //        txtPrice.Text = string.Empty;
+        //        tbxDiscountPercent.Text = string.Empty;
+
+        //        // Kategoriya va mahsulotlarni qayta yuklash
+        //        await LoadSuppliesAsync(); // DataGrid ni yangilash
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show($"Ta'minot qo‘shishda xatolik: {response.Error?.Message ?? "Ma'lumotlar yo‘q"}",
+        //            "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+        //    }
+        //}
+        //catch (Exception ex)
+        //{
+        //    MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}", "Xatolik",
+        //        MessageBoxButton.OK, MessageBoxImage.Error);
+        //    System.Diagnostics.Debug.WriteLine($"Xato: {ex.StackTrace}");
+        //}
+        //finally
+        //{
+        //    addSupplyBtn.IsEnabled = true;
+        //    supplyDate.dateTextBox.Focus();
+        //}
     }
 
     private async void cbxCategory_GotFocus(object sender, RoutedEventArgs e)
