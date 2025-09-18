@@ -2,6 +2,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Models;
 
 public static class FilteringExtensions
@@ -9,40 +10,26 @@ public static class FilteringExtensions
     public static IQueryable<T> AsFilterable<T>(this IQueryable<T> query, FilteringRequest request)
     {
         var param = Expression.Parameter(typeof(T), "x");
+        var props = typeof(T).GetProperties();
 
         foreach (var entry in request.Filters ?? [])
         {
-            var prop = typeof(T).GetProperty(entry.Key);
-            if (prop == null) continue;
+            var prop = props.FirstOrDefault(p => string.Equals(p.Name, entry.Key, StringComparison.OrdinalIgnoreCase));
+            if (prop is null) continue;
 
             var member = Expression.Property(param, prop.Name);
-
-            Expression body;
-
-            if (prop.PropertyType == typeof(string))
+            try
             {
-                var notNull = Expression.NotEqual(member, Expression.Constant(null, typeof(string)));
-
-                var memberToLower = Expression.Call(member, nameof(string.ToLower), Type.EmptyTypes);
-                var valueToLower = Expression.Constant(entry.Value.ToString()!.ToLower());
-
-                var equals = Expression.Equal(memberToLower, valueToLower);
-                body = Expression.AndAlso(notNull, equals);
+                var convertedValue = ConversionHelper.TryConvert(entry.Value, prop.PropertyType);
+                var constant = Expression.Constant(convertedValue, prop.PropertyType);
+                var body = Expression.Equal(member, constant);
+                var lambda = Expression.Lambda<Func<T, bool>>(body, param);
+                query = query.Where(lambda);
             }
-            else if (prop.PropertyType.IsEnum)
+            catch (Exception ex)
             {
-                var enumValue = Enum.Parse(prop.PropertyType, entry.Value.ToString()!, ignoreCase: true);
-                var constant = Expression.Constant(enumValue);
-                body = Expression.Equal(member, constant);
+                throw new AppException($"'{entry.Key}' bo‘yicha filter qiymatini o‘zgartirishda xatolik: {ex.Message}");
             }
-            else
-            {
-                var constant = Expression.Constant(Convert.ChangeType(entry.Value, prop.PropertyType));
-                body = Expression.Equal(member, constant);
-            }
-
-            var lambda = Expression.Lambda<Func<T, bool>>(body, param);
-            query = query.Where(lambda);
         }
 
         // 🔎 Global search (case-insensitive)

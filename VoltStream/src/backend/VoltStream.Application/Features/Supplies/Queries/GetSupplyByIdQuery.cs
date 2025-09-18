@@ -10,15 +10,15 @@ using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Supplies.DTOs;
 using VoltStream.Domain.Entities;
 
-public record GetSupplyByIdQuery(long Id) : IRequest<SupplyDTO>;
+public record GetSupplyByIdQuery(long Id) : IRequest<SupplyDto>;
 
 public class GetSupplyByIdQueryHandler(
     IAppDbContext context,
     IMapper mapper)
-    : IRequestHandler<GetSupplyByIdQuery, SupplyDTO>
+    : IRequestHandler<GetSupplyByIdQuery, SupplyDto>
 {
-    public async Task<SupplyDTO> Handle(GetSupplyByIdQuery request, CancellationToken cancellationToken)
-        => mapper.Map<SupplyDTO>(await context.Supplies
+    public async Task<SupplyDto> Handle(GetSupplyByIdQuery request, CancellationToken cancellationToken)
+        => mapper.Map<SupplyDto>(await context.Supplies
             .Where(s => s.IsDeleted != true)
             .Include(supply => supply.Product)
                 .ThenInclude(product => product.Category)

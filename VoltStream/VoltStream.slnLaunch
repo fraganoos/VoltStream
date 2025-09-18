@@ -1,6 +1,6 @@
 [
   {
-    "Name": "Новый профиль",
+    "Name": "Fully run ",
     "Projects": [
       {
         "Path": "src\\backend\\VoltStream.WebApi\\VoltStream.WebApi.csproj",
