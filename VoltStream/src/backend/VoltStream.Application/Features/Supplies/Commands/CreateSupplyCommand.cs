@@ -49,15 +49,6 @@ public class CreateSupplyCommandHandler(
             context.Categories.Add(category);
             await context.SaveAsync(cancellationToken);
             newCategoryId = category.Id;
-
-            if (request.ProductId > 0)
-            {
-                var existProduct = await context.Products.FirstOrDefaultAsync(product =>
-                product.Id == request.ProductId, cancellationToken);
-
-                existProduct.CategoryId = newCategoryId;
-                await context.SaveAsync(cancellationToken);
-            }
         }
 
         long newProductId = request.ProductId;
@@ -96,9 +87,6 @@ public class CreateSupplyCommandHandler(
             warehouseItem.Price = request.Price;
             warehouseItem.DiscountPercent = request.DiscountPercent;
         }
-
-        // var supply = mapper.Map<Supply>(request);
-        //context.Supplies.Add(mapper.Map<Supply>(request));
 
         var supply = mapper.Map<Supply>(request);
         supply.ProductId = newProductId;
