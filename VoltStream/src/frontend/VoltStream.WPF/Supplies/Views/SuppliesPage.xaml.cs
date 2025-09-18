@@ -403,15 +403,33 @@ public partial class SuppliesPage : Page
 
     private void cbxCategory_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        if (_allCategories.Count == 0 && !string.IsNullOrEmpty(cbxCategory.Text))
+        try
         {
-            ComboBoxHelper.BeforeUpdate(sender, e, "Mahsulot turi", true);
+            // Text null emasligini tekshir
+            var text = cbxCategory.Text?.Trim();
+            if (string.IsNullOrEmpty(text))
+                return;
+
+            // Kategoriya ro‘yxati mavjudmi?
+            if (_allCategories == null || _allCategories.Count == 0)
+            {
+                ComboBoxHelper.BeforeUpdate(sender, e, "Mahsulot turi", true);
+                return;
+            }
+
+            // Ro‘yxatda shunday nom yo‘qligini tekshir
+            bool exists = _allCategories
+                .Any(a => !string.IsNullOrEmpty(a?.Name) &&
+                          a.Name.Equals(text, StringComparison.OrdinalIgnoreCase));
+
+            if (!exists)
+            {
+                ComboBoxHelper.BeforeUpdate(sender, e, "Mahsulot turi", true);
+            }
         }
-        else if (_allCategories.Count != 0 && 
-            _allCategories.FirstOrDefault(a =>
-            a.Name.Equals(cbxCategory.Text.Trim(), StringComparison.OrdinalIgnoreCase)) == null)
+        catch (Exception ex)
         {
-            ComboBoxHelper.BeforeUpdate(sender, e, "Mahsulot turi", true);
+            MessageBox.Show(ex.Message, "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

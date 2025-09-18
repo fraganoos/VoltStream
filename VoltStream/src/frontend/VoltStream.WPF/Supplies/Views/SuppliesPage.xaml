@@ -75,6 +75,7 @@
                               StaysOpenOnEdit="True"
                               Margin="0,1,10,1"
                               DisplayMemberPath="Name"
+                              SelectedValuePath="Id"
                               VerticalAlignment="Center"
                               FontSize="14"
                               GotFocus="cbxCategory_GotFocus"
@@ -171,12 +172,11 @@
                     <Label Grid.Column="1" Content="%" 
                            VerticalAlignment="Center" 
                            FontSize="14" Margin="-10,0,0,0"/>
-                    <Button Grid.Column="2" x:Name="addSupplyBtn" 
+                    <Button Grid.Column="1" x:Name="addSupplyBtn" 
                             Content=" Qo'shish  🗹" 
-                            HorizontalAlignment="Stretch" 
-                            VerticalAlignment="Stretch" 
-                            FontWeight="DemiBold" Margin="0,4,10,4"
-                            FontSize="14" Click="AddSupplyBtn_Click"/>
+                            VerticalAlignment="Bottom" 
+                            FontWeight="DemiBold" Margin="84,0,10,4"
+                            FontSize="14" Click="AddSupplyBtn_Click" Grid.ColumnSpan="2" Height="27"/>
                 </Grid>
             </Grid>
             <Grid Grid.Column="2">
