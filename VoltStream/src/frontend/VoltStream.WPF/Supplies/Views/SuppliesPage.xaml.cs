@@ -1,14 +1,14 @@
 ﻿namespace VoltStream.WPF.Supplies.Views;
 
-using System.Windows;
-using System.Windows.Input;
-using ApiServices.Interfaces;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 using ApiServices.DTOs.Products;
 using ApiServices.DTOs.Supplies;
-using System.Collections.Generic;
+using ApiServices.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 public partial class SuppliesPage : Page
 {
@@ -155,7 +155,7 @@ public partial class SuppliesPage : Page
 
                 // ItemsSource ni Category listiga cast qilamiz
                 var categories = cbxCategory.ItemsSource as List<Category>;
-                if ((categories == null)||(categories != null && !categories.Any(c =>
+                if ((categories == null) || (categories != null && !categories.Any(c =>
                         c.Name.ToLower().Equals(newCategoryName, StringComparison.OrdinalIgnoreCase))))
                 {
                     // Ha yoki Yo‘q so‘rovi
@@ -177,13 +177,13 @@ public partial class SuppliesPage : Page
                         cbxCategory.Focus();
                     }
                 }
-                else 
+                else
                 {
                     // Agar kategoriya matni mavjud elementlardan biriga mos kelsa
                     cbxProduct.Focus();
                 }
             }
-            else           
+            else
             {
                 long categoryId = Convert.ToInt64(cbxCategory.SelectedValue);
                 try

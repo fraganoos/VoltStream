@@ -7,17 +7,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
+using VoltStream.Application.Features.Customers.DTOs;
 using VoltStream.Domain.Entities;
 
-public record GetCustomerByIdQuery(long Id) : IRequest<Customer>;
+public record GetCustomerByIdQuery(long Id) : IRequest<CustomerDto>;
 
 public class GetCustomerByIdQueryHandler(
     IAppDbContext context,
     IMapper mapper)
-    : IRequestHandler<GetCustomerByIdQuery, Customer>
+    : IRequestHandler<GetCustomerByIdQuery, CustomerDto>
 {
-    public async Task<Customer> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
-        => mapper.Map<Customer>(await context.Customers
+    public async Task<CustomerDto> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
+        => mapper.Map<CustomerDto>(await context.Customers
             .Include(c => c.Account)
                 .ThenInclude(a => a.CustomerOperations)
             .Include(c => c.Account)

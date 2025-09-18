@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using VoltStream.Application.Features.WarehouseItems.Queries;
+using VoltStream.WebApi.Controllers.Common;
 using VoltStream.WebApi.Models;
 
 public class WarehouseItemsController : BaseController

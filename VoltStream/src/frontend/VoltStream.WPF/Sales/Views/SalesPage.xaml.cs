@@ -1,4 +1,6 @@
-﻿using ApiServices.DTOs.Products;
+﻿namespace VoltStream.WPF.Sales.Views;
+
+using ApiServices.DTOs.Products;
 using ApiServices.DTOs.Supplies;
 using ApiServices.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,234 +11,232 @@ using System.Windows.Input;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Sales.Models;
 
-namespace VoltStream.WPF.Sales.Views
+/// <summary>
+/// Логика взаимодействия для SalesPage.xaml
+/// </summary>
+public partial class SalesPage : Page
 {
-    /// <summary>
-    /// Логика взаимодействия для SalesPage.xaml
-    /// </summary>
-    public partial class SalesPage : Page
+    private readonly IServiceProvider services;
+    private readonly ICategoriesApi categoriesApi;
+    private readonly IProductsApi productsApi;
+    private readonly IWarehouseItemsApi warehouseItemsApi;
+
+    public Sale _sale = new Sale();
+
+    public SalesPage(IServiceProvider services)
     {
-        private readonly IServiceProvider services;
-        private readonly ICategoriesApi categoriesApi;
-        private readonly IProductsApi productsApi;
-        private readonly IWarehouseItemsApi warehouseItemsApi;
+        InitializeComponent();
+        this.services = services;
+        DataContext = _sale;
+        categoriesApi = services.GetRequiredService<ICategoriesApi>();
+        productsApi = services.GetRequiredService<IProductsApi>();
+        warehouseItemsApi = services.GetRequiredService<IWarehouseItemsApi>();
 
-        public Sale _sale = new Sale();
+        CustomerName.GotFocus += CustomerName_GotFocus;
+        cbxCategoryName.GotFocus += cbxCategoryName_GotFocus;
+        cbxCategoryName.PreviewLostKeyboardFocus += CbxCategoryName_PreviewLostKeyboardFocus;
 
-        public SalesPage(IServiceProvider services)
+        cbxProductName.GotFocus += cbxProductName_GotFocus;
+        cbxProductName.SelectionChanged += CbxProductName_SelectionChanged;
+        cbxProductName.PreviewLostKeyboardFocus += cbxProductName_PreviewLostKeyboardFocus;
+        cbxProductName.LostFocus += cbxProductName_LostFocus;
+
+        cbxPerRollCount.GotFocus += cbxPerRollCount_GotFocus;
+        cbxPerRollCount.SelectionChanged += cbxPerRollCount_SelectionChanged;
+        cbxPerRollCount.PreviewLostKeyboardFocus += CbxPerRollCount_PreviewLostKeyboardFocus;
+    }
+
+    private void cbxPerRollCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (cbxPerRollCount.SelectedItem is WarehouseItem selectedWarehouseItem)
         {
-            InitializeComponent();
-            this.services = services;
-            DataContext = _sale;
-            categoriesApi = services.GetRequiredService<ICategoriesApi>();
-            productsApi = services.GetRequiredService<IProductsApi>();
-            warehouseItemsApi = services.GetRequiredService<IWarehouseItemsApi>();
-
-            CustomerName.GotFocus += CustomerName_GotFocus;
-            cbxCategoryName.GotFocus += cbxCategoryName_GotFocus;
-            cbxCategoryName.PreviewLostKeyboardFocus += CbxCategoryName_PreviewLostKeyboardFocus;
-
-            cbxProductName.GotFocus += cbxProductName_GotFocus;
-            cbxProductName.SelectionChanged += CbxProductName_SelectionChanged;
-            cbxProductName.PreviewLostKeyboardFocus += cbxProductName_PreviewLostKeyboardFocus;
-            cbxProductName.LostFocus += cbxProductName_LostFocus;
-
-            cbxPerRollCount.GotFocus += cbxPerRollCount_GotFocus;
-            cbxPerRollCount.SelectionChanged += cbxPerRollCount_SelectionChanged;
-            cbxPerRollCount.PreviewLostKeyboardFocus += CbxPerRollCount_PreviewLostKeyboardFocus;
+            // Rulon tanlanganda, uning narxi, chegirmasi o'zgartiramiz
+            tbxPrice.Text = selectedWarehouseItem.Price.ToString();
+            tbxPerDiscount.Text = selectedWarehouseItem.DiscountPercent.ToString();
         }
+    }
 
-        private void cbxPerRollCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void CustomerName_GotFocus(object sender, RoutedEventArgs e) /// API Qilish kerak
+    {
+        //await LoadCustomerNameAsync();
+    }
+
+    private async Task LoadCustomerNameAsync()
+    {
+        try
         {
-            if (cbxPerRollCount.SelectedItem is WarehouseItem selectedWarehouseItem)
+            // Сохраняем текущее выбранное значение
+            var selectedValue = CustomerName.SelectedValue;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("An error occurred: " + ex.Message);
+        }
+    }
+
+    private async void cbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
+    {
+        await LoadCategoryAsync();
+        cbxCategoryName.IsDropDownOpen = true;
+    }
+    private void CbxCategoryName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot turi");
+    }
+
+    private async void cbxProductName_GotFocus(object sender, RoutedEventArgs e)
+    {
+        long? categoryId = null;
+        if (cbxCategoryName.SelectedValue != null)
+        {
+            categoryId = (long)cbxCategoryName.SelectedValue;
+        }
+        await LoadProductAsync(categoryId);
+        cbxProductName.IsDropDownOpen = true;
+    }
+    private void CbxProductName_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (cbxProductName.SelectedItem is Product selectedProduct)
+        {
+            // maxsulot tanlanganda, uning categoryId sini ham olamiz va cbxCategoryName dagini o'zgartiramiz
+            cbxCategoryName.SelectedValue = selectedProduct.CategoryId;
+            //_sale.CategoryId = selectedProduct.CategoryId;
+            //_sale.CategoryName = (cbxCategoryName.ItemsSource as IEnumerable<Category>)?
+            //    .FirstOrDefault(c => c.Id == selectedProduct.CategoryId)?.Name ?? string.Empty;
+        }
+    }
+    private void cbxProductName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot");
+    }
+    private async void cbxProductName_LostFocus(object sender, RoutedEventArgs e)
+    {
+        long? productId = null;
+        if (cbxProductName.SelectedValue != null)
+        {
+            productId = (long)cbxProductName.SelectedValue;
+        }
+        await LoadWarehouseItemsAsync(productId);
+    }
+
+    private void cbxPerRollCount_GotFocus(object sender, RoutedEventArgs e)
+    {
+        cbxPerRollCount.IsDropDownOpen = true;
+    }
+    private void CbxPerRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        ComboBoxHelper.BeforeUpdate(sender, e, "Rulon uzunlugi");
+    }
+
+
+    private async Task LoadCategoryAsync() // Загрузка категорий
+    {
+        try
+        {
+            // Сохраняем текущее выбранное значение
+            var selectedValue = cbxCategoryName.SelectedValue;
+
+            var response = await categoriesApi.GetAllCategoriesAsync();
+            if (response.IsSuccessStatusCode && response.Content?.Data != null)
             {
-                // Rulon tanlanganda, uning narxi, chegirmasi o'zgartiramiz
-                tbxPrice.Text = selectedWarehouseItem.Price.ToString();
-                tbxPerDiscount.Text = selectedWarehouseItem.DiscountPercent.ToString();
-            }
-        }
+                List<Category> categories = response.Content.Data;
+                cbxCategoryName.ItemsSource = categories;
+                cbxCategoryName.DisplayMemberPath = "Name";
+                cbxCategoryName.SelectedValuePath = "Id";
 
-        private async void CustomerName_GotFocus(object sender, RoutedEventArgs e) /// API Qilish kerak
-        {
-            //await LoadCustomerNameAsync();
-        }
-
-        private async Task LoadCustomerNameAsync()
-        {
-            try { 
-                // Сохраняем текущее выбранное значение
-                var selectedValue = CustomerName.SelectedValue;
+                // Восстанавливаем выбранное значение
+                if (selectedValue != null)
+                    cbxCategoryName.SelectedValue = selectedValue;
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("An error occurred: " + ex.Message);
+                // Проверяем на null, чтобы избежать CS8602
+                var errorMsg = response.Error?.Message ?? "Unknown error";
+                MessageBox.Show("Error fetching categories: " + errorMsg);
             }
         }
-
-        private async void cbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
+        catch (Exception ex)
         {
-            await LoadCategoryAsync();
-            cbxCategoryName.IsDropDownOpen = true;
+            MessageBox.Show("An error occurred: " + ex.Message);
         }
-        private void CbxCategoryName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-        {
-            ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot turi");
-        }
+    }
 
-        private async void cbxProductName_GotFocus(object sender, RoutedEventArgs e)
+    private async Task LoadProductAsync(long? categoryId) // Загрузка продукции
+    {
+        try
         {
-            long? categoryId = null;
-            if (cbxCategoryName.SelectedValue != null)
+            // Сохраняем текущее выбранное значение
+            var selectedValue = cbxProductName.SelectedValue;
+            ApiResponse<Response<List<Product>>> response;
+
+            if (categoryId.HasValue && categoryId.Value != 0)
             {
-                categoryId = (long)cbxCategoryName.SelectedValue;
+                response = await productsApi.GetAllProductsByCategoryIdAsync(categoryId.Value);
             }
-            await LoadProductAsync(categoryId);
-            cbxProductName.IsDropDownOpen = true;
-        }
-        private void CbxProductName_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (cbxProductName.SelectedItem is Product selectedProduct)
+            else
             {
-                // maxsulot tanlanganda, uning categoryId sini ham olamiz va cbxCategoryName dagini o'zgartiramiz
-                cbxCategoryName.SelectedValue = selectedProduct.CategoryId;
-                //_sale.CategoryId = selectedProduct.CategoryId;
-                //_sale.CategoryName = (cbxCategoryName.ItemsSource as IEnumerable<Category>)?
-                //    .FirstOrDefault(c => c.Id == selectedProduct.CategoryId)?.Name ?? string.Empty;
+                response = await productsApi.GetAllProductsAsync();
             }
-        }
-        private void cbxProductName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-        {
-            ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot");
-        }
-        private async void cbxProductName_LostFocus(object sender, RoutedEventArgs e)
-        {
-            long? productId = null;
-            if (cbxProductName.SelectedValue != null)
+
+            if (response.IsSuccessStatusCode && response.Content?.Data != null)
             {
-                productId = (long)cbxProductName.SelectedValue;
+                var products = response.Content.Data;
+                cbxProductName.ItemsSource = products;
+                cbxProductName.DisplayMemberPath = "Name";
+                cbxProductName.SelectedValuePath = "Id";
+                // Восстанавливаем выбранное значение
+                if (selectedValue != null)
+                    cbxProductName.SelectedValue = selectedValue;
             }
-            await LoadWarehouseItemsAsync(productId);
-        }
-
-        private void cbxPerRollCount_GotFocus(object sender, RoutedEventArgs e)
-        {
-            cbxPerRollCount.IsDropDownOpen = true;
-        }
-        private void CbxPerRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-        {
-            ComboBoxHelper.BeforeUpdate(sender, e, "Rulon uzunlugi");
-        }
-
-
-        private async Task LoadCategoryAsync() // Загрузка категорий
-        {
-            try
+            else
             {
-                // Сохраняем текущее выбранное значение
-                var selectedValue = cbxCategoryName.SelectedValue;
-
-                var response = await categoriesApi.GetAllCategoriesAsync();
-                if (response.IsSuccessStatusCode && response.Content?.Data != null)
-                {
-                    List<Category> categories = response.Content.Data;
-                    cbxCategoryName.ItemsSource = categories;
-                    cbxCategoryName.DisplayMemberPath = "Name";
-                    cbxCategoryName.SelectedValuePath = "Id";
-
-                    // Восстанавливаем выбранное значение
-                    if (selectedValue != null)
-                        cbxCategoryName.SelectedValue = selectedValue;
-                }
-                else
-                {
-                    // Проверяем на null, чтобы избежать CS8602
-                    var errorMsg = response.Error?.Message ?? "Unknown error";
-                    MessageBox.Show("Error fetching categories: " + errorMsg);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("An error occurred: " + ex.Message);
+                var errorMsg = response.Error?.Message ?? "Unknown error";
+                MessageBox.Show("Ошибка при получении продукции: " + errorMsg);
             }
         }
-
-        private async Task LoadProductAsync(long? categoryId) // Загрузка продукции
+        catch (Exception ex)
         {
-            try
+            MessageBox.Show("Произошла ошибка: " + ex.Message);
+        }
+    }
+
+    private async Task LoadWarehouseItemsAsync(long? productId) // Загрузка данных со склада по productId
+    {
+        try
+        {
+            // Сохраняем текущее выбранное значение
+            var selectedValue = cbxPerRollCount.SelectedValue;
+            ApiResponse<Response<List<WarehouseItem>>> response;
+            if (productId.HasValue && productId.Value != 0)
             {
-                // Сохраняем текущее выбранное значение
-                var selectedValue = cbxProductName.SelectedValue;
-                ApiResponse<Response<List<Product>>> response;
-
-                if (categoryId.HasValue && categoryId.Value != 0)
-                {
-                    response = await productsApi.GetAllProductsByCategoryIdAsync(categoryId.Value);
-                }
-                else
-                {
-                    response = await productsApi.GetAllProductsAsync();
-                }
-
-                if (response.IsSuccessStatusCode && response.Content?.Data != null)
-                {
-                    var products = response.Content.Data;
-                    cbxProductName.ItemsSource = products;
-                    cbxProductName.DisplayMemberPath = "Name";
-                    cbxProductName.SelectedValuePath = "Id";
-                    // Восстанавливаем выбранное значение
-                    if (selectedValue != null)
-                        cbxProductName.SelectedValue = selectedValue;
-                }
-                else
-                {
-                    var errorMsg = response.Error?.Message ?? "Unknown error";
-                    MessageBox.Show("Ошибка при получении продукции: " + errorMsg);
-                }
+                response = await warehouseItemsApi.GetProductDetailsFromWarehouseAsync(productId.Value);
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("Произошла ошибка: " + ex.Message);
+                // Если productId не задан, можно либо не загружать данные, либо загрузить все элементы склада
+                // Здесь я выбрал не загружать ничего
+                cbxPerRollCount.ItemsSource = null;
+                return;
+            }
+            if (response.IsSuccessStatusCode && response.Content?.Data != null)
+            {
+                var warehouseItems = response.Content.Data;
+                cbxPerRollCount.ItemsSource = warehouseItems;
+                cbxPerRollCount.DisplayMemberPath = "QuantityPerRoll";
+                cbxPerRollCount.SelectedValuePath = "QuantityPerRoll";
+                // Восстанавливаем выбранное значение
+                if (selectedValue != null)
+                    cbxPerRollCount.SelectedValue = selectedValue;
+            }
+            else
+            {
+                var errorMsg = response.Error?.Message ?? "Unknown error";
+                MessageBox.Show("Ошибка при получении данных со склада: " + errorMsg);
             }
         }
-
-        private async Task LoadWarehouseItemsAsync(long? productId) // Загрузка данных со склада по productId
+        catch (Exception ex)
         {
-            try
-            {
-                // Сохраняем текущее выбранное значение
-                var selectedValue = cbxPerRollCount.SelectedValue;
-                ApiResponse<Response<List<WarehouseItem>>> response;
-                if (productId.HasValue && productId.Value != 0)
-                {
-                    response = await warehouseItemsApi.GetProductDetailsFromWarehouseAsync(productId.Value);
-                }
-                else
-                {
-                    // Если productId не задан, можно либо не загружать данные, либо загрузить все элементы склада
-                    // Здесь я выбрал не загружать ничего
-                    cbxPerRollCount.ItemsSource = null;
-                    return;
-                }
-                if (response.IsSuccessStatusCode && response.Content?.Data != null)
-                {
-                    var warehouseItems = response.Content.Data;
-                    cbxPerRollCount.ItemsSource = warehouseItems;
-                    cbxPerRollCount.DisplayMemberPath = "QuantityPerRoll";
-                    cbxPerRollCount.SelectedValuePath = "QuantityPerRoll";
-                    // Восстанавливаем выбранное значение
-                    if (selectedValue != null)
-                        cbxPerRollCount.SelectedValue = selectedValue;
-                }
-                else
-                {
-                    var errorMsg = response.Error?.Message ?? "Unknown error";
-                    MessageBox.Show("Ошибка при получении данных со склада: " + errorMsg);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Произошла ошибка: " + ex.Message);
-            }
+            MessageBox.Show("Произошла ошибка: " + ex.Message);
         }
     }
 }

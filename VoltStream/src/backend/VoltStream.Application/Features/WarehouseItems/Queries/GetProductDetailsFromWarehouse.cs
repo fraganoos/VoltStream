@@ -11,7 +11,7 @@ using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Warehouses.DTOs;
 using VoltStream.Domain.Entities;
 
-public record GetProductDetailsFromWarehouse(long id): IRequest<List<WarehouseItemDTO>>;
+public record GetProductDetailsFromWarehouse(long id) : IRequest<List<WarehouseItemDTO>>;
 internal class GetProductDetailsFromWarehouseHandler(
     IAppDbContext context, IMapper mapper
     ) : IRequestHandler<GetProductDetailsFromWarehouse, List<WarehouseItemDTO>>
@@ -21,6 +21,6 @@ internal class GetProductDetailsFromWarehouseHandler(
         return mapper.Map<List<WarehouseItemDTO>>(await context.WarehouseItems
                  .Where(w => !w.IsDeleted && w.ProductId == request.id)
                  .ToListAsync(cancellationToken))
-            ?? throw new NotFoundException(nameof(Product), nameof(request.id),request.id);
+            ?? throw new NotFoundException(nameof(Product), nameof(request.id), request.id);
     }
 }

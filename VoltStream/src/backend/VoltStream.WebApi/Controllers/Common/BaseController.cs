@@ -1,4 +1,4 @@
-﻿namespace VoltStream.WebApi.Controllers;
+﻿namespace VoltStream.WebApi.Controllers.Common;
 
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
