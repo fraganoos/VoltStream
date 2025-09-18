@@ -78,6 +78,7 @@
                               DisplayMemberPath="Name"
                               VerticalAlignment="Center"
                               FontSize="14"
+                              SelectedValuePath="Id"
                               Loaded="CbxCategory_Loaded"
                               GotFocus="CbxCategory_GotFocus"
                               LostFocus="CbxCategory_LostFocus"
@@ -95,6 +96,7 @@
                               VerticalAlignment="Center" 
                               FontSize="14"
                               Margin="0,1,10,1"
+                              SelectedValuePath="Id"
                               utils:EnterKeyTab.IsEnabled="True"
                               GotFocus="CbxProduct_GotFocus"
                               LostFocus="CbxProduct_LostFocus"/>

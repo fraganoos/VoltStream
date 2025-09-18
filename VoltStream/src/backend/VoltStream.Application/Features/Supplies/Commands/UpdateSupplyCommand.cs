@@ -12,13 +12,13 @@ public record UpdateSupplyCommand(
     long ProductId,
     decimal CountRoll,
     decimal QuantityPerRoll,
-    decimal TotalQuantity) : IRequest<long>;
+    decimal TotalQuantity) : IRequest<bool>;
 
 public class UpdateSupplyCommandHandler(
     IAppDbContext context)
-    : IRequestHandler<UpdateSupplyCommand, long>
+    : IRequestHandler<UpdateSupplyCommand, bool>
 {
-    public async Task<long> Handle(UpdateSupplyCommand request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(UpdateSupplyCommand request, CancellationToken cancellationToken)
     {
         var supply = await context.Supplies.FirstOrDefaultAsync(s => s.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Supply), nameof(request.Id), request.Id);
@@ -33,7 +33,6 @@ public class UpdateSupplyCommandHandler(
         resedue.TotalQuantity -= supply.TotalQuantity + request.TotalQuantity;
         resedue.CountRoll -= supply.CountRoll + request.CountRoll;
 
-        await context.CommitTransactionAsync(cancellationToken);
-        return supply.Id;
+        return await context.CommitTransactionAsync(cancellationToken);
     }
 }
