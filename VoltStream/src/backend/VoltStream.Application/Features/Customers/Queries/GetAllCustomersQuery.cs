@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Customers.DTOs;
 
-public record GetAllCustomersQuery : IRequest<List<CustomerDto>>;
+public record GetAllCustomersQuery : IRequest<IReadOnlyCollection<CustomerDto>>;
 
 public class GetAllCustomersQueryHandler(
     IAppDbContext context,
-    IMapper mapper) : IRequestHandler<GetAllCustomersQuery, List<CustomerDto>>
+    IMapper mapper) : IRequestHandler<GetAllCustomersQuery, IReadOnlyCollection<CustomerDto>>
 {
-    public async Task<List<CustomerDto>> Handle(GetAllCustomersQuery request, CancellationToken cancellationToken)
-        => mapper.Map<List<CustomerDto>>(await context.Customers.ToListAsync(cancellationToken));
+    public async Task<IReadOnlyCollection<CustomerDto>> Handle(GetAllCustomersQuery request, CancellationToken cancellationToken)
+        => mapper.Map<IReadOnlyCollection<CustomerDto>>(await context.Customers.ToListAsync(cancellationToken));
 }

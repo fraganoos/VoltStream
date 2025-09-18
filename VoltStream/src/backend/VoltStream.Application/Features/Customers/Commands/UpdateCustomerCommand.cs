@@ -14,21 +14,19 @@ public record UpdateCustomerCommand(
     string Name,
     string? Phone,
     string? Address,
-    string? Description) : IRequest<long>;
+    string? Description) : IRequest<bool>;
 
 public class UpdateCustomerCommandHandler(
     IAppDbContext context,
-    IMapper mapper) : IRequestHandler<UpdateCustomerCommand, long>
+    IMapper mapper) : IRequestHandler<UpdateCustomerCommand, bool>
 {
-    public async Task<long> Handle(UpdateCustomerCommand request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(UpdateCustomerCommand request, CancellationToken cancellationToken)
     {
         var customer = await context.Customers
             .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Customer), nameof(request.Id), request.Id);
 
         mapper.Map(request, customer);
-        await context.SaveAsync(cancellationToken);
-
-        return customer.Id;
+        return await context.SaveAsync(cancellationToken) > 0;
     }
 }

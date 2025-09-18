@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Mvc;
 using VoltStream.Application.Features.Warehouses.Commands;
 using VoltStream.Application.Features.Warehouses.Queries;
+using VoltStream.WebApi.Controllers.Common;
 using VoltStream.WebApi.Models;
 
 public class WarehousesController : BaseController

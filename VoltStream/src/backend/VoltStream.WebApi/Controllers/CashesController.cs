@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Mvc;
 using VoltStream.Application.Features.Cashes.Commands;
 using VoltStream.Application.Features.Cashes.Queries;
+using VoltStream.WebApi.Controllers.Common;
 using VoltStream.WebApi.Models;
 
 public class CashesController : BaseController

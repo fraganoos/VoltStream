@@ -15,8 +15,8 @@ public class GetAllSuppliesQueryHandler(
 {
     public async Task<List<SupplyDTO>> Handle(GetAllSuppliesQuery request, CancellationToken cancellationToken)
        => mapper.Map<List<SupplyDTO>>(await context.Supplies
-           .Where(supply=>supply.IsDeleted != true)
+           .Where(supply => supply.IsDeleted != true)
            .Include(supply => supply.Product)
-                .ThenInclude(product=>product.Category)
+                .ThenInclude(product => product.Category)
            .ToListAsync(cancellationToken));
 }
