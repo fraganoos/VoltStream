@@ -14,7 +14,7 @@ public interface ISuppliesApi
     Task<ApiResponse<Supply>> UpdateSupplyAsync([Body] Supply supplyUpdate);
 
     [Delete("/api/supplies/{id}")]
-    Task<ApiResponse<string>> DeleteSupplyAsync(long    id);
+    Task<ApiResponse<string>> DeleteSupplyAsync(long id);
 
     [Get("/api/supplies/{id}")]
     Task<ApiResponse<Supply>> GetByIdSupplyAsync(long id);

@@ -31,7 +31,7 @@ public class CreateSupplyCommandHandler(
             .FirstOrDefaultAsync(cancellationToken);
 
         if (warehouse is null)
-        { 
+        {
             context.Warehouses.Add(warehouse = new());
             warehouse.Items = new List<WarehouseItem>();
         }
@@ -49,10 +49,10 @@ public class CreateSupplyCommandHandler(
             context.Categories.Add(category);
             await context.SaveAsync(cancellationToken);
             newCategoryId = category.Id;
-            
+
             if (request.ProductId > 0)
             {
-                var existProduct = await context.Products.FirstOrDefaultAsync(product => 
+                var existProduct = await context.Products.FirstOrDefaultAsync(product =>
                 product.Id == request.ProductId, cancellationToken);
 
                 existProduct.CategoryId = newCategoryId;
@@ -97,7 +97,7 @@ public class CreateSupplyCommandHandler(
             warehouseItem.DiscountPercent = request.DiscountPercent;
         }
 
-       // var supply = mapper.Map<Supply>(request);
+        // var supply = mapper.Map<Supply>(request);
         //context.Supplies.Add(mapper.Map<Supply>(request));
 
         var supply = mapper.Map<Supply>(request);

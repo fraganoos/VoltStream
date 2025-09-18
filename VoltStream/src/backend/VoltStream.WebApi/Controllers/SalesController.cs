@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Mvc;
 using VoltStream.Application.Features.Sales.Commands;
 using VoltStream.Application.Features.Sales.Queries;
+using VoltStream.WebApi.Controllers.Common;
 using VoltStream.WebApi.Models;
 
 public class SalesController : BaseController

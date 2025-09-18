@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Mvc;
 using VoltStream.Application.Features.Products.Commands;
 using VoltStream.Application.Features.Products.Queries;
+using VoltStream.WebApi.Controllers.Common;
 using VoltStream.WebApi.Models;
 
 public class ProductsController : BaseController
@@ -26,7 +27,7 @@ public class ProductsController : BaseController
     [HttpGet("categoryId={Id:long}")]
     public async Task<IActionResult> GetAllProductByCategoryId(long Id)
     => Ok(new Response { Data = await Mediator.Send(new GetAllProductsByCategoryIdQuery(Id)) });
-   
+
     [HttpGet]
     public async Task<IActionResult> GetAll()
         => Ok(new Response { Data = await Mediator.Send(new GetAllProductsQuery()) });
