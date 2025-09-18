@@ -45,11 +45,14 @@
                 </Grid>
                 <Grid Grid.Row="0" Grid.Column="1">
                     <controls:UserCalendar x:Name="supplyDate" 
-                              VerticalAlignment="Center" 
-                              HorizontalAlignment="Left"
-                              Width="150" FontSize="14"
-                              Margin="0,0,10,0"
-                              utils:EnterKeyTab.IsEnabled="True"/>
+                                            VerticalAlignment="Center" 
+                                            HorizontalAlignment="Left"
+                                            Width="150" FontSize="14"
+                                            Margin="0,0,10,0"
+                                            GotFocus="supplyDate_GotFocus"
+                                            LostFocus="supplyDate_LostFocus"
+                                           PreviewMouseDown="supplyDate_PreviewMouseDown"
+                                            utils:EnterKeyTab.IsEnabled="True"/>
                 </Grid>
                 <Grid Grid.Row="1" Grid.Column="0">
                     <StackPanel Orientation="Horizontal" Margin="10,0">
@@ -62,24 +65,29 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="Turi" 
-                       VerticalAlignment="Center" 
-                       Foreground="#888" Margin="10,2"
-                       IsHitTestVisible="False" Panel.ZIndex="1"
-                       Visibility="{Binding ElementName=cbxCategory,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibility}}"/>
+                               VerticalAlignment="Center" 
+                               Foreground="#888" Margin="10,2"
+                               IsHitTestVisible="False" Panel.ZIndex="1"
+                               Visibility="{Binding ElementName=cbxCategory,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibility}}"/>
                     <ComboBox x:Name="cbxCategory"
-                              Grid.Column="0"  
-                              IsEditable="True" Margin="0,1,10,1"
-                              DisplayMemberPath = "Name"
-                              VerticalAlignment="Center"  
+                              Grid.Column="0"
+                              IsEditable="True"
+                              IsTextSearchEnabled="False"
+                              StaysOpenOnEdit="True"
+                              Margin="0,1,10,1"
+                              DisplayMemberPath="Name"
+                              VerticalAlignment="Center"
                               FontSize="14"
+                              Loaded="cbxCategory_Loaded"
                               GotFocus="cbxCategory_GotFocus"
                               LostFocus="cbxCategory_LostFocus"
-                              PreviewKeyDown="cbxCategory_PreviewKeyDown"/>
+                              utils:EnterKeyTab.IsEnabled="True"/>
+
                     <TextBlock Grid.Column="1" Text="Nomi" 
-                       VerticalAlignment="Center" 
-                       Foreground="#888" Margin="10,2"
-                       IsHitTestVisible="False" Panel.ZIndex="1"
-                       Visibility="{Binding ElementName=cbxProduct,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibility}}"/>
+                               VerticalAlignment="Center" 
+                               Foreground="#888" Margin="10,2"
+                               IsHitTestVisible="False" Panel.ZIndex="1"
+                               Visibility="{Binding ElementName=cbxProduct,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibility}}"/>
                     <ComboBox x:Name="cbxProduct" 
                               Grid.Column="1" 
                               IsEditable="True"
@@ -87,9 +95,9 @@
                               VerticalAlignment="Center" 
                               FontSize="14"
                               Margin="0,1,10,1"
+                              utils:EnterKeyTab.IsEnabled="True"
                               GotFocus="cbxProduct_GotFocus"
-                              LostFocus="cbxProduct_LostFocus"
-                              PreviewKeyDown="cbxProduct_PreviewKeyDown"/>
+                              LostFocus="cbxProduct_LostFocus"/>
                 </Grid>
                 <Grid Grid.Row="2" Grid.Column="0">
                     <Label Content="Rulon metr:" VerticalAlignment="Center" Margin="10,0" FontSize="14"/>
@@ -223,7 +231,8 @@
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="Foreground" Value="Black"/>
-                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="Padding" Value="10 0"/>
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.HeaderStyle>
@@ -237,6 +246,8 @@
                         <Style TargetType="TextBlock">
                             <Setter Property="Foreground" Value="Black"/>
                             <Setter Property="HorizontalAlignment" Value="Center"/>
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="Padding" Value="10 0"/>
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.HeaderStyle>
@@ -249,7 +260,8 @@
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="Foreground" Value="Black"/>
-                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="Padding" Value="10 0"/>
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.HeaderStyle>
