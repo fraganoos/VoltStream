@@ -3,7 +3,7 @@
 using VoltStream.Application.Features.Categories.DTOs;
 using VoltStream.Application.Features.Products.DTOs;
 
-public record SupplyDTO
+public record SupplyDto
 {
     public long Id { get; set; }
     public DateTimeOffset OperationDate { get; set; }
