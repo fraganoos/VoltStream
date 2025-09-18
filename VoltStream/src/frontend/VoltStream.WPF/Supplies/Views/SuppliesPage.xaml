@@ -72,16 +72,13 @@
                     <ComboBox x:Name="cbxCategory"
                               Grid.Column="0"
                               IsEditable="True"
-                              IsTextSearchEnabled="False"
                               StaysOpenOnEdit="True"
                               Margin="0,1,10,1"
                               DisplayMemberPath="Name"
                               VerticalAlignment="Center"
                               FontSize="14"
-                              SelectedValuePath="Id"
-                              Loaded="CbxCategory_Loaded"
-                              GotFocus="CbxCategory_GotFocus"
-                              LostFocus="CbxCategory_LostFocus"
+                              GotFocus="cbxCategory_GotFocus"
+                              LostFocus="cbxCategory_LostFocus"
                               utils:EnterKeyTab.IsEnabled="True"/>
 
                     <TextBlock Grid.Column="1" Text="Nomi" 
@@ -98,8 +95,8 @@
                               Margin="0,1,10,1"
                               SelectedValuePath="Id"
                               utils:EnterKeyTab.IsEnabled="True"
-                              GotFocus="CbxProduct_GotFocus"
-                              LostFocus="CbxProduct_LostFocus"/>
+                              GotFocus="cbxProduct_GotFocus"
+                              LostFocus="cbxProduct_LostFocus"/>
                 </Grid>
                 <Grid Grid.Row="2" Grid.Column="0">
                     <Label Content="Rulon metr:" VerticalAlignment="Center" Margin="10,0" FontSize="14"/>
