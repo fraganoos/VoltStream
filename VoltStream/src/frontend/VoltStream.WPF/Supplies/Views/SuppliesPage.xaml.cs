@@ -20,7 +20,7 @@ public partial class SuppliesPage : Page
     private readonly ICategoriesApi categoriesApi;
     private readonly ISuppliesApi suppliesApi;
     private readonly IWarehouseItemsApi warehouseItemsApi;
-    private List<Category> allCategories = [];
+    private List<Category> _allCategories = [];
     private ICollectionView categoriesView;
     public SuppliesPage(IServiceProvider services)
     {
@@ -220,25 +220,6 @@ public partial class SuppliesPage : Page
         addSupplyBtn.IsEnabled = false;
         try
         {
-            // Kiritilgan ma'lumotlarni olish
-            if (supplyDate.SelectedDate is null)
-            {
-                MessageBox.Show("Sana tanlanmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-                supplyDate.Focus();
-                return;
-            }
-
-            if (!decimal.TryParse(tbxPerRollCount.Text, out decimal perRollCount) || perRollCount <= 0)
-            {
-                MessageBox.Show("Rulon metr noto‘g‘ri kiritilgan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-                tbxPerRollCount.Focus();
-                return;
-            }
-
-        addSupplyBtn.IsEnabled = false;
-        try
-        {
-            // Kiritilgan ma'lumotlarni olish
             if (supplyDate.SelectedDate == null)
             {
                 MessageBox.Show("Sana tanlanmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -267,7 +248,6 @@ public partial class SuppliesPage : Page
                 return;
             }
 
-            // Chegirma foizini olish (ixtiyoriy)
             if (!decimal.TryParse(tbxDiscountPercent.Text, out decimal discountPercent) || discountPercent < 0)
             {
                 MessageBox.Show("Chegirma foizi noto‘g‘ri kiritilgan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -275,14 +255,10 @@ public partial class SuppliesPage : Page
                 return;
             }
 
-            // Jami metrni hisoblash
             decimal totalQuantity = perRollCount * rollCount;
+            long categoryId = cbxCategory.SelectedValue != null ? Convert.ToInt64(cbxCategory.SelectedValue) : 0;
+            long productId = cbxProduct.SelectedValue != null ? Convert.ToInt64(cbxProduct.SelectedValue) : 0;
 
-            // CategoryId va ProductId ni olish, null bo‘lsa 0 qo‘yiladi
-            long categoryId = cbxCategory.SelectedValue is not null ? Convert.ToInt64(cbxCategory.SelectedValue) : 0;
-            long productId = cbxProduct.SelectedValue is not null ? Convert.ToInt64(cbxProduct.SelectedValue) : 0;
-
-            // Supply ob'ektini yaratish
             var supply = new Supply
             {
                 OperationDate = supplyDate.SelectedDate.Value.ToUniversalTime(),
@@ -297,9 +273,7 @@ public partial class SuppliesPage : Page
                 DiscountPercent = discountPercent
             };
 
-            // API orqali ta'minotni saqlash
             var response = await suppliesApi.CreateSupplyAsync(supply);
-            System.Diagnostics.Debug.WriteLine($"API javobi: StatusCode={response.StatusCode}, ContentId={response.Content?.Id}, Error={response.Error?.Message}");
 
             if (response.IsSuccessStatusCode && response.Content != null)
             {
@@ -308,13 +282,12 @@ public partial class SuppliesPage : Page
                 cbxCategory.Text = null;
                 cbxProduct.SelectedItem = null;
                 cbxProduct.Text = null;
-                tbxPerRollCount.Text = string.Empty;
-                tbxRollCount.Text = string.Empty;
-                totalMeters.Text = string.Empty;
-                txtPrice.Text = string.Empty;
-                tbxDiscountPercent.Text = string.Empty;
+                tbxPerRollCount.Clear();
+                tbxRollCount.Clear();
+                totalMeters.Clear();
+                txtPrice.Clear();
+                tbxDiscountPercent.Clear();
 
-                // Kategoriya va mahsulotlarni qayta yuklash
                 await LoadSuppliesAsync();
             }
             else
@@ -325,16 +298,15 @@ public partial class SuppliesPage : Page
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}", "Xatolik",
-                MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}",
+                "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
         {
             addSupplyBtn.IsEnabled = true;
-            supplyDate.dateTextBox.Focus();
+            supplyDate.Focus();
         }
     }
-
 
     private void TxtPrice_GotFocus(object sender, RoutedEventArgs e)
     {
@@ -415,10 +387,10 @@ public partial class SuppliesPage : Page
     }
     private async void cbxCategory_GotFocus(object sender, RoutedEventArgs e)
     {
-        if (allCategories.Count == 0)
-            allCategories = await LoadCategoriesAsync();
+        if (_allCategories.Count == 0)
+            _allCategories = await LoadCategoriesAsync();
 
-        categoriesView = CollectionViewSource.GetDefaultView(allCategories);
+        categoriesView = CollectionViewSource.GetDefaultView(_allCategories);
         cbxCategory.ItemsSource = categoriesView;
 
         cbxCategory.IsDropDownOpen = true;

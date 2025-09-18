@@ -95,8 +95,8 @@
                               Margin="0,1,10,1"
                               SelectedValuePath="Id"
                               utils:EnterKeyTab.IsEnabled="True"
-                              GotFocus="CbxProduct_GotFocus"
-                              LostFocus="CbxProduct_LostFocus"/>
+                              GotFocus="cbxProduct_GotFocus"
+                              LostFocus="cbxProduct_LostFocus"/>
                 </Grid>
                 <Grid Grid.Row="2" Grid.Column="0">
                     <Label Content="Rulon metr:" VerticalAlignment="Center" Margin="10,0" FontSize="14"/>
