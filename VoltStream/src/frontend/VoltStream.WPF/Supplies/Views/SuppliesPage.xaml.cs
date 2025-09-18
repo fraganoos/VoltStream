@@ -79,8 +79,7 @@ public partial class SuppliesPage : Page
             {
                 string newProductName = cbxProduct.Text.Trim();
 
-                var products = cbxProduct.ItemsSource as List<Product>;
-                if (products != null && !products.Any(p =>
+                if (cbxProduct.ItemsSource is List<Product> products && !products.Any(p =>
                         p.Name.Equals(newProductName, StringComparison.OrdinalIgnoreCase)))
                 {
                     var result = MessageBox.Show(
@@ -264,22 +263,21 @@ public partial class SuppliesPage : Page
         }
     }
 
-    private async void cbxProduct_GotFocus(object sender, RoutedEventArgs e)
+    private async void CbxProduct_GotFocus(object sender, RoutedEventArgs e)
     {
         cbxProduct.ItemsSource = null;
         cbxProduct.IsDropDownOpen = true;
-    
+
         // Hozirgi tanlangan category ni olish
-        var selectedCategory = cbxCategory.SelectedItem as Category;
 
         // 1️⃣ Agar tanlangan category mavjud bo‘lsa
-        if (selectedCategory != null && _allCategories.FirstOrDefault(a =>
+        if (cbxCategory.SelectedItem is Category selectedCategory && _allCategories.FirstOrDefault(a =>
                 a.Name.Equals(cbxCategory.Text.Trim(), StringComparison.OrdinalIgnoreCase)) != null)
         {
             // Shu category ga oid productlarni yuklash
             var products = await productsApi.GetAllProductsByCategoryIdAsync(selectedCategory.Id);
 
-                cbxProduct.ItemsSource = products.Content.Data ?? new List<Product>();
+            cbxProduct.ItemsSource = products.Content.Data ?? [];
             return;
         }
 
@@ -308,7 +306,7 @@ public partial class SuppliesPage : Page
 }
 
 
-    private void txtPrice_GotFocus(object sender, RoutedEventArgs e)
+    private void TxtPrice_GotFocus(object sender, RoutedEventArgs e)
     {
         if (sender is TextBox tb)
         {
@@ -342,23 +340,22 @@ public partial class SuppliesPage : Page
         }
     }
 
-    private async void supplyDate_LostFocus(object sender, RoutedEventArgs e)
+    private async void SupplyDate_LostFocus(object sender, RoutedEventArgs e)
     {
         await LoadSuppliesAsync();
     }
 
-    private async void supplyDate_GotFocus(object sender, RoutedEventArgs e)
+    private async void SupplyDate_GotFocus(object sender, RoutedEventArgs e)
     {
         await LoadSuppliesAsync();
     }
 
-    private void supplyDate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private void SupplyDate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is VoltStream.WPF.Commons.UserControls.UserCalendar uc)
         {
             // Ichidagi dateTextBox’ga fokus berish
-            var textBox = uc.FindName("dateTextBox") as TextBox;
-            if (textBox != null && !textBox.IsKeyboardFocusWithin)
+            if (uc.FindName("dateTextBox") is TextBox textBox && !textBox.IsKeyboardFocusWithin)
             {
                 e.Handled = true;
                 textBox.Focus();
@@ -384,10 +381,10 @@ public partial class SuppliesPage : Page
             MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}",
                             "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-        return new List<Category>();
+        return [];
     }
 
-    private async void cbxCategory_GotFocus(object sender, RoutedEventArgs e)
+    private async void CbxCategory_GotFocus(object sender, RoutedEventArgs e)
     {
         if (_allCategories.Count == 0)
             _allCategories = await LoadCategoriesAsync();
@@ -399,7 +396,7 @@ public partial class SuppliesPage : Page
     }
 
     private TextBox _categoryTextBox;
-    private void cbxCategory_Loaded(object sender, RoutedEventArgs e)
+    private void CbxCategory_Loaded(object sender, RoutedEventArgs e)
     {
         // ComboBox yuklanganda ichidagi TextBox’ni topamiz
         _categoryTextBox = cbxCategory.Template.FindName("PART_EditableTextBox", cbxCategory) as TextBox;
@@ -414,7 +411,7 @@ public partial class SuppliesPage : Page
         cbxCategory.IsDropDownOpen = true;
     }
 
-    private void cbxCategory_LostFocus(object sender, RoutedEventArgs e)
+    private void CbxCategory_LostFocus(object sender, RoutedEventArgs e)
     {
         cbxCategory.IsDropDownOpen = false;
     }
