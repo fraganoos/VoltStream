@@ -21,4 +21,8 @@ public interface ISuppliesApi
 
     [Get("/api/supplies")]
     Task<ApiResponse<Response<List<Supply>>>> GetAllSuppliesAsync();
+
+    [Get("/api/supplies/by-date")]
+    Task<ApiResponse<Response<List<Supply>>>> GetAllSuppliesByDateAsync([Query] DateTimeOffset date);
+
 }

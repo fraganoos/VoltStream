@@ -37,4 +37,3 @@ public class AuditInterceptor : SaveChangesInterceptor
                 entry.Entity.UpdatedAt = now;
     }
 }
-
