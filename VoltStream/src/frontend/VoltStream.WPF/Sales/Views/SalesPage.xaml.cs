@@ -21,32 +21,32 @@ public partial class SalesPage : Page
     private readonly IProductsApi productsApi;
     private readonly IWarehouseItemsApi warehouseItemsApi;
 
-    public Sale _sale = new Sale();
+    public Sale sale = new();
 
     public SalesPage(IServiceProvider services)
     {
         InitializeComponent();
         this.services = services;
-        DataContext = _sale;
+        DataContext = sale;
         categoriesApi = services.GetRequiredService<ICategoriesApi>();
         productsApi = services.GetRequiredService<IProductsApi>();
         warehouseItemsApi = services.GetRequiredService<IWarehouseItemsApi>();
 
         CustomerName.GotFocus += CustomerName_GotFocus;
-        cbxCategoryName.GotFocus += cbxCategoryName_GotFocus;
+        cbxCategoryName.GotFocus += CbxCategoryName_GotFocus;
         cbxCategoryName.PreviewLostKeyboardFocus += CbxCategoryName_PreviewLostKeyboardFocus;
 
-        cbxProductName.GotFocus += cbxProductName_GotFocus;
+        cbxProductName.GotFocus += CbxProductName_GotFocus;
         cbxProductName.SelectionChanged += CbxProductName_SelectionChanged;
-        cbxProductName.PreviewLostKeyboardFocus += cbxProductName_PreviewLostKeyboardFocus;
-        cbxProductName.LostFocus += cbxProductName_LostFocus;
+        cbxProductName.PreviewLostKeyboardFocus += CbxProductName_PreviewLostKeyboardFocus;
+        cbxProductName.LostFocus += CbxProductName_LostFocus;
 
-        cbxPerRollCount.GotFocus += cbxPerRollCount_GotFocus;
-        cbxPerRollCount.SelectionChanged += cbxPerRollCount_SelectionChanged;
+        cbxPerRollCount.GotFocus += CbxPerRollCount_GotFocus;
+        cbxPerRollCount.SelectionChanged += CbxPerRollCount_SelectionChanged;
         cbxPerRollCount.PreviewLostKeyboardFocus += CbxPerRollCount_PreviewLostKeyboardFocus;
     }
 
-    private void cbxPerRollCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void CbxPerRollCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (cbxPerRollCount.SelectedItem is WarehouseItem selectedWarehouseItem)
         {
@@ -74,7 +74,7 @@ public partial class SalesPage : Page
         }
     }
 
-    private async void cbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
+    private async void CbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
     {
         await LoadCategoryAsync();
         cbxCategoryName.IsDropDownOpen = true;
@@ -84,7 +84,7 @@ public partial class SalesPage : Page
         ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot turi");
     }
 
-    private async void cbxProductName_GotFocus(object sender, RoutedEventArgs e)
+    private async void CbxProductName_GotFocus(object sender, RoutedEventArgs e)
     {
         long? categoryId = null;
         if (cbxCategoryName.SelectedValue != null)
@@ -100,16 +100,16 @@ public partial class SalesPage : Page
         {
             // maxsulot tanlanganda, uning categoryId sini ham olamiz va cbxCategoryName dagini o'zgartiramiz
             cbxCategoryName.SelectedValue = selectedProduct.CategoryId;
-            //_sale.CategoryId = selectedProduct.CategoryId;
-            //_sale.CategoryName = (cbxCategoryName.ItemsSource as IEnumerable<Category>)?
+            //sale.CategoryId = selectedProduct.CategoryId;
+            //sale.CategoryName = (cbxCategoryName.ItemsSource as IEnumerable<Category>)?
             //    .FirstOrDefault(c => c.Id == selectedProduct.CategoryId)?.Name ?? string.Empty;
         }
     }
-    private void cbxProductName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    private void CbxProductName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
         ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot");
     }
-    private async void cbxProductName_LostFocus(object sender, RoutedEventArgs e)
+    private async void CbxProductName_LostFocus(object sender, RoutedEventArgs e)
     {
         long? productId = null;
         if (cbxProductName.SelectedValue != null)
@@ -119,7 +119,7 @@ public partial class SalesPage : Page
         await LoadWarehouseItemsAsync(productId);
     }
 
-    private void cbxPerRollCount_GotFocus(object sender, RoutedEventArgs e)
+    private void CbxPerRollCount_GotFocus(object sender, RoutedEventArgs e)
     {
         cbxPerRollCount.IsDropDownOpen = true;
     }

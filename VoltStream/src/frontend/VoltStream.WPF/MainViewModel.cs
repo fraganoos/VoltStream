@@ -7,43 +7,46 @@ using VoltStream.WPF.Supplies.Views;
 
 public class MainViewModel : ViewModelBase
 {
-    private object _currentChildView;
-    private IServiceProvider _serviceProvider;
+    private object currentChildView;
+    private readonly IServiceProvider serviceProvider;
     public object CurrentChildView
     {
-        get { return _currentChildView; }
+        get { return currentChildView; }
         set
         {
-            _currentChildView = value;
+            currentChildView = value;
             OnPropertyChanged(nameof(CurrentChildView));
         }
     }
+
     // command to change view
     public ICommand ShowSuppliesViewCommand { get; }
     public ICommand ShowHomeViewCommand { get; }
     public ICommand ShowSalesViewCommand { get; }
+
     // constructor
     public MainViewModel()
     {
         ShowSuppliesViewCommand = new ViewModelCommand(ExicuteShowSuppliesViewCommand);
         ShowSalesViewCommand = new ViewModelCommand(ExicuteShowSalesViewCommand);
     }
+
     public MainViewModel(IServiceProvider serviceProvider)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         ShowSuppliesViewCommand = new ViewModelCommand(ExicuteShowSuppliesViewCommand);
         ShowSalesViewCommand = new ViewModelCommand(ExicuteShowSalesViewCommand);
     }
 
     private void ExicuteShowSalesViewCommand(object obj)
     {
-        var view = new SalesPage(_serviceProvider);
+        var view = new SalesPage(serviceProvider);
         CurrentChildView = view;
     }
 
     private void ExicuteShowSuppliesViewCommand(object obj)
     {
-        var view = new SuppliesPage(_serviceProvider);
+        var view = new SuppliesPage(serviceProvider);
         CurrentChildView = view;
     }
 }

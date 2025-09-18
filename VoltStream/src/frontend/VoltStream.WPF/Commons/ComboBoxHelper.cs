@@ -16,13 +16,12 @@ public static class ComboBoxHelper
     /// <param name="allow">ItemsSource da yo'q ma'lumotni qo'shishga ruxsat berish</param>
     public static void BeforeUpdate(object sender, KeyboardFocusChangedEventArgs e, string? strInfo, bool allow = false)
     {
-        var comboBox = sender as ComboBox;
-        if (comboBox == null) return;
+        if (sender is not ComboBox comboBox) return;
         var inputText = comboBox.Text?.Trim();
         if (string.IsNullOrEmpty(inputText)) return;
 
         var items = comboBox.ItemsSource;
-        if (items == null)
+        if (items is null)
         {
             if (allow)
             {

@@ -1,4 +1,5 @@
 ﻿namespace VoltStream.WPF.Supplies.Models;
+
 using System;
 
 public class Supply

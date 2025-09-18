@@ -1,4 +1,5 @@
 ﻿namespace ApiServices.DTOs.Products;
+
 using System.Text.Json.Serialization;
 
 public class Response<T>
