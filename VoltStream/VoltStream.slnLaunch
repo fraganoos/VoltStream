@@ -5,7 +5,7 @@
       {
         "Path": "src\\backend\\VoltStream.WebApi\\VoltStream.WebApi.csproj",
         "Action": "Start",
-        "DebugTarget": "http"
+        "DebugTarget": "https"
       },
       {
         "Path": "src\\frontend\\VoltStream.WPF\\VoltStream.WPF.csproj",

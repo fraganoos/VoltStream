@@ -6,20 +6,20 @@ using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
-public record UpdateProductCommand(long Id, string Name, long CategoryId) : IRequest<long>;
+public record UpdateProductCommand(long Id, string Name, long CategoryId) : IRequest<bool>;
 
 public class UpdateProductCommandHandler(
     IAppDbContext context)
-    : IRequestHandler<UpdateProductCommand, long>
+    : IRequestHandler<UpdateProductCommand, bool>
 {
-    public async Task<long> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
         var product = await context.Products.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Product), nameof(request.Id), request.Id);
 
         product.Name = request.Name;
         product.CategoryId = request.CategoryId;
-        await context.SaveAsync(cancellationToken);
-        return product.Id;
+
+        return await context.SaveAsync(cancellationToken) > 0;
     }
 }

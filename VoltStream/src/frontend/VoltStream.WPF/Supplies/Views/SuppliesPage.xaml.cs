@@ -100,14 +100,14 @@ public partial class SuppliesPage : Page
             }
         }
         catch { }
-        
-        if ((cbxCategory.SelectedItem == null|| 
+
+        if ((cbxCategory.SelectedItem == null ||
                     cbxCategory.SelectedItem != null) &&
-                    string.IsNullOrWhiteSpace(cbxCategory.Text) && 
-                    cbxProduct.SelectedItem!=null)
+                    string.IsNullOrWhiteSpace(cbxCategory.Text) &&
+                    cbxProduct.SelectedItem != null)
         {
             var categorytId = (cbxProduct.SelectedItem as Product)!.CategoryId;
-            cbxCategory.SelectedItem = allCategories.FirstOrDefault(a=>a.Id==categorytId);
+            cbxCategory.SelectedItem = allCategories.FirstOrDefault(a => a.Id == categorytId);
         }
     }
 
@@ -161,7 +161,7 @@ public partial class SuppliesPage : Page
         try
         {
             // Kiritilgan ma'lumotlarni olish
-            if (supplyDate.SelectedDate == null)
+            if (supplyDate.SelectedDate is null)
             {
                 MessageBox.Show("Sana tanlanmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
                 supplyDate.Focus();
@@ -201,13 +201,12 @@ public partial class SuppliesPage : Page
             decimal totalQuantity = perRollCount * rollCount;
 
             // CategoryId va ProductId ni olish, null bo‘lsa 0 qo‘yiladi
-            long categoryId = cbxCategory.SelectedValue != null ? Convert.ToInt64(cbxCategory.SelectedValue) : 0;
-            long productId = cbxProduct.SelectedValue != null ? Convert.ToInt64(cbxProduct.SelectedValue) : 0;
+            long categoryId = cbxCategory.SelectedValue is not null ? Convert.ToInt64(cbxCategory.SelectedValue) : 0;
+            long productId = cbxProduct.SelectedValue is not null ? Convert.ToInt64(cbxProduct.SelectedValue) : 0;
 
             // Supply ob'ektini yaratish
             var supply = new Supply
             {
-
                 OperationDate = supplyDate.SelectedDate.Value.ToUniversalTime(),
                 CategoryId = categoryId,
                 ProductId = productId,
@@ -220,14 +219,12 @@ public partial class SuppliesPage : Page
                 DiscountPercent = discountPercent
             };
 
-
             // API orqali ta'minotni saqlash
             var response = await suppliesApi.CreateSupplyAsync(supply);
             System.Diagnostics.Debug.WriteLine($"API javobi: StatusCode={response.StatusCode}, ContentId={response.Content?.Id}, Error={response.Error?.Message}");
 
             if (response.IsSuccessStatusCode && response.Content != null)
             {
-
                 // Formani tozalash
                 cbxCategory.SelectedItem = null;
                 cbxCategory.Text = null;
@@ -301,7 +298,7 @@ public partial class SuppliesPage : Page
 
         // — Product combobox bo‘sh bo‘lib qoladi
         cbxProduct.ItemsSource = new List<Product>();
-}
+    }
 
 
     private void TxtPrice_GotFocus(object sender, RoutedEventArgs e)
@@ -389,7 +386,7 @@ public partial class SuppliesPage : Page
 
         categoriesView = CollectionViewSource.GetDefaultView(allCategories);
         cbxCategory.ItemsSource = categoriesView;
-        
+
         cbxCategory.IsDropDownOpen = true;
     }
 
@@ -414,5 +411,5 @@ public partial class SuppliesPage : Page
         cbxCategory.IsDropDownOpen = false;
     }
 
-   
+
 }

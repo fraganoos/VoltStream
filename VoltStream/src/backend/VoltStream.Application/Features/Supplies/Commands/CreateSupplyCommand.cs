@@ -33,7 +33,7 @@ public class CreateSupplyCommandHandler(
         if (warehouse is null)
         {
             context.Warehouses.Add(warehouse = new());
-            warehouse.Items = new List<WarehouseItem>();
+            warehouse.Items = [];
         }
 
         await context.BeginTransactionAsync(cancellationToken);

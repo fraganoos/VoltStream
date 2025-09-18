@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Sales.DTOs;
 
-public record GetAllSalesQuery : IRequest<List<SalesDto>>;
+public record GetAllSalesQuery : IRequest<IReadOnlyCollection<SalesDto>>;
 
 public class GetAllSalesQueryHandler(
     IAppDbContext context,
     IMapper mapper)
-    : IRequestHandler<GetAllSalesQuery, List<SalesDto>>
+    : IRequestHandler<GetAllSalesQuery, IReadOnlyCollection<SalesDto>>
 {
-    public async Task<List<SalesDto>> Handle(GetAllSalesQuery request, CancellationToken cancellationToken)
-        => mapper.Map<List<SalesDto>>(await context.Products.ToListAsync(cancellationToken));
+    public async Task<IReadOnlyCollection<SalesDto>> Handle(GetAllSalesQuery request, CancellationToken cancellationToken)
+        => mapper.Map<IReadOnlyCollection<SalesDto>>(await context.Products.ToListAsync(cancellationToken));
 }
