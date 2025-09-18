@@ -14,17 +14,15 @@ using System.Windows.Input;
 
 public partial class SuppliesPage : Page
 {
-    private readonly IServiceProvider services;
     private readonly IProductsApi productsApi;
     private readonly ICategoriesApi categoriesApi;
     private readonly ISuppliesApi suppliesApi;
     private readonly IWarehouseItemsApi warehouseItemsApi;
-    private List<Category> _allCategories = new();
-    private ICollectionView _categoriesView;
+    private List<Category> allCategories = [];
+    private ICollectionView categoriesView;
     public SuppliesPage(IServiceProvider services)
     {
         InitializeComponent();
-        this.services = services;
 
         // API xizmatlarini DI orqali olish
         productsApi = services.GetRequiredService<IProductsApi>();
@@ -54,7 +52,7 @@ public partial class SuppliesPage : Page
                 if (response.IsSuccessStatusCode && response.Content?.Data != null)
                 {
                     // OperationDate bo‘yicha teskari tartibda (eng so‘nggi birinchi)
-                    List<Supply> supplies = response.Content.Data.OrderByDescending(s => s.CreatedAt).ToList();
+                    List<Supply> supplies = [.. response.Content.Data.OrderByDescending(s => s.CreatedAt)];
                     supplyDataGrid.ItemsSource = supplies;
                 }
                 else
@@ -101,15 +99,15 @@ public partial class SuppliesPage : Page
                 }
             }
         }
-        catch (Exception ex) { }
+        catch { }
         
         if ((cbxCategory.SelectedItem == null|| 
                     cbxCategory.SelectedItem != null) &&
                     string.IsNullOrWhiteSpace(cbxCategory.Text) && 
                     cbxProduct.SelectedItem!=null)
         {
-            var categorytId = (cbxProduct.SelectedItem as Product).CategoryId;
-            cbxCategory.SelectedItem = _allCategories.FirstOrDefault(a=>a.Id==categorytId);
+            var categorytId = (cbxProduct.SelectedItem as Product)!.CategoryId;
+            cbxCategory.SelectedItem = allCategories.FirstOrDefault(a=>a.Id==categorytId);
         }
     }
 
@@ -271,13 +269,13 @@ public partial class SuppliesPage : Page
         // Hozirgi tanlangan category ni olish
 
         // 1️⃣ Agar tanlangan category mavjud bo‘lsa
-        if (cbxCategory.SelectedItem is Category selectedCategory && _allCategories.FirstOrDefault(a =>
+        if (cbxCategory.SelectedItem is Category selectedCategory && allCategories.FirstOrDefault(a =>
                 a.Name.Equals(cbxCategory.Text.Trim(), StringComparison.OrdinalIgnoreCase)) != null)
         {
             // Shu category ga oid productlarni yuklash
             var products = await productsApi.GetAllProductsByCategoryIdAsync(selectedCategory.Id);
 
-            cbxProduct.ItemsSource = products.Content.Data ?? [];
+            cbxProduct.ItemsSource = products.Content!.Data ?? [];
             return;
         }
 
@@ -287,7 +285,7 @@ public partial class SuppliesPage : Page
         {
             // Barcha productlarni yuklash
             var allProducts = await productsApi.GetAllProductsAsync();
-            cbxProduct.ItemsSource = allProducts.Content.Data ?? new List<Product>();
+            cbxProduct.ItemsSource = allProducts.Content!.Data ?? [];
             return;
         }
 
@@ -297,7 +295,7 @@ public partial class SuppliesPage : Page
         {
             // Barcha productlarni yuklash
             var allProducts = await productsApi.GetAllProductsAsync();
-            cbxProduct.ItemsSource = allProducts.Content.Data ?? new List<Product>();
+            cbxProduct.ItemsSource = allProducts.Content!.Data ?? [];
             return;
         }
 
@@ -386,11 +384,11 @@ public partial class SuppliesPage : Page
 
     private async void CbxCategory_GotFocus(object sender, RoutedEventArgs e)
     {
-        if (_allCategories.Count == 0)
-            _allCategories = await LoadCategoriesAsync();
+        if (allCategories.Count == 0)
+            allCategories = await LoadCategoriesAsync();
 
-        _categoriesView = CollectionViewSource.GetDefaultView(_allCategories);
-        cbxCategory.ItemsSource = _categoriesView;
+        categoriesView = CollectionViewSource.GetDefaultView(allCategories);
+        cbxCategory.ItemsSource = categoriesView;
         
         cbxCategory.IsDropDownOpen = true;
     }
@@ -399,7 +397,7 @@ public partial class SuppliesPage : Page
     private void CbxCategory_Loaded(object sender, RoutedEventArgs e)
     {
         // ComboBox yuklanganda ichidagi TextBox’ni topamiz
-        _categoryTextBox = cbxCategory.Template.FindName("PART_EditableTextBox", cbxCategory) as TextBox;
+        _categoryTextBox = (cbxCategory.Template.FindName("PART_EditableTextBox", cbxCategory) as TextBox)!;
         if (_categoryTextBox != null)
             _categoryTextBox.TextChanged -= CategoryTextBox_TextChanged;
     }
@@ -407,7 +405,7 @@ public partial class SuppliesPage : Page
     private void CategoryTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         string currentText = _categoryTextBox.Text; // shu paytdagi yozilgan matn
-        cbxCategory.ItemsSource = _allCategories.Where(a => a.Name.Contains(currentText));                                            // kerakli ishlarni shu yerda qilasan (filter, log va h.k.)
+        cbxCategory.ItemsSource = allCategories.Where(a => a.Name.Contains(currentText));                                            // kerakli ishlarni shu yerda qilasan (filter, log va h.k.)
         cbxCategory.IsDropDownOpen = true;
     }
 
