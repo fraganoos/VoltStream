@@ -12,15 +12,15 @@ using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Supplies.DTOs;
 
 public record GetAllSuppliesByDateQuery(
-    DateTimeOffset OrerationDate) : IRequest<List<SupplyDTO>>;
+    DateTimeOffset OrerationDate) : IRequest<IReadOnlyCollection<SupplyDto>>;
 
 public class GetAllSuppliesByDateQueryHandler(
     IAppDbContext context,
     IMapper mapper)
-    : IRequestHandler<GetAllSuppliesByDateQuery, List<SupplyDTO>>
+    : IRequestHandler<GetAllSuppliesByDateQuery, IReadOnlyCollection<SupplyDto>>
 {
 
-    public async Task<List<SupplyDTO>> Handle(GetAllSuppliesByDateQuery request, CancellationToken cancellationToken)
+    public async Task<IReadOnlyCollection<SupplyDto>> Handle(GetAllSuppliesByDateQuery request, CancellationToken cancellationToken)
     {
         var startLocal = request.OrerationDate.LocalDateTime.Date;   // 2025-09-15 00:00 (local)
         var endLocal = startLocal.AddDays(1);
@@ -29,7 +29,7 @@ public class GetAllSuppliesByDateQueryHandler(
         var startUtc = DateTime.SpecifyKind(startLocal, DateTimeKind.Local).ToUniversalTime();
         var endUtc = DateTime.SpecifyKind(endLocal, DateTimeKind.Local).ToUniversalTime();
 
-        var supplies = mapper.Map<List<SupplyDTO>>(await context.Supplies
+        var supplies = mapper.Map<IReadOnlyCollection<SupplyDto>>(await context.Supplies
             .Where(s => !s.IsDeleted)
             .Where(s => s.OperationDate >= startUtc && s.OperationDate < endUtc)
             .Include(s => s.Product)

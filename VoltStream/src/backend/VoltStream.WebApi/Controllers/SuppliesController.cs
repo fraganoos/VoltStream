@@ -8,7 +8,7 @@ using VoltStream.WebApi.Controllers.Common;
 using VoltStream.WebApi.Models;
 
 public class SuppliesController
-    : CrudController<SupplyDTO,
+    : CrudController<SupplyDto,
         GetAllSuppliesQuery,
         GetSupplyByIdQuery,
         CreateSupplyCommand,
@@ -18,4 +18,8 @@ public class SuppliesController
     [HttpGet("by-date")]
     public async Task<IActionResult> GetAll([FromQuery] DateTimeOffset date)
         => Ok(new Response { Data = await Mediator.Send(new GetAllSuppliesByDateQuery(date)) });
+
+    [HttpPost("filter")]
+    public async Task<IActionResult> GetAll(SupplyFilterQuery query)
+        => Ok(new Response { Data = await Mediator.Send(query) });
 }
