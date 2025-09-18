@@ -1,4 +1,5 @@
 ﻿namespace VoltStream.WPF.Commons.Utils;
+
 using System;
 using System.Globalization;
 using System.Windows.Data;

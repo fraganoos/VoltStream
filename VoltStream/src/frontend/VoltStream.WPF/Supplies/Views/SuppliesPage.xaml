@@ -49,9 +49,9 @@
                                             HorizontalAlignment="Left"
                                             Width="150" FontSize="14"
                                             Margin="0,0,10,0"
-                                            GotFocus="supplyDate_GotFocus"
-                                            LostFocus="supplyDate_LostFocus"
-                                           PreviewMouseDown="supplyDate_PreviewMouseDown"
+                                            GotFocus="SupplyDate_GotFocus"
+                                            LostFocus="SupplyDate_LostFocus"
+                                           PreviewMouseDown="SupplyDate_PreviewMouseDown"
                                             utils:EnterKeyTab.IsEnabled="True"/>
                 </Grid>
                 <Grid Grid.Row="1" Grid.Column="0">
@@ -94,8 +94,8 @@
                               FontSize="14"
                               Margin="0,1,10,1"
                               utils:EnterKeyTab.IsEnabled="True"
-                              GotFocus="cbxProduct_GotFocus"
-                              LostFocus="cbxProduct_LostFocus"/>
+                              GotFocus="CbxProduct_GotFocus"
+                              LostFocus="CbxProduct_LostFocus"/>
                 </Grid>
                 <Grid Grid.Row="2" Grid.Column="0">
                     <Label Content="Rulon metr:" VerticalAlignment="Center" Margin="10,0" FontSize="14"/>
@@ -118,7 +118,7 @@
                              HorizontalAlignment="Stretch" 
                              HorizontalContentAlignment="Right" 
                              FontSize="14" Margin="0,0,10,0"
-                             LostFocus="tbxRollCount_GotFocus"
+                             LostFocus="TbxRollCount_GotFocus"
                              utils:EnterKeyTab.IsEnabled="True"/>
                 </Grid>
                 <Grid Grid.Row="3" Grid.Column="0">
@@ -144,8 +144,8 @@
                             HorizontalAlignment="Stretch" 
                             HorizontalContentAlignment="Right" 
                             FontSize="14" Margin="0,0,10,0" 
-                            GotFocus="txtPrice_GotFocus"
-                            PreviewMouseDown="txtPrice_PreviewMouseDown"
+                            GotFocus="TxtPrice_GotFocus"
+                            PreviewMouseDown="TxtPrice_PreviewMouseDown"
                             utils:EnterKeyTab.IsEnabled="True"/>
 
                 </Grid>
@@ -165,8 +165,8 @@
                              HorizontalContentAlignment="Right" 
                              FontSize="14" Margin="0,0,10,0" 
                              utils:EnterKeyTab.IsEnabled="True"
-                             GotFocus="tbxDiscountPercent_GotFocus"
-                             PreviewMouseDown="tbxDiscountPercent_PreviewMouseDown"/>
+                             GotFocus="TbxDiscountPercent_GotFocus"
+                             PreviewMouseDown="TbxDiscountPercent_PreviewMouseDown"/>
                     <Label Grid.Column="1" Content="%" 
                            VerticalAlignment="Center" 
                            FontSize="14" Margin="-10,0,0,0"/>
@@ -175,7 +175,7 @@
                             HorizontalAlignment="Stretch" 
                             VerticalAlignment="Stretch" 
                             FontWeight="DemiBold" Margin="0,4,10,4"
-                            FontSize="14" Click="addSupplyBtn_Click"/>
+                            FontSize="14" Click="AddSupplyBtn_Click"/>
                 </Grid>
             </Grid>
             <Grid Grid.Column="2">

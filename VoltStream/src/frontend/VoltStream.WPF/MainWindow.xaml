@@ -17,8 +17,8 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Styles/ButtonStyles.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Styles/Colors.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/ButtonStyles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/Colors.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
@@ -45,7 +45,8 @@
                 <StackPanel Orientation="Horizontal"
                             Height="35"
                             Margin="15,5,0,15">
-                    <Image Source="/VoltStream.WPF;component/Source/Images/LogoVolt.png" />
+
+                    <Image Source="/Commons/Source/Images/LogoVolt.png" />
                     <TextBlock Text="VoltStream"
                                FontWeight="Medium"
                                VerticalAlignment="Center"

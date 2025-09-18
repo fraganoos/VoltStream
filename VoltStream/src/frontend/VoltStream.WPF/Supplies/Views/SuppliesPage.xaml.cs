@@ -175,10 +175,25 @@ public partial class SuppliesPage : Page
         }
     }
 
-    private async void addSupplyBtn_Click(object sender, RoutedEventArgs e)
+    private async void AddSupplyBtn_Click(object sender, RoutedEventArgs e)
     {
-        NotificationService.Show("dskjhfgl skdfj hgslkdfjhgk lsdfhgklsdhfgkl jjhsdklgfsdkjfhsd kljf");
+        addSupplyBtn.IsEnabled = false;
+        try
+        {
+            // Kiritilgan ma'lumotlarni olish
+            if (supplyDate.SelectedDate == null)
+            {
+                MessageBox.Show("Sana tanlanmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                supplyDate.Focus();
+                return;
+            }
 
+            if (!decimal.TryParse(tbxPerRollCount.Text, out decimal perRollCount) || perRollCount <= 0)
+            {
+                MessageBox.Show("Rulon metr noto‘g‘ri kiritilgan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                tbxPerRollCount.Focus();
+                return;
+            }
 
         addSupplyBtn.IsEnabled = false;
         try
@@ -284,7 +299,7 @@ public partial class SuppliesPage : Page
     }
 
 
-    private void txtPrice_GotFocus(object sender, RoutedEventArgs e)
+    private void TxtPrice_GotFocus(object sender, RoutedEventArgs e)
     {
         if (sender is TextBox tb)
         {
@@ -292,17 +307,16 @@ public partial class SuppliesPage : Page
         }
     }
 
-    private void txtPrice_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private void TxtPrice_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-        var tb = sender as TextBox;
-        if (tb != null && !tb.IsKeyboardFocusWithin)
+        if (sender is TextBox tb && !tb.IsKeyboardFocusWithin)
         {
             e.Handled = true;
             tb.Focus();
         }
     }
 
-    private void tbxDiscountPercent_GotFocus(object sender, RoutedEventArgs e)
+    private void TbxDiscountPercent_GotFocus(object sender, RoutedEventArgs e)
     {
         if (sender is TextBox tb)
         {
@@ -310,33 +324,31 @@ public partial class SuppliesPage : Page
         }
     }
 
-    private void tbxDiscountPercent_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private void TbxDiscountPercent_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-        var tb = sender as TextBox;
-        if (tb != null && !tb.IsKeyboardFocusWithin)
+        if (sender is TextBox tb && !tb.IsKeyboardFocusWithin)
         {
             e.Handled = true;
             tb.Focus();
         }
     }
 
-    private async void supplyDate_LostFocus(object sender, RoutedEventArgs e)
+    private async void SupplyDate_LostFocus(object sender, RoutedEventArgs e)
     {
         await LoadSuppliesAsync();
     }
 
-    private async void supplyDate_GotFocus(object sender, RoutedEventArgs e)
+    private async void SupplyDate_GotFocus(object sender, RoutedEventArgs e)
     {
         await LoadSuppliesAsync();
     }
 
-    private void supplyDate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private void SupplyDate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is VoltStream.WPF.Commons.UserControls.UserCalendar uc)
         {
             // Ichidagi dateTextBox’ga fokus berish
-            var textBox = uc.FindName("dateTextBox") as TextBox;
-            if (textBox != null && !textBox.IsKeyboardFocusWithin)
+            if (uc.FindName("dateTextBox") is TextBox textBox && !textBox.IsKeyboardFocusWithin)
             {
                 e.Handled = true;
                 textBox.Focus();
@@ -362,7 +374,7 @@ public partial class SuppliesPage : Page
             MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}",
                             "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-        return new List<Category>();
+        return [];
     }
     private async void cbxCategory_GotFocus(object sender, RoutedEventArgs e)
     {

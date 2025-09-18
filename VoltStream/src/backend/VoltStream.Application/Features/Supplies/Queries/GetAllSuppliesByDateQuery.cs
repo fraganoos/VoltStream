@@ -12,7 +12,7 @@ using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Supplies.DTOs;
 
 public record GetAllSuppliesByDateQuery(
-    DateTimeOffset orerationDate) : IRequest<List<SupplyDTO>>;
+    DateTimeOffset OrerationDate) : IRequest<List<SupplyDTO>>;
 
 public class GetAllSuppliesByDateQueryHandler(
     IAppDbContext context,
@@ -22,7 +22,7 @@ public class GetAllSuppliesByDateQueryHandler(
 
     public async Task<List<SupplyDTO>> Handle(GetAllSuppliesByDateQuery request, CancellationToken cancellationToken)
     {
-        var startLocal = request.orerationDate.LocalDateTime.Date;   // 2025-09-15 00:00 (local)
+        var startLocal = request.OrerationDate.LocalDateTime.Date;   // 2025-09-15 00:00 (local)
         var endLocal = startLocal.AddDays(1);
 
         // PostgreSQL bilan ishlash uchun UTC ga aylantiramiz
