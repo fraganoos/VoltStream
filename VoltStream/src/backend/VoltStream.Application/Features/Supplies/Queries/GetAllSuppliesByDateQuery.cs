@@ -22,16 +22,19 @@ public class GetAllSuppliesByDateQueryHandler(
 
     public async Task<List<SupplyDTO>> Handle(GetAllSuppliesByDateQuery request, CancellationToken cancellationToken)
     {
+        var startLocal = request.orerationDate.LocalDateTime.Date;   // 2025-09-15 00:00 (local)
+        var endLocal = startLocal.AddDays(1);
 
-        var date = request.orerationDate.Date;
-        var nextDay = date.AddDays(1);
+        // PostgreSQL bilan ishlash uchun UTC ga aylantiramiz
+        var startUtc = DateTime.SpecifyKind(startLocal, DateTimeKind.Local).ToUniversalTime();
+        var endUtc = DateTime.SpecifyKind(endLocal, DateTimeKind.Local).ToUniversalTime();
 
         var supplies = mapper.Map<List<SupplyDTO>>(await context.Supplies
-                            .Where(supply => supply.IsDeleted != true)
-                            .Where(d => d.OperationDate >= date && d.OperationDate < nextDay)
-                            .Include(supply => supply.Product)
-                                .ThenInclude(product => product.Category)
-                            .ToListAsync(cancellationToken));
+            .Where(s => !s.IsDeleted)
+            .Where(s => s.OperationDate >= startUtc && s.OperationDate < endUtc)
+            .Include(s => s.Product)
+                .ThenInclude(p => p.Category)
+            .ToListAsync(cancellationToken));
         return supplies;
     }
 }

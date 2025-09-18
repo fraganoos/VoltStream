@@ -5,10 +5,11 @@ using ApiServices.DTOs.Supplies;
 using ApiServices.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
-using System.Globalization;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 public partial class SuppliesPage : Page
@@ -18,9 +19,8 @@ public partial class SuppliesPage : Page
     private readonly ICategoriesApi categoriesApi;
     private readonly ISuppliesApi suppliesApi;
     private readonly IWarehouseItemsApi warehouseItemsApi;
-    private bool isProcessingProductLostFocus = false; // Hodisani qayta ishlashni oldini olish uchun flag
-    private bool isProcessingCategoryLostFocus = false; // Hodisani qayta ishlashni oldini olish uchun flag
-
+    private List<Category> _allCategories = new();
+    private ICollectionView _categoriesView;
     public SuppliesPage(IServiceProvider services)
     {
         InitializeComponent();
@@ -31,71 +31,24 @@ public partial class SuppliesPage : Page
         categoriesApi = services.GetRequiredService<ICategoriesApi>();
         suppliesApi = services.GetRequiredService<ISuppliesApi>();
         warehouseItemsApi = services.GetRequiredService<IWarehouseItemsApi>();
-
+        supplyDate.SelectedDate = DateTime.Now;
         supplyDate.dateTextBox.Focus();
     }
 
-    private async Task LoadCategoriesAsync()
-    {
-        try
-        {
-            var response = await categoriesApi.GetAllCategoriesAsync();
-            if (response.IsSuccessStatusCode && response.Content?.Data != null)
-            {
-                List<Category> categories = response.Content.Data;
-                cbxCategory.ItemsSource = categories;
-                cbxCategory.DisplayMemberPath = "Name";
-                cbxCategory.SelectedValuePath = "Id";
-                if (categories.Count == 0)
-                    MessageBox.Show("Kategoriyalar topilmadi.", "Ma'lumot", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                MessageBox.Show($"Kategoriyalarni olishda xatolik: {response.Error?.Message ?? "Ma'lumotlar yo'q"}",
-                    "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}", "Xatolik",
-                MessageBoxButton.OK, MessageBoxImage.Error);
-            System.Diagnostics.Debug.WriteLine($"Xato: {ex.StackTrace}");
-        }
-    }
-
-    private async Task LoadProductsAsync()
-    {
-        try
-        {
-            var response = await productsApi.GetAllProductsAsync();
-            if (response.IsSuccessStatusCode && response.Content?.Data != null)
-            {
-                List<Product> products = response.Content.Data;
-                cbxProduct.ItemsSource = products;
-                cbxProduct.DisplayMemberPath = "Name";
-                cbxProduct.SelectedValuePath = "Id";
-                if (products.Count == 0)
-                    MessageBox.Show("Mahsulotlar topilmadi.", "Ma'lumot", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                MessageBox.Show($"Mahsulotlar olishda xatolik: {response.Error?.Message ?? "Ma'lumotlar yo'q"}",
-                    "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}", "Xatolik",
-                MessageBoxButton.OK, MessageBoxImage.Error);
-            System.Diagnostics.Debug.WriteLine($"Xato: {ex.StackTrace}");
-        }
-    }
 
     private async Task LoadSuppliesAsync()
     {
         try
         {
-            var operationDate = supplyDate.SelectedDate.Value;
+            var text = supplyDate.dateTextBox.Text;
+
+            if (DateTime.TryParseExact(
+                    text,
+                    "dd.MM.yyyy",
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.None,
+                    out DateTime operationDate))
+            {
 
                 var response = await suppliesApi.GetAllSuppliesByDateAsync(operationDate);
                 if (response.IsSuccessStatusCode && response.Content?.Data != null)
@@ -109,7 +62,7 @@ public partial class SuppliesPage : Page
                     MessageBox.Show($"Ta'minotlarni olishda xatolik: {response.Error?.Message ?? "Ma'lumotlar yo'q"}",
                         "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-            
+            }
         }
         catch (Exception ex)
         {
@@ -118,128 +71,8 @@ public partial class SuppliesPage : Page
         }
     }
 
-    private void cbxCategory_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter || e.Key == Key.Tab)
-        {
-            //Agar element tanlangan bo'lsa, to'g'ridan-to'g'ri cbxProduct ga o'tamiz
-            if (cbxCategory.SelectedItem != null)
-            {
-                cbxProduct.Focus();
-                e.Handled = true; // Hodisani to'xtatamiz, qayta LostFocus chaqirilmasligi uchun
-            }
-            else
-            {
-                // Agar element tanlanmagan bo'lsa, LostFocus hodisasini ishga tushiramiz
-                cbxCategory_LostFocus(sender, new RoutedEventArgs());
-            }
-        }
-    }
-
-    private async void cbxCategory_LostFocus(object sender, RoutedEventArgs e)
-    {
-        // Agar hodisa allaqachon ishlayotgan bo'lsa, qayta ishlashni to'xtatamiz
-        if (isProcessingCategoryLostFocus)
-            return;
-
-        isProcessingCategoryLostFocus = true; // Hodisani boshladik
-
-        try
-        {
-            if (cbxCategory.SelectedItem == null && !string.IsNullOrWhiteSpace(cbxCategory.Text))
-            {
-                string newCategoryName = cbxCategory.Text.Trim().ToLower();
-
-                // ItemsSource ni Category listiga cast qilamiz
-                var categories = cbxCategory.ItemsSource as List<Category>;
-                if ((categories == null)||(categories != null && !categories.Any(c =>
-                        c.Name.ToLower().Equals(newCategoryName, StringComparison.OrdinalIgnoreCase))))
-                {
-                    // Ha yoki Yo‘q so‘rovi
-                    var result = MessageBox.Show(
-                        $"\"{newCategoryName}\" nomli kategoriya mavjud emas.\n" +
-                        "Yangi kategoriya yaratmoqchimisiz?",
-                        "Yangi kategoriya",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question);
-
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        await LoadProductsAsync();
-                        cbxProduct.Focus();
-                    }
-                    else if (result == MessageBoxResult.No)
-                    {
-                        cbxCategory.Text = null;
-                        cbxCategory.Focus();
-                    }
-                }
-                else 
-                {
-                    // Agar kategoriya matni mavjud elementlardan biriga mos kelsa
-                    cbxProduct.Focus();
-                }
-            }
-            else           
-            {
-                long categoryId = Convert.ToInt64(cbxCategory.SelectedValue);
-                try
-                {
-                    var response = await productsApi.GetAllProductsByCategoryIdAsync(categoryId);
-                    if (response.IsSuccessStatusCode && response.Content?.Data != null)
-                    {
-                        List<Product> products = response.Content.Data;
-                        cbxProduct.ItemsSource = products;
-                        cbxProduct.DisplayMemberPath = "Name";
-                        cbxProduct.SelectedValuePath = "Id";
-                    }
-                    else
-                    {
-                        MessageBox.Show($"Mahsulotlar olishda xatolik: {response.Error?.Message ?? "Ma'lumotlar yo'q"}",
-                            "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}", "Xatolik",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-
-                cbxProduct.Focus();
-            }
-        }
-        finally
-        {
-            isProcessingCategoryLostFocus = false; // Hodisa tugadi, flagni qayta tiklaymiz
-        }
-    }
-
-    private void cbxProduct_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Enter || e.Key == Key.Tab)
-        {
-            // Agar element tanlangan bo'lsa, to'g'ridan-to'g'ri tbxPerRollCount ga o'tamiz
-            if (cbxProduct.SelectedItem != null)
-            {
-                tbxPerRollCount.Focus();
-                e.Handled = true; // Hodisani to'xtatamiz, qayta LostFocus chaqirilmasligi uchun
-            }
-            else
-            {
-                // Agar element tanlanmagan bo'lsa, LostFocus hodisasini ishga tushiramiz
-                cbxProduct_LostFocus(sender, new RoutedEventArgs());
-            }
-        }
-    }
-
     private void cbxProduct_LostFocus(object sender, RoutedEventArgs e)
     {
-        // Agar hodisa allaqachon ishlayotgan bo'lsa, qayta ishlashni to'xtatamiz
-        if (isProcessingProductLostFocus)
-            return;
-
-        isProcessingProductLostFocus = true; // Hodisani boshladik
-
         try
         {
             if (cbxProduct.SelectedItem == null && !string.IsNullOrWhiteSpace(cbxProduct.Text))
@@ -268,15 +101,16 @@ public partial class SuppliesPage : Page
                     }
                 }
             }
-            else if (cbxProduct.SelectedItem != null)
-            {
-                // Agar element tanlangan bo'lsa, to'g'ridan-to'g'ri tbxPerRollCount ga o'tamiz
-                tbxPerRollCount.Focus();
-            }
         }
-        finally
+        catch (Exception ex) { }
+        
+        if ((cbxCategory.SelectedItem == null|| 
+                    cbxCategory.SelectedItem != null) &&
+                    string.IsNullOrWhiteSpace(cbxCategory.Text) && 
+                    cbxProduct.SelectedItem!=null)
         {
-            isProcessingProductLostFocus = false; // Hodisa tugadi, flagni qayta tiklaymiz
+            var categorytId = (cbxProduct.SelectedItem as Product).CategoryId;
+            cbxCategory.SelectedItem = _allCategories.FirstOrDefault(a=>a.Id==categorytId);
         }
     }
 
@@ -430,17 +264,49 @@ public partial class SuppliesPage : Page
         }
     }
 
-    private async void cbxCategory_GotFocus(object sender, RoutedEventArgs e)
+    private async void cbxProduct_GotFocus(object sender, RoutedEventArgs e)
     {
-        await LoadCategoriesAsync();
-        cbxCategory.IsDropDownOpen = true;
         cbxProduct.ItemsSource = null;
-    }
-
-    private void cbxProduct_GotFocus(object sender, RoutedEventArgs e)
-    {
         cbxProduct.IsDropDownOpen = true;
-    }
+    
+        // Hozirgi tanlangan category ni olish
+        var selectedCategory = cbxCategory.SelectedItem as Category;
+
+        // 1️⃣ Agar tanlangan category mavjud bo‘lsa
+        if (selectedCategory != null && _allCategories.FirstOrDefault(a =>
+                a.Name.Equals(cbxCategory.Text.Trim(), StringComparison.OrdinalIgnoreCase)) != null)
+        {
+            // Shu category ga oid productlarni yuklash
+            var products = await productsApi.GetAllProductsByCategoryIdAsync(selectedCategory.Id);
+
+                cbxProduct.ItemsSource = products.Content.Data ?? new List<Product>();
+            return;
+        }
+
+        // 2️⃣ Agar foydalanuvchi hali hech nima tanlamagan bo‘lsa
+        if (cbxCategory.SelectedItem == null &&
+            string.IsNullOrWhiteSpace(cbxCategory.Text))
+        {
+            // Barcha productlarni yuklash
+            var allProducts = await productsApi.GetAllProductsAsync();
+            cbxProduct.ItemsSource = allProducts.Content.Data ?? new List<Product>();
+            return;
+        }
+
+        // 2️⃣ Agar foydalanuvchi hali hech nima tanlamagan bo‘lsa 
+        if (cbxCategory.SelectedItem != null &&
+            string.IsNullOrWhiteSpace(cbxCategory.Text))
+        {
+            // Barcha productlarni yuklash
+            var allProducts = await productsApi.GetAllProductsAsync();
+            cbxProduct.ItemsSource = allProducts.Content.Data ?? new List<Product>();
+            return;
+        }
+
+        // — Product combobox bo‘sh bo‘lib qoladi
+        cbxProduct.ItemsSource = new List<Product>();
+}
+
 
     private void txtPrice_GotFocus(object sender, RoutedEventArgs e)
     {
@@ -482,4 +348,78 @@ public partial class SuppliesPage : Page
     {
         await LoadSuppliesAsync();
     }
+
+    private async void supplyDate_GotFocus(object sender, RoutedEventArgs e)
+    {
+        await LoadSuppliesAsync();
+    }
+
+    private void supplyDate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is VoltStream.WPF.Commons.UserControls.UserCalendar uc)
+        {
+            // Ichidagi dateTextBox’ga fokus berish
+            var textBox = uc.FindName("dateTextBox") as TextBox;
+            if (textBox != null && !textBox.IsKeyboardFocusWithin)
+            {
+                e.Handled = true;
+                textBox.Focus();
+                textBox.SelectAll();   // Ixtiyoriy: matnni belgilang
+            }
+        }
+    }
+
+    private async Task<List<Category>> LoadCategoriesAsync()
+    {
+        try
+        {
+            var response = await categoriesApi.GetAllCategoriesAsync();
+            if (response.IsSuccessStatusCode && response.Content?.Data != null)
+            {
+                return response.Content.Data;
+            }
+            MessageBox.Show("Kategoriyalar topilmadi.", "Ma'lumot",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}",
+                            "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        return new List<Category>();
+    }
+
+    private async void cbxCategory_GotFocus(object sender, RoutedEventArgs e)
+    {
+        if (_allCategories.Count == 0)
+            _allCategories = await LoadCategoriesAsync();
+
+        _categoriesView = CollectionViewSource.GetDefaultView(_allCategories);
+        cbxCategory.ItemsSource = _categoriesView;
+        
+        cbxCategory.IsDropDownOpen = true;
+    }
+
+    private TextBox _categoryTextBox;
+    private void cbxCategory_Loaded(object sender, RoutedEventArgs e)
+    {
+        // ComboBox yuklanganda ichidagi TextBox’ni topamiz
+        _categoryTextBox = cbxCategory.Template.FindName("PART_EditableTextBox", cbxCategory) as TextBox;
+        if (_categoryTextBox != null)
+            _categoryTextBox.TextChanged -= CategoryTextBox_TextChanged;
+    }
+
+    private void CategoryTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        string currentText = _categoryTextBox.Text; // shu paytdagi yozilgan matn
+        cbxCategory.ItemsSource = _allCategories.Where(a => a.Name.Contains(currentText));                                            // kerakli ishlarni shu yerda qilasan (filter, log va h.k.)
+        cbxCategory.IsDropDownOpen = true;
+    }
+
+    private void cbxCategory_LostFocus(object sender, RoutedEventArgs e)
+    {
+        cbxCategory.IsDropDownOpen = false;
+    }
+
+   
 }
