@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Source\Images\LogoVolt.png" />
+    <None Remove="Commons\Source\Images\LogoVolt.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Source\Images\LogoVolt.png">
+    <Resource Include="Commons\Source\Images\LogoVolt.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

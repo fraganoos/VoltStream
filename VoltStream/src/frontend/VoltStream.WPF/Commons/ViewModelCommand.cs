@@ -1,35 +1,38 @@
-﻿using System.Windows.Input;
+﻿namespace VoltStream.WPF.Commons;
 
-namespace VoltStream.WPF.Commons
+using System.Windows.Input;
+
+public class ViewModelCommand : ICommand
 {
-    public class ViewModelCommand : ICommand
-    {
-        private readonly Action<object> _executeAction;
-        private readonly Predicate<object> _canExecuteAction;
+    private readonly Action<object> executeAction;
+    private readonly Predicate<object> canExecuteAction;
 
-        // Constructor
-        public ViewModelCommand(Action<object> executeAction)
-        {
-            _executeAction = executeAction;
-            _canExecuteAction = null;
-        }
-        public ViewModelCommand(Action<object> executeAction, Predicate<object> canExecuteAction)
-        {
-            _executeAction = executeAction;
-            _canExecuteAction = canExecuteAction;
-        }
-        public event EventHandler CanExecuteChanged
-        {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
-        }
-        public bool CanExecute(object parameter)
-        {
-            return _canExecuteAction == null ? true : _canExecuteAction(parameter);
-        }
-        public void Execute(object parameter)
-        {
-            _executeAction(parameter);
-        }
+    // Constructor
+    public ViewModelCommand(Action<object> executeAction)
+    {
+        this.executeAction = executeAction;
+        canExecuteAction = null!;
+    }
+
+    public ViewModelCommand(Action<object> executeAction, Predicate<object> canExecuteAction)
+    {
+        this.executeAction = executeAction;
+        this.canExecuteAction = canExecuteAction;
+    }
+
+    public event EventHandler CanExecuteChanged
+    {
+        add { CommandManager.RequerySuggested += value; }
+        remove { CommandManager.RequerySuggested -= value; }
+    }
+
+    public bool CanExecute(object parameter)
+    {
+        return canExecuteAction == null || canExecuteAction(parameter);
+    }
+
+    public void Execute(object parameter)
+    {
+        executeAction(parameter);
     }
 }

@@ -39,5 +39,4 @@ public record Supply
 
     [JsonPropertyName("createdAt")]
     public DateTimeOffset CreatedAt { get; set; }
-
 }

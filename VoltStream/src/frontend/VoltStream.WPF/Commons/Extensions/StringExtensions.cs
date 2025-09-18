@@ -1,6 +1,6 @@
 ﻿namespace VoltStream.WPF.Commons.Extensions;
 
-public static class SstringExtensions
+public static class StringExtensions
 {
     public static string WrapWithNewLines(this string text, int maxLength)
     {
