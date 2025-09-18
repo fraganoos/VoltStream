@@ -21,14 +21,14 @@ public partial class App : Application
         ApiService.ConfigureServices(services, "https://localhost:7287");
 
         // WPF xizmatlarini qo‘shish
-        services.AddSingleton<MineViewModel>();
+        services.AddSingleton<MainViewModel>();
 
         // Extension method ishlaydi
         var serviceProvider = services.BuildServiceProvider();
 
         var mainWindow = new MainWindow
         {
-            DataContext = serviceProvider.GetService<MineViewModel>()
+            DataContext = serviceProvider.GetService<MainViewModel>()
         };
         mainWindow.Show();
     }

@@ -1,11 +1,11 @@
-﻿using System.Windows.Input;
+﻿namespace VoltStream.WPF;
+
+using System.Windows.Input;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Sales.Views;
 using VoltStream.WPF.Supplies.Views;
 
-namespace VoltStream.WPF;
-
-public class MineViewModel : ViewModelBase
+public class MainViewModel : ViewModelBase
 {
     private object _currentChildView;
     private IServiceProvider _serviceProvider;
@@ -23,12 +23,12 @@ public class MineViewModel : ViewModelBase
     public ICommand ShowHomeViewCommand { get; }
     public ICommand ShowSalesViewCommand { get; }
     // constructor
-    public MineViewModel()
+    public MainViewModel()
     {
         ShowSuppliesViewCommand = new ViewModelCommand(ExicuteShowSuppliesViewCommand);
         ShowSalesViewCommand = new ViewModelCommand(ExicuteShowSalesViewCommand);
     }
-    public MineViewModel(IServiceProvider serviceProvider)
+    public MainViewModel(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         ShowSuppliesViewCommand = new ViewModelCommand(ExicuteShowSuppliesViewCommand);

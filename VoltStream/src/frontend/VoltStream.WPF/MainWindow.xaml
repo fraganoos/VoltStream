@@ -8,83 +8,105 @@
         xmlns:viewmodels="clr-namespace:VoltStream.WPF"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="MainWindow" Height="700" Width="1300">
+        Title="MainWindow"
+        Height="700"
+        Width="1300">
     <Window.DataContext>
-        <viewmodels:MineViewModel/>
+        <viewmodels:MainViewModel />
     </Window.DataContext>
-        <Window.Resources>
+    <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Styles/ButtonStyles.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Styles/Colors.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Styles/ButtonStyles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Styles/Colors.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
     <Border>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="250" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+
+            <!-- Notification stack -->
+            <StackPanel Grid.Column="1"
+                        x:Name="NotificationHost"
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Right"
+                        Margin="20"
+                        Panel.ZIndex="9999"
+                        Orientation="Vertical"
+                        IsHitTestVisible="False" />
+            
             <!--Navigation menu-->
-            <StackPanel Grid.Column="0" Background="#0A003A">
-                <StackPanel Orientation="Horizontal" Height="35" 
+            <StackPanel Grid.Column="0"
+                        Background="#0A003A">
+                <StackPanel Orientation="Horizontal"
+                            Height="35"
                             Margin="15,5,0,15">
-                    <Image Source="/VoltStream.WPF;component/Source/Images/LogoVolt.png"/>
-                    <TextBlock Text="VoltStream" 
+                    <Image Source="/VoltStream.WPF;component/Source/Images/LogoVolt.png" />
+                    <TextBlock Text="VoltStream"
                                FontWeight="Medium"
                                VerticalAlignment="Center"
-                               FontSize="20" 
-                               Foreground="White" 
-                               Margin="20,0,0,0"/>
+                               FontSize="20"
+                               Foreground="White"
+                               Margin="20,0,0,0" />
 
                 </StackPanel>
-                <RadioButton Style="{DynamicResource menuButton}" 
-                         Tag="{DynamicResource color1}">
+                <RadioButton Style="{DynamicResource menuButton}"
+                             Tag="{DynamicResource color1}">
                     <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="Home" Style="{StaticResource menuButtonIcon}"/>
-                        <TextBlock Text="Bosh sahifa" Style="{StaticResource menuButtonText}"/>
+                        <fa:IconImage Icon="Home"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Bosh sahifa"
+                                   Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
-                <RadioButton Style="{DynamicResource menuButton}" 
+                <RadioButton Style="{DynamicResource menuButton}"
                              Tag="{DynamicResource color2}"
                              Command="{Binding ShowSuppliesViewCommand}">
                     <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="ProjectDiagram" Style="{StaticResource menuButtonIcon}"/>
-                        <TextBlock Text="Ishlab chiqarish" Style="{StaticResource menuButtonText}"/>
+                        <fa:IconImage Icon="ProjectDiagram"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Ishlab chiqarish"
+                                   Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
-                <RadioButton Style="{DynamicResource menuButton}" 
+                <RadioButton Style="{DynamicResource menuButton}"
                              Tag="{DynamicResource color3}"
                              Command="{Binding ShowSalesViewCommand}">
                     <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="ShoppingCart" Style="{StaticResource menuButtonIcon}"/>
-                        <TextBlock Text="Savdo" Style="{StaticResource menuButtonText}"/>
+                        <fa:IconImage Icon="ShoppingCart"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Savdo"
+                                   Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
             </StackPanel>
             <!--Header and content-->
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="50"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="50" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <!--Header-->
-                <Border Grid.Row="0" Background="#0A003A">
-                    <TextBlock Text="Bosh sahifa" 
+                <Border Grid.Row="0"
+                        Background="#0A003A">
+                    <TextBlock Text="Bosh sahifa"
                                VerticalAlignment="Center"
-                               FontSize="16" 
-                               Foreground="White" 
-                               Margin="20,0,0,0"/>
+                               FontSize="16"
+                               Foreground="White"
+                               Margin="20,0,0,0" />
                 </Border>
                 <!--Content-->
                 <Frame Grid.Row="1"
-                                Content="{Binding CurrentChildView}"
-                                Margin="10"
+                       Content="{Binding CurrentChildView}"
+                       Margin="10"
                        NavigationUIVisibility="Hidden">
-                    
+
                 </Frame>
             </Grid>
-            </Grid>
+        </Grid>
     </Border>
 </Window>
