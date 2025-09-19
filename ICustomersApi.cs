@@ -1,14 +1,17 @@
 ﻿namespace ApiServices.Interfaces;
-
+using System;
+using System.Collections.Generic;
 using ApiServices.DTOs.Customers;
-using ApiServices.DTOs.Products;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Refit;
 
 [Headers("accept: application/json")]
 public interface ICustomersApi
 {
     [Get("/api/customers")]
-    Task<ApiResponse<Response<List<Customer>>>> GetAllCustomersAsync();
+    Task<ApiResponse<List<Customer>>> GetAllCustomersAsync();
     [Get("/api/customers/{id}")]
     Task<ApiResponse<Customer>> GetCustomerByIdAsync(long id);
     [Post("/api/customers")]

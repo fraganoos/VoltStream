@@ -1,8 +1,7 @@
 ﻿namespace ApiServices.DTOs.Customers;
-
 using System.Text.Json.Serialization;
 
-public record Customer
+public class Customer
 {
     [JsonPropertyName("id")]
     public int Id { get; set; }

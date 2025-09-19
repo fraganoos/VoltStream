@@ -359,19 +359,19 @@ public partial class SuppliesPage : Page
         await LoadSuppliesAsync();
     }
 
-    private void SupplyDate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-        if (sender is VoltStream.WPF.Commons.UserControls.UserCalendar uc)
-        {
-            // Ichidagi dateTextBox’ga fokus berish
-            if (uc.FindName("dateTextBox") is TextBox textBox && !textBox.IsKeyboardFocusWithin)
-            {
-                e.Handled = true;
-                textBox.Focus();
-                textBox.SelectAll();   // Ixtiyoriy: matnni belgilang
-            }
-        }
-    }
+    //private void SupplyDate_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    //{
+    //    if (sender is VoltStream.WPF.Commons.UserControls.UserCalendar uc)
+    //    {
+    //        // Ichidagi dateTextBox’ga fokus berish
+    //        if (uc.FindName("dateTextBox") is TextBox textBox && !textBox.IsKeyboardFocusWithin)
+    //        {
+    //            e.Handled = true;
+    //            textBox.Focus();
+    //            textBox.SelectAll();   // Ixtiyoriy: matnni belgilang
+    //        }
+    //    }
+    //}
 
     private async Task<List<Category>> LoadCategoriesAsync()
     {
