@@ -31,7 +31,9 @@ public class CreateSaleCommandHandler(
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new NotFoundException(nameof(Warehouse));
 
-        var account = await context.Accounts.FirstOrDefaultAsync(a => a.CustomerId == request.CustomerId, cancellationToken)
+        var customer = await context.Customers
+            .Include(c => c.Account)
+            .FirstOrDefaultAsync(a => a.Id == request.CustomerId, cancellationToken)
             ?? throw new NotFoundException(nameof(Account));
 
         var description = new StringBuilder();
@@ -81,12 +83,12 @@ public class CreateSaleCommandHandler(
 
         var sale = mapper.Map<Sale>(request);
 
-        account.CurrentSumm -= sale.Summa;
-        account.DiscountSumm += sale.Discount;
+        customer.Account.CurrentSumm -= sale.Summa;
+        customer.Account.DiscountSumm += sale.Discount;
 
         var customerOperation = mapper.Map<CustomerOperation>(request);
         customerOperation.OperationType = OperationType.Sale;
-        customerOperation.Account = account;
+        customerOperation.Customer = customer;
         customerOperation.Description = $"Savdo ID = {sale.Id}: {request.Description}. {description}".Trimmer(200);
         sale.CustomerOperation = customerOperation;
 
