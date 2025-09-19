@@ -2,7 +2,7 @@
 
 using VoltStream.Domain.Entities;
 
-public class AccountDto
+public record AccountDto
 {
     public long Id { get; set; }
     public long CustomerId { get; set; }

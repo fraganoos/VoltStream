@@ -1,6 +1,6 @@
 [
   {
-    "Name": "Fully run ",
+    "Name": "Combined",
     "Projects": [
       {
         "Path": "src\\backend\\VoltStream.WebApi\\VoltStream.WebApi.csproj",

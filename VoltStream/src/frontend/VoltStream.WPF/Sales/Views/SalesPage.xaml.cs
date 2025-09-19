@@ -1,8 +1,8 @@
 ﻿namespace VoltStream.WPF.Sales.Views;
 
+using ApiServices.DTOs.Customers;
 using ApiServices.DTOs.Products;
 using ApiServices.DTOs.Supplies;
-using ApiServices.DTOs.Customers;
 using ApiServices.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
@@ -71,6 +71,7 @@ public partial class SalesPage : Page
             // Сохраняем текущее выбранное значение
             var selectedValue = CustomerName.SelectedValue;
             var response = await customersApi.GetAllCustomersAsync();
+
                 if (response.IsSuccessStatusCode && response.Content?.Data != null)
                 {
                     List<Customer> customers = response.Content.Data;
@@ -87,6 +88,7 @@ public partial class SalesPage : Page
                     var errorMsg = response.Error?.Message ?? "Unknown error";
                     MessageBox.Show("Error fetching customers: " + errorMsg);
                 }
+
         }
         catch (Exception ex)
         {

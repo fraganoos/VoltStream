@@ -136,14 +136,14 @@ public class UpdateSaleCommandHandler(
 
         await context.BeginTransactionAsync(cancellationToken);
 
-        var account = sale.Customer.Account;
-        account.CurrentSumm -= sale.Summa;
-        account.DiscountSumm += sale.Discount;
+        var customer = sale.Customer;
+        customer.Account.CurrentSumm -= sale.Summa;
+        customer.Account.DiscountSumm += sale.Discount;
 
         mapper.Map(request, sale);
         var customerOperation = mapper.Map<CustomerOperation>(request);
         customerOperation.OperationType = OperationType.Sale;
-        customerOperation.Account = account;
+        customerOperation.Customer = customer;
         customerOperation.Description = $"Savdo ID = {sale.Id}: {request.Description}. {description}".Trimmer(200);
         sale.CustomerOperation = customerOperation;
 
