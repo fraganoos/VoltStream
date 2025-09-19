@@ -1,12 +1,9 @@
 ﻿namespace ApiServices.Interfaces;
 
-using System;
-using System.Collections.Generic;
 using ApiServices.DTOs.Customers;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Refit;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 [Headers("accept: application/json")]
 public interface ICustomersApi

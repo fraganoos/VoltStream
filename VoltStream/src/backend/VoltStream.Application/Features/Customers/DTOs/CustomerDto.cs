@@ -1,6 +1,6 @@
 ﻿namespace VoltStream.Application.Features.Customers.DTOs;
 
-public class CustomerDto
+public record CustomerDto
 {
     public long Id { get; set; }
     public string Name { get; set; } = string.Empty;

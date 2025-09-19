@@ -1,8 +1,8 @@
 ﻿namespace VoltStream.WPF.Sales.Views;
 
+using ApiServices.DTOs.Customers;
 using ApiServices.DTOs.Products;
 using ApiServices.DTOs.Supplies;
-using ApiServices.DTOs.Customers;
 using ApiServices.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
@@ -71,22 +71,22 @@ public partial class SalesPage : Page
             // Сохраняем текущее выбранное значение
             var selectedValue = CustomerName.SelectedValue;
             var response = await customersApi.GetAllCustomersAsync();
-                if (response.IsSuccessStatusCode && response.Content != null)
-                {
-                    List<Customer> customers = response.Content;
-                    CustomerName.ItemsSource = customers;
-                    CustomerName.DisplayMemberPath = "Name";
-                    CustomerName.SelectedValuePath = "Id";
-                    // Восстанавливаем выбранное значение
-                    if (selectedValue != null)
-                        CustomerName.SelectedValue = selectedValue;
-                }
-                else
-                {
-                    // Проверяем на null, чтобы избежать CS8602
-                    var errorMsg = response.Error?.Message ?? "Unknown error";
-                    MessageBox.Show("Error fetching customers: " + errorMsg);
-                }
+            if (response.IsSuccessStatusCode && response.Content != null)
+            {
+                List<Customer> customers = response.Content;
+                CustomerName.ItemsSource = customers;
+                CustomerName.DisplayMemberPath = "Name";
+                CustomerName.SelectedValuePath = "Id";
+                // Восстанавливаем выбранное значение
+                if (selectedValue != null)
+                    CustomerName.SelectedValue = selectedValue;
+            }
+            else
+            {
+                // Проверяем на null, чтобы избежать CS8602
+                var errorMsg = response.Error?.Message ?? "Unknown error";
+                MessageBox.Show("Error fetching customers: " + errorMsg);
+            }
         }
         catch (Exception ex)
         {
