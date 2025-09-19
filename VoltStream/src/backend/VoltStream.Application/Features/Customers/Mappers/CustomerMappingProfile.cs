@@ -10,6 +10,9 @@ public class CustomerMappingProfile : Profile
 {
     public CustomerMappingProfile()
     {
+        CreateMap<Customer, CustomerDto>();
+        CreateMap<Account, AccountDto>();
+
         CreateMap<CreateCustomerCommand, Customer>()
             .ForMember(dest => dest.NormalizedName, opt =>
             opt.MapFrom(src => src.Name.ToNormalized()));
@@ -17,7 +20,5 @@ public class CustomerMappingProfile : Profile
         CreateMap<UpdateCustomerCommand, Customer>()
             .ForMember(dest => dest.NormalizedName, opt =>
             opt.MapFrom(src => src.Name.ToNormalized()));
-
-        CreateMap<Customer, CustomerDto>();
     }
 }

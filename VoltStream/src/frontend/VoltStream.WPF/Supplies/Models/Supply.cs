@@ -4,7 +4,7 @@ using System;
 
 public class Supply
 {
-    public DateTime OperationDate { get; set; }= DateTime.Now;
+    public DateTime OperationDate { get; set; } = DateTime.Now;
     public string CategoryName { get; set; } = string.Empty;
     public long ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty;

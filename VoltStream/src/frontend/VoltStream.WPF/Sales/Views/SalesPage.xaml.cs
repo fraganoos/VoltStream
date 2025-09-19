@@ -72,22 +72,22 @@ public partial class SalesPage : Page
             var selectedValue = CustomerName.SelectedValue;
             var response = await customersApi.GetAllCustomersAsync();
 
-                if (response.IsSuccessStatusCode && response.Content?.Data != null)
-                {
-                    List<Customer> customers = response.Content.Data;
-                    CustomerName.ItemsSource = customers;
-                    CustomerName.DisplayMemberPath = "Name";
-                    CustomerName.SelectedValuePath = "Id";
-                    // Восстанавливаем выбранное значение
-                    if (selectedValue != null)
-                        CustomerName.SelectedValue = selectedValue;
-                }
-                else
-                {
-                    // Проверяем на null, чтобы избежать CS8602
-                    var errorMsg = response.Error?.Message ?? "Unknown error";
-                    MessageBox.Show("Error fetching customers: " + errorMsg);
-                }
+            if (response.IsSuccessStatusCode && response.Content?.Data != null)
+            {
+                List<Customer> customers = response.Content.Data;
+                CustomerName.ItemsSource = customers;
+                CustomerName.DisplayMemberPath = "Name";
+                CustomerName.SelectedValuePath = "Id";
+                // Восстанавливаем выбранное значение
+                if (selectedValue != null)
+                    CustomerName.SelectedValue = selectedValue;
+            }
+            else
+            {
+                // Проверяем на null, чтобы избежать CS8602
+                var errorMsg = response.Error?.Message ?? "Unknown error";
+                MessageBox.Show("Error fetching customers: " + errorMsg);
+            }
 
         }
         catch (Exception ex)

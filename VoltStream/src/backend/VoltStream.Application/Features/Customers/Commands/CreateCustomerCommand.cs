@@ -12,7 +12,6 @@ using VoltStream.Domain.Entities;
 
 public record CreateCustomerCommand(
     string Name,
-    string NormalizedName,
     string? Phone,
     string? Address,
     string? Description,
