@@ -2,6 +2,7 @@
 
 using ApiServices.DTOs.Products;
 using ApiServices.DTOs.Supplies;
+using ApiServices.DTOs.Customers;
 using ApiServices.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
@@ -20,6 +21,7 @@ public partial class SalesPage : Page
     private readonly ICategoriesApi categoriesApi;
     private readonly IProductsApi productsApi;
     private readonly IWarehouseItemsApi warehouseItemsApi;
+    private readonly ICustomersApi customersApi;
 
     public Sale sale = new();
 
@@ -31,6 +33,7 @@ public partial class SalesPage : Page
         categoriesApi = services.GetRequiredService<ICategoriesApi>();
         productsApi = services.GetRequiredService<IProductsApi>();
         warehouseItemsApi = services.GetRequiredService<IWarehouseItemsApi>();
+        customersApi = services.GetRequiredService<ICustomersApi>();
 
         CustomerName.GotFocus += CustomerName_GotFocus;
         cbxCategoryName.GotFocus += CbxCategoryName_GotFocus;
@@ -58,7 +61,7 @@ public partial class SalesPage : Page
 
     private async void CustomerName_GotFocus(object sender, RoutedEventArgs e) /// API Qilish kerak
     {
-        //await LoadCustomerNameAsync();
+        await LoadCustomerNameAsync();
     }
 
     private async Task LoadCustomerNameAsync()
@@ -67,6 +70,23 @@ public partial class SalesPage : Page
         {
             // Сохраняем текущее выбранное значение
             var selectedValue = CustomerName.SelectedValue;
+            var response = await customersApi.GetAllCustomersAsync();
+                if (response.IsSuccessStatusCode && response.Content != null)
+                {
+                    List<Customer> customers = response.Content;
+                    CustomerName.ItemsSource = customers;
+                    CustomerName.DisplayMemberPath = "Name";
+                    CustomerName.SelectedValuePath = "Id";
+                    // Восстанавливаем выбранное значение
+                    if (selectedValue != null)
+                        CustomerName.SelectedValue = selectedValue;
+                }
+                else
+                {
+                    // Проверяем на null, чтобы избежать CS8602
+                    var errorMsg = response.Error?.Message ?? "Unknown error";
+                    MessageBox.Show("Error fetching customers: " + errorMsg);
+                }
         }
         catch (Exception ex)
         {
