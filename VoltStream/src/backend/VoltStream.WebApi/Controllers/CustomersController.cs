@@ -16,6 +16,6 @@ public class CustomersController
         DeleteCostumerCommand>
 {
     [HttpPost("filter")]
-    public async Task<IActionResult> GetFiltered(GetAllFilteringCustomersQuery query)
+    public async Task<IActionResult> GetFiltered(CustomerFilterQuery query)
         => Ok(new Response { Data = await Mediator.Send(query) });
 }

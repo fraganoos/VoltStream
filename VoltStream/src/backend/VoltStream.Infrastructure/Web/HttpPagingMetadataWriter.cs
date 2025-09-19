@@ -2,20 +2,10 @@
 
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
-using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Commons.Models;
-
-public class HttpPagingMetadataWriter : IPagingMetadataWriter
+public class HttpPagingMetadataWriter(IHttpContextAccessor accessor) : IPagingMetadataWriter
 {
-    private readonly IHttpContextAccessor accessor;
-
-    public HttpPagingMetadataWriter(IHttpContextAccessor accessor)
-    {
-        this.accessor = accessor;
-        PagingExtensions.ConfigureWriter(this);
-    }
-
     public void Write(PagedListMetadata metadata)
     {
         var headers = accessor.HttpContext?.Response?.Headers;
@@ -24,5 +14,3 @@ public class HttpPagingMetadataWriter : IPagingMetadataWriter
         headers["X-Paging"] = JsonSerializer.Serialize(metadata);
     }
 }
-
-
