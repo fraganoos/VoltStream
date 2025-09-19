@@ -1,8 +1,6 @@
 ﻿namespace VoltStream.Application.Commons.Extensions;
 
-using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Models;
 
 public static class FilteringExtensions
@@ -14,40 +12,44 @@ public static class FilteringExtensions
 
         foreach (var entry in request.Filters ?? [])
         {
-            var prop = props.FirstOrDefault(p => string.Equals(p.Name, entry.Key, StringComparison.OrdinalIgnoreCase));
+            var prop = props.FirstOrDefault(p =>
+                string.Equals(p.Name, entry.Key, StringComparison.OrdinalIgnoreCase));
             if (prop is null) continue;
 
             var member = Expression.Property(param, prop.Name);
-            try
+            Expression? filterExpr = null;
+
+            foreach (var raw in entry.Value)
             {
-                var convertedValue = ConversionHelper.TryConvert(entry.Value, prop.PropertyType);
-                var constant = Expression.Constant(convertedValue, prop.PropertyType);
-                var body = Expression.Equal(member, constant);
-                var lambda = Expression.Lambda<Func<T, bool>>(body, param);
-                query = query.Where(lambda);
+                var condition = BuildCondition(member, raw, prop.PropertyType);
+                if (condition is not null)
+                    filterExpr = filterExpr is null ? condition : Expression.OrElse(filterExpr, condition);
             }
-            catch (Exception ex)
+
+            if (filterExpr is not null)
             {
-                throw new AppException($"'{entry.Key}' bo‘yicha filter qiymatini o‘zgartirishda xatolik: {ex.Message}");
+                var lambda = Expression.Lambda<Func<T, bool>>(filterExpr, param);
+                query = query.Where(lambda);
             }
         }
 
-        // 🔎 Global search (case-insensitive)
+        // 🔍 Global search
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
-            var stringProps = typeof(T).GetProperties().Where(p => p.PropertyType == typeof(string));
+            var stringProps = typeof(T).GetProperties()
+                .Where(p => p.PropertyType == typeof(string));
+
             Expression? searchExpr = null;
 
             foreach (var p in stringProps)
             {
                 var member = Expression.Property(param, p.Name);
-
                 var notNull = Expression.NotEqual(member, Expression.Constant(null, typeof(string)));
                 var memberToLower = Expression.Call(member, nameof(string.ToLower), Type.EmptyTypes);
                 var searchValue = Expression.Constant(request.Search.ToLower());
                 var contains = Expression.Call(memberToLower, nameof(string.Contains), Type.EmptyTypes, searchValue);
-
                 var condition = Expression.AndAlso(notNull, contains);
+
                 searchExpr = searchExpr is null ? condition : Expression.OrElse(searchExpr, condition);
             }
 
@@ -58,18 +60,45 @@ public static class FilteringExtensions
             }
         }
 
-        return query.AsSortable(request).AsPagable(request);
+        return query.AsSortable(request);
     }
 
-    public static async Task<PagedList<T>> ToPagedListAsync<T>(
-        this IQueryable<T> query,
-        FilteringRequest request,
-        CancellationToken cancellationToken = default)
+    private static Expression? BuildCondition(Expression member, string raw, Type targetType)
     {
-        var filtered = query.AsFilterable(request);
-        var total = await filtered.CountAsync(cancellationToken);
-        var items = await filtered.ToListAsync(cancellationToken);
+        string value = raw;
+        string op = "=";
 
-        return new PagedList<T>(items, total, request.Page, request.PageSize);
+        if (raw.StartsWith(">=")) { op = ">="; value = raw[2..]; }
+        else if (raw.StartsWith("<=")) { op = "<="; value = raw[2..]; }
+        else if (raw.StartsWith(">")) { op = ">"; value = raw[1..]; }
+        else if (raw.StartsWith("<")) { op = "<"; value = raw[1..]; }
+        else if (raw.StartsWith("contains:", StringComparison.OrdinalIgnoreCase))
+        {
+            op = "contains"; value = raw["contains:".Length..];
+        }
+
+        object? converted;
+        try
+        {
+            converted = ConversionHelper.TryConvert(value, targetType);
+        }
+        catch
+        {
+            return null;
+        }
+
+        var constant = Expression.Constant(converted, targetType);
+
+        return op switch
+        {
+            "=" => Expression.Equal(member, constant),
+            ">" => Expression.GreaterThan(member, constant),
+            ">=" => Expression.GreaterThanOrEqual(member, constant),
+            "<" => Expression.LessThan(member, constant),
+            "<=" => Expression.LessThanOrEqual(member, constant),
+            "contains" when targetType == typeof(string) =>
+                Expression.Call(member, nameof(string.Contains), Type.EmptyTypes, Expression.Constant(value)),
+            _ => null
+        };
     }
 }

@@ -20,9 +20,8 @@ public class GetCustomerByIdQueryHandler(
     public async Task<CustomerDto> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
         => mapper.Map<CustomerDto>(await context.Customers
             .Include(c => c.Account)
-                .ThenInclude(a => a.CustomerOperations)
-            .Include(c => c.Account)
-                .ThenInclude(a => a.DiscountOperations)
+            .Include(a => a.CustomerOperations)
+            .Include(a => a.DiscountOperations)
             .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken))
         ?? throw new NotFoundException(nameof(Customer), nameof(request.Id), request.Id);
 }

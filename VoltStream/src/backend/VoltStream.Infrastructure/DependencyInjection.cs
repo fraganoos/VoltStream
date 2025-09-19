@@ -6,16 +6,19 @@ using Microsoft.Extensions.DependencyInjection;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Infrastructure.Persistence;
 using VoltStream.Infrastructure.Persistence.Interceptors;
+using VoltStream.Infrastructure.Web;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddHttpContextAccessor();
+
         services.AddScoped<AuditInterceptor>();
         services.AddDbContext<IAppDbContext, AppDbContext>((sp, options) =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
             .AddInterceptors(sp.GetRequiredService<AuditInterceptor>()));
 
-        return services;
+        services.AddScoped<IPagingMetadataWriter, HttpPagingMetadataWriter>();
     }
 }

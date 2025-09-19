@@ -10,15 +10,15 @@ using System.Threading.Tasks;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
-public record GetAllProductsByCategoryIdQuery(long categoryId) : IRequest<List<Product>>;
+public record GetAllProductsByCategoryIdQuery(long CategoryId) : IRequest<IReadOnlyCollection<Product>>;
 
 public class GetAllProductsByCategoryIdQueryHandler(
     IAppDbContext context,
     IMapper mapper)
-    : IRequestHandler<GetAllProductsByCategoryIdQuery, List<Product>>
+    : IRequestHandler<GetAllProductsByCategoryIdQuery, IReadOnlyCollection<Product>>
 {
-    public async Task<List<Product>> Handle(GetAllProductsByCategoryIdQuery request, CancellationToken cancellationToken)
-        => mapper.Map<List<Product>>
+    public async Task<IReadOnlyCollection<Product>> Handle(GetAllProductsByCategoryIdQuery request, CancellationToken cancellationToken)
+        => mapper.Map<IReadOnlyCollection<Product>>
         (await context.Products.Where(a =>
-        a.CategoryId == request.categoryId).ToListAsync(cancellationToken));
+        a.CategoryId == request.CategoryId).ToListAsync(cancellationToken));
 }

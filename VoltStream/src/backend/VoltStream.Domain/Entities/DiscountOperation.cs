@@ -1,7 +1,5 @@
 ﻿namespace VoltStream.Domain.Entities;
 
-using System;
-
 public class DiscountOperation : Auditable
 {
     public DateTimeOffset Date { get; set; }
@@ -10,6 +8,6 @@ public class DiscountOperation : Auditable
     public bool IsDiscountUsed { get; set; }
     public decimal DiscountSumm { get; set; }
 
-    public long AccountId { get; set; }
-    public Account Account { get; set; } = default!;
+    public long CustomerId { get; set; }
+    public Customer Customer { get; set; } = default!;
 }

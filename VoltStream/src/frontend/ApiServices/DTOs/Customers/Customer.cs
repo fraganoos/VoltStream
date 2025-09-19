@@ -1,6 +1,6 @@
-﻿namespace VoltStream.Application.Features.Customers.DTOs;
+﻿namespace ApiServices.DTOs.Customers;
 
-public class CustomerDto
+public class Customer
 {
     public long Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -8,5 +8,5 @@ public class CustomerDto
     public string? Address { get; set; }
     public string? Description { get; set; }
 
-    public AccountDto Account { get; set; } = default!;
+    public Account Account { get; set; } = default!;
 }
