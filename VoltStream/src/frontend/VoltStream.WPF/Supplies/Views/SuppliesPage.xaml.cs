@@ -226,6 +226,13 @@ public partial class SuppliesPage : Page
                 supplyDate.Focus();
                 return;
             }
+            else
+            {
+                if (DateTime.TryParse(supplyDate.dateTextBox.Text, out DateTime parsedDate))
+                {
+                    supplyDate.SelectedDate = parsedDate;
+                }
+            }
 
             if (!decimal.TryParse(tbxPerRollCount.Text, out decimal perRollCount) || perRollCount <= 0)
             {
@@ -387,8 +394,7 @@ public partial class SuppliesPage : Page
     }
     private async void cbxCategory_GotFocus(object sender, RoutedEventArgs e)
     {
-        if (_allCategories.Count == 0)
-            _allCategories = await LoadCategoriesAsync();
+        _allCategories = await LoadCategoriesAsync();
 
         categoriesView = CollectionViewSource.GetDefaultView(_allCategories);
         cbxCategory.ItemsSource = categoriesView;
