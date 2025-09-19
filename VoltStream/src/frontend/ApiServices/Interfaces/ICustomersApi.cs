@@ -1,6 +1,7 @@
 ﻿namespace ApiServices.Interfaces;
 
 using ApiServices.DTOs.Customers;
+using ApiServices.DTOs.Products;
 using Refit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
