@@ -51,7 +51,6 @@
                                             Margin="0,0,10,0"
                                             GotFocus="SupplyDate_GotFocus"
                                             LostFocus="SupplyDate_LostFocus"
-                                           PreviewMouseDown="SupplyDate_PreviewMouseDown"
                                             utils:EnterKeyTab.IsEnabled="True"/>
                 </Grid>
                 <Grid Grid.Row="1" Grid.Column="0">
