@@ -1,23 +1,24 @@
 ﻿namespace ApiServices.Interfaces;
 
 using ApiServices.DTOs.Products;
+using ApiServices.Models;
 using Refit;
 
 [Headers("accept: application/json")]
 public interface ICategoriesApi
 {
-    [Post("/api/categories​")]
+    [Post("/categories​")]
     Task<ApiResponse<Category>> CreateCategoryAsync([Body] Category categoryCreate);
 
-    [Put("/api/categories​")]
+    [Put("/categories​")]
     Task<ApiResponse<Category>> UpdateCategoryAsync([Body] Category categoryUpdate);
 
-    [Delete("/api/categories​/{id}")]
+    [Delete("/categories​/{id}")]
     Task<ApiResponse<string>> DeleteCategoryAsync(long id);
 
-    [Get("/api/categories​/{id}")]
+    [Get("/categories​/{id}")]
     Task<ApiResponse<Category>> GetByIdCategoryAsync(long id);
 
-    [Get("/api/categories")]
+    [Get("/categories")]
     Task<ApiResponse<Response<List<Category>>>> GetAllCategoriesAsync();
 }

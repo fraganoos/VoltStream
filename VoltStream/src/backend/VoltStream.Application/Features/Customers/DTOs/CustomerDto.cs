@@ -1,6 +1,7 @@
 ﻿namespace VoltStream.Application.Features.Customers.DTOs;
 
-using VoltStream.Domain.Entities;
+using VoltStream.Application.Features.CustomerOperations.DTOs;
+using VoltStream.Application.Features.DiscountOperations.DTOs;
 
 public record CustomerDto
 {
@@ -11,6 +12,6 @@ public record CustomerDto
     public string? Description { get; set; }
 
     public AccountDto Account { get; set; } = default!;
-    public ICollection<CustomerOperation> CustomerOperations { get; set; } = default!;
-    public ICollection<DiscountOperation> DiscountOperations { get; set; } = default!;
+    public ICollection<CustomerOperationDto> CustomerOperations { get; set; } = default!;
+    public ICollection<DiscountOperationDto> DiscountOperations { get; set; } = default!;
 }

@@ -18,7 +18,7 @@ public partial class App : Application
         var services = new ServiceCollection();
 
         // ApiService’dan API sozlamalarini olish
-        ApiService.ConfigureServices(services, "https://localhost:7287");
+        ApiService.ConfigureServices(services, "https://localhost:7287/api");
 
         // WPF xizmatlarini qo‘shish
         services.AddSingleton<MainViewModel>();

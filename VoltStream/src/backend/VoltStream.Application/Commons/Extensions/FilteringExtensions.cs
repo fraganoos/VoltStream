@@ -1,19 +1,28 @@
 ﻿namespace VoltStream.Application.Commons.Extensions;
 
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using VoltStream.Application.Commons.Models;
 
 public static class FilteringExtensions
 {
     public static IQueryable<T> AsFilterable<T>(this IQueryable<T> query, FilteringRequest request)
+    where T : class
     {
+        query = ApplyPropertyIncludes(query, request);
+
         var param = Expression.Parameter(typeof(T), "x");
         var props = typeof(T).GetProperties();
 
         foreach (var entry in request.Filters ?? [])
         {
+            var key = entry.Key;
+
+            if (entry.Value.All(v => v.StartsWith("include", StringComparison.OrdinalIgnoreCase)))
+                continue;
+
             var prop = props.FirstOrDefault(p =>
-                string.Equals(p.Name, entry.Key, StringComparison.OrdinalIgnoreCase));
+                string.Equals(p.Name, key, StringComparison.OrdinalIgnoreCase));
             if (prop is null) continue;
 
             var member = Expression.Property(param, prop.Name);
@@ -129,7 +138,6 @@ public static class FilteringExtensions
             };
         }
 
-
         // Standard comparisons
         return op switch
         {
@@ -193,6 +201,43 @@ public static class FilteringExtensions
         }
 
         return searchExpr;
+    }
+
+    #endregion
+
+    #region Include
+
+    private static IQueryable<T> ApplyPropertyIncludes<T>(IQueryable<T> query, FilteringRequest request)
+    where T : class
+    {
+        var props = typeof(T).GetProperties();
+
+        foreach (var entry in request.Filters ?? [])
+        {
+            var key = entry.Key;
+            var prop = props.FirstOrDefault(p =>
+                string.Equals(p.Name, key, StringComparison.OrdinalIgnoreCase));
+            if (prop is null) continue;
+
+            var propName = prop.Name;
+
+            foreach (var value in entry.Value)
+            {
+                if (value.Equals("include", StringComparison.OrdinalIgnoreCase))
+                {
+                    query = query.Include(propName);
+                }
+                else if (value.StartsWith("include:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var path = value["include:".Length..].Trim();
+
+                    var fullPath = $"{propName}.{path}";
+                    query = query.Include(fullPath);
+                }
+            }
+        }
+
+        return query;
     }
 
     #endregion

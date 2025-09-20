@@ -4,6 +4,7 @@ using ApiServices.DTOs.Customers;
 using ApiServices.DTOs.Products;
 using ApiServices.DTOs.Supplies;
 using ApiServices.Interfaces;
+using ApiServices.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
 using System.Windows;

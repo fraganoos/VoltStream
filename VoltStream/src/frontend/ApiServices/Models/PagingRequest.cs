@@ -1,4 +1,4 @@
-﻿namespace VoltStream.Application.Commons.Models;
+﻿namespace ApiServices.Models;
 
 public record PagingRequest : SortingRequest
 {
