@@ -1,7 +1,7 @@
 ﻿namespace ApiServices.Interfaces;
 
 using ApiServices.DTOs.Customers;
-using ApiServices.DTOs.Products;
+using ApiServices.Models;
 using Refit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,31 +9,24 @@ using System.Threading.Tasks;
 [Headers("accept: application/json")]
 public interface ICustomersApi
 {
-    [Post("/api/customers​")]
-    Task<ApiResponse<Customer>> CreateAsync([Body] Customer CustomersCreate);
+    [Post("/customers​")]
+    Task<ApiResponse<Response<Customer>>> CreateAsync([Body] Customer CustomersCreate);
 
-    [Put("/api/customers​")]
-    Task<ApiResponse<Customer>> UpdateAsync([Body] Customer CustomersUpdate);
+    [Put("/customers​")]
+    Task<ApiResponse<Response<Customer>>> UpdateAsync([Body] Customer CustomersUpdate);
 
-    [Delete("/api/customers​/{id}")]
-    Task<ApiResponse<string>> DeleteAsync(long id);
+    [Delete("/customers​/{id}")]
+    Task<ApiResponse<Response<bool>>> DeleteAsync(long id);
 
-    [Get("/api/customers​/{id}")]
-    Task<ApiResponse<Customer>> GetByIdAsync(long id);
+    [Get("/customers​/{id}")]
+    Task<ApiResponse<Response<Customer>>> GetByIdAsync(long id);
 
-    [Get("/api/customers")]
+    [Get("/customers")]
     Task<ApiResponse<Response<List<Customer>>>> GetAllCustomersAsync();
 
+    [Get("/customers/{id}")]
+    Task<ApiResponse<Response<Customer>>> GetCustomerByIdAsync(long id);
 
-    [Get("/api/customers/{id}")]
-    Task<ApiResponse<Customer>> GetCustomerByIdAsync(long id);
-
-    [Post("/api/customers")]
-    Task<ApiResponse<Customer>> CreateCustomerAsync([Body] Customer customerCreate);
-
-    [Put("/api/customers")]
-    Task<ApiResponse<Customer>> UpdateCustomerAsync([Body] Customer customerUpdate);
-
-    [Delete("/api/customers/{id}")]
-    Task<ApiResponse<string>> DeleteCustomerAsync(long id);
+    [Post("/customers/filter")]
+    Task<ApiResponse<Response<List<Customer>>>> Filter(FilteringRequest request);
 }

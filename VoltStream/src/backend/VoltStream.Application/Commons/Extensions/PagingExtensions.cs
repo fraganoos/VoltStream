@@ -10,7 +10,7 @@ public static class PagingExtensions
         this IQueryable<T> query,
         FilteringRequest request,
         IPagingMetadataWriter? writer = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) where T : class
     {
         var filtered = query.AsFilterable(request);
         var total = await filtered.CountAsync(cancellationToken);
@@ -25,8 +25,6 @@ public static class PagingExtensions
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
-
-        Console.WriteLine(items.GetType());
 
         writer?.Write(new PagedListMetadata(total, page, pageSize,
             (int)Math.Ceiling((double)total / pageSize)));

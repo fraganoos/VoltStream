@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Commons.Models;
@@ -17,6 +16,5 @@ public class CustomerFilterQueryHandler(
 {
     public async Task<IReadOnlyCollection<CustomerDto>> Handle(CustomerFilterQuery request, CancellationToken cancellationToken)
         => mapper.Map<IReadOnlyCollection<CustomerDto>>(await context.Customers
-            .Include(c => c.Account)
             .ToPagedListAsync(request, writer, cancellationToken));
 }
