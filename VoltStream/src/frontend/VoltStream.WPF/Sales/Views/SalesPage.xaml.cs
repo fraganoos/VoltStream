@@ -48,15 +48,172 @@ public partial class SalesPage : Page
         cbxPerRollCount.GotFocus += CbxPerRollCount_GotFocus;
         cbxPerRollCount.SelectionChanged += CbxPerRollCount_SelectionChanged;
         cbxPerRollCount.PreviewLostKeyboardFocus += CbxPerRollCount_PreviewLostKeyboardFocus;
+
+        txtRollCount.LostFocus += (s, e) => CalcFinalSumProduct(s);
+        txtQuantity.PreviewLostKeyboardFocus += TxtQuantity_PreviewLostKeyboardFocus;
+        txtPrice.LostFocus += (s, e) => CalcFinalSumProduct(s);
+        txtSum.LostFocus += TxtSum_LostFocus;
+        txtPerDiscount.PreviewLostKeyboardFocus += txtPerDiscount_PreviewLostKeyboardFocus;
+        txtDiscount.PreviewLostKeyboardFocus += txtDiscount_PreviewLostKeyboardFocus;
+        txtFinalSumProduct.PreviewLostKeyboardFocus += txtFinalSumProduct_PreviewLostKeyboardFocus;
     }
 
+    private void txtFinalSumProduct_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        if(decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSum) &&
+            decimal.TryParse(txtSum.Text, out decimal sum) && sum != 0)
+        {
+            if (finalSum > sum)
+            {
+                MessageBox.Show("Chegirmadan keyingi summa umumiy summadan katta bo'lishi mumkin emas.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                txtPerDiscount.Text = null;
+                txtDiscount.Text = null;
+                txtFinalSumProduct.Text = null;
+                e.Handled = true; // Fokusni saqlab qolish
+                return;
+            }
+            decimal discount = sum - finalSum;
+            decimal perDiscount = (discount / sum * 100);
+            txtDiscount.Text = discount.ToString();
+            txtPerDiscount.Text = perDiscount.ToString();
+        }
+        else
+        {
+            txtFinalSumProduct.Text = null;
+            txtPerDiscount.Text = "0";
+            CalcFinalSumProduct(sender);
+        }
+    }
+
+    private void txtDiscount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        if (decimal.TryParse(txtDiscount.Text, out decimal discount) &&
+            decimal.TryParse(txtSum.Text, out decimal sum) && sum != 0)
+        {
+            if (discount>sum)
+            {
+             MessageBox.Show("Chegirma umumiy summadan katta bo'lishi mumkin emas.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                txtPerDiscount.Text = null;
+                txtDiscount.Text = null;
+                txtFinalSumProduct.Text = null;
+                e.Handled = true; // Fokusni saqlab qolish
+                return;
+            }
+            decimal perDiscount = (discount / sum *100);
+            txtFinalSumProduct.Text = (sum - discount).ToString();
+            txtPerDiscount.Text = perDiscount.ToString();
+        }
+        else
+        {
+            txtDiscount.Text = "0";
+            txtPerDiscount.Text = "0";
+            CalcFinalSumProduct(sender);
+        }
+    }
+
+    private void txtPerDiscount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        if (decimal.TryParse(txtPerDiscount.Text, out decimal perDiscount) &&
+            perDiscount != 0)
+        {
+            if (perDiscount >= 100)
+            {
+                MessageBox.Show("Chegirma 100% dan katta bo'lishi mumkin emas.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                txtPerDiscount.Text = null;
+                txtDiscount.Text = null;
+                txtFinalSumProduct.Text = null;
+                e.Handled = true; // Fokusni saqlab qolish
+                return;
+            }
+            CalcFinalSumProduct(sender);
+        }
+        else
+        {
+            txtPerDiscount.Text = "0";
+            CalcFinalSumProduct(sender);
+        }
+    }
+
+    private void TxtSum_LostFocus(object sender, RoutedEventArgs e)
+    {
+            if (decimal.TryParse(txtSum.Text, out decimal sum) &&
+            decimal.TryParse(txtQuantity.Text, out decimal quantity) && quantity !=0)
+        {
+            decimal price = sum / quantity;
+            txtPrice.Text = price.ToString();
+            CalcFinalSumProduct(sender);
+        }
+        else
+        {
+            txtSum.Text = null;
+            txtFinalSumProduct.Text = null;
+        }
+    }
+
+
+    private void TxtQuantity_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        if (decimal.TryParse(txtQuantity.Text, out decimal quantity) &&
+            decimal.TryParse(cbxPerRollCount.Text, out decimal perRollCount) &&
+            perRollCount != 0)
+        {
+            decimal rollCount = Math.Ceiling(quantity / perRollCount);
+            txtRollCount.Text = rollCount.ToString();
+            CalcFinalSumProduct(sender);
+        }
+        else
+        {
+            txtQuantity.Text = null;
+            txtSum.Text = null;
+            txtFinalSumProduct.Text = null;
+        }
+    }
+
+    private void CalcFinalSumProduct(object sender)
+    {
+        if (sender == cbxPerRollCount || sender == txtRollCount)
+        {
+            if (decimal.TryParse(txtRollCount.Text, out decimal rollCount) &&
+            decimal.TryParse(cbxPerRollCount.Text, out decimal perRollCount))
+            {
+                // Umumiy uzunlik hisoblaymiz
+                decimal totalQuantity = rollCount * perRollCount;
+                txtQuantity.Text = totalQuantity.ToString();
+            }
+            else
+            {
+                txtQuantity.Text = null;
+                txtSum.Text = null;
+                txtFinalSumProduct.Text = null;
+            }
+        }
+        if (decimal.TryParse(txtPrice.Text, out decimal price) &&
+            decimal.TryParse(txtQuantity.Text, out decimal quantity) &&
+            decimal.TryParse(txtPerDiscount.Text, out decimal discountPercent))
+        {
+            // Umumiy narx hisoblaymiz
+            decimal totalPrice = price * quantity;
+            decimal discountAmount = totalPrice * (discountPercent / 100);
+            decimal finalPrice = totalPrice - discountAmount;
+            txtSum.Text = totalPrice.ToString();
+            txtDiscount.Text = discountAmount.ToString();
+            txtFinalSumProduct.Text = finalPrice.ToString();
+        }
+        else
+        {
+            txtSum.Text = null;
+            txtDiscount.Text = null;
+            txtFinalSumProduct.Text = null;
+        }
+    }
     private void CbxPerRollCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (cbxPerRollCount.SelectedItem is WarehouseItem selectedWarehouseItem)
         {
             // Rulon tanlanganda, uning narxi, chegirmasi o'zgartiramiz
-            tbxPrice.Text = selectedWarehouseItem.Price.ToString();
-            tbxPerDiscount.Text = selectedWarehouseItem.DiscountPercent.ToString();
+            txtPrice.Text = selectedWarehouseItem.Price.ToString();
+            txtPerDiscount.Text = selectedWarehouseItem.DiscountPercent.ToString();
+            CalcFinalSumProduct(sender);
         }
     }
 
