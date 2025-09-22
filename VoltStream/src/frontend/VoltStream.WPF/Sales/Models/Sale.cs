@@ -16,13 +16,13 @@
         public long ProductId { get; set; }
         public string ProductName { get; set; } = string.Empty;
         public string PerRollCount { get; set; } = string.Empty; // birligi
-        public decimal? RollCount { get; set; } // rulon
-        public decimal? Quantity { get; set; } // metr
-        public decimal? Price { get; set; } // narxi
-        public decimal? Sum { get; set; } // summa
-        public decimal? PerDiscount { get; set; } // chegirma
-        public decimal? Discount { get; set; } // chegirma summasi
-        public decimal? FinalSumProduct { get; set; } // chegirmadan keyingi narxi
+        public string? RollCount { get; set; } // rulon
+        public string? Quantity { get; set; } // metr
+        public string? Price { get; set; } // narxi
+        public string? Sum { get; set; } // summa
+        public string? PerDiscount { get; set; } // chegirma
+        public string? Discount { get; set; } // chegirma summasi
+        public string? FinalSumProduct { get; set; } // chegirmadan keyingi narxi
         public List<SaleItem> SaleItems { get; set; } = default!;
     }
 }

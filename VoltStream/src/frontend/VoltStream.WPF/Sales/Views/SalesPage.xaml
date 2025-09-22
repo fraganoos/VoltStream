@@ -190,53 +190,60 @@
                       FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
             <TextBlock Grid.Column="3" Text="Rulon soni" 
                        Style="{StaticResource FloatingLabelStyle}"
-                       Tag="{Binding ElementName=tbxRollCount}"
+                       Tag="{Binding ElementName=txtRollCount}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
-            <TextBox Grid.Column="3" x:Name="tbxRollCount"
+            <TextBox Grid.Column="3" x:Name="txtRollCount"
                      Text="{Binding RollCount}" Margin="1,3"
-                      FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+                      FontSize="14" utils:EnterKeyTab.IsEnabled="True"
+                     utils:NumericTextBox.IsNumeric="True"/>
             <TextBlock Grid.Column="4" Text="Jami metr" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=txtQuantity}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
             <TextBox Grid.Column="4" x:Name="txtQuantity"
                      Text="{Binding Quantity}" Margin="1,3"
-                      FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+                      FontSize="14" utils:EnterKeyTab.IsEnabled="True"
+                     utils:NumericTextBox.IsNumeric="True"/>
             <TextBlock Grid.Column="5" Text="Narxi" 
                        Style="{StaticResource FloatingLabelStyle}"
-                       Tag="{Binding ElementName=tbxPrice}"
+                       Tag="{Binding ElementName=txtPrice}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
-            <TextBox Grid.Column="5" x:Name="tbxPrice"
+            <TextBox Grid.Column="5" x:Name="txtPrice"
                       Text="{Binding Price}" Margin="1,3"
-                      FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+                      FontSize="14" utils:EnterKeyTab.IsEnabled="True"
+                     utils:NumericTextBox.IsNumeric="True"/>
             <TextBlock Grid.Column="6" Text="Jami summa" 
                        Style="{StaticResource FloatingLabelStyle}"
-                       Tag="{Binding ElementName=tbxSum}"
+                       Tag="{Binding ElementName=txtSum}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
-            <TextBox Grid.Column="6" x:Name="tbxSum" Margin="1,3"
-                     Text="{Binding Sum}"
-                     FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+            <TextBox Grid.Column="6" x:Name="txtSum" Margin="1,3"
+                     Text="{Binding Sum}" FontSize="14" 
+                     utils:EnterKeyTab.IsEnabled="True"
+                     utils:NumericTextBox.IsNumeric="True"/>
             <TextBlock Grid.Column="7" Text="Chegirma%" 
                        Style="{StaticResource FloatingLabelStyle}"
-                       Tag="{Binding ElementName=tbxPerDiscount}"
+                       Tag="{Binding ElementName=txtPerDiscount}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
-            <TextBox Grid.Column="7" x:Name="tbxPerDiscount" Margin="1,3"
-                     Text="{Binding PerDiscount}"
-                     FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+            <TextBox Grid.Column="7" x:Name="txtPerDiscount" Margin="1,3"
+                     Text="{Binding PerDiscount}" FontSize="14" 
+                     utils:EnterKeyTab.IsEnabled="True"
+                     utils:NumericTextBox.IsNumeric="True"/>
             <TextBlock Grid.Column="8" Text="Chegirma summasi" 
                        Style="{StaticResource FloatingLabelStyle}"
-                       Tag="{Binding ElementName=tbxDiscount}"
+                       Tag="{Binding ElementName=txtDiscount}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
-            <TextBox Grid.Column="8" x:Name="tbxDiscount" Margin="1,3"
-                     Text="{Binding Discount}"
-                        FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+            <TextBox Grid.Column="8" x:Name="txtDiscount" Margin="1,3"
+                     Text="{Binding Discount}" FontSize="14" 
+                     utils:EnterKeyTab.IsEnabled="True"
+                     utils:NumericTextBox.IsNumeric="True"/>
             <TextBlock Grid.Column="9" Text="Umumiy summa" 
                        Style="{StaticResource FloatingLabelStyle}"
-                       Tag="{Binding ElementName=tbxFinalSumProduct}"
+                       Tag="{Binding ElementName=txtFinalSumProduct}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
-            <TextBox Grid.Column="9" x:Name="tbxFinalSumProduct" Margin="1,3"
-                     Text="{Binding FinalSumProduct}"
-                     FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+            <TextBox Grid.Column="9" x:Name="txtFinalSumProduct" Margin="1,3"
+                     Text="{Binding FinalSumProduct}" FontSize="14" 
+                     utils:EnterKeyTab.IsEnabled="True"
+                     utils:NumericTextBox.IsNumeric="True"/>
             <Button Grid.Column="10" x:Name="addButton" Content="Qo'shish"
                     Margin="4,3"
                     FontSize="14"/>
