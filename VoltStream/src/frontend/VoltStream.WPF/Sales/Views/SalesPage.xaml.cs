@@ -74,8 +74,8 @@ public partial class SalesPage : Page
             }
             decimal discount = sum - finalSum;
             decimal perDiscount = (discount / sum * 100);
-            txtDiscount.Text = discount.ToString();
-            txtPerDiscount.Text = perDiscount.ToString();
+            txtDiscount.Text = discount.ToString("N2");
+            txtPerDiscount.Text = perDiscount.ToString("N2");
         }
         else
         {
@@ -100,8 +100,8 @@ public partial class SalesPage : Page
                 return;
             }
             decimal perDiscount = (discount / sum *100);
-            txtFinalSumProduct.Text = (sum - discount).ToString();
-            txtPerDiscount.Text = perDiscount.ToString();
+            txtFinalSumProduct.Text = (sum - discount).ToString("N2");
+            txtPerDiscount.Text = perDiscount.ToString("N2");
         }
         else
         {
@@ -140,7 +140,7 @@ public partial class SalesPage : Page
             decimal.TryParse(txtQuantity.Text, out decimal quantity) && quantity !=0)
         {
             decimal price = sum / quantity;
-            txtPrice.Text = price.ToString();
+            txtPrice.Text = price.ToString("N2");
             CalcFinalSumProduct(sender);
         }
         else
@@ -158,7 +158,7 @@ public partial class SalesPage : Page
             perRollCount != 0)
         {
             decimal rollCount = Math.Ceiling(quantity / perRollCount);
-            txtRollCount.Text = rollCount.ToString();
+            txtRollCount.Text = rollCount.ToString("N2");
             CalcFinalSumProduct(sender);
         }
         else
@@ -178,7 +178,7 @@ public partial class SalesPage : Page
             {
                 // Umumiy uzunlik hisoblaymiz
                 decimal totalQuantity = rollCount * perRollCount;
-                txtQuantity.Text = totalQuantity.ToString();
+                txtQuantity.Text = totalQuantity.ToString("N2");
             }
             else
             {
@@ -195,9 +195,9 @@ public partial class SalesPage : Page
             decimal totalPrice = price * quantity;
             decimal discountAmount = totalPrice * (discountPercent / 100);
             decimal finalPrice = totalPrice - discountAmount;
-            txtSum.Text = totalPrice.ToString();
-            txtDiscount.Text = discountAmount.ToString();
-            txtFinalSumProduct.Text = finalPrice.ToString();
+            txtSum.Text = totalPrice.ToString("N2");
+            txtDiscount.Text = discountAmount.ToString("N2");
+            txtFinalSumProduct.Text = finalPrice.ToString("N2");
         }
         else
         {
@@ -211,8 +211,8 @@ public partial class SalesPage : Page
         if (cbxPerRollCount.SelectedItem is WarehouseItem selectedWarehouseItem)
         {
             // Rulon tanlanganda, uning narxi, chegirmasi o'zgartiramiz
-            txtPrice.Text = selectedWarehouseItem.Price.ToString();
-            txtPerDiscount.Text = selectedWarehouseItem.DiscountPercent.ToString();
+            txtPrice.Text = selectedWarehouseItem.Price.ToString("N2");
+            txtPerDiscount.Text = selectedWarehouseItem.DiscountPercent.ToString("N2");
             CalcFinalSumProduct(sender);
         }
     }

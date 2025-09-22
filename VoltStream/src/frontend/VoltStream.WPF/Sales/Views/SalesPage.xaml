@@ -171,7 +171,7 @@
             <ComboBox Grid.Column="0" x:Name="cbxCategoryName"
                       Text="{Binding CategoryName}"
                       IsEditable="True" Margin="1,3"
-                      FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+                      FontSize="14" utils:ComboBoxTabBehavior.EnableTabOnSelect="True"/>
             <TextBlock Grid.Column="1" Text="Maxsulot nomi" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=cbxProductName}"
@@ -179,7 +179,8 @@
             <ComboBox Grid.Column="1" x:Name="cbxProductName"
                       Text="{Binding ProductName}"
                       IsEditable="True" Margin="1,3"
-                      FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+                      FontSize="14" 
+                      utils:ComboBoxTabBehavior.EnableTabOnSelect="True"/>
             <TextBlock Grid.Column="2" Text="Rulon metr" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=cbxPerRollCount}"
@@ -187,7 +188,7 @@
             <ComboBox Grid.Column="2" x:Name="cbxPerRollCount"
                         Text="{Binding PerRollCount}"
                       Margin="2,3" IsEditable="True"
-                      FontSize="14" utils:EnterKeyTab.IsEnabled="True"/>
+                      FontSize="14" utils:ComboBoxTabBehavior.EnableTabOnSelect="True"/>
             <TextBlock Grid.Column="3" Text="Rulon soni" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=txtRollCount}"

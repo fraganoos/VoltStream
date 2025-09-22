@@ -1,180 +1,4 @@
-﻿using System;
-//using System.Text.RegularExpressions;
-//using System.Windows;
-//using System.Windows.Controls;
-//using System.Windows.Input;
-//using System.Globalization;
-//using System.Windows.Data;
-
-//namespace VoltStream.WPF.Commons.Utils
-//{
-//    public static class NumericTextBox
-//    {
-//        public static bool GetIsNumeric(DependencyObject obj)
-//        {
-//            return (bool)obj.GetValue(IsNumericProperty);
-//        }
-
-//        public static void SetIsNumeric(DependencyObject obj, bool value)
-//        {
-//            obj.SetValue(IsNumericProperty, value);
-//        }
-
-//        public static readonly DependencyProperty IsNumericProperty =
-//        DependencyProperty.RegisterAttached(
-//            "IsNumeric",
-//            typeof(bool),
-//            typeof(NumericTextBox),
-//            new PropertyMetadata(false, OnIsNumericChanged));
-
-//        private static void OnIsNumericChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-//        {
-//            if (d is TextBox textBox)
-//            {
-//                bool isEnabled = (bool)e.NewValue;
-
-//                if (isEnabled)
-//                {
-//                    textBox.TextAlignment = TextAlignment.Right; // Выравнивание текста по правому краю
-//                    textBox.PreviewTextInput += TextBox_PreviewTextInput;
-//                    textBox.PreviewKeyDown += TextBox_PreviewKeyDown;
-//                    textBox.GotFocus += TextBox_GotFocus;
-//                    textBox.TextChanged += TextBox_TextChanged;
-//                    textBox.LostFocus += TextBox_LostFocus;
-//                    textBox.SetValue(TextBox.TextProperty, textBox.Text); // Принудительное обновление
-//                    textBox.TargetUpdated += TextBox_TargetUpdated!; // Обработка изменений через Binding
-//                }
-//                else
-//                {
-//                    textBox.PreviewTextInput -= TextBox_PreviewTextInput;
-//                    textBox.PreviewKeyDown -= TextBox_PreviewKeyDown;
-//                    textBox.GotFocus -= TextBox_GotFocus;
-//                    textBox.TextChanged -= TextBox_TextChanged;
-//                    textBox.LostFocus -= TextBox_LostFocus;
-//                    textBox.TargetUpdated -= TextBox_TargetUpdated!;
-//                }
-//            }
-//        }
-
-//        private static void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-//        {
-//            if (sender is TextBox textBox && !IsValidDecimalInput(textBox.Text, e.Text))
-//            {
-//                e.Handled = true;
-//            }
-//        }
-
-//        private static void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
-//        {
-//            if (e.Key == Key.Space)
-//            {
-//                e.Handled = true;
-//            }
-//        }
-//        private static void TextBox_GotFocus(object sender, RoutedEventArgs e)
-//        {
-//            if (sender is TextBox textBox)
-//            {
-//                // Убираем форматирование, оставляем "сырой" ввод
-//                string raw = textBox.Text.Replace(" ", "").Replace(",", "."); // сохраняем как raw
-//                if (decimal.TryParse(raw, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal number))
-//                {
-//                    textBox.Text = number.ToString(CultureInfo.InvariantCulture); // например: "1234.56"
-//                    textBox.CaretIndex = textBox.Text.Length;
-//                }
-//                textBox.SelectAll();
-//            }
-//        }
-//        private static void TextBox_TargetUpdated(object? sender, DataTransferEventArgs e)
-//        {
-//            ApplyFormatting(sender as TextBox);
-//        }
-
-//        private static void ApplyFormatting(TextBox? textBox)
-//        {
-//            if (textBox == null) return;
-
-//            string text = textBox.Text.Replace(" ", "").Replace(",", ".");
-
-//            if (decimal.TryParse(text, NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out decimal number))
-//            {
-//                textBox.Text = FormatNumberWithSpaces(number, 2);
-//                textBox.CaretIndex = textBox.Text.Length;
-//            }
-//            else
-//            {
-//                textBox.Text = null; // Значение по умолчанию
-//            }
-//        }
-
-//        private static void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-//        {
-//            if (sender is TextBox textBox)
-//            {
-//                string text = textBox.Text;
-
-//                // Удаление ведущих нулей, если их больше одного
-//                if (text.StartsWith("00"))
-//                {
-//                    textBox.Text = text.TrimStart('0');
-//                    if (string.IsNullOrEmpty(textBox.Text))
-//                    {
-//                        textBox.Text = "0";
-//                    }
-//                    textBox.CaretIndex = textBox.Text.Length;
-//                }
-
-//                // Если первый символ - ".", добавляем "0." для корректности
-//                if (text.StartsWith(",") || text.StartsWith("."))
-//                {
-//                    textBox.Text = "0" + text;
-//                    textBox.CaretIndex = textBox.Text.Length;
-//                }
-
-//                // Замена запятой на точку
-//                if (textBox.Text.Contains(","))
-//                {
-//                    textBox.Text = text.Replace(',', '.');
-//                    textBox.CaretIndex = textBox.Text.Length;
-//                }
-//            }
-//        }
-
-//        private static void TextBox_LostFocus(object sender, RoutedEventArgs e)
-//        {
-//            if (sender is TextBox textBox)
-//            {
-//                if (decimal.TryParse(textBox.Text.Replace(" ", "").Replace(".", ","),
-//                    NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands,
-//                    CultureInfo.InvariantCulture, out decimal number))
-//                {
-//                    textBox.Text = FormatNumberWithSpaces(number, 2);
-//                }
-//                else
-//                {
-//                    textBox.Text = null; // "0.00"; // Значение по умолчанию
-//                }
-//            }
-//        }
-
-//        private static bool IsValidDecimalInput(string currentText, string newText)
-//        {
-//            string fullText = currentText + newText;
-//            fullText = fullText.Replace('.', ','); // Замена запятой на точку
-//            Regex regex = new Regex(@"^-?\d{0,15}([,]\d{0,2})?$"); // До 15 цифр перед точкой, 2 после
-//            return regex.IsMatch(fullText);
-//        }
-
-//        private static string FormatNumberWithSpaces(decimal number, int decimalPlaces)
-//        {
-//            return number.ToString($"N{decimalPlaces}", CultureInfo.InvariantCulture)
-//                         .Replace(",", " ") // Разделитель тысяч — пробел
-//                         .Replace(".", "."); // Разделитель дробной части — точка
-//        }
-//    }
-//}
-using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -191,8 +15,18 @@ namespace VoltStream.WPF.Commons.Utils
                 typeof(NumericTextBox),
                 new PropertyMetadata(false, OnIsNumericChanged));
 
+        public static readonly DependencyProperty DecimalDigitsProperty =
+            DependencyProperty.RegisterAttached(
+                "DecimalDigits",
+                typeof(int),
+                typeof(NumericTextBox),
+                new PropertyMetadata(2)); // По умолчанию 2 знака после запятой
+
         public static bool GetIsNumeric(DependencyObject obj) => (bool)obj.GetValue(IsNumericProperty);
         public static void SetIsNumeric(DependencyObject obj, bool value) => obj.SetValue(IsNumericProperty, value);
+
+        public static int GetDecimalDigits(DependencyObject obj) => (int)obj.GetValue(DecimalDigitsProperty);
+        public static void SetDecimalDigits(DependencyObject obj, int value) => obj.SetValue(DecimalDigitsProperty, value);
 
         private static void OnIsNumericChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -202,37 +36,105 @@ namespace VoltStream.WPF.Commons.Utils
                 {
                     textBox.TextAlignment = TextAlignment.Right;
                     textBox.PreviewTextInput += TextBox_PreviewTextInput;
-                    textBox.GotFocus += (s, ev) => textBox.SelectAll();
+                    //textBox.GotFocus += (s, ev) => textBox.SelectAll();
+                    textBox.GotFocus += TextBox_GotFocus_SelectAll;
+                    textBox.PreviewKeyDown += OnPreviewKeyDown;
+                    textBox.TextChanged += TextBox_TextChanged;
+                    textBox.LostFocus += TextBox_LostFocus_FormatNumber;
                     DataObject.AddPastingHandler(textBox, OnPaste);
                 }
                 else
                 {
                     textBox.PreviewTextInput -= TextBox_PreviewTextInput;
-                    textBox.GotFocus -= (s, ev) => textBox.SelectAll();
+                    //textBox.GotFocus -= (s, ev) => textBox.SelectAll();
+                    textBox.GotFocus -= TextBox_GotFocus_SelectAll;
+                    textBox.PreviewKeyDown -= OnPreviewKeyDown;
+                    textBox.TextChanged -= TextBox_TextChanged;
+                    textBox.LostFocus -= TextBox_LostFocus_FormatNumber;
                     DataObject.RemovePastingHandler(textBox, OnPaste);
                 }
             }
         }
 
+        private static void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is not TextBox textBox) return;
+            if (textBox.Text.Contains(",") || textBox.Text.Contains("."))
+            {
+                string decimalSeparator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+                string altSeparator = decimalSeparator == "." ? "," : ".";
+                textBox.Text = textBox.Text.Replace(altSeparator, decimalSeparator);
+                textBox.CaretIndex = textBox.Text.Length;
+            }
+        }
+
         private static void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
+            if (sender is not TextBox textBox) return;
+
+            // Разрешить удаление, если выделен весь текст
+            if (textBox.SelectionLength == textBox.Text.Length && char.IsDigit(e.Text, 0))
+            {
+                e.Handled = false;
+                return;
+            }
+
             if (e.Text == "-")
             {
-                if (sender is TextBox textBox)
+                e.Handled = textBox.CaretIndex != 0 || textBox.Text.Contains("-");
+                return;
+            }
+            int decimalDigits = GetDecimalDigits(textBox);
+            e.Handled = !IsTextNumeric(textBox.Text, e.Text, decimalDigits);
+        }
+
+        // Разрешить удаление при нажатии Delete или Backspace
+        private static void OnPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (sender is not TextBox textBox) return;
+
+            if (e.Key == Key.Delete || e.Key == Key.Back)
+            {
+                // Если выделен весь текст, разрешить удаление
+                if (textBox.SelectionLength == textBox.Text.Length)
                 {
-                    e.Handled = textBox.CaretIndex != 0 || textBox.Text.Contains("-");
+                    e.Handled = false;
+                    return;
+                }
+                // Если ничего не выделено, разрешить удаление
+                if (textBox.SelectionLength == 0)
+                {
+                    e.Handled = false;
                     return;
                 }
             }
-            e.Handled = !IsTextNumeric((sender as TextBox)?.Text, e.Text);
+        }
+        private static void TextBox_LostFocus_FormatNumber(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                if (double.TryParse(textBox.Text, NumberStyles.Any, CultureInfo.CurrentCulture, out double value))
+                {
+                    int decimalDigits = GetDecimalDigits(textBox);
+                    string format = "N" + decimalDigits;
+                    textBox.Text = value.ToString(format, CultureInfo.CurrentCulture);
+                }
+            }
         }
 
+        // Обработка вставки из буфера обмена
         private static void OnPaste(object sender, DataObjectPastingEventArgs e)
         {
+            if (sender is not TextBox textBox)
+            {
+                e.CancelCommand();
+                return;
+            }
             if (e.DataObject.GetDataPresent(DataFormats.Text))
             {
                 string text = (string)e.DataObject.GetData(DataFormats.Text);
-                if (!IsTextNumeric((sender as TextBox)?.Text, text))
+                int decimalDigits = GetDecimalDigits(textBox);
+                if (!IsTextNumeric(textBox.Text, text, decimalDigits))
                     e.CancelCommand();
             }
             else
@@ -241,13 +143,12 @@ namespace VoltStream.WPF.Commons.Utils
             }
         }
 
-        // Проверка с учетом любого разделителя дробной части
-        private static bool IsTextNumeric(string? currentText, string newText)
+
+        // Проверка с учетом любого разделителя дробной части и ограничения на количество знаков после разделителя
+        private static bool IsTextNumeric(string? currentText, string newText, int decimalDigits)
         {
             string decimalSeparator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
-            MessageBox.Show(decimalSeparator);
             string altSeparator = decimalSeparator == "." ? "," : ".";
-            MessageBox.Show(decimalSeparator + " " +altSeparator);
             string fullText = (currentText ?? "") + newText;
 
             // Заменяем альтернативный разделитель на текущий
@@ -257,9 +158,37 @@ namespace VoltStream.WPF.Commons.Utils
             int sepCount = fullText.Split(decimalSeparator).Length - 1;
             if (sepCount > 1) return false;
 
+            // Ограничение на количество знаков после разделителя
+            int sepIndex = fullText.IndexOf(decimalSeparator, StringComparison.Ordinal);
+            if (sepIndex >= 0)
+            {
+                int afterSep = fullText.Length - sepIndex - 1;
+                if (afterSep > decimalDigits)
+                    return false;
+            }
+
             // Проверяем на корректность числа
-            string pattern = @"^-?\d*(" + Regex.Escape(decimalSeparator) + @"\d*)?$";
+            string pattern = @"^-?\d*(" + Regex.Escape(decimalSeparator) + @"\d{0," + decimalDigits + @"})?$";
             return Regex.IsMatch(fullText, pattern);
         }
+        private static void TextBox_GotFocus_SelectAll(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                // Если текстбокс не в режиме только для чтения и не пустой, выделяем весь текст
+                if (!textBox.IsReadOnly && !string.IsNullOrEmpty(textBox.Text))
+                {
+                    textBox.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        textBox.SelectAll();
+                    }), System.Windows.Threading.DispatcherPriority.Input);
+                }
+            }
+        }
+    
+    
     }
 }
+
+
+
