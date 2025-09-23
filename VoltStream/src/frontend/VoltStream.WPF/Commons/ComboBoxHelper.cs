@@ -88,7 +88,14 @@ public static class ComboBoxHelper
             comboBox.SelectedItem = null;
             e.Handled = true;
             MessageBox.Show($"{inputText} - {strInfo}: ro'yxatda yo'q.", "Tekshiruv");
-            comboBox.IsDropDownOpen = true;
+            try
+                {
+                comboBox.IsDropDownOpen = true;
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
         }
     }
 }
