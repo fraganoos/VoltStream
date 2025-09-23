@@ -27,48 +27,64 @@ namespace VoltStream.WPF.Commons.Utils
                 {
                     comboBox.DropDownClosed += ComboBox_DropDownClosed;
                     comboBox.PreviewKeyDown += ComboBox_PreviewKeyDown;
+                    comboBox.PreviewMouseDown += ComboBox_PreviewMouseDown;
                 }
                 else
                 {
                     comboBox.DropDownClosed -= ComboBox_DropDownClosed;
                     comboBox.PreviewKeyDown -= ComboBox_PreviewKeyDown;
+                    comboBox.PreviewMouseDown -= ComboBox_PreviewMouseDown;
                 }
             }
         }
 
         private static string? _lastText;
+        private static bool _mouseClicked = false;
+        private static void ComboBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _mouseClicked = true;
+        }
+
         private static void ComboBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (sender is ComboBox comboBox && e.Key == Key.Enter && comboBox.IsDropDownOpen)
+            if (sender is ComboBox comboBox && e.Key == Key.Enter )
             {
                 // Сохраняем текст до закрытия
                 _lastText = comboBox.Text;
+                if (!comboBox.IsDropDownOpen)
+                {
+                    e.Handled = true; // Предотвращаем дальнейшую обработку Enter
+                    SendTabKey();
+                    return;
+                }
+                else 
+                {
+                    comboBox.IsDropDownOpen = false;
+                    e.Handled = true;
+                    SendTabKey();
+                }
                 // Закрываем дропдаун, после чего сработает DropDownClosed
-                comboBox.IsDropDownOpen = false;
-                e.Handled = true;
             }
         }
 
         private static void ComboBox_DropDownClosed(object? sender, System.EventArgs e)
         {
-            if (sender is ComboBox comboBox)
-            {
-                //MessageBox.Show(comboBox.Text + " 1");
-                SendTabKey();
-                //// Проверяем, изменился ли текст после выбора
-                //if (_lastText != null && comboBox.Text != _lastText)
-                //{
-                //    MessageBox.Show(comboBox.Text + " 2");
-                //    _lastText = null;
-                //    SendTabKey();
-                //}
-                //else if (Mouse.LeftButton == MouseButtonState.Pressed)
-                //{
-                //    MessageBox.Show(comboBox.Text + " 3");
-                //    // Если выбрано мышкой, тоже переходим
-                //    SendTabKey();
-                //}
-            }
+            //if (sender is ComboBox comboBox)
+            //{
+            //    // Проверяем, изменился ли текст после выбора
+            //    if (comboBox.Text != null) //(_lastText != null && comboBox.Text != _lastText)
+            //    {
+            //        //MessageBox.Show(comboBox.Text + " 2");
+            //        _lastText = null;
+            //        SendTabKey();
+            //    }
+            //    if (_mouseClicked) //(Mouse.LeftButton == MouseButtonState.Pressed)
+            //    {
+            //        // Если выбрано мышкой, тоже переходим
+            //        _mouseClicked = false;
+            //        SendTabKey();
+            //    }
+            //}
         }
 
         private static void SendTabKey()

@@ -35,9 +35,8 @@ namespace VoltStream.WPF.Commons.Utils
                 if ((bool)e.NewValue)
                 {
                     textBox.TextAlignment = TextAlignment.Right;
-                    textBox.PreviewTextInput += TextBox_PreviewTextInput;
-                    //textBox.GotFocus += (s, ev) => textBox.SelectAll();
                     textBox.GotFocus += TextBox_GotFocus_SelectAll;
+                    textBox.PreviewTextInput += TextBox_PreviewTextInput;
                     textBox.PreviewKeyDown += OnPreviewKeyDown;
                     textBox.TextChanged += TextBox_TextChanged;
                     textBox.LostFocus += TextBox_LostFocus_FormatNumber;
@@ -45,13 +44,26 @@ namespace VoltStream.WPF.Commons.Utils
                 }
                 else
                 {
-                    textBox.PreviewTextInput -= TextBox_PreviewTextInput;
-                    //textBox.GotFocus -= (s, ev) => textBox.SelectAll();
                     textBox.GotFocus -= TextBox_GotFocus_SelectAll;
+                    textBox.PreviewTextInput -= TextBox_PreviewTextInput;
                     textBox.PreviewKeyDown -= OnPreviewKeyDown;
                     textBox.TextChanged -= TextBox_TextChanged;
                     textBox.LostFocus -= TextBox_LostFocus_FormatNumber;
                     DataObject.RemovePastingHandler(textBox, OnPaste);
+                }
+            }
+        }
+        private static void TextBox_GotFocus_SelectAll(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                // Если текстбокс не в режиме только для чтения и не пустой, выделяем весь текст
+                if (!textBox.IsReadOnly && !string.IsNullOrEmpty(textBox.Text))
+                {
+                    textBox.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        textBox.SelectAll();
+                    }), System.Windows.Threading.DispatcherPriority.Input);
                 }
             }
         }
@@ -143,7 +155,6 @@ namespace VoltStream.WPF.Commons.Utils
             }
         }
 
-
         // Проверка с учетом любого разделителя дробной части и ограничения на количество знаков после разделителя
         private static bool IsTextNumeric(string? currentText, string newText, int decimalDigits)
         {
@@ -171,24 +182,5 @@ namespace VoltStream.WPF.Commons.Utils
             string pattern = @"^-?\d*(" + Regex.Escape(decimalSeparator) + @"\d{0," + decimalDigits + @"})?$";
             return Regex.IsMatch(fullText, pattern);
         }
-        private static void TextBox_GotFocus_SelectAll(object sender, RoutedEventArgs e)
-        {
-            if (sender is TextBox textBox)
-            {
-                // Если текстбокс не в режиме только для чтения и не пустой, выделяем весь текст
-                if (!textBox.IsReadOnly && !string.IsNullOrEmpty(textBox.Text))
-                {
-                    textBox.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        textBox.SelectAll();
-                    }), System.Windows.Threading.DispatcherPriority.Input);
-                }
-            }
-        }
-    
-    
     }
 }
-
-
-
