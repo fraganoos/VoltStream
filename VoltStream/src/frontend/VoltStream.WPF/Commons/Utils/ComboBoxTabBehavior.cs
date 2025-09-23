@@ -1,3 +1,4 @@
+п»їusing System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -13,101 +14,200 @@ namespace VoltStream.WPF.Commons.Utils
                 typeof(ComboBoxTabBehavior),
                 new UIPropertyMetadata(false, OnEnableTabOnSelectChanged));
 
-        public static bool GetEnableTabOnSelect(DependencyObject obj)
-            => (bool)obj.GetValue(EnableTabOnSelectProperty);
+        public static readonly DependencyProperty NextKeyProperty =
+            DependencyProperty.RegisterAttached(
+                "NextKey",
+                typeof(Key),
+                typeof(ComboBoxTabBehavior),
+                new UIPropertyMetadata(Key.Tab));
 
-        public static void SetEnableTabOnSelect(DependencyObject obj, bool value)
-            => obj.SetValue(EnableTabOnSelectProperty, value);
+        public static bool GetEnableTabOnSelect(DependencyObject obj) =>
+            (bool)obj.GetValue(EnableTabOnSelectProperty);
+
+        public static void SetEnableTabOnSelect(DependencyObject obj, bool value) =>
+            obj.SetValue(EnableTabOnSelectProperty, value);
+
+        public static Key GetNextKey(DependencyObject obj) =>
+            (Key)obj.GetValue(NextKeyProperty);
+
+        public static void SetNextKey(DependencyObject obj, Key value) =>
+            obj.SetValue(NextKeyProperty, value);
 
         private static void OnEnableTabOnSelectChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is ComboBox comboBox)
+            if (d is not ComboBox comboBox)
+                return;
+
+            if ((bool)e.NewValue)
             {
-                if ((bool)e.NewValue)
-                {
-                    comboBox.DropDownClosed += ComboBox_DropDownClosed;
-                    comboBox.PreviewKeyDown += ComboBox_PreviewKeyDown;
-                    comboBox.PreviewMouseDown += ComboBox_PreviewMouseDown;
-                }
-                else
-                {
-                    comboBox.DropDownClosed -= ComboBox_DropDownClosed;
-                    comboBox.PreviewKeyDown -= ComboBox_PreviewKeyDown;
-                    comboBox.PreviewMouseDown -= ComboBox_PreviewMouseDown;
-                }
+                comboBox.DropDownClosed += ComboBox_DropDownClosed;
+                comboBox.PreviewKeyDown += ComboBox_PreviewKeyDown;
+                comboBox.PreviewMouseDown += ComboBox_PreviewMouseDown;
+                comboBox.Unloaded += ComboBox_Unloaded;
+
+                SetComboBoxState(comboBox, new State());
+            }
+            else
+            {
+                comboBox.DropDownClosed -= ComboBox_DropDownClosed;
+                comboBox.PreviewKeyDown -= ComboBox_PreviewKeyDown;
+                comboBox.PreviewMouseDown -= ComboBox_PreviewMouseDown;
+                comboBox.Unloaded -= ComboBox_Unloaded;
+
+                ClearComboBoxState(comboBox);
             }
         }
 
-        private static string? _lastText;
-        private static bool _mouseClicked = false;
+        #region State per ComboBox
+        private class State
+        {
+            public bool MouseClicked { get; set; }
+            public bool EnterPressed { get; set; }
+        }
+
+        private static readonly DependencyProperty StateProperty =
+            DependencyProperty.RegisterAttached(
+                "State",
+                typeof(State),
+                typeof(ComboBoxTabBehavior),
+                new PropertyMetadata(null));
+
+        private static void SetComboBoxState(ComboBox comboBox, State state) =>
+            comboBox.SetValue(StateProperty, state);
+
+        private static State? GetComboBoxState(ComboBox comboBox) =>
+            comboBox.GetValue(StateProperty) as State;
+
+        private static void ClearComboBoxState(ComboBox comboBox) =>
+            comboBox.ClearValue(StateProperty);
+        #endregion
+
         private static void ComboBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            _mouseClicked = true;
+            if (sender is ComboBox comboBox && comboBox.IsDropDownOpen)
+            {
+                var state = GetComboBoxState(comboBox);
+                if (state != null) state.MouseClicked = true;
+            }
         }
 
         private static void ComboBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (sender is ComboBox comboBox && e.Key == Key.Enter )
+            if (sender is not ComboBox comboBox)
+                return;
+
+            var state = GetComboBoxState(comboBox);
+            if (state == null) return;
+
+            // ENTER в†’ РїРµСЂРµС…РѕРґ РІРїРµСЂС‘Рґ (РѕР±С‹С‡РЅРѕ Tab)
+            if (e.Key == Key.Enter)
             {
-                // Сохраняем текст до закрытия
-                _lastText = comboBox.Text;
+                state.EnterPressed = true;
+
                 if (!comboBox.IsDropDownOpen)
                 {
-                    e.Handled = true; // Предотвращаем дальнейшую обработку Enter
-                    SendTabKey();
-                    return;
+                    e.Handled = true;
+                    DoNavigationForKey(comboBox, GetNextKey(comboBox));
                 }
-                else 
+                else
                 {
                     comboBox.IsDropDownOpen = false;
-                    e.Handled = true;
-                    SendTabKey();
                 }
-                // Закрываем дропдаун, после чего сработает DropDownClosed
+
+                return;
+            }
+
+            // СЃС‚СЂРµР»РєРё в†ђ / в†‘ в†’ РЅР°Р·Р°Рґ
+            if (e.Key == Key.Left || e.Key == Key.Up)
+            {
+                if (TryGetEditableTextBox(comboBox, out var textBox))
+                {
+                    if (textBox.CaretIndex == 0 || string.IsNullOrEmpty(textBox.Text))
+                    {
+                        e.Handled = true;
+
+                        if (comboBox.IsDropDownOpen)
+                            comboBox.IsDropDownOpen = false;
+
+                        MoveFocusPrevious(comboBox);
+                    }
+                }
+            }
+
+            // СЃС‚СЂРµР»РєРё в†’ / в†“ в†’ РІРїРµСЂС‘Рґ
+            if (e.Key == Key.Right || e.Key == Key.Down)
+            {
+                if (TryGetEditableTextBox(comboBox, out var textBox))
+                {
+                    // РµСЃР»Рё РєСѓСЂСЃРѕСЂ РІ РєРѕРЅС†Рµ С‚РµРєСЃС‚Р° в†’ РёРґС‘Рј РґР°Р»СЊС€Рµ
+                    if (textBox.CaretIndex == textBox.Text.Length)
+                    {
+                        e.Handled = true;
+
+                        if (comboBox.IsDropDownOpen)
+                            comboBox.IsDropDownOpen = false;
+
+                        DoNavigationForKey(comboBox, Key.Tab);
+                    }
+                }
             }
         }
 
-        private static void ComboBox_DropDownClosed(object? sender, System.EventArgs e)
+        private static void ComboBox_DropDownClosed(object? sender, EventArgs e)
         {
-            //if (sender is ComboBox comboBox)
-            //{
-            //    // Проверяем, изменился ли текст после выбора
-            //    if (comboBox.Text != null) //(_lastText != null && comboBox.Text != _lastText)
-            //    {
-            //        //MessageBox.Show(comboBox.Text + " 2");
-            //        _lastText = null;
-            //        SendTabKey();
-            //    }
-            //    if (_mouseClicked) //(Mouse.LeftButton == MouseButtonState.Pressed)
-            //    {
-            //        // Если выбрано мышкой, тоже переходим
-            //        _mouseClicked = false;
-            //        SendTabKey();
-            //    }
-            //}
+            if (sender is ComboBox comboBox)
+            {
+                var state = GetComboBoxState(comboBox);
+                if (state == null) return;
+
+                if (state.EnterPressed)
+                {
+                    state.EnterPressed = false;
+                    DoNavigationForKey(comboBox, GetNextKey(comboBox));
+                    return;
+                }
+
+                if (state.MouseClicked)
+                {
+                    state.MouseClicked = false;
+                    DoNavigationForKey(comboBox, GetNextKey(comboBox));
+                }
+            }
         }
 
-        private static void SendTabKey()
+        private static void ComboBox_Unloaded(object sender, RoutedEventArgs e)
         {
-            var tabDown = new KeyEventArgs(
-                Keyboard.PrimaryDevice,
-                PresentationSource.FromVisual(Application.Current.MainWindow),
-                0,
-                Key.Tab)
-            {
-                RoutedEvent = Keyboard.KeyDownEvent
-            };
-            InputManager.Current.ProcessInput(tabDown);
+            if (sender is ComboBox comboBox)
+                ClearComboBoxState(comboBox);
+        }
 
-            var tabUp = new KeyEventArgs(
-                Keyboard.PrimaryDevice,
-                PresentationSource.FromVisual(Application.Current.MainWindow),
-                0,
-                Key.Tab)
+        private static bool TryGetEditableTextBox(ComboBox comboBox, out TextBox textBox)
+        {
+            textBox = comboBox.Template.FindName("PART_EditableTextBox", comboBox) as TextBox;
+            return textBox != null;
+        }
+
+        // РќР°РІРёРіР°С†РёСЏ С‡РµСЂРµР· MoveFocus вЂ” РєРѕСЂСЂРµРєС‚РЅРѕ РёРјРёС‚РёСЂСѓРµС‚ Tab / Shift+Tab
+        private static void DoNavigationForKey(ComboBox comboBox, Key key)
+        {
+            var focused = Keyboard.FocusedElement as UIElement ?? comboBox;
+            if (focused == null) return;
+
+            if (key == Key.Tab || key == Key.Enter || key == Key.Right || key == Key.Down)
             {
-                RoutedEvent = Keyboard.KeyUpEvent
-            };
-            InputManager.Current.ProcessInput(tabUp);
+                focused.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+            }
+            else if (key == Key.Left || key == Key.Up)
+            {
+                focused.MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));
+            }
+        }
+
+        private static void MoveFocusPrevious(ComboBox comboBox)
+        {
+            var focused = Keyboard.FocusedElement as UIElement ?? comboBox;
+            if (focused != null)
+                focused.MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));
         }
     }
 }

@@ -301,7 +301,14 @@ public partial class SalesPage : Page
 
     private void CbxPerRollCount_GotFocus(object sender, RoutedEventArgs e)
     {
-        cbxPerRollCount.IsDropDownOpen = true;
+        try
+        {
+            cbxPerRollCount.IsDropDownOpen = true;
+        }
+        catch (Exception ex)
+        {
+            //ignored
+        }
     }
     private void CbxPerRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
