@@ -1,5 +1,7 @@
 ﻿namespace VoltStream.WPF.Sales.Models
 {
+    using System.Collections.ObjectModel;
+
     public class Sale
     {
         public DateTime OperationDate { get; set; } = DateTime.Now;
@@ -23,6 +25,6 @@
         public string? PerDiscount { get; set; } // chegirma
         public string? Discount { get; set; } // chegirma summasi
         public string? FinalSumProduct { get; set; } // chegirmadan keyingi narxi
-        public List<SaleItem> SaleItems { get; set; } = default!;
+        public ObservableCollection<SaleItem> SaleItems { get; set; } = new ObservableCollection<SaleItem>();
     }
 }

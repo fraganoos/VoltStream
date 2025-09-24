@@ -378,7 +378,6 @@ public partial class SalesPage : Page
         ComboBoxHelper.BeforeUpdate(sender, e, "Rulon uzunlugi");
     }
 
-
     private async Task LoadCategoryAsync() // Загрузка категорий
     {
         try
@@ -488,6 +487,26 @@ public partial class SalesPage : Page
         {
             MessageBox.Show("Произошла ошибка: " + ex.Message);
         }
+    }
+
+    private void addButton_Click(object sender, RoutedEventArgs e)
+    {
+        SaleItem saleItem = new SaleItem()
+        {
+            CategoryId = cbxCategoryName.SelectedIndex,
+            CategoryName = cbxCategoryName.Text,
+            ProductId = cbxProductName.SelectedIndex,
+            ProductName = cbxProductName.Text,
+            PerRollCount = decimal.TryParse(cbxPerRollCount.Text, out decimal perRollCount) ? perRollCount : 0,
+            RollCount = decimal.TryParse(txtRollCount.Text, out decimal rollCount) ? rollCount : 0,
+            Quantity = decimal.TryParse(txtQuantity.Text, out decimal quantity) ? quantity : 0,
+            Price = decimal.TryParse(txtPrice.Text, out decimal price) ? price : 0,
+            Sum = decimal.TryParse(txtSum.Text, out decimal sum) ? sum : 0,
+            PerDiscount = decimal.TryParse(txtPerDiscount.Text, out decimal perDiscount) ? perDiscount : 0,
+            Discount = decimal.TryParse(txtDiscount.Text, out decimal discount) ? discount : 0,
+            FinalSumProduct = decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSumProduct) ? finalSumProduct : 0
+        };
+        sale.SaleItems.Insert(0, saleItem);
     }
 }
 
