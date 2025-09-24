@@ -6,7 +6,7 @@ public class SaleItem
     public string CategoryName { get; set; } = string.Empty;
     public long ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty;
-    public string PerRollCount { get; set; } = string.Empty; // birligi
+    public decimal? PerRollCount { get; set; }  // birligi
     public decimal? RollCount { get; set; } // rulon
     public decimal? Quantity { get; set; } // metr
     public decimal? Price { get; set; } // narxi
