@@ -29,4 +29,5 @@ public interface ICustomersApi
 
     [Post("/customers/filter")]
     Task<ApiResponse<Response<List<Customer>>>> Filter(FilteringRequest request);
+    Task GetCustomerByIdAsync(long? customerId);
 }

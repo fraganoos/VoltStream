@@ -37,6 +37,9 @@ public partial class SalesPage : Page
         customersApi = services.GetRequiredService<ICustomersApi>();
 
         CustomerName.GotFocus += CustomerName_GotFocus;
+        CustomerName.PreviewLostKeyboardFocus += (s, e) => ComboBoxHelper.BeforeUpdate(s, e, "Mijoz");
+        CustomerName.LostFocus += CustomerName_LostFocus;
+
         cbxCategoryName.GotFocus += CbxCategoryName_GotFocus;
         cbxCategoryName.PreviewLostKeyboardFocus += CbxCategoryName_PreviewLostKeyboardFocus;
 
@@ -56,6 +59,101 @@ public partial class SalesPage : Page
         txtPerDiscount.PreviewLostKeyboardFocus += txtPerDiscount_PreviewLostKeyboardFocus;
         txtDiscount.PreviewLostKeyboardFocus += txtDiscount_PreviewLostKeyboardFocus;
         txtFinalSumProduct.PreviewLostKeyboardFocus += txtFinalSumProduct_PreviewLostKeyboardFocus;
+    }
+
+    private async void CustomerName_LostFocus(object sender, RoutedEventArgs e)
+    {
+        long? customerId = null;
+        if (CustomerName.SelectedValue!=null)
+        {
+            customerId = (long)CustomerName.SelectedValue;
+        }
+        else
+        {
+            beginBalans.Clear();
+            lastBalans.Text = null;
+            tel.Text=null;
+            return;
+        }
+        await LoadCustomerByIdAsync(customerId);
+    }
+    private async Task LoadCustomerByIdAsync(long? customerId)
+    {
+        try
+        {
+            if (customerId.HasValue && customerId.Value != 0)
+            {
+                var response = await customersApi.GetCustomerByIdAsync(customerId.Value);
+                if (response.IsSuccessStatusCode && response.Content?.Data != null)
+                {
+                    var accounts = response.Content.Data.Accounts;
+                    beginBalans.Text = accounts.CurrentSumm.ToString("N2");
+                    tel.Text=response.Content.Data.Phone;
+                    decimal beginSumm = 0;
+                    decimal saleSumm = 0;
+                    if (decimal.TryParse(beginBalans.Text, out decimal value)) beginSumm = value;
+                    if (decimal.TryParse(finalSumm.Text, out decimal amount)) saleSumm = amount;
+                    decimal endSumm = beginSumm - saleSumm;
+                    lastBalans.Text = endSumm.ToString("N2");
+
+
+
+                    //sale.CustomerId = customer.Id;
+                    //sale.CustomerName = customer.Name;
+                }
+                else
+                {
+                    var errorMsg = response.Error?.Message ?? "Unknown error";
+                    MessageBox.Show("Error fetching customer by ID: " + errorMsg);
+                }
+            }
+            else
+            {
+                // Если customerId не задан, очищаем поля
+                //sale.CustomerId = null;
+                //sale.CustomerName = string.Empty;
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("An error occurred: " + ex.Message);
+        }
+    }
+
+    private async void CustomerName_GotFocus(object sender, RoutedEventArgs e) 
+    {
+        await LoadCustomerNameAsync();
+    }
+    private async Task LoadCustomerNameAsync()
+    {
+        try
+        {
+            // Сохраняем текущее выбранное значение
+            var selectedValue = CustomerName.SelectedValue;
+            var response = await customersApi.GetAllCustomersAsync();
+
+            if (response.IsSuccessStatusCode && response.Content?.Data != null)
+            {
+                List<Customer> customers = response.Content.Data;
+                CustomerName.ItemsSource = customers;
+                CustomerName.DisplayMemberPath = "Name";
+                CustomerName.SelectedValuePath = "Id";
+                // Восстанавливаем выбранное значение
+                if (selectedValue != null)
+                    CustomerName.SelectedValue = selectedValue;
+            }
+            else
+            {
+                // Проверяем на null, чтобы избежать CS8602
+                var errorMsg = response.Error?.Message ?? "Unknown error";
+                MessageBox.Show("Error fetching customers: " + errorMsg);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("An error occurred: " + ex.Message);
+        }
     }
 
     private void txtFinalSumProduct_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -110,6 +208,7 @@ public partial class SalesPage : Page
             CalcFinalSumProduct(sender);
         }
     }
+
 
     private void txtPerDiscount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
@@ -217,42 +316,6 @@ public partial class SalesPage : Page
         }
     }
 
-    private async void CustomerName_GotFocus(object sender, RoutedEventArgs e) /// API Qilish kerak
-    {
-        await LoadCustomerNameAsync();
-    }
-
-    private async Task LoadCustomerNameAsync()
-    {
-        try
-        {
-            // Сохраняем текущее выбранное значение
-            var selectedValue = CustomerName.SelectedValue;
-            var response = await customersApi.GetAllCustomersAsync();
-
-            if (response.IsSuccessStatusCode && response.Content?.Data != null)
-            {
-                List<Customer> customers = response.Content.Data;
-                CustomerName.ItemsSource = customers;
-                CustomerName.DisplayMemberPath = "Name";
-                CustomerName.SelectedValuePath = "Id";
-                // Восстанавливаем выбранное значение
-                if (selectedValue != null)
-                    CustomerName.SelectedValue = selectedValue;
-            }
-            else
-            {
-                // Проверяем на null, чтобы избежать CS8602
-                var errorMsg = response.Error?.Message ?? "Unknown error";
-                MessageBox.Show("Error fetching customers: " + errorMsg);
-            }
-
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show("An error occurred: " + ex.Message);
-        }
-    }
 
     private async void CbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
     {

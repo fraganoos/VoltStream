@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 public record Customer
 {
     [JsonPropertyName("id")]
-    public int Id { get; set; }
+    public long Id { get; set; }
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
@@ -18,4 +18,7 @@ public record Customer
 
     [JsonPropertyName("description")]
     public string? Description { get; set; }
+    [JsonPropertyName("account")]
+    public Account? Accounts { get; set; }=new Account();
+
 }
