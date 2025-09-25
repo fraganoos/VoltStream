@@ -507,6 +507,20 @@ public partial class SalesPage : Page
             FinalSumProduct = decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSumProduct) ? finalSumProduct : 0
         };
         sale.SaleItems.Insert(0, saleItem);
+        sale.FinalSum=sale.SaleItems.Sum(s => s.Sum);
+
+        cbxCategoryName.SelectedValue = null;
+        cbxProductName.SelectedValue = null;
+        cbxPerRollCount.SelectedValue = null;
+        txtRollCount.Clear();
+        txtQuantity.Clear();
+        txtPrice.Clear();
+        txtSum.Clear();
+        txtPerDiscount.Clear();
+        txtDiscount.Clear();
+        txtFinalSumProduct.Clear();
+        //MessageBox.Show(sale.FinalSum.ToString());
+        cbxCategoryName.Focus();
     }
 }
 
