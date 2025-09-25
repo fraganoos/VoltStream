@@ -5,14 +5,32 @@
 
     public class Sale : ViewModelBase
     {
+        public decimal? _totalSum;
+        public decimal? _totalDiscount;
         public decimal? _finalSum;
         public DateTime OperationDate { get; set; } = DateTime.Now;
         public long CustomerId { get; set; }
         public string CustomerName { get; set; } = string.Empty;
         public string CurrencyType { get; set; } = string.Empty;
-        public decimal? TotalSum { get; set; } // jami summa
-        public decimal? TotalDiscount { get; set; } // chegirma
-        public bool CheckedDiscount { get; set; } // chegirma ishlatilganmi
+        public decimal? TotalSum 
+        {
+            get => _totalSum;
+            set
+            {
+                _totalSum = value;
+                OnPropertyChanged(nameof(TotalSum));
+            }
+        } // jami summa
+        public bool CheckedDiscount { get; set; } = false; // chegirma ishlatilganmi
+        public decimal? TotalDiscount 
+        {
+            get => _totalDiscount;
+            set
+            {
+                _totalDiscount = value;
+                OnPropertyChanged(nameof(TotalDiscount));
+            }
+        } // chegirma
         public decimal? FinalSum
         {
             get => _finalSum;
