@@ -41,8 +41,8 @@ namespace VoltStream.WPF.Commons.Utils
             if ((bool)e.NewValue)
             {
                 comboBox.DropDownClosed += ComboBox_DropDownClosed;
+                comboBox.SelectionChanged += ComboBox_SelectionChanged;
                 comboBox.PreviewKeyDown += ComboBox_PreviewKeyDown;
-                comboBox.PreviewMouseDown += ComboBox_PreviewMouseDown;
                 comboBox.Unloaded += ComboBox_Unloaded;
 
                 SetComboBoxState(comboBox, new State());
@@ -50,8 +50,8 @@ namespace VoltStream.WPF.Commons.Utils
             else
             {
                 comboBox.DropDownClosed -= ComboBox_DropDownClosed;
+                comboBox.SelectionChanged -= ComboBox_SelectionChanged;
                 comboBox.PreviewKeyDown -= ComboBox_PreviewKeyDown;
-                comboBox.PreviewMouseDown -= ComboBox_PreviewMouseDown;
                 comboBox.Unloaded -= ComboBox_Unloaded;
 
                 ClearComboBoxState(comboBox);
@@ -61,8 +61,8 @@ namespace VoltStream.WPF.Commons.Utils
         #region State per ComboBox
         private class State
         {
-            public bool MouseClicked { get; set; }
             public bool EnterPressed { get; set; }
+            public bool MouseSelected { get; set; }
         }
 
         private static readonly DependencyProperty StateProperty =
@@ -82,12 +82,13 @@ namespace VoltStream.WPF.Commons.Utils
             comboBox.ClearValue(StateProperty);
         #endregion
 
-        private static void ComboBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private static void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (sender is ComboBox comboBox && comboBox.IsDropDownOpen)
+            if (sender is ComboBox comboBox)
             {
                 var state = GetComboBoxState(comboBox);
-                if (state != null) state.MouseClicked = true;
+                if (state != null)
+                    state.MouseSelected = true; // только при выборе элемента
             }
         }
 
@@ -99,7 +100,15 @@ namespace VoltStream.WPF.Commons.Utils
             var state = GetComboBoxState(comboBox);
             if (state == null) return;
 
-            // ENTER → переход вперёд (обычно Tab)
+            bool allSelected = false;
+            if (TryGetEditableTextBox(comboBox, out var textBox))
+            {
+                allSelected = textBox.SelectionStart == 0 &&
+                              textBox.SelectionLength == textBox.Text.Length &&
+                              textBox.Text.Length > 0;
+            }
+
+            // ENTER → Tab (вперёд)
             if (e.Key == Key.Enter)
             {
                 state.EnterPressed = true;
@@ -117,38 +126,43 @@ namespace VoltStream.WPF.Commons.Utils
                 return;
             }
 
-            // стрелки ← / ↑ → назад
+            // ← / ↑ → Shift+Tab (назад)
             if (e.Key == Key.Left || e.Key == Key.Up)
             {
-                if (TryGetEditableTextBox(comboBox, out var textBox))
+                if (TryGetEditableTextBox(comboBox, out var tb))
                 {
-                    if (textBox.CaretIndex == 0 || string.IsNullOrEmpty(textBox.Text))
+                    if (tb.CaretIndex == 0 || string.IsNullOrEmpty(tb.Text) || allSelected)
                     {
                         e.Handled = true;
-
                         if (comboBox.IsDropDownOpen)
                             comboBox.IsDropDownOpen = false;
-
                         MoveFocusPrevious(comboBox);
                     }
                 }
+                else // не редактируемый ComboBox
+                {
+                    e.Handled = true;
+                    MoveFocusPrevious(comboBox);
+                }
             }
 
-            // стрелки → / ↓ → вперёд
+            // → / ↓ → Tab (вперёд)
             if (e.Key == Key.Right || e.Key == Key.Down)
             {
-                if (TryGetEditableTextBox(comboBox, out var textBox))
+                if (TryGetEditableTextBox(comboBox, out var tb))
                 {
-                    // если курсор в конце текста → идём дальше
-                    if (textBox.CaretIndex == textBox.Text.Length)
+                    if (tb.CaretIndex == tb.Text.Length || allSelected)
                     {
                         e.Handled = true;
-
                         if (comboBox.IsDropDownOpen)
                             comboBox.IsDropDownOpen = false;
-
                         DoNavigationForKey(comboBox, Key.Tab);
                     }
+                }
+                else // не редактируемый ComboBox
+                {
+                    e.Handled = true;
+                    DoNavigationForKey(comboBox, Key.Tab);
                 }
             }
         }
@@ -167,9 +181,10 @@ namespace VoltStream.WPF.Commons.Utils
                     return;
                 }
 
-                if (state.MouseClicked)
+                // теперь только если реально выбрали элемент
+                if (state.MouseSelected)
                 {
-                    state.MouseClicked = false;
+                    state.MouseSelected = false;
                     DoNavigationForKey(comboBox, GetNextKey(comboBox));
                 }
             }
@@ -187,20 +202,15 @@ namespace VoltStream.WPF.Commons.Utils
             return textBox != null;
         }
 
-        // Навигация через MoveFocus — корректно имитирует Tab / Shift+Tab
         private static void DoNavigationForKey(ComboBox comboBox, Key key)
         {
             var focused = Keyboard.FocusedElement as UIElement ?? comboBox;
             if (focused == null) return;
 
             if (key == Key.Tab || key == Key.Enter || key == Key.Right || key == Key.Down)
-            {
                 focused.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-            }
             else if (key == Key.Left || key == Key.Up)
-            {
                 focused.MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));
-            }
         }
 
         private static void MoveFocusPrevious(ComboBox comboBox)

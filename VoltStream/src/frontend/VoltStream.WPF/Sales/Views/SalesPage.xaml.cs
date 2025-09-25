@@ -37,6 +37,7 @@ public partial class SalesPage : Page
         customersApi = services.GetRequiredService<ICustomersApi>();
 
         CustomerName.GotFocus += CustomerName_GotFocus;
+        
         CustomerName.PreviewLostKeyboardFocus += (s, e) => ComboBoxHelper.BeforeUpdate(s, e, "Mijoz");
         CustomerName.LostFocus += CustomerName_LostFocus;
 
@@ -89,14 +90,14 @@ public partial class SalesPage : Page
                     var accounts = response.Content.Data.Accounts;
                     beginBalans.Text = accounts.CurrentSumm.ToString("N2");
                     tel.Text=response.Content.Data.Phone;
-                    decimal beginSumm = 0;
-                    decimal saleSumm = 0;
-                    if (decimal.TryParse(beginBalans.Text, out decimal value)) beginSumm = value;
-                    if (decimal.TryParse(finalSumm.Text, out decimal amount)) saleSumm = amount;
-                    decimal endSumm = beginSumm - saleSumm;
-                    lastBalans.Text = endSumm.ToString("N2");
+                    //decimal beginSumm = 0;
+                    //decimal saleSumm = 0;
+                    //if (decimal.TryParse(beginBalans.Text, out decimal value)) beginSumm = value;
+                    //if (decimal.TryParse(finalSumm.Text, out decimal amount)) saleSumm = amount;
+                    //decimal endSumm = beginSumm - saleSumm;
+                    //lastBalans.Text = endSumm.ToString("N2");
 
-
+                    CalcSaleSum();
 
                     //sale.CustomerId = customer.Id;
                     //sale.CustomerName = customer.Name;
@@ -507,8 +508,8 @@ public partial class SalesPage : Page
             FinalSumProduct = decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSumProduct) ? finalSumProduct : 0
         };
         sale.SaleItems.Insert(0, saleItem);
-        sale.FinalSum=sale.SaleItems.Sum(s => s.Sum);
-
+        //sale.FinalSum=sale.SaleItems.Sum(s => s.Sum);
+        CalcSaleSum(sender);
         cbxCategoryName.SelectedValue = null;
         cbxProductName.SelectedValue = null;
         cbxPerRollCount.SelectedValue = null;
@@ -521,6 +522,37 @@ public partial class SalesPage : Page
         txtFinalSumProduct.Clear();
         //MessageBox.Show(sale.FinalSum.ToString());
         cbxCategoryName.Focus();
+    }
+    private void CalcSaleSum (object? sender = null)
+    {
+        decimal finalSum = 0;
+        decimal totalSum = 0;
+        decimal totalDiscount= 0;
+        if (sale.SaleItems.Count > 0) 
+        { 
+            sale.FinalSum = sale.SaleItems.Sum(s => s.Sum);
+            sale.TotalSum = sale.SaleItems.Sum(s => s.Sum);
+            sale.TotalDiscount=sale.SaleItems.Sum(d => d.Discount);
+            finalSum = sale.FinalSum.Value;
+            totalSum = sale.TotalSum.Value;
+            totalDiscount = sale.TotalDiscount.Value;
+            if (sale.CheckedDiscount)
+            {
+                finalSum = totalSum - totalDiscount;
+                sale.FinalSum= finalSum;
+            }
+        }
+        decimal beginSum = decimal.TryParse(beginBalans.Text, out decimal value) ? value : 0;
+        decimal endSum = beginSum - finalSum;
+        lastBalans.Text = endSum.ToString();
+
+    }
+
+
+    private void checkedDiscount_Click(object sender, RoutedEventArgs e)
+    {
+        CalcSaleSum(sender);
+
     }
 }
 
