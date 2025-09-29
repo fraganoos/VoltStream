@@ -22,6 +22,7 @@ public partial class CustomerWindow : Window
     {
         InitializeComponent();
         txtName.Text = name;
+        txtName.Focus();
     }
     public dynamic? Result { get; private set; }
 
@@ -33,8 +34,8 @@ public partial class CustomerWindow : Window
             phone = txtPhone.Text,
             address = txtAddress.Text,
             description = txtDescription.Text,
-            beginningSum = decimal.TryParse(txtBeginningSum.Text, out var b) ? b : 0,
-            discountSumm = decimal.TryParse(txtDiscountSum.Text, out var d) ? d : 0
+            beginningSum = (decimal.TryParse(txtBeginningSum2.Text, out var d) ? d : 0) - (decimal.TryParse(txtBeginningSum.Text, out var k) ? k : 0),
+            //discountSumm = decimal.TryParse(txtDiscountSum.Text, out var d) ? d : 0
         };
 
         DialogResult = true;

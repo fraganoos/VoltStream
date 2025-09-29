@@ -58,7 +58,7 @@ public static class ComboBoxHelper
             }
             if (string.Equals(value, inputText, StringComparison.OrdinalIgnoreCase))
             {
-                return true; // найден в списке
+                return false; // найден в списке
             }
         }
 
