@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Customer;
 using VoltStream.WPF.Sales.Models;
 
 /// <summary>
@@ -38,7 +39,7 @@ public partial class SalesPage : Page
 
         CustomerName.GotFocus += CustomerName_GotFocus;
         
-        CustomerName.PreviewLostKeyboardFocus += (s, e) => ComboBoxHelper.BeforeUpdate(s, e, "Mijoz");
+        CustomerName.PreviewLostKeyboardFocus += CustomerName_PreviewLostKeyboardFocus;
         CustomerName.LostFocus += CustomerName_LostFocus;
 
         cbxCategoryName.GotFocus += CbxCategoryName_GotFocus;
@@ -49,7 +50,7 @@ public partial class SalesPage : Page
         cbxProductName.PreviewLostKeyboardFocus += CbxProductName_PreviewLostKeyboardFocus;
         cbxProductName.LostFocus += CbxProductName_LostFocus;
 
-        cbxPerRollCount.GotFocus += CbxPerRollCount_GotFocus;
+        //cbxPerRollCount.GotFocus += CbxPerRollCount_GotFocus;
         cbxPerRollCount.SelectionChanged += CbxPerRollCount_SelectionChanged;
         cbxPerRollCount.PreviewLostKeyboardFocus += CbxPerRollCount_PreviewLostKeyboardFocus;
 
@@ -60,6 +61,22 @@ public partial class SalesPage : Page
         txtPerDiscount.PreviewLostKeyboardFocus += txtPerDiscount_PreviewLostKeyboardFocus;
         txtDiscount.PreviewLostKeyboardFocus += txtDiscount_PreviewLostKeyboardFocus;
         txtFinalSumProduct.PreviewLostKeyboardFocus += txtFinalSumProduct_PreviewLostKeyboardFocus;
+    }
+
+    private void CustomerName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        bool accept = ComboBoxHelper.BeforeUpdate(sender, e, "Xaridor", true);
+        if (accept)
+        {
+            var win = new CustomerWindow(CustomerName.Text);
+            if (win.ShowDialog() == true)
+            {
+                var customer = win.Result;
+                // тут можете сохранить customer в БД или список
+            }
+            else { e.Handled = true; }
+
+        }
     }
 
     private async void CustomerName_LostFocus(object sender, RoutedEventArgs e)
@@ -321,11 +338,11 @@ public partial class SalesPage : Page
     private async void CbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
     {
         await LoadCategoryAsync();
-        cbxCategoryName.IsDropDownOpen = true;
+        //cbxCategoryName.IsDropDownOpen = true;
     }
     private void CbxCategoryName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot turi");
+        bool accepted= ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot turi");
     }
 
     private async void CbxProductName_GotFocus(object sender, RoutedEventArgs e)
@@ -336,7 +353,7 @@ public partial class SalesPage : Page
             categoryId = (long)cbxCategoryName.SelectedValue;
         }
         await LoadProductAsync(categoryId);
-        cbxProductName.IsDropDownOpen = true;
+        //cbxProductName.IsDropDownOpen = true;
     }
     private void CbxProductName_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -363,17 +380,17 @@ public partial class SalesPage : Page
         await LoadWarehouseItemsAsync(productId);
     }
 
-    private void CbxPerRollCount_GotFocus(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            cbxPerRollCount.IsDropDownOpen = true;
-        }
-        catch (Exception ex)
-        {
-            //ignored
-        }
-    }
+    //private void CbxPerRollCount_GotFocus(object sender, RoutedEventArgs e)
+    //{
+    //    try
+    //    {
+    //        cbxPerRollCount.IsDropDownOpen = true;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        //ignored
+    //    }
+    //}
     private void CbxPerRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
         ComboBoxHelper.BeforeUpdate(sender, e, "Rulon uzunlugi");
