@@ -148,7 +148,7 @@
                     <Image Source="/Commons/Source/Images/LogoVolt.png"
                           Width="100" Height="100"/>
 
-                    <TextBlock Text="ValtStream"
+                    <TextBlock Text="VoltStream"
                               Foreground="White"
                               FontSize="35"
                               FontWeight="Medium"

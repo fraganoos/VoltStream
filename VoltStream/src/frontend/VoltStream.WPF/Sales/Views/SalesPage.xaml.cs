@@ -7,6 +7,7 @@ using ApiServices.Interfaces;
 using ApiServices.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -63,8 +64,9 @@ public partial class SalesPage : Page
         txtFinalSumProduct.PreviewLostKeyboardFocus += txtFinalSumProduct_PreviewLostKeyboardFocus;
     }
 
-    private void CustomerName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    private async void CustomerName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
+
         bool accept = ComboBoxHelper.BeforeUpdate(sender, e, "Xaridor", true);
         if (accept)
         {
@@ -72,10 +74,33 @@ public partial class SalesPage : Page
             if (win.ShowDialog() == true)
             {
                 var customer = win.Result;
+                Customer newCustomer = new Customer
+                {
+                    Name=customer.name,
+                    Phone = customer.phone,
+                    Address = customer.address,
+                    Description = customer.description,
+                    Accounts = new Account
+                    {
+                        BeginningSumm = customer.beginningSum,
+                        CurrentSumm = customer.beginningSum,
+                        DiscountSumm = 0
+                    }
+
+                };
+
+                var response= await customersApi.CreateAsync(newCustomer);
+                if (response.IsSuccessStatusCode && response.Content != null)
+                {
+                    await LoadCustomerNameAsync();
+                }
+                else { e.Handled = true;
+                    MessageBox.Show($"Xatolik yuz berdi. {response.Error?.Message}","Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
                 // тут можете сохранить customer в БД или список
             }
             else { e.Handled = true; }
-
+            accept = false;
         }
     }
 
@@ -107,17 +132,9 @@ public partial class SalesPage : Page
                     var accounts = response.Content.Data.Accounts;
                     beginBalans.Text = accounts.CurrentSumm.ToString("N2");
                     tel.Text=response.Content.Data.Phone;
-                    //decimal beginSumm = 0;
-                    //decimal saleSumm = 0;
-                    //if (decimal.TryParse(beginBalans.Text, out decimal value)) beginSumm = value;
-                    //if (decimal.TryParse(finalSumm.Text, out decimal amount)) saleSumm = amount;
-                    //decimal endSumm = beginSumm - saleSumm;
-                    //lastBalans.Text = endSumm.ToString("N2");
 
                     CalcSaleSum();
 
-                    //sale.CustomerId = customer.Id;
-                    //sale.CustomerName = customer.Name;
                 }
                 else
                 {
