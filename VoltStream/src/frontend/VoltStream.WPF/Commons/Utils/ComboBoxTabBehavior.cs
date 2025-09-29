@@ -44,6 +44,7 @@ namespace VoltStream.WPF.Commons.Utils
                 comboBox.SelectionChanged += ComboBox_SelectionChanged;
                 comboBox.PreviewKeyDown += ComboBox_PreviewKeyDown;
                 comboBox.Unloaded += ComboBox_Unloaded;
+                comboBox.GotFocus += ComboBox_GotFocus;
 
                 SetComboBoxState(comboBox, new State());
             }
@@ -53,10 +54,13 @@ namespace VoltStream.WPF.Commons.Utils
                 comboBox.SelectionChanged -= ComboBox_SelectionChanged;
                 comboBox.PreviewKeyDown -= ComboBox_PreviewKeyDown;
                 comboBox.Unloaded -= ComboBox_Unloaded;
+                comboBox.GotFocus -= ComboBox_GotFocus;
 
                 ClearComboBoxState(comboBox);
             }
         }
+
+
 
         #region State per ComboBox
         private class State
@@ -81,6 +85,21 @@ namespace VoltStream.WPF.Commons.Utils
         private static void ClearComboBoxState(ComboBox comboBox) =>
             comboBox.ClearValue(StateProperty);
         #endregion
+
+        private static void ComboBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+
+                if (sender is ComboBox comboBox)
+                {
+                    if (!comboBox.IsDropDownOpen)
+                    {
+                        comboBox.IsDropDownOpen = true;
+                    }
+                }
+            } catch { }
+        }
 
         private static void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -108,6 +127,12 @@ namespace VoltStream.WPF.Commons.Utils
                               textBox.Text.Length > 0;
             }
 
+            //// automatic DropDownOpen
+            //if (!comboBox.IsDropDownOpen && GetKeyType(e))
+            //{
+            //    comboBox.IsDropDownOpen = true;
+            //}
+
             // ENTER → Tab (вперёд)
             if (e.Key == Key.Enter)
             {
@@ -120,7 +145,7 @@ namespace VoltStream.WPF.Commons.Utils
                 }
                 else
                 {
-                    comboBox.IsDropDownOpen = false;
+                    //comboBox.IsDropDownOpen = false;
                 }
 
                 return;
@@ -219,5 +244,27 @@ namespace VoltStream.WPF.Commons.Utils
             if (focused != null)
                 focused.MoveFocus(new TraversalRequest(FocusNavigationDirection.Previous));
         }
+
+        //private static bool GetKeyType(KeyEventArgs e)
+        //{
+        //    // Буквы A–Z
+        //    if (e.Key >= Key.A && e.Key <= Key.Z)
+        //        return true;
+
+        //    // Цифры верхнего ряда 0–9
+        //    if (e.Key >= Key.D0 && e.Key <= Key.D9)
+        //        return true;
+
+        //    // Цифры NumPad 0–9
+        //    if (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)
+        //        return true;
+
+        //    // Символы с клавиатуры (, . ; ' - = [ ] и т.п.)
+        //    if (e.Key >= Key.Oem1 && e.Key <= Key.Oem102)
+        //        return true;
+
+        //    // Остальное можно игнорировать
+        //    return false;
+        //}
     }
 }
