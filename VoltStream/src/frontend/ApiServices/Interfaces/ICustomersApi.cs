@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 [Headers("accept: application/json")]
 public interface ICustomersApi
 {
-    [Post("/customers​")]
-    Task<ApiResponse<Response<Customer>>> CreateAsync([Body] Customer CustomersCreate);
+    [Post("/customers")]
+    Task<ApiResponse<Response<long>>> CreateAsync([Body] Customer customer);
 
     [Put("/customers​")]
-    Task<ApiResponse<Response<Customer>>> UpdateAsync([Body] Customer CustomersUpdate);
+    Task<ApiResponse<Response<Customer>>> UpdateAsync([Body] Customer customer);
 
     [Delete("/customers​/{id}")]
     Task<ApiResponse<Response<bool>>> DeleteAsync(long id);
