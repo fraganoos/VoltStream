@@ -12,7 +12,7 @@
         public long CustomerId { get; set; }
         public string CustomerName { get; set; } = string.Empty;
         public string CurrencyType { get; set; } = string.Empty;
-        public decimal? TotalSum 
+        public decimal? TotalSum
         {
             get => _totalSum;
             set
@@ -22,7 +22,7 @@
             }
         } // jami summa
         public bool CheckedDiscount { get; set; } = false; // chegirma ishlatilganmi
-        public decimal? TotalDiscount 
+        public decimal? TotalDiscount
         {
             get => _totalDiscount;
             set
@@ -36,15 +36,15 @@
             get => _finalSum;
             set
             {
-                    _finalSum = value;
-                    OnPropertyChanged(nameof(FinalSum));
+                _finalSum = value;
+                OnPropertyChanged(nameof(FinalSum));
             }
         }// chegirmadan keyingi summa
         public string Description { get; set; } = string.Empty;
         public string CategoryName { get; set; } = string.Empty;
         public long CategoryId { get; set; }
         public long ProductId { get; set; }
-        public string? ProductName { get; set; } 
+        public string? ProductName { get; set; }
         public string? PerRollCount { get; set; }  // birligi
         public string? RollCount { get; set; } // rulon
         public string? Quantity { get; set; } // metr

@@ -80,7 +80,7 @@ public static class ComboBoxHelper
 
         comboBox.Text = "";
         comboBox.SelectedItem = null;
-        comboBox.SelectedValue= null;
+        comboBox.SelectedValue = null;
         e.Handled = true;
         MessageBox.Show($"{inputText} - {strInfo}: ro'yxatda yo'q.", "Tekshiruv");
         try { comboBox.IsDropDownOpen = true; } catch { }

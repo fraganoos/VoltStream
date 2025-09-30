@@ -132,7 +132,7 @@
                             VerticalAlignment="Center"
                             FontSize="12" 
                             utils:EnterKeyTab.IsEnabled="True"
-                                  Click="checkedDiscount_Click"/>
+                                  Click="CheckedDiscount_Click"/>
                     </Border>
                     </Grid>
                     <Label Grid.Column="1" Content="To'lashga:"
@@ -323,7 +323,7 @@
                      utils:NumericTextBox.IsNumeric="True"/>
             <Button Grid.Column="10" x:Name="addButton" 
                     Content="Qo'shish" Margin="4,3"
-                    FontSize="14" Click="addButton_Click"/>
+                    FontSize="14" Click="AddButton_Click"/>
         </Grid>
         <Grid Grid.Row="2" Margin="0,5,0,5">
             <DataGrid x:Name="dataGrid" 
