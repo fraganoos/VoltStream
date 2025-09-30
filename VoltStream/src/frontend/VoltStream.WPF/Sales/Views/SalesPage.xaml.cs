@@ -90,7 +90,7 @@ public partial class SalesPage : Page
                 };
 
                 var response = await customersApi.CreateAsync(newCustomer);
-                if (response.IsSuccessStatusCode && response.Content != null)
+                if (response.IsSuccessStatusCode && response.Content is not null)
                 {
                     await LoadCustomerNameAsync();
                 }

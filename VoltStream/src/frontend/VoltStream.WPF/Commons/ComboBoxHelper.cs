@@ -50,8 +50,8 @@ public static class ComboBoxHelper
             string value = item?.ToString() ?? "";
             if (!string.IsNullOrEmpty(displayMember))
             {
-                var prop = item.GetType().GetProperty(displayMember);
-                if (prop != null)
+                var prop = item!.GetType().GetProperty(displayMember);
+                if (prop is not null)
                 {
                     value = prop.GetValue(item)?.ToString() ?? "";
                 }

@@ -16,7 +16,7 @@ public record CreateCustomerCommand(
     string? Phone,
     string? Address,
     string? Description,
-    AccountDto Account)
+    AccountCreationDto Account)
     : IRequest<long>;
 
 public class CreateCustomerComandHandler(
