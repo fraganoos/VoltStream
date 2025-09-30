@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -98,7 +97,8 @@ namespace VoltStream.WPF.Commons.Utils
                         comboBox.IsDropDownOpen = true;
                     }
                 }
-            } catch { }
+            }
+            catch { }
         }
 
         private static void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

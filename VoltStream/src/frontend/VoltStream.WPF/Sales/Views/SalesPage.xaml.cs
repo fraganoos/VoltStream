@@ -39,7 +39,7 @@ public partial class SalesPage : Page
         customersApi = services.GetRequiredService<ICustomersApi>();
 
         CustomerName.GotFocus += CustomerName_GotFocus;
-        
+
         CustomerName.PreviewLostKeyboardFocus += CustomerName_PreviewLostKeyboardFocus;
         CustomerName.LostFocus += CustomerName_LostFocus;
 
@@ -59,9 +59,9 @@ public partial class SalesPage : Page
         txtQuantity.PreviewLostKeyboardFocus += TxtQuantity_PreviewLostKeyboardFocus;
         txtPrice.LostFocus += (s, e) => CalcFinalSumProduct(s);
         txtSum.LostFocus += TxtSum_LostFocus;
-        txtPerDiscount.PreviewLostKeyboardFocus += txtPerDiscount_PreviewLostKeyboardFocus;
-        txtDiscount.PreviewLostKeyboardFocus += txtDiscount_PreviewLostKeyboardFocus;
-        txtFinalSumProduct.PreviewLostKeyboardFocus += txtFinalSumProduct_PreviewLostKeyboardFocus;
+        txtPerDiscount.PreviewLostKeyboardFocus += TxtPerDiscount_PreviewLostKeyboardFocus;
+        txtDiscount.PreviewLostKeyboardFocus += TxtDiscount_PreviewLostKeyboardFocus;
+        txtFinalSumProduct.PreviewLostKeyboardFocus += TxtFinalSumProduct_PreviewLostKeyboardFocus;
     }
 
     private async void CustomerName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -74,13 +74,13 @@ public partial class SalesPage : Page
             if (win.ShowDialog() == true)
             {
                 var customer = win.Result;
-                Customer newCustomer = new Customer
+                Customer newCustomer = new()
                 {
-                    Name=customer.name,
+                    Name = customer!.name,
                     Phone = customer.phone,
                     Address = customer.address,
                     Description = customer.description,
-                    Accounts = new Account
+                    Account = new()
                     {
                         BeginningSumm = customer.beginningSum,
                         CurrentSumm = customer.beginningSum,
@@ -89,25 +89,26 @@ public partial class SalesPage : Page
 
                 };
 
-                var response= await customersApi.CreateAsync(newCustomer);
+                var response = await customersApi.CreateAsync(newCustomer);
                 if (response.IsSuccessStatusCode && response.Content != null)
                 {
                     await LoadCustomerNameAsync();
                 }
-                else { e.Handled = true;
-                    MessageBox.Show($"Xatolik yuz berdi. {response.Error?.Message}","Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                else
+                {
+                    e.Handled = true;
+                    MessageBox.Show($"Xatolik yuz berdi. {response.Error?.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 // тут можете сохранить customer в БД или список
             }
             else { e.Handled = true; }
-            accept = false;
         }
     }
 
     private async void CustomerName_LostFocus(object sender, RoutedEventArgs e)
     {
-        long? customerId = null;
-        if (CustomerName.SelectedValue!=null)
+        long? customerId;
+        if (CustomerName.SelectedValue != null)
         {
             customerId = (long)CustomerName.SelectedValue;
         }
@@ -115,7 +116,7 @@ public partial class SalesPage : Page
         {
             beginBalans.Clear();
             lastBalans.Text = null;
-            tel.Text=null;
+            tel.Text = null;
             return;
         }
         await LoadCustomerByIdAsync(customerId);
@@ -129,9 +130,9 @@ public partial class SalesPage : Page
                 var response = await customersApi.GetCustomerByIdAsync(customerId.Value);
                 if (response.IsSuccessStatusCode && response.Content?.Data != null)
                 {
-                    var accounts = response.Content.Data.Accounts;
-                    beginBalans.Text = accounts.CurrentSumm.ToString("N2");
-                    tel.Text=response.Content.Data.Phone;
+                    var accounts = response.Content.Data.Account;
+                    beginBalans.Text = accounts!.CurrentSumm.ToString("N2");
+                    tel.Text = response.Content.Data.Phone;
 
                     CalcSaleSum();
 
@@ -155,7 +156,7 @@ public partial class SalesPage : Page
         }
     }
 
-    private async void CustomerName_GotFocus(object sender, RoutedEventArgs e) 
+    private async void CustomerName_GotFocus(object sender, RoutedEventArgs e)
     {
         await LoadCustomerNameAsync();
     }
@@ -191,9 +192,9 @@ public partial class SalesPage : Page
         }
     }
 
-    private void txtFinalSumProduct_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    private void TxtFinalSumProduct_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        if(decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSum) &&
+        if (decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSum) &&
             decimal.TryParse(txtSum.Text, out decimal sum) && sum != 0)
         {
             if (finalSum > sum)
@@ -218,21 +219,21 @@ public partial class SalesPage : Page
         }
     }
 
-    private void txtDiscount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    private void TxtDiscount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
         if (decimal.TryParse(txtDiscount.Text, out decimal discount) &&
             decimal.TryParse(txtSum.Text, out decimal sum) && sum != 0)
         {
-            if (discount>sum)
+            if (discount > sum)
             {
-             MessageBox.Show("Chegirma umumiy summadan katta bo'lishi mumkin emas.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Chegirma umumiy summadan katta bo'lishi mumkin emas.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
                 txtPerDiscount.Text = null;
                 txtDiscount.Text = null;
                 txtFinalSumProduct.Text = null;
                 e.Handled = true; // Fokusni saqlab qolish
                 return;
             }
-            decimal perDiscount = (discount / sum *100);
+            decimal perDiscount = (discount / sum * 100);
             txtFinalSumProduct.Text = (sum - discount).ToString("N2");
             txtPerDiscount.Text = perDiscount.ToString("N2");
         }
@@ -245,7 +246,7 @@ public partial class SalesPage : Page
     }
 
 
-    private void txtPerDiscount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    private void TxtPerDiscount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
         if (decimal.TryParse(txtPerDiscount.Text, out decimal perDiscount) &&
             perDiscount != 0)
@@ -270,8 +271,8 @@ public partial class SalesPage : Page
 
     private void TxtSum_LostFocus(object sender, RoutedEventArgs e)
     {
-            if (decimal.TryParse(txtSum.Text, out decimal sum) &&
-            decimal.TryParse(txtQuantity.Text, out decimal quantity) && quantity !=0)
+        if (decimal.TryParse(txtSum.Text, out decimal sum) &&
+        decimal.TryParse(txtQuantity.Text, out decimal quantity) && quantity != 0)
         {
             decimal price = sum / quantity;
             txtPrice.Text = price.ToString("N2");
@@ -359,7 +360,7 @@ public partial class SalesPage : Page
     }
     private void CbxCategoryName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        bool accepted= ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot turi");
+        _ = ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot turi");
     }
 
     private async void CbxProductName_GotFocus(object sender, RoutedEventArgs e)
@@ -524,9 +525,9 @@ public partial class SalesPage : Page
         }
     }
 
-    private void addButton_Click(object sender, RoutedEventArgs e)
+    private void AddButton_Click(object sender, RoutedEventArgs e)
     {
-        SaleItem saleItem = new SaleItem()
+        SaleItem saleItem = new()
         {
             CategoryId = cbxCategoryName.SelectedIndex,
             CategoryName = cbxCategoryName.Text,
@@ -543,7 +544,7 @@ public partial class SalesPage : Page
         };
         sale.SaleItems.Insert(0, saleItem);
         //sale.FinalSum=sale.SaleItems.Sum(s => s.Sum);
-        CalcSaleSum(sender);
+        CalcSaleSum();
         cbxCategoryName.SelectedValue = null;
         cbxProductName.SelectedValue = null;
         cbxPerRollCount.SelectedValue = null;
@@ -557,23 +558,23 @@ public partial class SalesPage : Page
         //MessageBox.Show(sale.FinalSum.ToString());
         cbxCategoryName.Focus();
     }
-    private void CalcSaleSum (object? sender = null)
+    private void CalcSaleSum()
     {
         decimal finalSum = 0;
         decimal totalSum = 0;
-        decimal totalDiscount= 0;
-        if (sale.SaleItems.Count > 0) 
-        { 
+        decimal totalDiscount = 0;
+        if (sale.SaleItems.Count > 0)
+        {
             sale.FinalSum = sale.SaleItems.Sum(s => s.Sum);
             sale.TotalSum = sale.SaleItems.Sum(s => s.Sum);
-            sale.TotalDiscount=sale.SaleItems.Sum(d => d.Discount);
-            finalSum = sale.FinalSum.Value;
-            totalSum = sale.TotalSum.Value;
-            totalDiscount = sale.TotalDiscount.Value;
+            sale.TotalDiscount = sale.SaleItems.Sum(d => d.Discount);
+            finalSum = sale.FinalSum!.Value;
+            totalSum = sale.TotalSum!.Value;
+            totalDiscount = sale.TotalDiscount!.Value;
             if (sale.CheckedDiscount)
             {
                 finalSum = totalSum - totalDiscount;
-                sale.FinalSum= finalSum;
+                sale.FinalSum = finalSum;
             }
         }
         decimal beginSum = decimal.TryParse(beginBalans.Text, out decimal value) ? value : 0;
@@ -583,9 +584,9 @@ public partial class SalesPage : Page
     }
 
 
-    private void checkedDiscount_Click(object sender, RoutedEventArgs e)
+    private void CheckedDiscount_Click(object sender, RoutedEventArgs e)
     {
-        CalcSaleSum(sender);
+        CalcSaleSum();
 
     }
 }

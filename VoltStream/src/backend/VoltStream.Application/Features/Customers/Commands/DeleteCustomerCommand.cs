@@ -8,13 +8,13 @@ using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
-public record DeleteCostumerCommand(long Id) : IRequest<bool>;
+public record DeleteCustomerCommand(long Id) : IRequest<bool>;
 
-public class DeleteCostumerCommandHandler(
+public class DeleteCustomerCommandHandler(
     IAppDbContext context)
-    : IRequestHandler<DeleteCostumerCommand, bool>
+    : IRequestHandler<DeleteCustomerCommand, bool>
 {
-    public async Task<bool> Handle(DeleteCostumerCommand request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(DeleteCustomerCommand request, CancellationToken cancellationToken)
     {
         var customer = await context.Customers
             .Include(c => c.Account)

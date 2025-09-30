@@ -11,7 +11,7 @@ public class CustomerMappingProfile : Profile
     public CustomerMappingProfile()
     {
         CreateMap<Customer, CustomerDto>();
-        CreateMap<Account, AccountDto>();
+        CreateMap<Account, AccountDto>().ReverseMap();
 
         CreateMap<CreateCustomerCommand, Customer>()
             .ForMember(dest => dest.NormalizedName, opt =>
