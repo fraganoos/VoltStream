@@ -321,6 +321,26 @@ public partial class SalesPage : Page
                     return;
                 }
             }
+            if (quantity % perRollCount != 0)
+            {
+                int intRollCount = (int)(quantity / perRollCount);
+                decimal _q = (decimal)intRollCount * perRollCount;
+                decimal _quantity = quantity - _q;
+                decimal q_quantity = perRollCount - _quantity;
+                sale.NewQuantity = q_quantity;
+                if (MessageBox.Show($"Siz {cbxProductName.Text}-ning {cbxPerRollCount.Text}-metrlik rulonidan " +
+                    $"{quantity.ToString()} metr tanladingiz, shunda bitta rulondan {_quantity} metr " +
+                    $"kesilib omborga bitta {q_quantity} metrlik rulon qo'shiladi." + Environment.NewLine +
+                    "Davom ettirishga rozimisiz?", "Savdo", MessageBoxButton.YesNo, MessageBoxImage.Question, 
+                    MessageBoxResult.No) == MessageBoxResult.No)
+                {
+                    e.Handled = true;
+                    txtQuantity.Text = _q.ToString();
+                    sale.NewQuantity = 0;
+                    txtQuantity.SelectAll();
+                    return;
+                }
+            }
 
             decimal rollCount = Math.Ceiling(quantity / perRollCount);
             txtRollCount.Text = rollCount.ToString();
@@ -383,7 +403,6 @@ public partial class SalesPage : Page
             CalcFinalSumProduct(sender);
         }
     }
-
 
     private async void CbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
     {
@@ -576,7 +595,10 @@ public partial class SalesPage : Page
             ProductName = cbxProductName.Text,
             PerRollCount = decimal.TryParse(cbxPerRollCount.Text, out decimal perRollCount) ? perRollCount : 0,
             RollCount = decimal.TryParse(txtRollCount.Text, out decimal rollCount) ? rollCount : 0,
+            WarehouseCountRoll=sale.WarehouseCountRoll,
             Quantity = decimal.TryParse(txtQuantity.Text, out decimal quantity) ? quantity : 0,
+            NewQuantity = sale.NewQuantity,
+            WarehouseQuantity = sale.WarehouseQuantity,
             Price = decimal.TryParse(txtPrice.Text, out decimal price) ? price : 0,
             Sum = decimal.TryParse(txtSum.Text, out decimal sum) ? sum : 0,
             PerDiscount = decimal.TryParse(txtPerDiscount.Text, out decimal perDiscount) ? perDiscount : 0,
@@ -598,6 +620,9 @@ public partial class SalesPage : Page
         txtFinalSumProduct.Clear();
         //MessageBox.Show(sale.FinalSum.ToString());
         cbxCategoryName.Focus();
+        sale.NewQuantity = 0;
+        sale.WarehouseCountRoll = 0;
+        sale.WarehouseQuantity = 0;
     }
     private void CalcSaleSum()
     {
