@@ -7,7 +7,7 @@ public class Account
     [JsonPropertyName("id")]
     public long Id { get; set; }
 
-    [JsonPropertyName ("customerId")]
+    [JsonPropertyName("customerId")]
     public long CustomerId { get; set; }
 
     [JsonPropertyName("beginningSumm")]

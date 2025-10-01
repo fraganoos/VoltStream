@@ -19,6 +19,6 @@ public record Customer
     [JsonPropertyName("description")]
     public string? Description { get; set; }
     [JsonPropertyName("account")]
-    public Account? Accounts { get; set; }=new Account();
-
+    public Account? Account { get; set; } = default!;
 }
+

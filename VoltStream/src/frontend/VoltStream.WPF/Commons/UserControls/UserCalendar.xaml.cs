@@ -38,7 +38,7 @@ public partial class UserCalendar : UserControl
             userCalendar.dateTextBox.Text = newDate.ToString("dd.MM.yyyy");
         }
         UserCalendar userCal = d as UserCalendar;
-        userCal.dateTextBox.Focus();
+        userCal!.dateTextBox.Focus();
         userCal.dateTextBox.SelectAll();
     }
 

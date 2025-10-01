@@ -8,3 +8,10 @@ public record AccountDto
     public decimal CurrentSumm { get; set; }
     public decimal DiscountSumm { get; set; }
 }
+
+public record AccountCreationDto
+{
+    public decimal BeginningSumm { get; set; }
+    public decimal CurrentSumm { get; set; }
+    public decimal DiscountSumm { get; set; }
+}

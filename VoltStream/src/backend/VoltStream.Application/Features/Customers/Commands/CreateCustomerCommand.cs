@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
+using VoltStream.Application.Features.Customers.DTOs;
 using VoltStream.Domain.Entities;
 
 public record CreateCustomerCommand(
@@ -15,8 +16,7 @@ public record CreateCustomerCommand(
     string? Phone,
     string? Address,
     string? Description,
-    decimal BeginningSum,
-    decimal DiscountSumm)
+    AccountCreationDto Account)
     : IRequest<long>;
 
 public class CreateCustomerComandHandler(
@@ -33,13 +33,6 @@ public class CreateCustomerComandHandler(
             throw new AlreadyExistException(nameof(Customer), nameof(request.Name), request.Name);
 
         var customer = mapper.Map<Customer>(request);
-        context.Accounts.Add(new()
-        {
-            BeginningSumm = request.BeginningSum,
-            Customer = customer,
-            CurrentSumm = request.BeginningSum,
-            DiscountSumm = request.DiscountSumm
-        });
         context.Customers.Add(customer);
 
         await context.SaveAsync(cancellationToken);

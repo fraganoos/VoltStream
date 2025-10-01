@@ -13,7 +13,7 @@ public class CustomersController
         GetCustomerByIdQuery,
         CreateCustomerCommand,
         UpdateCustomerCommand,
-        DeleteCostumerCommand>
+        DeleteCustomerCommand>
 {
     [HttpPost("filter")]
     public async Task<IActionResult> GetFiltered(CustomerFilterQuery query)

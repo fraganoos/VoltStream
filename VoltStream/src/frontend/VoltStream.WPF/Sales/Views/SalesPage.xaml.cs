@@ -7,10 +7,12 @@ using ApiServices.Interfaces;
 using ApiServices.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Customer;
 using VoltStream.WPF.Sales.Models;
 
 /// <summary>
@@ -37,7 +39,8 @@ public partial class SalesPage : Page
         customersApi = services.GetRequiredService<ICustomersApi>();
 
         CustomerName.GotFocus += CustomerName_GotFocus;
-        CustomerName.PreviewLostKeyboardFocus += (s, e) => ComboBoxHelper.BeforeUpdate(s, e, "Mijoz");
+
+        CustomerName.PreviewLostKeyboardFocus += CustomerName_PreviewLostKeyboardFocus;
         CustomerName.LostFocus += CustomerName_LostFocus;
 
         cbxCategoryName.GotFocus += CbxCategoryName_GotFocus;
@@ -48,23 +51,82 @@ public partial class SalesPage : Page
         cbxProductName.PreviewLostKeyboardFocus += CbxProductName_PreviewLostKeyboardFocus;
         cbxProductName.LostFocus += CbxProductName_LostFocus;
 
-        cbxPerRollCount.GotFocus += CbxPerRollCount_GotFocus;
+        //cbxPerRollCount.GotFocus += CbxPerRollCount_GotFocus;
         cbxPerRollCount.SelectionChanged += CbxPerRollCount_SelectionChanged;
         cbxPerRollCount.PreviewLostKeyboardFocus += CbxPerRollCount_PreviewLostKeyboardFocus;
 
         txtRollCount.LostFocus += (s, e) => CalcFinalSumProduct(s);
+        txtRollCount.PreviewLostKeyboardFocus += txtRollCount_PreviewLostKeyboardFocus;
         txtQuantity.PreviewLostKeyboardFocus += TxtQuantity_PreviewLostKeyboardFocus;
         txtPrice.LostFocus += (s, e) => CalcFinalSumProduct(s);
         txtSum.LostFocus += TxtSum_LostFocus;
-        txtPerDiscount.PreviewLostKeyboardFocus += txtPerDiscount_PreviewLostKeyboardFocus;
-        txtDiscount.PreviewLostKeyboardFocus += txtDiscount_PreviewLostKeyboardFocus;
-        txtFinalSumProduct.PreviewLostKeyboardFocus += txtFinalSumProduct_PreviewLostKeyboardFocus;
+        txtPerDiscount.PreviewLostKeyboardFocus += TxtPerDiscount_PreviewLostKeyboardFocus;
+        txtDiscount.PreviewLostKeyboardFocus += TxtDiscount_PreviewLostKeyboardFocus;
+        txtFinalSumProduct.PreviewLostKeyboardFocus += TxtFinalSumProduct_PreviewLostKeyboardFocus;
+    }
+
+    private void txtRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        if (txtRollCount.Text.Length > 0) 
+        {
+            if ((decimal.TryParse(txtRollCount.Text, out decimal value) ? value : 0) > sale.WarehouseCountRoll)
+            {
+                if (MessageBox.Show($"Omborda {cbxProductName.Text} -dan {sale.WarehouseCountRoll} " +
+                    $"rulon qolgan." + Environment.NewLine + "Davom ettirishga rozimisiz?",
+                    "Savdo",MessageBoxButton.YesNo,MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.No)
+                {
+                    e.Handled = true;
+                    txtRollCount.Text=null;
+                }
+            } 
+        }
+    }
+
+    private async void CustomerName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+
+        bool accept = ComboBoxHelper.BeforeUpdate(sender, e, "Xaridor", true);
+        if (accept)
+        {
+            var win = new CustomerWindow(CustomerName.Text);
+            if (win.ShowDialog() == true)
+            {
+                var customer = win.Result;
+                Customer newCustomer = new()
+                {
+                    Name = customer!.name,
+                    Phone = customer.phone,
+                    Address = customer.address,
+                    Description = customer.description,
+                    Account = new()
+                    {
+                        BeginningSumm = customer.beginningSum,
+                        CurrentSumm = customer.beginningSum,
+                        DiscountSumm = 0
+                    }
+
+                };
+
+                var response = await customersApi.CreateAsync(newCustomer);
+                if (response.IsSuccessStatusCode && response.Content is not null)
+                {
+                    await LoadCustomerNameAsync();
+                }
+                else
+                {
+                    e.Handled = true;
+                    MessageBox.Show($"Xatolik yuz berdi. {response.Error?.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                // тут можете сохранить customer в БД или список
+            }
+            else { e.Handled = true; }
+        }
     }
 
     private async void CustomerName_LostFocus(object sender, RoutedEventArgs e)
     {
-        long? customerId = null;
-        if (CustomerName.SelectedValue!=null)
+        long? customerId;
+        if (CustomerName.SelectedValue != null)
         {
             customerId = (long)CustomerName.SelectedValue;
         }
@@ -72,7 +134,7 @@ public partial class SalesPage : Page
         {
             beginBalans.Clear();
             lastBalans.Text = null;
-            tel.Text=null;
+            tel.Text = null;
             return;
         }
         await LoadCustomerByIdAsync(customerId);
@@ -86,20 +148,12 @@ public partial class SalesPage : Page
                 var response = await customersApi.GetCustomerByIdAsync(customerId.Value);
                 if (response.IsSuccessStatusCode && response.Content?.Data != null)
                 {
-                    var accounts = response.Content.Data.Accounts;
-                    beginBalans.Text = accounts.CurrentSumm.ToString("N2");
-                    tel.Text=response.Content.Data.Phone;
-                    decimal beginSumm = 0;
-                    decimal saleSumm = 0;
-                    if (decimal.TryParse(beginBalans.Text, out decimal value)) beginSumm = value;
-                    if (decimal.TryParse(finalSumm.Text, out decimal amount)) saleSumm = amount;
-                    decimal endSumm = beginSumm - saleSumm;
-                    lastBalans.Text = endSumm.ToString("N2");
+                    var accounts = response.Content.Data.Account;
+                    beginBalans.Text = accounts!.CurrentSumm.ToString("N2");
+                    tel.Text = response.Content.Data.Phone;
 
+                    CalcSaleSum();
 
-
-                    //sale.CustomerId = customer.Id;
-                    //sale.CustomerName = customer.Name;
                 }
                 else
                 {
@@ -120,7 +174,7 @@ public partial class SalesPage : Page
         }
     }
 
-    private async void CustomerName_GotFocus(object sender, RoutedEventArgs e) 
+    private async void CustomerName_GotFocus(object sender, RoutedEventArgs e)
     {
         await LoadCustomerNameAsync();
     }
@@ -156,9 +210,9 @@ public partial class SalesPage : Page
         }
     }
 
-    private void txtFinalSumProduct_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    private void TxtFinalSumProduct_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        if(decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSum) &&
+        if (decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSum) &&
             decimal.TryParse(txtSum.Text, out decimal sum) && sum != 0)
         {
             if (finalSum > sum)
@@ -183,21 +237,21 @@ public partial class SalesPage : Page
         }
     }
 
-    private void txtDiscount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    private void TxtDiscount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
         if (decimal.TryParse(txtDiscount.Text, out decimal discount) &&
             decimal.TryParse(txtSum.Text, out decimal sum) && sum != 0)
         {
-            if (discount>sum)
+            if (discount > sum)
             {
-             MessageBox.Show("Chegirma umumiy summadan katta bo'lishi mumkin emas.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Chegirma umumiy summadan katta bo'lishi mumkin emas.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
                 txtPerDiscount.Text = null;
                 txtDiscount.Text = null;
                 txtFinalSumProduct.Text = null;
                 e.Handled = true; // Fokusni saqlab qolish
                 return;
             }
-            decimal perDiscount = (discount / sum *100);
+            decimal perDiscount = (discount / sum * 100);
             txtFinalSumProduct.Text = (sum - discount).ToString("N2");
             txtPerDiscount.Text = perDiscount.ToString("N2");
         }
@@ -210,7 +264,7 @@ public partial class SalesPage : Page
     }
 
 
-    private void txtPerDiscount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    private void TxtPerDiscount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
         if (decimal.TryParse(txtPerDiscount.Text, out decimal perDiscount) &&
             perDiscount != 0)
@@ -235,8 +289,8 @@ public partial class SalesPage : Page
 
     private void TxtSum_LostFocus(object sender, RoutedEventArgs e)
     {
-            if (decimal.TryParse(txtSum.Text, out decimal sum) &&
-            decimal.TryParse(txtQuantity.Text, out decimal quantity) && quantity !=0)
+        if (decimal.TryParse(txtSum.Text, out decimal sum) &&
+        decimal.TryParse(txtQuantity.Text, out decimal quantity) && quantity != 0)
         {
             decimal price = sum / quantity;
             txtPrice.Text = price.ToString("N2");
@@ -256,8 +310,20 @@ public partial class SalesPage : Page
             decimal.TryParse(cbxPerRollCount.Text, out decimal perRollCount) &&
             perRollCount != 0)
         {
+            if ((decimal.TryParse(txtQuantity.Text, out decimal value) ? value : 0) > sale.WarehouseQuantity)
+            {
+                if (MessageBox.Show($"Omborda {cbxProductName.Text}-ning {cbxPerRollCount.Text}-metrligidan {sale.WarehouseQuantity} " +
+                    $"metr qolgan." + Environment.NewLine + "Davom ettirishga rozimisiz?",
+                    "Savdo", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.No)
+                {
+                    e.Handled = true;
+                    txtQuantity.Text = null;
+                    return;
+                }
+            }
+
             decimal rollCount = Math.Ceiling(quantity / perRollCount);
-            txtRollCount.Text = rollCount.ToString("N2");
+            txtRollCount.Text = rollCount.ToString();
             CalcFinalSumProduct(sender);
         }
         else
@@ -310,8 +376,10 @@ public partial class SalesPage : Page
         if (cbxPerRollCount.SelectedItem is WarehouseItem selectedWarehouseItem)
         {
             // Rulon tanlanganda, uning narxi, chegirmasi o'zgartiramiz
-            txtPrice.Text = selectedWarehouseItem.Price.ToString("N2");
-            txtPerDiscount.Text = selectedWarehouseItem.DiscountPercent.ToString("N2");
+            txtPrice.Text = selectedWarehouseItem.Price.ToString();
+            txtPerDiscount.Text = selectedWarehouseItem.DiscountPercent.ToString();
+            sale.WarehouseCountRoll = selectedWarehouseItem.CountRoll;
+            sale.WarehouseQuantity = selectedWarehouseItem.TotalQuantity;
             CalcFinalSumProduct(sender);
         }
     }
@@ -320,11 +388,11 @@ public partial class SalesPage : Page
     private async void CbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
     {
         await LoadCategoryAsync();
-        cbxCategoryName.IsDropDownOpen = true;
+        //cbxCategoryName.IsDropDownOpen = true;
     }
     private void CbxCategoryName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot turi");
+        _ = ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot turi");
     }
 
     private async void CbxProductName_GotFocus(object sender, RoutedEventArgs e)
@@ -335,7 +403,7 @@ public partial class SalesPage : Page
             categoryId = (long)cbxCategoryName.SelectedValue;
         }
         await LoadProductAsync(categoryId);
-        cbxProductName.IsDropDownOpen = true;
+        //cbxProductName.IsDropDownOpen = true;
     }
     private void CbxProductName_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -362,17 +430,17 @@ public partial class SalesPage : Page
         await LoadWarehouseItemsAsync(productId);
     }
 
-    private void CbxPerRollCount_GotFocus(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            cbxPerRollCount.IsDropDownOpen = true;
-        }
-        catch (Exception ex)
-        {
-            //ignored
-        }
-    }
+    //private void CbxPerRollCount_GotFocus(object sender, RoutedEventArgs e)
+    //{
+    //    try
+    //    {
+    //        cbxPerRollCount.IsDropDownOpen = true;
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        //ignored
+    //    }
+    //}
     private void CbxPerRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
         ComboBoxHelper.BeforeUpdate(sender, e, "Rulon uzunlugi");
@@ -458,6 +526,15 @@ public partial class SalesPage : Page
             ApiResponse<Response<List<WarehouseItem>>> response;
             if (productId.HasValue && productId.Value != 0)
             {
+                //var fiter = new FilteringRequest
+                //{
+                //    Filters = new()
+                //    {
+                //        ["ProductId"] = [productId.Value.ToString()]
+                //        //["PerRolCount"] = [cbxPerRollCount.SelectedValue.ToString()]
+                //    }
+                //};
+                //response= await warehouseItemsApi.GetFilterFromWarehouseAsync(fiter);
                 response = await warehouseItemsApi.GetProductDetailsFromWarehouseAsync(productId.Value);
             }
             else
@@ -489,9 +566,9 @@ public partial class SalesPage : Page
         }
     }
 
-    private void addButton_Click(object sender, RoutedEventArgs e)
+    private void AddButton_Click(object sender, RoutedEventArgs e)
     {
-        SaleItem saleItem = new SaleItem()
+        SaleItem saleItem = new()
         {
             CategoryId = cbxCategoryName.SelectedIndex,
             CategoryName = cbxCategoryName.Text,
@@ -507,6 +584,51 @@ public partial class SalesPage : Page
             FinalSumProduct = decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSumProduct) ? finalSumProduct : 0
         };
         sale.SaleItems.Insert(0, saleItem);
+        //sale.FinalSum=sale.SaleItems.Sum(s => s.Sum);
+        CalcSaleSum();
+        cbxCategoryName.SelectedValue = null;
+        cbxProductName.SelectedValue = null;
+        cbxPerRollCount.SelectedValue = null;
+        txtRollCount.Clear();
+        txtQuantity.Clear();
+        txtPrice.Clear();
+        txtSum.Clear();
+        txtPerDiscount.Clear();
+        txtDiscount.Clear();
+        txtFinalSumProduct.Clear();
+        //MessageBox.Show(sale.FinalSum.ToString());
+        cbxCategoryName.Focus();
+    }
+    private void CalcSaleSum()
+    {
+        decimal finalSum = 0;
+        decimal totalSum = 0;
+        decimal totalDiscount = 0;
+        if (sale.SaleItems.Count > 0)
+        {
+            sale.FinalSum = sale.SaleItems.Sum(s => s.Sum);
+            sale.TotalSum = sale.SaleItems.Sum(s => s.Sum);
+            sale.TotalDiscount = sale.SaleItems.Sum(d => d.Discount);
+            finalSum = sale.FinalSum!.Value;
+            totalSum = sale.TotalSum!.Value;
+            totalDiscount = sale.TotalDiscount!.Value;
+            if (sale.CheckedDiscount)
+            {
+                finalSum = totalSum - totalDiscount;
+                sale.FinalSum = finalSum;
+            }
+        }
+        decimal beginSum = decimal.TryParse(beginBalans.Text, out decimal value) ? value : 0;
+        decimal endSum = beginSum - finalSum;
+        lastBalans.Text = endSum.ToString();
+
+    }
+
+
+    private void CheckedDiscount_Click(object sender, RoutedEventArgs e)
+    {
+        CalcSaleSum();
+
     }
 }
 

@@ -4,6 +4,8 @@ using ApiServices.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using System.Windows.Forms.Design;
+using VoltStream.WPF.Customer;
+using VoltStream.WPF.Sales.Views;
 
 /// <summary>
 /// Interaction logic for App.xaml
@@ -22,6 +24,8 @@ public partial class App : Application
 
         // WPF xizmatlarini qo‘shish
         services.AddSingleton<MainViewModel>();
+        services.AddTransient<SalesPage>();
+        services.AddTransient<CustomerWindow>();
 
         // Extension method ishlaydi
         var serviceProvider = services.BuildServiceProvider();

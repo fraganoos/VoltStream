@@ -6,6 +6,7 @@
       xmlns:local="clr-namespace:VoltStream.WPF.Sales.Views"
       xmlns:controls="clr-namespace:VoltStream.WPF.Commons.UserControls"
       xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
+      xmlns:model="clr-namespace:VoltStream.WPF.Supplies.Models"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="SalesPage">
@@ -80,11 +81,11 @@
                     </Grid.ColumnDefinitions>
                     <ComboBox Grid.Column="0" x:Name="CurrencyType" 
                              Text="{Binding CurrencyType}"
-                              IsEditable="True"
+                              IsEditable="False"
                              VerticalAlignment="Center" 
                              HorizontalAlignment="Stretch"
-                             FontSize="14"
-                             Margin="0,2,10,2"
+                             FontSize="14" IsReadOnly="True"
+                             Margin="0,2,10,2" IsTabStop="False"
                              utils:ComboBoxTabBehavior.EnableTabOnSelect="True"/>
                     <Label Grid.Column="1" Content="Jami summa:"
                             VerticalAlignment="Center" 
@@ -96,6 +97,8 @@
                              HorizontalAlignment="Stretch"
                              FontSize="14" Margin="0,2,0,2"
                              IsReadOnly="True"
+                             IsTabStop="False"
+                             utils:NumericTextBox.IsNumeric="True"
                              utils:TextBoxTabBehavior.EnableTabOnKeys="True"/>
                 </Grid>
                 <Grid Grid.Row="3" Grid.Column="1">
@@ -114,6 +117,9 @@
                              VerticalAlignment="Stretch" 
                              HorizontalAlignment="Stretch"
                              FontSize="14" Margin="0,2"
+                             IsReadOnly="True"
+                             IsTabStop="False"
+                             utils:NumericTextBox.IsNumeric="True"
                              utils:TextBoxTabBehavior.EnableTabOnKeys="True"/>
                     <Border Grid.Column="1" 
                             HorizontalAlignment="Stretch"
@@ -125,7 +131,8 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             FontSize="12" 
-                            utils:EnterKeyTab.IsEnabled="True"/>
+                            utils:EnterKeyTab.IsEnabled="True"
+                                  Click="CheckedDiscount_Click"/>
                     </Border>
                     </Grid>
                     <Label Grid.Column="1" Content="To'lashga:"
@@ -133,12 +140,15 @@
                            HorizontalAlignment="Left" 
                            FontSize="14" Margin="1,0,0,0"/>
                     <TextBox Grid.Column="2" x:Name="finalSumm" 
-                             Text="{Binding FinalSum}"
+                             Text="{Binding FinalSum, 
+                         Mode=TwoWay}"
                              VerticalAlignment="Stretch" 
                              HorizontalAlignment="Stretch"
                              FontSize="14" Margin="0,2"
-                             IsReadOnly="True"
+                             IsReadOnly="True" IsTabStop="False"
+                             utils:NumericTextBox.IsNumeric="True"
                              utils:TextBoxTabBehavior.EnableTabOnKeys="True"/>
+                            
 
                 </Grid>
                 <Grid Grid.Row="4" Grid.Column="1">
@@ -175,40 +185,38 @@
                         Path=Text.IsEmpty, 
                         Converter={StaticResource BoolToVis}}"/>
                     <TextBox Grid.Row="1" x:Name="beginBalans" 
-                             IsReadOnly="True" IsTabStop="True"
+                             IsReadOnly="True" IsTabStop="False"
                              Background="Transparent"
                              HorizontalContentAlignment="Right"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Center"
                              BorderThickness="0"
                          FontSize="12" Margin="35,2,2,2"
-                         utils:TextBoxTabBehavior.EnableTabOnKeys="True"/>
+                             utils:NumericTextBox.IsNumeric="True"/>
                     <TextBlock Grid.Row="2" Text="Natija:" VerticalAlignment="Center"
                                Visibility="{Binding ElementName=lastBalans, 
                                Path=Text.IsEmpty, 
                             Converter={StaticResource BoolToVis}}"/>
                     <TextBox Grid.Row="2" x:Name="lastBalans" 
-                             IsReadOnly="True" IsTabStop="True"
+                             IsReadOnly="True" IsTabStop="False"
                              Background="Transparent"
                              HorizontalContentAlignment="Right"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Center"
                              BorderThickness="0"
                          FontSize="12" Margin="35,2,2,2"
-                         utils:TextBoxTabBehavior.EnableTabOnKeys="True"/>
-                    
+                             utils:NumericTextBox.IsNumeric="True"/>
                     <TextBlock Grid.Row="3" Text="Telefon:" VerticalAlignment="Center"
                                Visibility="{Binding ElementName=tel, 
                                 Path=Text.IsEmpty, 
                                 Converter={StaticResource BoolToVis}}"/>
                     <TextBox Grid.Row="3" x:Name="tel" 
-                             IsReadOnly="True" IsTabStop="True"
+                             IsReadOnly="True" IsTabStop="False"
                              Background="Transparent"
                              BorderThickness="0"
                          HorizontalAlignment="Stretch"
                          VerticalAlignment="Center"
-                         FontSize="12" Margin="42,2,2,2"
-                         utils:TextBoxTabBehavior.EnableTabOnKeys="True"/>
+                         FontSize="12" Margin="42,2,2,2"/>
                     <Grid Grid.Row="4">
 
                     </Grid>
@@ -315,7 +323,7 @@
                      utils:NumericTextBox.IsNumeric="True"/>
             <Button Grid.Column="10" x:Name="addButton" 
                     Content="Qo'shish" Margin="4,3"
-                    FontSize="14" Click="addButton_Click"/>
+                    FontSize="14" Click="AddButton_Click"/>
         </Grid>
         <Grid Grid.Row="2" Margin="0,5,0,5">
             <DataGrid x:Name="dataGrid" 
@@ -323,41 +331,40 @@
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
                   CanUserDeleteRows="True"
-                  IsReadOnly="True"
                   SelectionMode="Single"
                   SelectionUnit="FullRow"
                   FontSize="14">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Maxsulot turi" 
                              Binding="{Binding CategoryName}" 
-                             Width="*"/>
+                             Width="1.5*" MinWidth="120"/>
                     <DataGridTextColumn Header="Maxsulot nomi" 
                              Binding="{Binding ProductName}" 
-                             Width="*"/>
+                             Width="1.8*" MinWidth="120"/>
                     <DataGridTextColumn Header="Rulon metr" 
                              Binding="{Binding PerRollCount}" 
-                             Width="80"/>
+                             Width="*"/>
                     <DataGridTextColumn Header="Rulon soni" 
                              Binding="{Binding RollCount}" 
-                             Width="80"/>
+                             Width="*"/>
                     <DataGridTextColumn Header="Jami metr" 
                              Binding="{Binding Quantity}" 
-                             Width="80"/>
+                             Width="*"/>
                     <DataGridTextColumn Header="Narxi" 
                              Binding="{Binding Price}" 
-                             Width="80"/>
+                             Width="*"/>
                     <DataGridTextColumn Header="Jami summa" 
                              Binding="{Binding Sum}" 
-                             Width="100"/>
+                             Width="*" utils:NumericTextBox.IsNumeric="True"/>
                     <DataGridTextColumn Header="Chegirma%" 
                              Binding="{Binding PerDiscount}" 
-                             Width="80"/>
+                             Width="*"/>
                     <DataGridTextColumn Header="Chegirma summasi" 
                              Binding="{Binding Discount}" 
-                             Width="120"/>
+                             Width="*"/>
                     <DataGridTextColumn Header="Umumiy summa" 
                              Binding="{Binding FinalSumProduct}" 
-                             Width="100"/>
+                             Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
