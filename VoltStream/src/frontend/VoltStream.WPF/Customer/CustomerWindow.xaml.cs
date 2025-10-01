@@ -1,6 +1,7 @@
 ﻿namespace VoltStream.WPF.Customer;
 
 using System.Windows;
+using System.Windows.Controls;
 
 /// <summary>
 /// Логика взаимодействия для CustomerWindow.xaml
@@ -11,6 +12,10 @@ public partial class CustomerWindow : Window
     {
         InitializeComponent();
         txtName.Text = name;
+        txtName.GotFocus += (s, e) => TextBox_SelectAll(s, e);
+        txtAddress.GotFocus += (s, e) => TextBox_SelectAll(s, e);
+        txtPhone.GotFocus += (s, e) => TextBox_SelectAll(s, e);
+        txtDescription.GotFocus += (s, e) => TextBox_SelectAll(s, e);
         txtName.Focus();
     }
     public dynamic? Result { get; private set; }
@@ -30,4 +35,15 @@ public partial class CustomerWindow : Window
         DialogResult = true;
         Close();
     }
+    private void TextBox_SelectAll(object sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox textBox)
+        {
+            if (!textBox.IsReadOnly && !string.IsNullOrEmpty(textBox.Text))
+            {
+                textBox.Dispatcher.BeginInvoke(new Action(() => textBox.SelectAll()), System.Windows.Threading.DispatcherPriority.Input);
+            }
+        }
+    }
+
 }

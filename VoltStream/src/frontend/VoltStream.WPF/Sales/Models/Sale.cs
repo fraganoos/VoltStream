@@ -47,9 +47,10 @@
         public string? ProductName { get; set; }
         public string? PerRollCount { get; set; }  // birligi
         public string? RollCount { get; set; } // rulon
-        public decimal? WarehouseCountRoll { get; set; } // ombordagi qoldiq rulon
+        public decimal WarehouseCountRoll { get; set; } = decimal.Zero; // ombordagi qoldiq rulon
         public string? Quantity { get; set; } // metr
-        public decimal? WarehouseQuantity {  get; set; } // ombordagi qoldiq metr
+        public decimal NewQuantity { get; set; } = decimal.Zero;
+        public decimal WarehouseQuantity { get; set; } = decimal.Zero; // ombordagi qoldiq metr
         public string? Price { get; set; } // narxi
         public string? Sum { get; set; } // summa
         public string? PerDiscount { get; set; } // chegirma
