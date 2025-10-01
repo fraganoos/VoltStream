@@ -6,6 +6,7 @@ using VoltStream.Domain.Entities;
 
 public interface IAppDbContext
 {
+    DbSet<AllowedClient> AllowedClients { get; set; }
     DbSet<Product> Products { get; }
     DbSet<Category> Categories { get; }
     DbSet<Payment> Payments { get; }

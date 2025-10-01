@@ -16,7 +16,8 @@ public static class DependencyInjection
 
         services.AddScoped<AuditInterceptor>();
         services.AddDbContext<IAppDbContext, AppDbContext>((sp, options) =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
+            b => b.MigrationsAssembly("VoltStream.Infrastructure"))
             .AddInterceptors(sp.GetRequiredService<AuditInterceptor>()));
 
         services.AddScoped<IPagingMetadataWriter, HttpPagingMetadataWriter>();
