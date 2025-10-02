@@ -84,6 +84,16 @@
                                    Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
+                <RadioButton Style="{DynamicResource menuButton}"
+                             Tag="{DynamicResource color6}"
+                             Command="{Binding ShowPaymentViewCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <fa:IconImage Icon="MoneyCheckDollar"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Oldi-berdi"
+                                   Style="{StaticResource menuButtonText}" />
+                    </StackPanel>
+                </RadioButton>
             </StackPanel>
             <!--Header and content-->
             <Grid Grid.Column="1">
