@@ -13,7 +13,7 @@ public record UpdateAllowedClientCommand(
     long Id,
     string IpAddress,
     string? DeviceName,
-    bool IsBlocked)
+    bool IsActive)
     : IRequest<bool>;
 
 public class UpdateAllowedClientCommandHandler(
@@ -25,9 +25,9 @@ public class UpdateAllowedClientCommandHandler(
     {
         var client = await context.AllowedClients.FirstOrDefaultAsync(wh => wh.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(AllowedClient), nameof(request.Id), request.Id);
+        Console.WriteLine($"DeviceName: {request.DeviceName}");
 
         mapper.Map(request, client);
-        await context.SaveAsync(cancellationToken);
         return await context.SaveAsync(cancellationToken) > 0;
     }
 }

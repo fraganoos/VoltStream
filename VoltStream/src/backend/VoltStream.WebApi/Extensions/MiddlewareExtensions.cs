@@ -6,18 +6,20 @@ public static class MiddlewareExtensions
     {
         app.Use(async (context, next) =>
         {
+            await next();
+
             var log = new RequestLog
             {
                 IpAddress = context.Connection.RemoteIpAddress?.ToString(),
                 Path = context.Request.Path,
                 Method = context.Request.Method,
                 UserAgent = context.Request.Headers.UserAgent.ToString(),
-                TimeStamp = DateTime.UtcNow
+                TimeStamp = DateTime.UtcNow,
+                StatusCode = context.Response.StatusCode,
+                IsSuccess = context.Response.StatusCode >= 200 && context.Response.StatusCode < 300
             };
 
             callback?.Invoke(log);
-
-            await next();
         });
 
         return app;
@@ -31,4 +33,7 @@ public class RequestLog
     public string? Method { get; set; }
     public string? UserAgent { get; set; }
     public DateTime TimeStamp { get; set; }
+    public int? StatusCode { get; set; }
+    public bool IsSuccess { get; set; }
 }
+

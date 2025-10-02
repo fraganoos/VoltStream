@@ -3,6 +3,7 @@
 using AutoMapper;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Features.Monitoring.Commands;
+using VoltStream.Application.Features.Monitoring.DTOs;
 using VoltStream.Domain.Entities;
 
 public class CustomerMappingProfile : Profile
@@ -16,5 +17,7 @@ public class CustomerMappingProfile : Profile
         CreateMap<UpdateAllowedClientCommand, AllowedClient>()
             .ForMember(dest => dest.NormalizedName, opt =>
             opt.MapFrom(src => src.DeviceName!.ToNormalized()));
+
+        CreateMap<AllowedClient, AllowedClientDto>();
     }
 }

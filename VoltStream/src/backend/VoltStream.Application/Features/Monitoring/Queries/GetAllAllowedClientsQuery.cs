@@ -17,7 +17,11 @@ public class GetAllAllowedClientQueryHandler(
     : IRequestHandler<GetAllAllowedClientsQuery, IReadOnlyCollection<AllowedClientDto>>
 {
     public async Task<IReadOnlyCollection<AllowedClientDto>> Handle(GetAllAllowedClientsQuery request, CancellationToken cancellationToken)
-         => mapper.Map<IReadOnlyCollection<AllowedClientDto>>(await context.AllowedClients
-             .Where(w => !w.IsDeleted)
-             .ToListAsync(cancellationToken));
+    {
+        var s = mapper.Map<IReadOnlyCollection<AllowedClientDto>>(await context.AllowedClients
+                 .Where(w => !w.IsDeleted)
+                 .ToListAsync(cancellationToken));
+
+        return s;
+    }
 }

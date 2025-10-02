@@ -18,14 +18,12 @@ public class ClientIpMiddleware(RequestDelegate next)
             return;
         }
 
-        // ✅ Server o'zidan kelgan so'rovlarni tekshirib, DB ga kirmasdan o'tkazib yuborish
         if (IsLocalRequest(context))
         {
             await next(context);
             return;
         }
 
-        // 🔒 Faqat tashqi IP lar uchun DB dan tekshir
         var allowed = await db.AllowedClients
             .FirstOrDefaultAsync(c => c.IpAddress == ip);
 
@@ -63,10 +61,8 @@ public class ClientIpMiddleware(RequestDelegate next)
         var ipAddress = context.Connection.RemoteIpAddress;
         if (ipAddress is null) return false;
 
-        // IPv6 loopback (::1) yoki IPv4 loopback (127.0.0.1)
         if (IPAddress.IsLoopback(ipAddress)) return true;
 
-        // Agar serverning o'z IP laridan biri bo'lsa
         var localIps = Dns.GetHostAddresses(Dns.GetHostName());
         return localIps.Contains(ipAddress);
     }
