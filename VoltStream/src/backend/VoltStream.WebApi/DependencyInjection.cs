@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddInfrastructureServices(conf);
         services.AddControllers(options
             => options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())))
+                .AddApplicationPart(typeof(DependencyInjection).Assembly)
                 .AddJsonOptions(opt => opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
         services.AddOpenApi();
@@ -22,7 +23,7 @@ public static class DependencyInjection
 
     public static void UseOpenApiDocumentation(this WebApplication app)
     {
-        if (app.Environment.IsDevelopment())
+        if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
         {
             app.MapOpenApi();
             app.MapScalarApiReference(opt =>
@@ -30,7 +31,6 @@ public static class DependencyInjection
                 opt.WithTheme(ScalarTheme.BluePlanet);
                 opt.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
                 opt.WithTitle("VoltStream API Documentation");
-                //opt.WithLayout(ScalarLayout.Classic);
                 opt.WithFavicon("favicon.ico");
             });
         }

@@ -11,6 +11,7 @@ using VoltStream.Infrastructure.Persistence.Interceptors;
 public class AppDbContext(DbContextOptions<AppDbContext> options)
     : DbContext(options), IAppDbContext
 {
+    public DbSet<AllowedClient> AllowedClients { get; set; }
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Product> Products { get; set; }
