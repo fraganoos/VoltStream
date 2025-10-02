@@ -10,7 +10,7 @@ public class WarehouseMappingProfile : Profile
 {
     public WarehouseMappingProfile()
     {
-        CreateMap<WarehouseItem, WarehouseItemDTO>();
+        CreateMap<WarehouseItem, WarehouseItemDto>();
         CreateMap<Warehouse, WarehouseDTO>();
 
         CreateMap<CreateWarehouseCommand, Warehouse>()

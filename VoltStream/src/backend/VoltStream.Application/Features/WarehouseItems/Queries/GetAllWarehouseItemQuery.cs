@@ -9,15 +9,15 @@ using System.Threading.Tasks;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Warehouses.DTOs;
 
-public record GetAllWarehouseItemQuery() : IRequest<IReadOnlyCollection<WarehouseItemDTO>>;
+public record GetAllWarehouseItemQuery() : IRequest<IReadOnlyCollection<WarehouseItemDto>>;
 
 public class GetAllWarehouseItemQueryHandler(
     IAppDbContext context,
     IMapper mapper)
-    : IRequestHandler<GetAllWarehouseItemQuery, IReadOnlyCollection<WarehouseItemDTO>>
+    : IRequestHandler<GetAllWarehouseItemQuery, IReadOnlyCollection<WarehouseItemDto>>
 {
-    public async Task<IReadOnlyCollection<WarehouseItemDTO>> Handle(GetAllWarehouseItemQuery request, CancellationToken cancellationToken)
-         => mapper.Map<IReadOnlyCollection<WarehouseItemDTO>>(await context.WarehouseItems
+    public async Task<IReadOnlyCollection<WarehouseItemDto>> Handle(GetAllWarehouseItemQuery request, CancellationToken cancellationToken)
+         => mapper.Map<IReadOnlyCollection<WarehouseItemDto>>(await context.WarehouseItems
              .Where(w => w.IsDeleted != true)
              .ToListAsync(cancellationToken));
 
