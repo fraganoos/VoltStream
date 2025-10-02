@@ -2,6 +2,7 @@
 
 using System.Windows.Input;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Payments.Views;
 using VoltStream.WPF.Sales.Views;
 using VoltStream.WPF.Supplies.Views;
 
@@ -23,12 +24,14 @@ public class MainViewModel : ViewModelBase
     public ICommand ShowSuppliesViewCommand { get; }
     public ICommand ShowHomeViewCommand { get; }
     public ICommand ShowSalesViewCommand { get; }
+    public ICommand ShowPaymentViewCommand { get; }
 
     // constructor
     public MainViewModel()
     {
         ShowSuppliesViewCommand = new ViewModelCommand(ExicuteShowSuppliesViewCommand);
         ShowSalesViewCommand = new ViewModelCommand(ExicuteShowSalesViewCommand);
+        ShowPaymentViewCommand = new ViewModelCommand(ExicuteShowPaymentViewCommand);
     }
 
     public MainViewModel(IServiceProvider serviceProvider)
@@ -36,6 +39,7 @@ public class MainViewModel : ViewModelBase
         this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         ShowSuppliesViewCommand = new ViewModelCommand(ExicuteShowSuppliesViewCommand);
         ShowSalesViewCommand = new ViewModelCommand(ExicuteShowSalesViewCommand);
+        ShowPaymentViewCommand = new ViewModelCommand(ExicuteShowPaymentViewCommand);
     }
 
     private void ExicuteShowSalesViewCommand(object obj)
@@ -47,6 +51,11 @@ public class MainViewModel : ViewModelBase
     private void ExicuteShowSuppliesViewCommand(object obj)
     {
         var view = new SuppliesPage(serviceProvider);
+        CurrentChildView = view;
+    }
+    private void ExicuteShowPaymentViewCommand(object obj)
+    {
+        var view = new PaymentsPage(serviceProvider);
         CurrentChildView = view;
     }
 }
