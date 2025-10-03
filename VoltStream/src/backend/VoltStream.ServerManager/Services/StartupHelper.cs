@@ -4,7 +4,7 @@ using Microsoft.Win32;
 
 public static class StartupHelper
 {
-    private const string AppName = "VoltStreamServerManager";
+    private const string AppName = "VoltStream ServerManager";
 
     public static void RegisterInStartup()
     {
