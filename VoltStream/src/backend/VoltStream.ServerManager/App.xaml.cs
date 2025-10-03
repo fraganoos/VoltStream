@@ -127,9 +127,9 @@ public partial class App : Application
 
     private static Icon GetStatusTrayIcon()
     {
-        using var baseStream = Application.GetResourceStream(
-            new Uri("pack://application:,,,/Assets/voltstream.ico")).Stream;
-        using var baseIcon = new Icon(baseStream);
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        var iconPath = Path.Combine(baseDir, "Assets", "voltstream.ico");
+        using var baseIcon = new Icon(iconPath);
 
         using var bmp = baseIcon.ToBitmap();
         using var g = Graphics.FromImage(bmp);
