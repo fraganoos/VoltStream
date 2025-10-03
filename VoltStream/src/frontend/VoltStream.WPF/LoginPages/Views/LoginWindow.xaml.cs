@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using VoltStream.WPF.LoginPages.Models;
 
 namespace VoltStream.WPF.LoginPages.Views;
 
@@ -21,5 +22,13 @@ public partial class LoginWindow : Window
     private void btnClose_Click(object sender, RoutedEventArgs e)
     {
         this.Close();
+    }
+
+    private void tbxPassword_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is LoginViewModel vm)
+        {
+            vm.Password = tbxPassword.Password;
+        }
     }
 }

@@ -44,6 +44,7 @@ public class LoginViewModel : ViewModelBase
 
     public ICommand LoginCommand { get; }
     private readonly ILoginApi _loginApi;
+
     // ✅ Login muvaffaqiyatli bo‘lsa signal beradigan event
     public event Action? LoginSucceeded;
 
@@ -57,8 +58,6 @@ public class LoginViewModel : ViewModelBase
     {
         try
         {
-            IsBusy = true;
-
             var response = await _loginApi.LoginAsync(new LoginRequest
             {
                 Username = this.Username,
@@ -68,8 +67,7 @@ public class LoginViewModel : ViewModelBase
             if (response.IsSuccessStatusCode)
             {
                 ErrorMessage = "";
-                // ✅ Event chaqiriladi
-                LoginSucceeded?.Invoke();
+                LoginSucceeded?.Invoke(); // ✅ MainWindow ochiladi
             }
             else
             {
@@ -80,10 +78,5 @@ public class LoginViewModel : ViewModelBase
         {
             ErrorMessage = $"Login failed: {ex.Message}";
         }
-        finally
-        {
-            IsBusy = false;
-        }
     }
 }
-
