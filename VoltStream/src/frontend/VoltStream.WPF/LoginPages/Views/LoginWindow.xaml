@@ -12,8 +12,7 @@
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
         AllowsTransparency="True"
-        MouseDown="Window_MouseDown">  
-
+        >
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
     </Window.Resources>
@@ -24,8 +23,10 @@
 
     <Border CornerRadius="12">
         <Border.Background>
-            <ImageBrush ImageSource="/VoltStream.WPF;component/Commons/Source/Images/oramkabel.png"
-                       Stretch="Uniform"/>
+            <ImageBrush ImageSource="/Commons/Source/Images/oramkabel.png"
+           Stretch="Uniform"/>
+
+
         </Border.Background>
 
         <Border CornerRadius="10"                    
@@ -184,10 +185,12 @@
                             Height="28"
                             VerticalContentAlignment="Center"
                             Margin="0,5,0,0"
-                            Padding="20,0,0,0">
+                            Padding="20,0,0,0"
+                            utils:EnterKeyTab.IsEnabled="True"
+                             >
 
                         <TextBox.Background>
-                            <ImageBrush ImageSource="/VoltStream.WPF;component/Commons/Source/Images/user-icon.png"
+                            <ImageBrush ImageSource="/Commons/Source/Images/user-icon.png"
                                        Stretch="None"
                                        AlignmentX="Left"/>
                         </TextBox.Background>
@@ -204,27 +207,27 @@
                               FontWeight="Medium"
                               FontFamily="Montserrat"                             
                               Margin="0,15,0,0"/>
-                    <TextBox x:Name="tbxPassword"
-                            Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
-                            FontSize="16"
-                            FontWeight="Medium"
-                            FontFamily="Montserrat"                            
-                            Foreground="White"
-                            CaretBrush="LightGray"
-                            BorderBrush="DarkGray"
-                            BorderThickness="0,0,0,2"
-                            Height="28"
-                            VerticalContentAlignment="Center"
-                            Margin="0,5,0,0"
-                            Padding="20,0,0,0">
-
-                        <TextBox.Background>
+                    <PasswordBox x:Name="tbxPassword"
+                                 PasswordChanged="tbxPassword_PasswordChanged"
+                                 FontSize="16"
+                                 FontWeight="Medium"
+                                 FontFamily="Montserrat"                            
+                                 Foreground="White"
+                                 CaretBrush="LightGray"
+                                 BorderBrush="DarkGray"
+                                 BorderThickness="0,0,0,2"
+                                 Height="28"
+                                 VerticalContentAlignment="Center"
+                                 Margin="0,5,0,0"
+                                 Padding="20,0,0,0"
+                                 utils:EnterKeyTab.IsEnabled="True">
+                        <PasswordBox.Background>
                             <ImageBrush ImageSource="/VoltStream.WPF;component/Commons/Source/Images/key-icon.png"
-                                       Stretch="None"
-                                       AlignmentX="Left"/>
-                        </TextBox.Background>
-                    </TextBox>
-                    
+                    Stretch="None"
+                    AlignmentX="Left"/>
+                        </PasswordBox.Background>
+                    </PasswordBox>
+
 
                     <TextBlock Text="parol-123" HorizontalAlignment="Center"
                              Foreground="Azure"
@@ -240,6 +243,7 @@
 
                     <Button x:Name="btnLogin" 
                             Command="{Binding LoginCommand}"
+                            IsEnabled="{Binding IsBusy, Converter={StaticResource BooleanToVisibility}}"
                             BorderThickness="0"
                             Content="LOG IN"
                             Foreground="White"

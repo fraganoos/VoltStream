@@ -271,7 +271,7 @@
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
             <TextBox Grid.Column="3" x:Name="txtRollCount"
                      Text="{Binding RollCount}" Margin="1,3"
-                      FontSize="14" utils:TextBoxTabBehavior.EnableTabOnKeys="True"
+                     FontSize="14" utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                      utils:NumericTextBox.IsNumeric="True"/>
             <TextBlock Grid.Column="4" Text="Jami metr" 
                        Style="{StaticResource FloatingLabelStyle}"
@@ -279,15 +279,15 @@
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
             <TextBox Grid.Column="4" x:Name="txtQuantity"
                      Text="{Binding Quantity}" Margin="1,3"
-                      FontSize="14" utils:TextBoxTabBehavior.EnableTabOnKeys="True"
+                     FontSize="14" utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                      utils:NumericTextBox.IsNumeric="True"/>
             <TextBlock Grid.Column="5" Text="Narxi" 
                        Style="{StaticResource FloatingLabelStyle}"
                        Tag="{Binding ElementName=txtPrice}"
                        IsHitTestVisible="False" Panel.ZIndex="1"/>
             <TextBox Grid.Column="5" x:Name="txtPrice"
-                      Text="{Binding Price}" Margin="1,3"
-                      FontSize="14" utils:TextBoxTabBehavior.EnableTabOnKeys="True"
+                     Text="{Binding Price}" Margin="1,3"
+                     FontSize="14" utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                      utils:NumericTextBox.IsNumeric="True"/>
             <TextBlock Grid.Column="6" Text="Jami summa" 
                        Style="{StaticResource FloatingLabelStyle}"
@@ -337,34 +337,34 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Maxsulot turi" 
                              Binding="{Binding CategoryName}" 
-                             Width="*"/>
+                             Width="1.5*" MinWidth="120"/>
                     <DataGridTextColumn Header="Maxsulot nomi" 
                              Binding="{Binding ProductName}" 
-                             Width="*"/>
+                             Width="1.8*" MinWidth="120"/>
                     <DataGridTextColumn Header="Rulon metr" 
                              Binding="{Binding PerRollCount}" 
-                             Width="80"/>
+                             Width="*"/>
                     <DataGridTextColumn Header="Rulon soni" 
                              Binding="{Binding RollCount}" 
-                             Width="80"/>
+                             Width="*"/>
                     <DataGridTextColumn Header="Jami metr" 
                              Binding="{Binding Quantity}" 
-                             Width="80"/>
+                             Width="*"/>
                     <DataGridTextColumn Header="Narxi" 
                              Binding="{Binding Price}" 
-                             Width="80"/>
+                             Width="*"/>
                     <DataGridTextColumn Header="Jami summa" 
                              Binding="{Binding Sum}" 
-                             Width="100" utils:NumericTextBox.IsNumeric="True"/>
+                             Width="*" utils:NumericTextBox.IsNumeric="True"/>
                     <DataGridTextColumn Header="Chegirma%" 
                              Binding="{Binding PerDiscount}" 
-                             Width="80"/>
+                             Width="*"/>
                     <DataGridTextColumn Header="Chegirma summasi" 
                              Binding="{Binding Discount}" 
-                             Width="120"/>
+                             Width="*"/>
                     <DataGridTextColumn Header="Umumiy summa" 
                              Binding="{Binding FinalSumProduct}" 
-                             Width="100"/>
+                             Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
