@@ -4,8 +4,31 @@
       Title="IP Access">
     <Grid Margin="10">
         <DataGrid x:Name="IpDataGrid"
-                  AutoGenerateColumns="True"
+                  AutoGenerateColumns="False"
                   IsReadOnly="False"
-                  RowEditEnding="IpDataGrid_RowEditEnding" />
+                  RowEditEnding="IpDataGrid_RowEditEnding">
+            <DataGrid.Columns>
+                <!-- ID ustuni readonly -->
+                <DataGridTextColumn Header="ID"
+                                    Binding="{Binding Id}"
+                                    IsReadOnly="True" />
+
+                <!-- IP ustuni readonly -->
+                <DataGridTextColumn Header="IP Address"
+                                    Binding="{Binding IpAddress}"
+                                    IsReadOnly="True" />
+
+                <!-- Agar boshqa maydonlar editable bo‘lsin -->
+                <DataGridTextColumn Header="Client Name"
+                                    Binding="{Binding DeviceName}" />
+
+                <DataGridCheckBoxColumn Header="IsActive"
+                                        Binding="{Binding IsActive}" />
+
+                <DataGridTextColumn Header="LastRequestAt"
+                                        Binding="{Binding LastRequestAt}" 
+                                        IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Page>
