@@ -15,6 +15,22 @@ public class ServerHostService
     private CancellationTokenSource? cts;
     private readonly List<RequestLog> logs = [];
 
+    private ServerStatus status = ServerStatus.Stopped;
+    public ServerStatus Status
+    {
+        get => status;
+        private set
+        {
+            if (status != value)
+            {
+                status = value;
+                StatusChanged?.Invoke(this, status);
+            }
+        }
+    }
+
+    public bool IsRunning => Status == ServerStatus.Running;
+
     public event EventHandler<RequestLog>? RequestReceived;
     public event EventHandler<ServerStatus>? StatusChanged;
 
@@ -24,7 +40,7 @@ public class ServerHostService
     {
         if (app is not null) return;
 
-        StatusChanged?.Invoke(this, ServerStatus.Starting);
+        Status = ServerStatus.Starting;
 
         var config = new ConfigurationBuilder()
             .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
@@ -74,12 +90,14 @@ public class ServerHostService
                 };
 
                 ForwardLog(log);
-                StatusChanged?.Invoke(this,
-                    response.IsSuccessStatusCode ? ServerStatus.Running : ServerStatus.Stopped);
+
+                Status = response.IsSuccessStatusCode
+                    ? ServerStatus.Running
+                    : ServerStatus.Stopped;
             }
             catch
             {
-                StatusChanged?.Invoke(this, ServerStatus.Stopped);
+                Status = ServerStatus.Stopped;
             }
         });
     }
@@ -88,12 +106,12 @@ public class ServerHostService
     {
         if (app is null) return;
 
-        StatusChanged?.Invoke(this, ServerStatus.Stopping);
+        Status = ServerStatus.Stopping;
         cts?.Cancel();
         await app.StopAsync(cancellationToken);
         app = null;
         cts = null;
-        StatusChanged?.Invoke(this, ServerStatus.Stopped);
+        Status = ServerStatus.Stopped;
     }
 
     public async Task RestartAsync(CancellationToken cancellationToken = default)

@@ -6,17 +6,15 @@ using VoltStream.ServerManager.Pages.Settings;
 
 public partial class MainWindow : Window
 {
-    private readonly ServerHostService serverHost = new();
-
     public MainWindow()
     {
         InitializeComponent();
-        MainFrame.Navigate(new DashboardPage(serverHost, ServerStatusIndicator));
+        MainFrame.Navigate(new DashboardPage(App.ServerHost, ServerStatusIndicator));
     }
 
     private void DashboardButton_Click(object sender, RoutedEventArgs e)
     {
-        MainFrame.Navigate(new DashboardPage(serverHost, ServerStatusIndicator));
+        MainFrame.Navigate(new DashboardPage(App.ServerHost, ServerStatusIndicator));
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)

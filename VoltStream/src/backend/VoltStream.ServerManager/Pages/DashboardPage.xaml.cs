@@ -9,9 +9,9 @@ using VoltStream.WebApi.Extensions;
 public partial class DashboardPage : Page
 {
     private readonly ServerHostService serverHost;
-    private readonly Ellipse statusIndicator;
+    private readonly Ellipse? statusIndicator;
 
-    public DashboardPage(ServerHostService serverHost, Ellipse statusIndicator)
+    public DashboardPage(ServerHostService serverHost, Ellipse? statusIndicator)
     {
         InitializeComponent();
         this.serverHost = serverHost;
@@ -24,6 +24,17 @@ public partial class DashboardPage : Page
 
         this.serverHost.StatusChanged += OnServerStatusChanged;
         this.serverHost.RequestReceived += OnRequestReceived;
+
+        // Initialize indicator immediately based on current state
+        var initialStatus = serverHost.IsRunning ? ServerStatus.Running : ServerStatus.Stopped;
+        SetIndicator(initialStatus);
+
+        // Unsubscribe on unload to avoid callbacks after page/window closed
+        this.Unloaded += (_, __) =>
+        {
+            this.serverHost.StatusChanged -= OnServerStatusChanged;
+            this.serverHost.RequestReceived -= OnRequestReceived;
+        };
     }
 
     private void OnRequestReceived(object? sender, RequestLog log)
@@ -36,17 +47,20 @@ public partial class DashboardPage : Page
 
     private void OnServerStatusChanged(object? sender, ServerStatus status)
     {
-        Dispatcher.Invoke(() =>
+        Dispatcher.Invoke(() => SetIndicator(status));
+    }
+
+    private void SetIndicator(ServerStatus status)
+    {
+        if (statusIndicator is null) return;
+        statusIndicator.Fill = status switch
         {
-            statusIndicator.Fill = status switch
-            {
-                ServerStatus.Running => Brushes.Green,
-                ServerStatus.Stopped => Brushes.Red,
-                ServerStatus.Starting => Brushes.Yellow,
-                ServerStatus.Stopping => Brushes.Orange,
-                _ => Brushes.Gray
-            };
-        });
+            ServerStatus.Running => Brushes.Green,
+            ServerStatus.Stopped => Brushes.Red,
+            ServerStatus.Starting => Brushes.Yellow,
+            ServerStatus.Stopping => Brushes.Orange,
+            _ => Brushes.Gray
+        };
     }
 
     private void AddLogToList(RequestLog log)
