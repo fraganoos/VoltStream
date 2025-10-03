@@ -26,6 +26,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Cash> Cashes { get; set; }
     public DbSet<CashOperation> CashOperations { get; set; }
     public DbSet<Warehouse> Warehouses { get; set; }
+    public DbSet<User> Users { get; set; }
 
     private IDbContextTransaction? currentTransaction;
 

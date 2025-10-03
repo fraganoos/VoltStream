@@ -9,7 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Commons\Source\Images\key-icon.png" />
+    <None Remove="Commons\Source\Images\LogoVolt.jpg" />
     <None Remove="Commons\Source\Images\LogoVolt.png" />
+    <None Remove="Commons\Source\Images\oramkabel.png" />
+    <None Remove="Commons\Source\Images\user-icon.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,9 +34,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Commons\Source\Images\key-icon.png" />
+    <Resource Include="Commons\Source\Images\LogoVolt.jpg" />
     <Resource Include="Commons\Source\Images\LogoVolt.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Commons\Source\Images\oramkabel.png" />
+    <Resource Include="Commons\Source\Images\user-icon.png" />
   </ItemGroup>
 
 </Project>

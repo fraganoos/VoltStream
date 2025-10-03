@@ -3,8 +3,9 @@
 using ApiServices.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
-using System.Windows.Forms.Design;
 using VoltStream.WPF.Customer;
+using VoltStream.WPF.LoginPages.Models;
+using VoltStream.WPF.LoginPages.Views;
 using VoltStream.WPF.Sales.Views;
 
 /// <summary>
@@ -23,6 +24,10 @@ public partial class App : Application
         ApiService.ConfigureServices(services, "https://localhost:7287/api");
 
         // WPF xizmatlarini qo‘shish
+        services.AddSingleton<LoginViewModel>();
+        services.AddSingleton<LoginWindow>();
+
+        services.AddSingleton<MainWindow>();
         services.AddSingleton<MainViewModel>();
         services.AddTransient<SalesPage>();
         services.AddTransient<CustomerWindow>();
@@ -30,10 +35,30 @@ public partial class App : Application
         // Extension method ishlaydi
         var serviceProvider = services.BuildServiceProvider();
 
-        var mainWindow = new MainWindow
+        var loginViewModel = serviceProvider.GetRequiredService<LoginViewModel>();
+        var loginWindow = serviceProvider.GetRequiredService<LoginWindow>();
+        loginWindow.DataContext = loginViewModel;
+
+        // ✅ Login muvaffaqiyatli bo‘lsa, LoginWindow yopilib MainWindow ochiladi
+        loginViewModel.LoginSucceeded += () =>
         {
-            DataContext = serviceProvider.GetService<MainViewModel>()
+            loginWindow.Dispatcher.Invoke(() =>
+            {
+
+                var mainWindow = serviceProvider.GetRequiredService<MainWindow>();
+                mainWindow.DataContext = serviceProvider.GetRequiredService<MainViewModel>();
+                mainWindow.Show();
+                loginWindow.Close();
+            });
         };
-        mainWindow.Show();
+
+        loginWindow.Show();
+
+
+        //var mainWindow = new MainWindow
+        //{
+        //    DataContext = serviceProvider.GetService<MainViewModel>()
+        //};
+        //mainWindow.Show();
     }
 }

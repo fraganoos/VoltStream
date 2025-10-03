@@ -1,31 +1,34 @@
 ﻿using System.Windows;
-using System.Windows.Input;
+using VoltStream.WPF.LoginPages.Models;
 
-namespace VoltStream.WPF.LoginPages.Views
+namespace VoltStream.WPF.LoginPages.Views;
+
+/// <summary>
+/// Interaction logic for LoginWindow.xaml
+/// </summary>
+public partial class LoginWindow : Window
 {
-    /// <summary>
-    /// Interaction logic for LoginWindow.xaml
-    /// </summary>
-    public partial class LoginWindow : Window
+    public LoginWindow()
     {
-        public LoginWindow()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+        txtUser.Focus();
+    }
 
-        private void btnMinimize_Click(object sender, RoutedEventArgs e)
-        {
-            WindowState = WindowState.Minimized;
-        }
+    private void btnMinimize_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+    }
 
-        private void btnClose_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
+    private void btnClose_Click(object sender, RoutedEventArgs e)
+    {
+        this.Close();
+    }
 
-        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+    private void tbxPassword_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is LoginViewModel vm)
         {
-
+            vm.Password = tbxPassword.Password;
         }
     }
 }
