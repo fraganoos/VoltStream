@@ -17,6 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="LoginPages\Models\" />
+    <Folder Include="Payments\Models\" />
     <Folder Include="Sales\ViewModels\" />
     <Folder Include="Supplies\ViewModels\" />
   </ItemGroup>
