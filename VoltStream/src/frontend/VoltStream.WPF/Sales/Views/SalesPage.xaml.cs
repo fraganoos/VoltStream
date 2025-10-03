@@ -67,18 +67,18 @@ public partial class SalesPage : Page
 
     private void txtRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        if (txtRollCount.Text.Length > 0) 
+        if (txtRollCount.Text.Length > 0)
         {
             if ((decimal.TryParse(txtRollCount.Text, out decimal value) ? value : 0) > sale.WarehouseCountRoll)
             {
                 if (MessageBox.Show($"Omborda {cbxProductName.Text} -dan {sale.WarehouseCountRoll} " +
                     $"rulon qolgan." + Environment.NewLine + "Davom ettirishga rozimisiz?",
-                    "Savdo",MessageBoxButton.YesNo,MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.No)
+                    "Savdo", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) == MessageBoxResult.No)
                 {
                     e.Handled = true;
-                    txtRollCount.Text=null;
+                    txtRollCount.Text = null;
                 }
-            } 
+            }
         }
     }
 
@@ -331,7 +331,7 @@ public partial class SalesPage : Page
                 if (MessageBox.Show($"Siz {cbxProductName.Text}-ning {cbxPerRollCount.Text}-metrlik rulonidan " +
                     $"{quantity.ToString()} metr tanladingiz, shunda bitta rulondan {_quantity} metr " +
                     $"kesilib omborga bitta {q_quantity} metrlik rulon qo'shiladi." + Environment.NewLine +
-                    "Davom ettirishga rozimisiz?", "Savdo", MessageBoxButton.YesNo, MessageBoxImage.Question, 
+                    "Davom ettirishga rozimisiz?", "Savdo", MessageBoxButton.YesNo, MessageBoxImage.Question,
                     MessageBoxResult.No) == MessageBoxResult.No)
                 {
                     e.Handled = true;
@@ -595,7 +595,7 @@ public partial class SalesPage : Page
             ProductName = cbxProductName.Text,
             PerRollCount = decimal.TryParse(cbxPerRollCount.Text, out decimal perRollCount) ? perRollCount : 0,
             RollCount = decimal.TryParse(txtRollCount.Text, out decimal rollCount) ? rollCount : 0,
-            WarehouseCountRoll=sale.WarehouseCountRoll,
+            WarehouseCountRoll = sale.WarehouseCountRoll,
             Quantity = decimal.TryParse(txtQuantity.Text, out decimal quantity) ? quantity : 0,
             NewQuantity = sale.NewQuantity,
             WarehouseQuantity = sale.WarehouseQuantity,

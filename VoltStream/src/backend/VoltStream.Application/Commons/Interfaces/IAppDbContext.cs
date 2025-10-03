@@ -21,6 +21,7 @@ public interface IAppDbContext
     DbSet<Warehouse> Warehouses { get; }
     DbSet<DiscountOperation> DiscountsOperations { get; }
     DbSet<CashOperation> CashOperations { get; }
+    DbSet<User> Users { get; }
 
     Task<int> SaveAsync(CancellationToken cancellationToken);
 
