@@ -1,19 +1,16 @@
 ﻿<Page x:Class="VoltStream.WPF.Supplies.Views.SuppliesPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:VoltStream.WPF.Supplies.Views"
       xmlns:controls="clr-namespace:VoltStream.WPF.Commons.UserControls"
       xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
-      mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      xmlns:conv="clr-namespace:VoltStream.WPF.Commons.Converters"
+      mc:Ignorable="d"
+      d:DesignHeight="450"
+      d:DesignWidth="800"
       Title="SupplyPage">
-    <Page.Resources>
-        <utils:UtcToUzbekistanTimeConverter x:Key="UtcToUzbekistanTimeConverter"/>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
-    </Page.Resources>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="140"/>
@@ -67,7 +64,7 @@
                                VerticalAlignment="Center" 
                                Foreground="#888" Margin="10,2"
                                IsHitTestVisible="False" Panel.ZIndex="1"
-                               Visibility="{Binding ElementName=cbxCategory,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibility}}"/>
+                               Visibility="{Binding ElementName=cbxCategory,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibilityConverter}}"/>
                     <ComboBox x:Name="cbxCategory"
                               Grid.Column="0"
                               IsEditable="True"
@@ -77,15 +74,15 @@
                               SelectedValuePath="Id"
                               VerticalAlignment="Center"
                               FontSize="14"
-                              GotFocus="cbxCategory_GotFocus"
-                              LostFocus="cbxCategory_LostFocus"
+                              GotFocus="CbxCategory_GotFocus"
+                              LostFocus="CbxCategory_LostFocus"
                               utils:EnterKeyTab.IsEnabled="True"/>
 
                     <TextBlock Grid.Column="1" Text="Nomi" 
                                VerticalAlignment="Center" 
                                Foreground="#888" Margin="10,2"
                                IsHitTestVisible="False" Panel.ZIndex="1"
-                               Visibility="{Binding ElementName=cbxProduct,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibility}}"/>
+                               Visibility="{Binding ElementName=cbxProduct,Path=Text.IsEmpty,Converter={StaticResource BooleanToVisibilityConverter}}"/>
                     <ComboBox x:Name="cbxProduct" 
                               Grid.Column="1" 
                               IsEditable="True"
@@ -95,8 +92,8 @@
                               Margin="0,1,10,1"
                               SelectedValuePath="Id"
                               utils:EnterKeyTab.IsEnabled="True"
-                              GotFocus="cbxProduct_GotFocus"
-                              LostFocus="cbxProduct_LostFocus"/>
+                              GotFocus="CbxProduct_GotFocus"
+                              LostFocus="CbxProduct_LostFocus"/>
                 </Grid>
                 <Grid Grid.Row="2" Grid.Column="0">
                     <Label Content="Rulon metr:" VerticalAlignment="Center" Margin="10,0" FontSize="14"/>

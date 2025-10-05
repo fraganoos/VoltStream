@@ -5,9 +5,13 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!-- begin::Converters -->
+                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Converters/Converters.xaml" />
+                <!-- end::Converters -->
+                
                 <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/ButtonStyles.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/Colors.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/FloatingLable.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/FloatingLable.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
 

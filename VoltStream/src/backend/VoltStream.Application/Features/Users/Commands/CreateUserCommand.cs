@@ -1,6 +1,5 @@
 ﻿namespace VoltStream.Application.Features.Users.Commands;
 
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -15,8 +14,9 @@ public record CreateUserCommand(
     string Username,
     string Password) : IRequest<long>;
 
-public class CreateUserCommandHandler(IAppDbContext context,
-    IMapper mapper) : IRequestHandler<CreateUserCommand, long>
+public class CreateUserCommandHandler(
+    IAppDbContext context)
+    : IRequestHandler<CreateUserCommand, long>
 {
     public async Task<long> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
