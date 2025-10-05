@@ -1,20 +1,23 @@
 ﻿namespace VoltStream.WPF.Sales.Models;
 
-public class SaleItem
+using CommunityToolkit.Mvvm.ComponentModel;
+using VoltStream.WPF.Commons;
+
+public partial class SaleItem : ViewModelBase
 {
-    public long CategoryId { get; set; }
-    public string CategoryName { get; set; } = string.Empty;
-    public long ProductId { get; set; }
-    public string ProductName { get; set; } = string.Empty;
-    public decimal? PerRollCount { get; set; }  // birligi
-    public decimal WarehouseQuantity { get; set; } = decimal.Zero;
-    public decimal? RollCount { get; set; } // rulon
-    public decimal WarehouseCountRoll { get; set; } = decimal.Zero;
-    public decimal? Quantity { get; set; } // metr
-    public decimal NewQuantity { get; set; } = decimal.Zero;
-    public decimal? Price { get; set; } // narxi
-    public decimal? Sum { get; set; } // summa
-    public decimal? PerDiscount { get; set; } // chegirma
-    public decimal? Discount { get; set; } // chegirma summasi
-    public decimal? FinalSumProduct { get; set; } // chegirmadan keyingi narxi
+    [ObservableProperty] private long categoryId;
+    [ObservableProperty] private string categoryName = string.Empty;
+    [ObservableProperty] private long productId;
+    [ObservableProperty] private string productName = string.Empty;
+    [ObservableProperty] private decimal? perRollCount;
+    [ObservableProperty] private decimal warehouseQuantity = decimal.Zero;
+    [ObservableProperty] private decimal? rollCount;
+    [ObservableProperty] private decimal warehouseCountRoll = decimal.Zero;
+    [ObservableProperty] private decimal? quantity;
+    [ObservableProperty] private decimal newQuantity = decimal.Zero;
+    [ObservableProperty] private decimal? price;
+    [ObservableProperty] private decimal? sum;
+    [ObservableProperty] private decimal? perDiscount;
+    [ObservableProperty] private decimal? discount;
+    [ObservableProperty] private decimal? finalSumProduct;
 }

@@ -1,0 +1,10 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converter="clr-namespace:VoltStream.WPF.Commons.Converters">
+    
+    <converter:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+    <converter:StringIsNotEmptyConverter x:Key="StringIsNotEmptyConverter" />
+    <converter:UtcToUzbekistanTimeConverter x:Key="UtcToUzbekistanTimeConverter" />
+    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+</ResourceDictionary>

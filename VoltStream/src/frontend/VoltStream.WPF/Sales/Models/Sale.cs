@@ -1,61 +1,36 @@
-﻿namespace VoltStream.WPF.Sales.Models
-{
-    using System.Collections.ObjectModel;
-    using VoltStream.WPF.Commons;
+﻿namespace VoltStream.WPF.Sales.Models;
 
-    public class Sale : ViewModelBase
-    {
-        public decimal? _totalSum;
-        public decimal? _totalDiscount;
-        public decimal? _finalSum;
-        public DateTime OperationDate { get; set; } = DateTime.Now;
-        public long CustomerId { get; set; }
-        public string CustomerName { get; set; } = string.Empty;
-        public string CurrencyType { get; set; } = string.Empty;
-        public decimal? TotalSum
-        {
-            get => _totalSum;
-            set
-            {
-                _totalSum = value;
-                OnPropertyChanged(nameof(TotalSum));
-            }
-        } // jami summa
-        public bool CheckedDiscount { get; set; } = false; // chegirma ishlatilganmi
-        public decimal? TotalDiscount
-        {
-            get => _totalDiscount;
-            set
-            {
-                _totalDiscount = value;
-                OnPropertyChanged(nameof(TotalDiscount));
-            }
-        } // chegirma
-        public decimal? FinalSum
-        {
-            get => _finalSum;
-            set
-            {
-                _finalSum = value;
-                OnPropertyChanged(nameof(FinalSum));
-            }
-        }// chegirmadan keyingi summa
-        public string Description { get; set; } = string.Empty;
-        public string CategoryName { get; set; } = string.Empty;
-        public long CategoryId { get; set; }
-        public long ProductId { get; set; }
-        public string? ProductName { get; set; }
-        public string? PerRollCount { get; set; }  // birligi
-        public string? RollCount { get; set; } // rulon
-        public decimal WarehouseCountRoll { get; set; } = decimal.Zero; // ombordagi qoldiq rulon
-        public string? Quantity { get; set; } // metr
-        public decimal NewQuantity { get; set; } = decimal.Zero;
-        public decimal WarehouseQuantity { get; set; } = decimal.Zero; // ombordagi qoldiq metr
-        public string? Price { get; set; } // narxi
-        public string? Sum { get; set; } // summa
-        public string? PerDiscount { get; set; } // chegirma
-        public string? Discount { get; set; } // chegirma summasi
-        public string? FinalSumProduct { get; set; } // chegirmadan keyingi narxi
-        public ObservableCollection<SaleItem> SaleItems { get; set; } = new ObservableCollection<SaleItem>();
-    }
+using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
+using VoltStream.WPF.Commons;
+
+public partial class Sale : ViewModelBase
+{
+    [ObservableProperty] private decimal? totalSum;
+    [ObservableProperty] private decimal? totalDiscount;
+    [ObservableProperty] private decimal? finalSum;
+
+    [ObservableProperty] private DateTime operationDate = DateTime.Now;
+    [ObservableProperty] private long customerId;
+    [ObservableProperty] private string customerName = string.Empty;
+    [ObservableProperty] private string currencyType = string.Empty;
+    [ObservableProperty] private bool checkedDiscount = false;
+    [ObservableProperty] private string description = string.Empty;
+    [ObservableProperty] private string categoryName = string.Empty;
+    [ObservableProperty] private long categoryId;
+    [ObservableProperty] private long productId;
+    [ObservableProperty] private string? productName;
+    [ObservableProperty] private string? perRollCount;
+    [ObservableProperty] private string? rollCount;
+    [ObservableProperty] private decimal warehouseCountRoll = decimal.Zero;
+    [ObservableProperty] private string? quantity;
+    [ObservableProperty] private decimal newQuantity = decimal.Zero;
+    [ObservableProperty] private decimal warehouseQuantity = decimal.Zero;
+    [ObservableProperty] private string? price;
+    [ObservableProperty] private string? sum;
+    [ObservableProperty] private string? perDiscount;
+    [ObservableProperty] private string? discount;
+    [ObservableProperty] private string? finalSumProduct;
+
+    public ObservableCollection<SaleItem> SaleItems { get; set; } = [];
 }

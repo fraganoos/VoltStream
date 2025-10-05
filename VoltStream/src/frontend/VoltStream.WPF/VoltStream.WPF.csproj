@@ -18,13 +18,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="LoginPages\Models\" />
+    <Folder Include="LoginPages\ViewModels\" />
     <Folder Include="Payments\Models\" />
     <Folder Include="Sales\ViewModels\" />
     <Folder Include="Supplies\ViewModels\" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="FontAwesome.Sharp" Version="6.6.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

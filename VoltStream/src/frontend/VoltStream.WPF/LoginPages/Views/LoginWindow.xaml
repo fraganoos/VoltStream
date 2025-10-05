@@ -5,20 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VoltStream.WPF.LoginPages.Views"
         xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
+        xmlns:converter="clr-namespace:VoltStream.WPF.Commons.Converters"
         mc:Ignorable="d"
-        Title="LoginView" Height="550" Width="800"
+        Title="LoginView"
+        Height="550"
+        Width="800"
         WindowStyle="None"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
-        AllowsTransparency="True"
-        >
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
-    </Window.Resources>
+        AllowsTransparency="True">
 
     <Window.Visibility>
-        <Binding Path="IsViewVisible" Mode="TwoWay" Converter="{StaticResource BooleanToVisibility}"/>
+        <Binding Path="IsViewVisible" Mode="TwoWay" Converter="{StaticResource BooleanToVisibilityConverter}"/>
     </Window.Visibility>
 
     <Border CornerRadius="12">
@@ -79,7 +78,7 @@
                            FontFamily="Montserrat"
                            Cursor="Hand"
                            Grid.Column="1"
-                           Click="btnMinimize_Click">
+                            Click="BtnMinimize_Click">
 
                         <Button.Style>
                             <Style TargetType="Button">
@@ -114,7 +113,7 @@
                            FontFamily="Montserrat"
                            Cursor="Hand"
                            Grid.Column="2"
-                           Click="btnClose_Click">
+                            Click="BtnClose_Click">
 
                         <Button.Style>
                             <Style TargetType="Button">
@@ -208,7 +207,7 @@
                               FontFamily="Montserrat"                             
                               Margin="0,15,0,0"/>
                     <PasswordBox x:Name="tbxPassword"
-                                 PasswordChanged="tbxPassword_PasswordChanged"
+                                 PasswordChanged="TbxPassword_PasswordChanged"
                                  FontSize="16"
                                  FontWeight="Medium"
                                  FontFamily="Montserrat"                            
@@ -243,7 +242,7 @@
 
                     <Button x:Name="btnLogin" 
                             Command="{Binding LoginCommand}"
-                            IsEnabled="{Binding IsBusy, Converter={StaticResource BooleanToVisibility}}"
+                            IsEnabled="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
                             BorderThickness="0"
                             Content="LOG IN"
                             Foreground="White"

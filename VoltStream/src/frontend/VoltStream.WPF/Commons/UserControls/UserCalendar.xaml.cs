@@ -13,9 +13,6 @@ public partial class UserCalendar : UserControl
     public static readonly DependencyProperty SelectedDateProperty =
         DependencyProperty.Register("SelectedDate", typeof(DateTime?), typeof(UserCalendar), new PropertyMetadata(DateTime.Now, OnSelectedDateChanged));
 
-    private static readonly Regex _dateInputRegex = new Regex("[0-9]", RegexOptions.Compiled);
-    private static readonly Regex _dateFormatRegex = new Regex(@"^(?:\d{2}\.\d{2}\.\d{2,4})?$", RegexOptions.Compiled);
-
     public UserCalendar()
     {
         InitializeComponent();
@@ -37,7 +34,7 @@ public partial class UserCalendar : UserControl
         {
             userCalendar.dateTextBox.Text = newDate.ToString("dd.MM.yyyy");
         }
-        UserCalendar userCal = d as UserCalendar;
+        UserCalendar userCal = (d as UserCalendar)!;
         userCal!.dateTextBox.Focus();
         userCal.dateTextBox.SelectAll();
     }
@@ -141,7 +138,14 @@ public partial class UserCalendar : UserControl
         }
     }
 
-    private static bool IsValidDateInput(string input) => _dateInputRegex.IsMatch(input);
+    private static bool IsValidDateInput(string input) => DateInputRegex().IsMatch(input);
 
-    private static bool IsValidDateFormat(string input) => _dateFormatRegex.IsMatch(input);
+    private static bool IsValidDateFormat(string input) => DateFormatRegex().IsMatch(input);
+
+
+    [GeneratedRegex("[0-9]", RegexOptions.Compiled)]
+    private static partial Regex DateInputRegex();
+
+    [GeneratedRegex(@"^(?:\d{2}\.\d{2}\.\d{2,4})?$", RegexOptions.Compiled)]
+    private static partial Regex DateFormatRegex();
 }
