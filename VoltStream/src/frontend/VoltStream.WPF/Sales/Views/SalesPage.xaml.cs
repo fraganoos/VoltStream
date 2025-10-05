@@ -56,7 +56,7 @@ public partial class SalesPage : Page
         cbxPerRollCount.PreviewLostKeyboardFocus += CbxPerRollCount_PreviewLostKeyboardFocus;
 
         txtRollCount.LostFocus += (s, e) => CalcFinalSumProduct(s);
-        txtRollCount.PreviewLostKeyboardFocus += txtRollCount_PreviewLostKeyboardFocus;
+        txtRollCount.PreviewLostKeyboardFocus += TxtRollCount_PreviewLostKeyboardFocus;
         txtQuantity.PreviewLostKeyboardFocus += TxtQuantity_PreviewLostKeyboardFocus;
         txtPrice.LostFocus += (s, e) => CalcFinalSumProduct(s);
         txtSum.LostFocus += TxtSum_LostFocus;
@@ -65,7 +65,7 @@ public partial class SalesPage : Page
         txtFinalSumProduct.PreviewLostKeyboardFocus += TxtFinalSumProduct_PreviewLostKeyboardFocus;
     }
 
-    private void txtRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    private void TxtRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
         if (txtRollCount.Text.Length > 0)
         {
@@ -126,7 +126,7 @@ public partial class SalesPage : Page
     private async void CustomerName_LostFocus(object sender, RoutedEventArgs e)
     {
         long? customerId;
-        if (CustomerName.SelectedValue != null)
+        if (CustomerName.SelectedValue is not null)
         {
             customerId = (long)CustomerName.SelectedValue;
         }
@@ -146,7 +146,7 @@ public partial class SalesPage : Page
             if (customerId.HasValue && customerId.Value != 0)
             {
                 var response = await customersApi.GetCustomerByIdAsync(customerId.Value);
-                if (response.IsSuccessStatusCode && response.Content?.Data != null)
+                if (response.IsSuccessStatusCode && response.Content?.Data is not null)
                 {
                     var accounts = response.Content.Data.Account;
                     beginBalans.Text = accounts!.CurrentSumm.ToString("N2");
@@ -186,14 +186,14 @@ public partial class SalesPage : Page
             var selectedValue = CustomerName.SelectedValue;
             var response = await customersApi.GetAllCustomersAsync();
 
-            if (response.IsSuccessStatusCode && response.Content?.Data != null)
+            if (response.IsSuccessStatusCode && response.Content?.Data is not null)
             {
                 List<Customer> customers = response.Content.Data;
                 CustomerName.ItemsSource = customers;
                 CustomerName.DisplayMemberPath = "Name";
                 CustomerName.SelectedValuePath = "Id";
                 // Восстанавливаем выбранное значение
-                if (selectedValue != null)
+                if (selectedValue is not null)
                     CustomerName.SelectedValue = selectedValue;
             }
             else
@@ -329,7 +329,7 @@ public partial class SalesPage : Page
                 decimal q_quantity = perRollCount - _quantity;
                 sale.NewQuantity = q_quantity;
                 if (MessageBox.Show($"Siz {cbxProductName.Text}-ning {cbxPerRollCount.Text}-metrlik rulonidan " +
-                    $"{quantity.ToString()} metr tanladingiz, shunda bitta rulondan {_quantity} metr " +
+                    $"{quantity} metr tanladingiz, shunda bitta rulondan {_quantity} metr " +
                     $"kesilib omborga bitta {q_quantity} metrlik rulon qo'shiladi." + Environment.NewLine +
                     "Davom ettirishga rozimisiz?", "Savdo", MessageBoxButton.YesNo, MessageBoxImage.Question,
                     MessageBoxResult.No) == MessageBoxResult.No)
@@ -417,7 +417,7 @@ public partial class SalesPage : Page
     private async void CbxProductName_GotFocus(object sender, RoutedEventArgs e)
     {
         long? categoryId = null;
-        if (cbxCategoryName.SelectedValue != null)
+        if (cbxCategoryName.SelectedValue is not null)
         {
             categoryId = (long)cbxCategoryName.SelectedValue;
         }
@@ -442,7 +442,7 @@ public partial class SalesPage : Page
     private async void CbxProductName_LostFocus(object sender, RoutedEventArgs e)
     {
         long? productId = null;
-        if (cbxProductName.SelectedValue != null)
+        if (cbxProductName.SelectedValue is not null)
         {
             productId = (long)cbxProductName.SelectedValue;
         }
@@ -473,7 +473,7 @@ public partial class SalesPage : Page
             var selectedValue = cbxCategoryName.SelectedValue;
 
             var response = await categoriesApi.GetAllCategoriesAsync();
-            if (response.IsSuccessStatusCode && response.Content?.Data != null)
+            if (response.IsSuccessStatusCode && response.Content?.Data is not null)
             {
                 List<Category> categories = response.Content.Data;
                 cbxCategoryName.ItemsSource = categories;
@@ -481,7 +481,7 @@ public partial class SalesPage : Page
                 cbxCategoryName.SelectedValuePath = "Id";
 
                 // Восстанавливаем выбранное значение
-                if (selectedValue != null)
+                if (selectedValue is not null)
                     cbxCategoryName.SelectedValue = selectedValue;
             }
             else
@@ -514,14 +514,14 @@ public partial class SalesPage : Page
                 response = await productsApi.GetAllProductsAsync();
             }
 
-            if (response.IsSuccessStatusCode && response.Content?.Data != null)
+            if (response.IsSuccessStatusCode && response.Content?.Data is not null)
             {
                 var products = response.Content.Data;
                 cbxProductName.ItemsSource = products;
                 cbxProductName.DisplayMemberPath = "Name";
                 cbxProductName.SelectedValuePath = "Id";
                 // Восстанавливаем выбранное значение
-                if (selectedValue != null)
+                if (selectedValue is not null)
                     cbxProductName.SelectedValue = selectedValue;
             }
             else
@@ -563,14 +563,14 @@ public partial class SalesPage : Page
                 cbxPerRollCount.ItemsSource = null;
                 return;
             }
-            if (response.IsSuccessStatusCode && response.Content?.Data != null)
+            if (response.IsSuccessStatusCode && response.Content?.Data is not null)
             {
                 var warehouseItems = response.Content.Data;
                 cbxPerRollCount.ItemsSource = warehouseItems;
                 cbxPerRollCount.DisplayMemberPath = "QuantityPerRoll";
                 cbxPerRollCount.SelectedValuePath = "QuantityPerRoll";
                 // Восстанавливаем выбранное значение
-                if (selectedValue != null)
+                if (selectedValue is not null)
                     cbxPerRollCount.SelectedValue = selectedValue;
             }
             else
@@ -653,6 +653,16 @@ public partial class SalesPage : Page
     private void CheckedDiscount_Click(object sender, RoutedEventArgs e)
     {
         CalcSaleSum();
+
+    }
+
+    private void ClearButton_Click(object sender, RoutedEventArgs e)
+    {
+
+    }
+
+    private void SubmitButton_Click(object sender, RoutedEventArgs e)
+    {
 
     }
 }

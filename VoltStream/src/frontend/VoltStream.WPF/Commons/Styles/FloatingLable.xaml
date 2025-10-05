@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:VoltStream.WPF.Commons.Utils" >
-    <local:StringIsNotEmptyConverter x:Key="StringIsNotEmptyConverter"/>
+                    xmlns:local="clr-namespace:VoltStream.WPF.Commons.Utils"
+                    xmlns:converters="clr-namespace:VoltStream.WPF.Commons.Converters">
 
     <Style x:Key="FloatingLabelStyle" TargetType="TextBlock">
         <!--<Setter Property="FontSize" Value="14"/>-->

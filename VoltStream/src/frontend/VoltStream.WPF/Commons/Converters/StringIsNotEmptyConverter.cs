@@ -1,4 +1,4 @@
-﻿namespace VoltStream.WPF.Commons.Utils;
+﻿namespace VoltStream.WPF.Commons.Converters;
 
 using System;
 using System.Globalization;

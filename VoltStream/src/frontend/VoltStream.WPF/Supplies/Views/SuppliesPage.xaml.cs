@@ -20,7 +20,7 @@ public partial class SuppliesPage : Page
     private readonly ISuppliesApi suppliesApi;
     private readonly IWarehouseItemsApi warehouseItemsApi;
     private List<Category> _allCategories = [];
-    private ICollectionView categoriesView;
+    private ICollectionView? categoriesView;
 
     public SuppliesPage(IServiceProvider services)
     {
@@ -34,11 +34,11 @@ public partial class SuppliesPage : Page
         supplyDate.SelectedDate = DateTime.Now;
         supplyDate.dateTextBox.Focus();
 
-        cbxCategory.PreviewLostKeyboardFocus += cbxCategory_PreviewLostKeyboardFocus;
-        cbxProduct.PreviewLostKeyboardFocus += cbxProduct_PreviewLostKeyboardFocus;
+        cbxCategory.PreviewLostKeyboardFocus += CbxCategory_PreviewLostKeyboardFocus;
+        cbxProduct.PreviewLostKeyboardFocus += CbxProduct_PreviewLostKeyboardFocus;
     }
 
-    private void cbxProduct_LostFocus(object sender, RoutedEventArgs e)
+    private void CbxProduct_LostFocus(object sender, RoutedEventArgs e)
     {
 
         if ((cbxCategory.SelectedItem is null ||
@@ -51,7 +51,7 @@ public partial class SuppliesPage : Page
         }
     }
 
-    private async void cbxProduct_GotFocus(object sender, RoutedEventArgs e)
+    private async void CbxProduct_GotFocus(object sender, RoutedEventArgs e)
     {
         cbxProduct.ItemsSource = null;
         cbxProduct.IsDropDownOpen = true;
@@ -126,48 +126,6 @@ public partial class SuppliesPage : Page
         {
             MessageBox.Show($"Server bilan ulanishda xatolik: {ex.Message}", "Xatolik",
                 MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-
-    private void tbxRollCount_GotFocus(object sender, RoutedEventArgs e)
-    {
-        try
-        {
-            if (cbxProduct.SelectedItem is null && !string.IsNullOrWhiteSpace(cbxProduct.Text))
-            {
-                string newProductName = cbxProduct.Text.Trim();
-
-                if (cbxProduct.ItemsSource is List<Product> products && !products.Any(p =>
-                        p.Name.Equals(newProductName, StringComparison.OrdinalIgnoreCase)))
-                {
-                    var result = MessageBox.Show(
-                        $"\"{newProductName}\" nomli mahsulot mavjud emas.\n" +
-                        "Yangi mahsulot yaratmoqchimisiz?",
-                        "Yangi mahsulot",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question);
-
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        tbxPerRollCount.Focus(); // Keyingi textboxga o'tadi
-                    }
-                    else
-                    {
-                        cbxProduct.Text = null;
-                        cbxProduct.Focus(); // Qaytib productga fokus beradi
-                    }
-                }
-            }
-        }
-        catch { }
-
-        if ((cbxCategory.SelectedItem is null ||
-                    cbxCategory.SelectedItem is not null) &&
-                    string.IsNullOrWhiteSpace(cbxCategory.Text) &&
-                    cbxProduct.SelectedItem is not null)
-        {
-            var categorytId = (cbxProduct.SelectedItem as Product)!.CategoryId;
-            cbxCategory.SelectedItem = _allCategories.FirstOrDefault(a => a.Id == categorytId);
         }
     }
 
@@ -392,7 +350,7 @@ public partial class SuppliesPage : Page
         }
         return [];
     }
-    private async void cbxCategory_GotFocus(object sender, RoutedEventArgs e)
+    private async void CbxCategory_GotFocus(object sender, RoutedEventArgs e)
     {
         _allCategories = await LoadCategoriesAsync();
 
@@ -401,13 +359,13 @@ public partial class SuppliesPage : Page
 
         cbxCategory.IsDropDownOpen = true;
     }
-    private void cbxCategory_LostFocus(object sender, RoutedEventArgs e)
+    private void CbxCategory_LostFocus(object sender, RoutedEventArgs e)
     {
         cbxCategory.IsDropDownOpen = false;
 
     }
 
-    private void cbxCategory_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    private void CbxCategory_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
         try
         {
@@ -439,7 +397,7 @@ public partial class SuppliesPage : Page
         }
     }
 
-    private void cbxProduct_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    private void CbxProduct_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
         ComboBoxHelper.BeforeUpdate(sender, e, "Mahsulot nomi", true);
     }

@@ -1,11 +1,7 @@
 ﻿namespace VoltStream.WPF.Commons;
-using System.ComponentModel;
 
-public abstract class ViewModelBase : INotifyPropertyChanged
+using CommunityToolkit.Mvvm.ComponentModel;
+
+public abstract class ViewModelBase : ObservableObject
 {
-    public event PropertyChangedEventHandler PropertyChanged;
-    protected void OnPropertyChanged(string propertyName)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
 }

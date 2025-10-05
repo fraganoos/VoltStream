@@ -2,17 +2,16 @@
 
 using ApiServices.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Windows;
 using VoltStream.WPF.Customer;
 using VoltStream.WPF.LoginPages.Models;
 using VoltStream.WPF.LoginPages.Views;
 using VoltStream.WPF.Sales.Views;
 
-/// <summary>
-/// Interaction logic for App.xaml
-/// </summary>
 public partial class App : Application
 {
+    public IServiceProvider? Services { get; private set; }
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -20,45 +19,22 @@ public partial class App : Application
 
         var services = new ServiceCollection();
 
-        // ApiService’dan API sozlamalarini olish
+        // ✅ API konfiguratsiyasi
         ApiService.ConfigureServices(services, "https://localhost:7287/api");
 
-        // WPF xizmatlarini qo‘shish
+        // ✅ ViewModel va View'larni ro‘yxatga olish
         services.AddSingleton<LoginViewModel>();
         services.AddSingleton<LoginWindow>();
-
-        services.AddSingleton<MainWindow>();
         services.AddSingleton<MainViewModel>();
+        services.AddTransient<MainWindow>();
         services.AddTransient<SalesPage>();
         services.AddTransient<CustomerWindow>();
 
-        // Extension method ishlaydi
-        var serviceProvider = services.BuildServiceProvider();
+        // ✅ DI konteynerni yaratish
+        Services = services.BuildServiceProvider();
 
-        var loginViewModel = serviceProvider.GetRequiredService<LoginViewModel>();
-        var loginWindow = serviceProvider.GetRequiredService<LoginWindow>();
-        loginWindow.DataContext = loginViewModel;
-
-        // ✅ Login muvaffaqiyatli bo‘lsa, LoginWindow yopilib MainWindow ochiladi
-        loginViewModel.LoginSucceeded += () =>
-        {
-            loginWindow.Dispatcher.Invoke(() =>
-            {
-
-                var mainWindow = serviceProvider.GetRequiredService<MainWindow>();
-                mainWindow.DataContext = serviceProvider.GetRequiredService<MainViewModel>();
-                mainWindow.Show();
-                loginWindow.Close();
-            });
-        };
-
-        loginWindow.Show();
-
-
-        //var mainWindow = new MainWindow
-        //{
-        //    DataContext = serviceProvider.GetService<MainViewModel>()
-        //};
-        //mainWindow.Show();
+        // ⚙️ Login qismini hozircha o‘tkazamiz (agar kerak bo‘lsa qayta qo‘shamiz)
+        var mainWindow = Services.GetRequiredService<MainWindow>();
+        mainWindow.Show();
     }
 }

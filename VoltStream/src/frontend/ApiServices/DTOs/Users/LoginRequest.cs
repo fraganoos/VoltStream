@@ -1,4 +1,5 @@
 ﻿namespace ApiServices.DTOs.Users;
+
 public class LoginRequest
 {
     public long Id { get; set; }

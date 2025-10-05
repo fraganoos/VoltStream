@@ -1,10 +1,10 @@
-﻿namespace VoltStream.WPF.Commons.Utils;
-using System;
+﻿namespace VoltStream.WPF.Commons.Converters;
+
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-public class InvertibleBooleanToVisibility : IValueConverter
+public class InverseBooleanToVisibilityConverter : IValueConverter
 {
     public bool Invert { get; set; } = false;
 

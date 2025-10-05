@@ -3,17 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:VoltStream.WPF"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
-        xmlns:viewmodels="clr-namespace:VoltStream.WPF"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Title="MainWindow"
         Height="700"
         Width="1300">
-    <Window.DataContext>
-        <viewmodels:MainViewModel />
-    </Window.DataContext>
+
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -22,6 +18,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
+
     <Border>
         <Grid>
             <Grid.ColumnDefinitions>
@@ -38,14 +35,13 @@
                         Panel.ZIndex="9999"
                         Orientation="Vertical"
                         IsHitTestVisible="False" />
-            
+
             <!--Navigation menu-->
             <StackPanel Grid.Column="0"
                         Background="#0A003A">
                 <StackPanel Orientation="Horizontal"
                             Height="35"
                             Margin="15,5,0,15">
-
                     <Image Source="/Commons/Source/Images/LogoVolt.png" />
                     <TextBlock Text="VoltStream"
                                FontWeight="Medium"
@@ -53,8 +49,8 @@
                                FontSize="20"
                                Foreground="White"
                                Margin="20,0,0,0" />
-
                 </StackPanel>
+
                 <RadioButton Style="{DynamicResource menuButton}"
                              Tag="{DynamicResource color1}">
                     <StackPanel Orientation="Horizontal">
@@ -64,6 +60,7 @@
                                    Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
+
                 <RadioButton Style="{DynamicResource menuButton}"
                              Tag="{DynamicResource color2}"
                              Command="{Binding ShowSuppliesViewCommand}">
@@ -74,6 +71,7 @@
                                    Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
+
                 <RadioButton Style="{DynamicResource menuButton}"
                              Tag="{DynamicResource color3}"
                              Command="{Binding ShowSalesViewCommand}">
@@ -84,6 +82,7 @@
                                    Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
+
                 <RadioButton Style="{DynamicResource menuButton}"
                              Tag="{DynamicResource color6}"
                              Command="{Binding ShowPaymentViewCommand}">
@@ -95,13 +94,14 @@
                     </StackPanel>
                 </RadioButton>
             </StackPanel>
+
             <!--Header and content-->
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <!--Header-->
+
                 <Border Grid.Row="0"
                         Background="#0A003A">
                     <TextBlock Text="Bosh sahifa"
@@ -110,13 +110,11 @@
                                Foreground="White"
                                Margin="20,0,0,0" />
                 </Border>
-                <!--Content-->
+
                 <Frame Grid.Row="1"
                        Content="{Binding CurrentChildView}"
                        Margin="10"
-                       NavigationUIVisibility="Hidden">
-
-                </Frame>
+                       NavigationUIVisibility="Hidden" />
             </Grid>
         </Grid>
     </Border>
