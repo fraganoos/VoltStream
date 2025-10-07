@@ -1,6 +1,6 @@
-﻿namespace VoltStream.Application.Features.Users.DTOs;
+﻿namespace ApiServices.DTOs.Users;
 
-public record UserDto
+public record User
 {
     public long Id { get; set; }
     public string Username { get; set; } = string.Empty;

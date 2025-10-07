@@ -8,19 +8,19 @@ using Refit;
 public interface IProductsApi
 {
     [Post("/products")]
-    Task<ApiResponse<Product>> CreateProductAsync([Body] Product productCreate);
+    Task<ApiResponse<Product>> CreateAsync([Body] Product productCreate);
 
     [Put("/products")]
-    Task<ApiResponse<Product>> UpdateProductAsync([Body] Product productUpdate);
+    Task<ApiResponse<Product>> UpdateAsync([Body] Product productUpdate);
 
     [Delete("/products/{id}")]
-    Task<ApiResponse<string>> DeleteProductAsync(long id);
+    Task<ApiResponse<string>> DeleteAsync(long id);
 
     [Get("/products/{id}")]
-    Task<ApiResponse<Product>> GetByIdProductAsync(long id);
+    Task<ApiResponse<Product>> GetByIdAsync(long id);
 
     [Get("/products")]
-    Task<ApiResponse<Response<List<Product>>>> GetAllProductsAsync();
+    Task<ApiResponse<Response<List<Product>>>> GetAllAsync();
     [Get("/products/categoryId={Id}")]
-    Task<ApiResponse<Response<List<Product>>>> GetAllProductsByCategoryIdAsync(long id);
+    Task<ApiResponse<Response<List<Product>>>> GetAllByCategoryIdAsync(long id);
 }

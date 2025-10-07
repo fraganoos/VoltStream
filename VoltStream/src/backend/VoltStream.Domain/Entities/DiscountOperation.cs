@@ -2,7 +2,7 @@
 
 public class DiscountOperation : Auditable
 {
-    public DateTimeOffset Date { get; set; }
+    public DateTime Date { get; set; }
     public string Description { get; set; } = string.Empty;
     public decimal Summa { get; set; }
     public bool IsDiscountUsed { get; set; }

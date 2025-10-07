@@ -25,9 +25,12 @@ public partial class App : Application
         // ✅ ViewModel va View'larni ro‘yxatga olish
         services.AddSingleton<LoginViewModel>();
         services.AddSingleton<LoginWindow>();
+
         services.AddSingleton<MainViewModel>();
         services.AddTransient<MainWindow>();
+
         services.AddTransient<SalesPage>();
+
         services.AddTransient<CustomerWindow>();
 
         // ✅ DI konteynerni yaratish

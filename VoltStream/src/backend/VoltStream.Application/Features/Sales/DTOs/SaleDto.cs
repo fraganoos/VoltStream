@@ -3,10 +3,10 @@
 using VoltStream.Application.Features.CustomerOperations.DTOs;
 using VoltStream.Application.Features.Customers.DTOs;
 
-public class SalesDto
+public class SaleDto
 {
     long Id { get; set; }
-    public DateTimeOffset OperationDate { get; set; } // operation kuni
+    public DateTime OperationDate { get; set; } // operation kuni
     public decimal CountRoll { get; set; }    // jami rulonlar soni
     public decimal TotalQuantity { get; set; } // jami metr
     public decimal Summa { get; set; } // jami summa

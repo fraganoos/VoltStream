@@ -15,7 +15,8 @@ public class SaleMappingProfile : Profile
         CreateMap<CreateSaleCommand, CustomerOperation>()
             .ForMember(dest => dest.Id, opt => opt.Ignore());
 
-        CreateMap<Sale, SalesDto>();
+        CreateMap<Sale, SaleDto>();
         CreateMap<SaleItem, SaleItemDto>();
+        CreateMap<SaleItemCreateDto, SaleItem>();
     }
 }

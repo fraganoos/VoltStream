@@ -10,15 +10,15 @@ using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Sales.DTOs;
 using VoltStream.Domain.Entities;
 
-public record GetSaleByIdQuery(long Id) : IRequest<SalesDto>;
+public record GetSaleByIdQuery(long Id) : IRequest<SaleDto>;
 
 public class GetSaleByIdQueryHandler(
     IAppDbContext context,
     IMapper mapper)
-    : IRequestHandler<GetSaleByIdQuery, SalesDto>
+    : IRequestHandler<GetSaleByIdQuery, SaleDto>
 {
-    public async Task<SalesDto> Handle(GetSaleByIdQuery request, CancellationToken cancellationToken)
-        => mapper.Map<SalesDto>(await context.Sales
+    public async Task<SaleDto> Handle(GetSaleByIdQuery request, CancellationToken cancellationToken)
+        => mapper.Map<SaleDto>(await context.Sales
             .Include(sale => sale.SaleItems)
             .Include(s => s.CustomerOperation)
             .FirstOrDefaultAsync(s => s.Id == request.Id, cancellationToken))

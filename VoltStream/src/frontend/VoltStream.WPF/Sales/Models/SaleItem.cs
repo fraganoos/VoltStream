@@ -20,4 +20,5 @@ public partial class SaleItem : ViewModelBase
     [ObservableProperty] private decimal? perDiscount;
     [ObservableProperty] private decimal? discount;
     [ObservableProperty] private decimal? finalSumProduct;
+
 }

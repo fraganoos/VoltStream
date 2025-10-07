@@ -7,7 +7,7 @@ using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
 public record CreateSupplyCommand(
-    DateTimeOffset OperationDate,
+    DateTime OperationDate,
     long CategoryId,
     string CategoryName,
     long ProductId,
@@ -92,7 +92,6 @@ public class CreateSupplyCommandHandler(
         supply.ProductId = newProductId;
         context.Supplies.Add(supply);
 
-        await context.SaveAsync(cancellationToken);
         await context.CommitTransactionAsync(cancellationToken);
         return supply.Id;
     }

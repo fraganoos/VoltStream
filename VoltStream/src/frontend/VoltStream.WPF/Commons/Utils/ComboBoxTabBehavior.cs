@@ -4,6 +4,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
+
+// To Do Combobox dropdown closega tekshiruv qo'yish kerak. review va refactor qilish kerak
 public static class ComboBoxTabBehavior
 {
     public static readonly DependencyProperty EnableTabOnSelectProperty =
@@ -58,8 +60,6 @@ public static class ComboBoxTabBehavior
             ClearComboBoxState(comboBox);
         }
     }
-
-
 
     #region State per ComboBox
     private class State
