@@ -4,10 +4,10 @@ using VoltStream.Domain.Enums;
 
 public class CustomerOperation : Auditable
 {
-    public long CustomerId { get; set; }
-    public decimal Summa { get; set; }
+    public decimal Amount { get; set; }
     public OperationType OperationType { get; set; }
     public string Description { get; set; } = string.Empty;
 
-    public Customer Customer { get; set; } = default!;
+    public long AccountId { get; set; }
+    public Account Account { get; set; } = default!;
 }

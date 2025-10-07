@@ -16,66 +16,108 @@ public class DeleteSaleCommandHandler(
 {
     public async Task<bool> Handle(DeleteSaleCommand request, CancellationToken cancellationToken)
     {
-        var sale = await context.Sales
-            .Include(s => s.CustomerOperation)
-            .Include(s => s.Customer)
-                .ThenInclude(c => c.Account)
-            .Include(s => s.Discount)
-            .Include(s => s.SaleItems)
-            .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
-            ?? throw new NotFoundException(nameof(Sale), nameof(request.Id), request.Id);
-
-        var warehouse = await context.Warehouses
-            .Include(wh => wh.Items)
-            .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new NotFoundException(nameof(Warehouse));
-
-
-        foreach (var item in sale.SaleItems)
-        {
-            var residue = warehouse.Items.FirstOrDefault(r => r.ProductId == item.ProductId && r.QuantityPerRoll == item.QuantityPerRoll)
-                ?? throw new NotFoundException(nameof(WarehouseItem), nameof(item.Id), item.Id);
-
-            var countRoll = (int)item.TotalQuantity / item.QuantityPerRoll;
-            var residueItem = item.TotalQuantity % item.QuantityPerRoll;
-
-            residue.CountRoll += countRoll;
-            residue.TotalQuantity += item.TotalQuantity - residueItem;
-
-            if (residueItem > 0)
-            {
-                var existItem = await context.WarehouseItems.FirstOrDefaultAsync(i => i.ProductId == item.ProductId && i.QuantityPerRoll == residueItem, cancellationToken);
-
-                if (existItem is null)
-                    context.WarehouseItems.Add(new()
-                    {
-                        CountRoll = 1,
-                        ProductId = item.ProductId,
-                        QuantityPerRoll = residueItem,
-                        DiscountPercent = item.DiscountPersent,
-                        Price = item.Price,
-                        TotalQuantity = residueItem,
-                        Warehouse = warehouse
-                    });
-                else
-                {
-                    existItem.CountRoll += 1;
-                    existItem.DiscountPercent = item.DiscountPersent;
-                    existItem.Price = item.Price;
-                    existItem.TotalQuantity += residueItem;
-                }
-            }
-        }
-
-
         await context.BeginTransactionAsync(cancellationToken);
 
-        sale.Customer.Account.CurrentSumm += sale.Summa;
-        sale.Customer.Account.DiscountSumm -= sale.Discount;
+        try
+        {
+            var sale = await GetSaleAsync(request.Id, cancellationToken);
+            var warehouse = await GetWarehouseAsync(cancellationToken);
+            var account = GetSaleAccount(sale);
+
+            await RevertSaleStockAsync(sale, warehouse, cancellationToken);
+
+            // Accountni revert qilish faqat IsApplied = false bo'lsa
+            if (!sale.DiscountOperation.IsApplied)
+            {
+                account.Balance += sale.Amount;
+                account.Discount -= sale.Discount;
+            }
+
+            MarkSaleAsDeleted(sale);
+
+            return await context.CommitTransactionAsync(cancellationToken);
+        }
+        catch
+        {
+            await context.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+    }
+
+    private async Task<Sale> GetSaleAsync(long saleId, CancellationToken cancellationToken)
+    {
+        return await context.Sales
+            .Include(s => s.CustomerOperation)
+            .Include(s => s.Customer)
+                .ThenInclude(c => c.Accounts)
+            .Include(s => s.DiscountOperation)
+            .Include(s => s.SaleItems)
+            .FirstOrDefaultAsync(s => s.Id == saleId, cancellationToken)
+            ?? throw new NotFoundException(nameof(Sale), nameof(saleId), saleId);
+    }
+
+    private async Task<Warehouse> GetWarehouseAsync(CancellationToken cancellationToken)
+    {
+        return await context.Warehouses
+            .Include(w => w.Stocks)
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException(nameof(Warehouse));
+    }
+
+    private Account GetSaleAccount(Sale sale)
+    {
+        var account = sale.Customer.Accounts.FirstOrDefault(a => a.CurrencyId == sale.CurrencyId)
+            ?? throw new ConflictException("Mijoz uchun tegishli currency account topilmadi");
+        return account;
+    }
+
+    private async Task RevertSaleStockAsync(Sale sale, Warehouse warehouse, CancellationToken cancellationToken)
+    {
+        foreach (var item in sale.SaleItems)
+        {
+            var residue = warehouse.Stocks.FirstOrDefault(r => r.ProductId == item.ProductId && r.LengthPerRoll == item.LengthPerRoll)
+                ?? throw new NotFoundException(nameof(WarehouseStock), nameof(item.Id), item.Id);
+
+            var countRoll = (int)item.TotalLength / item.LengthPerRoll;
+            var residueItem = item.TotalLength % item.LengthPerRoll;
+
+            residue.RollCount += countRoll;
+            residue.TotalLength += item.TotalLength - residueItem;
+
+            if (residueItem > 0)
+                await AddOrUpdateResidueItemAsync(item, residueItem, warehouse, cancellationToken);
+        }
+    }
+
+    private async Task AddOrUpdateResidueItemAsync(SaleItem item, decimal residueItem, Warehouse warehouse, CancellationToken cancellationToken)
+    {
+        var existItem = await context.WarehouseStocks
+            .FirstOrDefaultAsync(i => i.ProductId == item.ProductId && i.LengthPerRoll == residueItem, cancellationToken);
+
+        if (existItem is null)
+            context.WarehouseStocks.Add(new WarehouseStock
+            {
+                RollCount = 1,
+                ProductId = item.ProductId,
+                LengthPerRoll = residueItem,
+                DiscountRate = item.DiscountRate,
+                UnitPrice = item.UnitPrice,
+                TotalLength = residueItem,
+                Warehouse = warehouse
+            });
+        else
+        {
+            existItem.RollCount += 1;
+            existItem.DiscountRate = item.DiscountRate;
+            existItem.UnitPrice = item.UnitPrice;
+            existItem.TotalLength += residueItem;
+        }
+    }
+
+    private void MarkSaleAsDeleted(Sale sale)
+    {
         sale.IsDeleted = true;
         sale.CustomerOperation.IsDeleted = true;
         sale.DiscountOperation.IsDeleted = true;
-
-        return await context.CommitTransactionAsync(cancellationToken);
     }
 }

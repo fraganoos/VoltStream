@@ -1,17 +1,19 @@
 ﻿namespace VoltStream.Application.Features.Payments.DTOs;
 
+using VoltStream.Application.Features.Currencies.DTOs;
 using VoltStream.Domain.Enums;
 
-public record PaymentDTO
+public record PaymentDto
 {
     public long Id { get; set; }
-    public DateTimeOffset PaidDate { get; set; }
-    public long CustomerId { get; set; }
-    public PaymentType PaymentType { get; set; }
-    public decimal Summa { get; set; }
-    public CurrencyType CurrencyType { get; set; } = default!;
-    public decimal Kurs { get; set; }
-    public decimal DefaultSumm { get; set; }
-    public string Description { get; set; } = null!;
+    public DateTime PaidAt { get; set; }
+    public PaymentType Type { get; set; }
+    public decimal Amount { get; set; }
+    public decimal ExchangeRate { get; set; }
+    public decimal NetAmount { get; set; }
+    public string Description { get; set; } = string.Empty;
     public long CustomerOperationId { get; set; }
+
+    public long CurrencyId { get; set; }
+    public CurrencyDto Currency { get; set; } = default!;
 }

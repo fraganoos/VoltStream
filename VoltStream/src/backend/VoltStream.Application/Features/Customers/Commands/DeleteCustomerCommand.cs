@@ -16,21 +16,39 @@ public class DeleteCustomerCommandHandler(
 {
     public async Task<bool> Handle(DeleteCustomerCommand request, CancellationToken cancellationToken)
     {
+        // Mijozni olish va accountlarini yuklash
         var customer = await context.Customers
-            .Include(c => c.Account)
-            .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken)
+            .Include(c => c.Accounts)
+            .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Customer), nameof(request.Id), request.Id);
 
-        if (customer.Account.CurrentSumm > 0)
-            throw new ForbiddenException($"Mijoz haqdor: {customer.Account.CurrentSumm}");
-        else if (customer.Account.CurrentSumm < 0)
-            throw new ForbiddenException($"Mijoz qarzdor: {customer.Account.CurrentSumm}");
+        // Accountlar bo'yicha balans va chegirma tekshirish
+        foreach (var account in customer.Accounts)
+        {
+            if (account.Balance > 0)
+                throw new ForbiddenException($"Mijoz haqdor: {account.Balance}");
+            if (account.Balance < 0)
+                throw new ForbiddenException($"Mijoz qarzdor: {account.Balance}");
+            if (account.Discount > 0)
+                throw new ForbiddenException($"Mijozda chegirma mavjud: {account.Discount}");
+        }
 
-        if (customer.Account.DiscountSumm > 0)
-            throw new ForbiddenException($"Mijozda chegirma mavjud: {customer.Account.DiscountSumm}");
+        await context.BeginTransactionAsync(cancellationToken);
 
-        customer.IsDeleted = true;
-        customer.Account.IsDeleted = true;
-        return await context.SaveAsync(cancellationToken) > 0;
+        try
+        {
+            // Soft delete bajarish
+            customer.IsDeleted = true;
+            foreach (var account in customer.Accounts)
+                account.IsDeleted = true;
+
+            var result = await context.CommitTransactionAsync(cancellationToken);
+            return result;
+        }
+        catch
+        {
+            await context.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
     }
 }

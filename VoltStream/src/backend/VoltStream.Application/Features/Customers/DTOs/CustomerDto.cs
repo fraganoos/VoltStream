@@ -11,7 +11,7 @@ public record CustomerDto
     public string? Address { get; set; }
     public string? Description { get; set; }
 
-    public AccountDto Account { get; set; } = default!;
+    public ICollection<AccountDto> Accounts { get; set; } = default!;
     public ICollection<CustomerOperationDto> CustomerOperations { get; set; } = default!;
     public ICollection<DiscountOperationDto> DiscountOperations { get; set; } = default!;
 }

@@ -13,10 +13,10 @@ public class PaymentMapperProfile : Profile
 
         CreateMap<UpdatePaymentCommand, CustomerOperation>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Summa, opt => opt.MapFrom(src => src.DefaultSumm));
+            .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.NetAmount));
 
         CreateMap<CreatePaymentCommand, CustomerOperation>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.Summa, opt => opt.MapFrom(src => src.DefaultSumm));
+            .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.NetAmount));
     }
 }

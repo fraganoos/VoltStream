@@ -1,4 +1,4 @@
-﻿namespace VoltStream.Application.Features.WarehouseItems.Queries;
+﻿namespace VoltStream.Application.Features.WarehouseStocks.Queries;
 
 using AutoMapper;
 using MediatR;
@@ -15,6 +15,6 @@ public class WarehouseItemFilterQueryHandler(
     IMapper mapper) : IRequestHandler<WarehouseItemFilterQuery, IReadOnlyCollection<WarehouseItemDto>>
 {
     public async Task<IReadOnlyCollection<WarehouseItemDto>> Handle(WarehouseItemFilterQuery request, CancellationToken cancellationToken)
-        => mapper.Map<IReadOnlyCollection<WarehouseItemDto>>(await context.WarehouseItems
+        => mapper.Map<IReadOnlyCollection<WarehouseItemDto>>(await context.WarehouseStocks
             .ToPagedListAsync(request, writer, cancellationToken));
 }

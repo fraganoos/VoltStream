@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using VoltStream.Application;
 using VoltStream.Infrastructure;
 using VoltStream.WebApi.Conventions;
+using VoltStream.WebApi.Extensions;
 
 public static class DependencyInjection
 {
@@ -47,5 +48,7 @@ public static class DependencyInjection
             .AllowAnyHeader());
 
         app.UseAuthorization();
+
+        app.ApplyMigrations();
     }
 }

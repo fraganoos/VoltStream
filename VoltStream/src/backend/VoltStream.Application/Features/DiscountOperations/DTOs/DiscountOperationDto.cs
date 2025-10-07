@@ -7,10 +7,10 @@ public record DiscountOperationDto
     public long Id { get; set; }
     public DateTime Date { get; set; }
     public string Description { get; set; } = string.Empty;
-    public decimal Summa { get; set; }
-    public bool IsDiscountUsed { get; set; }
-    public decimal DiscountSumm { get; set; }
+    public decimal Amount { get; set; }
+    public bool IsApplied { get; set; }
+    public decimal DiscountAmount { get; set; }
 
-    public long AccountId { get; set; }
-    public Account Account { get; set; } = default!;
+    public long CustomerId { get; set; }
+    public Customer Customer { get; set; } = default!;
 }

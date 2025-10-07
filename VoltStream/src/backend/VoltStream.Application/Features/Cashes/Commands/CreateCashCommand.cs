@@ -13,7 +13,6 @@ public class CreateCashCommandHandler(
 {
     public async Task<long> Handle(CreateCashCommand request, CancellationToken cancellationToken)
     {
-
         var cash = mapper.Map<Cash>(request);
         context.Cashes.Add(cash);
         await context.SaveAsync(cancellationToken);

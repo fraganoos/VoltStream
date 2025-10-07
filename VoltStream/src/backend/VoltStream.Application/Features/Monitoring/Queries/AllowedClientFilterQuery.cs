@@ -18,6 +18,6 @@ public class AllowedClientFilterQueryHandler(
     : IRequestHandler<AllowedClientFilterQuery, IReadOnlyCollection<AllowedClient>>
 {
     public async Task<IReadOnlyCollection<AllowedClient>> Handle(AllowedClientFilterQuery request, CancellationToken ct)
-        => mapper.Map<IReadOnlyCollection<AllowedClient>>(await context.WarehouseItems
+        => mapper.Map<IReadOnlyCollection<AllowedClient>>(await context.WarehouseStocks
                  .ToPagedListAsync(request, writer, ct));
 }

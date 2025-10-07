@@ -5,11 +5,11 @@ public class SaleItemCreateDto
     public long Id { get; set; }
     public long SaleId { get; set; }
     public long ProductId { get; set; }
-    public decimal CountRoll { get; set; }  // rulon soni
-    public decimal QuantityPerRoll { get; set; }  //rulon uzunligi
-    public decimal TotalQuantity { get; set; } // jami uzunlik
-    public decimal Price { get; set; } // 1 metr narxi
-    public decimal DiscountPersent { get; set; }
-    public decimal Discount { get; set; }
-    public decimal TotalSumm { get; set; } // jami summa
+    public decimal RollCount { get; set; }  // entity: SaleItem.RollCount
+    public decimal LengthPerRoll { get; set; }  // entity: SaleItem.LengthPerRoll
+    public decimal TotalLength { get; set; } // entity: SaleItem.TotalLength
+    public decimal UnitPrice { get; set; } // entity: SaleItem.UnitPrice
+    public decimal DiscountRate { get; set; } // entity: SaleItem.DiscountRate
+    public decimal DiscountAmount { get; set; } // entity: SaleItem.DiscountAmount
+    public decimal TotalAmount { get; set; } // entity: SaleItem.TotalAmount
 }

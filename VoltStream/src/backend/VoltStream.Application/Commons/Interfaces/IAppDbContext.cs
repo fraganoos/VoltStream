@@ -6,7 +6,7 @@ using VoltStream.Domain.Entities;
 
 public interface IAppDbContext
 {
-    DbSet<AllowedClient> AllowedClients { get; set; }
+    DbSet<AllowedClient> AllowedClients { get; }
     DbSet<Product> Products { get; }
     DbSet<Category> Categories { get; }
     DbSet<Payment> Payments { get; }
@@ -17,11 +17,12 @@ public interface IAppDbContext
     DbSet<Cash> Cashes { get; }
     DbSet<Account> Accounts { get; }
     DbSet<Supply> Supplies { get; }
-    DbSet<WarehouseItem> WarehouseItems { get; }
+    DbSet<WarehouseStock> WarehouseStocks { get; }
     DbSet<Warehouse> Warehouses { get; }
     DbSet<DiscountOperation> DiscountsOperations { get; }
     DbSet<CashOperation> CashOperations { get; }
     DbSet<User> Users { get; }
+    DbSet<Currency> Currencies { get; }
 
     Task<int> SaveAsync(CancellationToken cancellationToken);
 

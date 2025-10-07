@@ -7,16 +7,14 @@ using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
 public record CreateSupplyCommand(
-    DateTime OperationDate,
-    long CategoryId,
+    DateTime Date,
     string CategoryName,
-    long ProductId,
     string ProductName,
-    decimal CountRoll,
-    decimal QuantityPerRoll,
-    decimal TotalQuantity,
-    decimal Price,
-    decimal DiscountPercent)
+    decimal RollCount,
+    decimal LengthPerRoll,
+    decimal TotalLength,
+    decimal UnitPrice,
+    decimal DiscountRate)
     : IRequest<long>;
 
 public class CreateSupplyCommandHandler(
@@ -26,73 +24,90 @@ public class CreateSupplyCommandHandler(
 {
     public async Task<long> Handle(CreateSupplyCommand request, CancellationToken cancellationToken)
     {
-        var warehouse = await context.Warehouses
-            .Include(w => w.Items)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (warehouse is null)
-        {
-            context.Warehouses.Add(warehouse = new());
-            warehouse.Items = [];
-        }
-
         await context.BeginTransactionAsync(cancellationToken);
 
-        long newCategoryId = request.CategoryId;
-        if (request.CategoryId <= 0)
+        try
         {
-            var category = new Category()
-            {
-                Name = request.CategoryName.Trim(),
-                NormalizedName = request.CategoryName.Trim().ToUpper(),
-            };
-            context.Categories.Add(category);
-            await context.SaveAsync(cancellationToken);
-            newCategoryId = category.Id;
-        }
+            // Ombor olish yoki yaratish
+            var warehouse = await context.Warehouses
+                .Include(w => w.Stocks)
+                .FirstOrDefaultAsync(cancellationToken);
 
-        long newProductId = request.ProductId;
-        if (request.ProductId <= 0)
+            if (warehouse is null)
+            {
+                warehouse = new Warehouse();
+                context.Warehouses.Add(warehouse);
+                await context.SaveAsync(cancellationToken);
+            }
+
+            // Category tekshirish/yaratish
+            var category = await context.Categories
+                .FirstOrDefaultAsync(c => c.NormalizedName == request.CategoryName.Trim().ToUpper(), cancellationToken);
+
+            if (category is null)
+            {
+                category = new Category
+                {
+                    Name = request.CategoryName.Trim(),
+                    NormalizedName = request.CategoryName.Trim().ToUpper()
+                };
+                context.Categories.Add(category);
+                await context.SaveAsync(cancellationToken);
+            }
+
+            // Product tekshirish/yaratish
+            var product = await context.Products
+                .FirstOrDefaultAsync(p => p.NormalizedName == request.ProductName.Trim().ToUpper(), cancellationToken);
+
+            if (product is null)
+            {
+                product = new Product
+                {
+                    Name = request.ProductName.Trim(),
+                    NormalizedName = request.ProductName.Trim().ToUpper(),
+                    CategoryId = category.Id
+                };
+                context.Products.Add(product);
+                await context.SaveAsync(cancellationToken);
+            }
+
+            // WarehouseStock tekshirish/yangilash
+            var stock = warehouse.Stocks.FirstOrDefault(ws =>
+                ws.ProductId == product.Id && ws.LengthPerRoll == request.LengthPerRoll);
+
+            if (stock is null)
+            {
+                warehouse.Stocks.Add(new WarehouseStock
+                {
+                    ProductId = product.Id,
+                    Warehouse = warehouse,
+                    RollCount = request.RollCount,
+                    LengthPerRoll = request.LengthPerRoll,
+                    TotalLength = request.TotalLength,
+                    UnitPrice = request.UnitPrice,
+                    DiscountRate = request.DiscountRate
+                });
+            }
+            else
+            {
+                stock.RollCount += request.RollCount;
+                stock.TotalLength += request.TotalLength;
+                stock.UnitPrice = request.UnitPrice;
+                stock.DiscountRate = request.DiscountRate;
+            }
+
+            // Supply yaratish
+            var supply = mapper.Map<Supply>(request);
+            supply.ProductId = product.Id;
+            context.Supplies.Add(supply);
+
+            await context.CommitTransactionAsync(cancellationToken);
+            return supply.Id;
+        }
+        catch
         {
-            var product = new Product()
-            {
-                Name = request.ProductName.Trim(),
-                NormalizedName = request.ProductName.Trim().ToUpper(),
-                CategoryId = newCategoryId
-            };
-            context.Products.Add(product);
-            await context.SaveAsync(cancellationToken);
-            newProductId = product.Id;
+            await context.RollbackTransactionAsync(cancellationToken);
+            throw;
         }
-
-
-        var warehouseItem = warehouse.Items.FirstOrDefault(wh
-            => wh.ProductId == newProductId && wh.QuantityPerRoll == request.QuantityPerRoll);
-
-
-        if (warehouseItem is null)
-            warehouse.Items.Add(new WarehouseItem()
-            {
-                CountRoll = request.CountRoll,
-                DiscountPercent = request.DiscountPercent,
-                Price = request.Price,
-                ProductId = newProductId,
-                QuantityPerRoll = request.QuantityPerRoll,
-                TotalQuantity = request.TotalQuantity,
-            });
-        else
-        {
-            warehouseItem.CountRoll += request.CountRoll;
-            warehouseItem.TotalQuantity += request.TotalQuantity;
-            warehouseItem.Price = request.Price;
-            warehouseItem.DiscountPercent = request.DiscountPercent;
-        }
-
-        var supply = mapper.Map<Supply>(request);
-        supply.ProductId = newProductId;
-        context.Supplies.Add(supply);
-
-        await context.CommitTransactionAsync(cancellationToken);
-        return supply.Id;
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace VoltStream.Application.Features.WarehouseItems.Queries;
+﻿namespace VoltStream.Application.Features.WarehouseStocks.Queries;
 
 using AutoMapper;
 using MediatR;
@@ -18,7 +18,7 @@ internal class GetProductDetailsFromWarehouseHandler(
 {
     public async Task<List<WarehouseItemDto>> Handle(GetProductDetailsFromWarehouse request, CancellationToken cancellationToken)
     {
-        return mapper.Map<List<WarehouseItemDto>>(await context.WarehouseItems
+        return mapper.Map<List<WarehouseItemDto>>(await context.WarehouseStocks
                  .Where(w => !w.IsDeleted && w.ProductId == request.id)
                  .ToListAsync(cancellationToken))
             ?? throw new NotFoundException(nameof(Product), nameof(request.id), request.id);

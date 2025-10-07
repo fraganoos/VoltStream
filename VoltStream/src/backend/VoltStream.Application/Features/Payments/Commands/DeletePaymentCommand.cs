@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
-using VoltStream.Domain.Enums;
 
 public record DeletePaymentCommand(long Id) : IRequest<bool>;
 
@@ -15,32 +14,58 @@ public class DeletePaymentCommandHandler(
 {
     public async Task<bool> Handle(DeletePaymentCommand request, CancellationToken cancellationToken)
     {
-        var payment = await context.Payments
-            .Include(p => p.CustomerOperation)
-            .Include(p => p.CashOperation)
-            .Include(p => p.Account)
-            .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
-            ?? throw new NotFoundException(nameof(Payment), nameof(request.Id), request.Id);
-
-        var cash = await context.Cashes.FirstOrDefaultAsync(cancellationToken)
-            ?? throw new NotFoundException(nameof(Cash));
-
-        if (payment.CashOperation.CurrencyType == CurrencyType.USD &&
-            payment.CashOperation.Summa <= cash.UsdBalance)
-            cash.UsdBalance -= payment.CashOperation.Summa;
-        else if (payment.CashOperation.CurrencyType == CurrencyType.UZS &&
-            payment.CashOperation.Summa <= cash.UzsBalance)
-            cash.UzsBalance -= payment.CashOperation.Summa;
-        else
-            throw new ConflictException("Kassada mablag' yetarli emas!");
-
         await context.BeginTransactionAsync(cancellationToken);
 
-        payment.Account.CurrentSumm -= payment.Summa;
-        payment.IsDeleted = true;
-        payment.CustomerOperation.IsDeleted = true;
-        payment.CashOperation.IsDeleted = true;
+        try
+        {
+            // === 1. Paymentni barcha bog‘lamalari bilan olish ===
+            var payment = await context.Payments
+                .Include(p => p.CustomerOperation)
+                .Include(p => p.CashOperation)
+                .Include(p => p.Account)
+                .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
+                ?? throw new NotFoundException(nameof(Payment), nameof(request.Id), request.Id);
 
-        return await context.CommitTransactionAsync(cancellationToken);
+            var account = payment.Account
+                ?? throw new ConflictException("To‘lovga tegishli hisob topilmadi.");
+
+            // === 2. Agar kassa orqali to‘lov bo‘lgan bo‘lsa, kassadagi balansni kamaytirish ===
+            if (payment.Type == Domain.Enums.PaymentType.Cash)
+            {
+                var cash = await context.Cashes
+                    .FirstOrDefaultAsync(c => c.Id == payment.CashOperationId, cancellationToken)
+                    ?? throw new NotFoundException(nameof(Cash), nameof(payment.CashOperationId), payment.CashOperationId);
+
+                if (cash.Balance < payment.Amount)
+                    throw new ConflictException("Kassada mablag‘ yetarli emas!");
+
+                cash.Balance -= payment.Amount;
+            }
+
+            // === 3. Mijoz hisobidagi balansni kamaytirish ===
+            account.Balance -= payment.NetAmount;
+
+            // === 4. Payment va bog‘liq operatsiyalarni soft delete qilish ===
+            payment.IsDeleted = true;
+
+            if (payment.CustomerOperation is not null)
+                payment.CustomerOperation.IsDeleted = true;
+
+            if (payment.CashOperation is not null)
+                payment.CashOperation.IsDeleted = true;
+
+            if (payment.DiscountOperation is not null)
+                payment.DiscountOperation.IsDeleted = true;
+
+            // === 5. Saqlash va commit ===
+            await context.CommitTransactionAsync(cancellationToken);
+
+            return true;
+        }
+        catch
+        {
+            await context.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
     }
 }

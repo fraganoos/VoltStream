@@ -2,12 +2,15 @@
 
 public class Sale : Auditable
 {
-    public DateTime OperationDate { get; set; } // operation kuni
-    public decimal CountRoll { get; set; }    // jami rulonlar soni
-    public decimal TotalQuantity { get; set; } // jami metr
-    public decimal Summa { get; set; } // jami summa
+    public DateTime Date { get; set; } // operation kuni
+    public decimal RollCount { get; set; }    // jami rulonlar soni
+    public decimal Length { get; set; } // jami metr
+    public decimal Amount { get; set; } // jami summa
     public decimal Discount { get; set; } // chegirma
     public string Description { get; set; } = string.Empty;
+
+    public long CurrencyId { get; set; }
+    public Currency Currency { get; set; } = default!;
 
     public long CustomerId { get; set; }
     public Customer Customer { get; set; } = default!;

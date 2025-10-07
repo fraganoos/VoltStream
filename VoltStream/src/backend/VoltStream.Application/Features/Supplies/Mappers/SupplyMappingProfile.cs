@@ -11,8 +11,7 @@ public class SupplyMappingProfile : Profile
     {
         CreateMap<CreateSupplyCommand, Supply>();
         CreateMap<UpdateSupplyCommand, Supply>();
-        CreateMap<CreateSupplyCommand, WarehouseItem>();
-        CreateMap<Supply, SupplyDto>()
-         .ForMember(d => d.CategoryName, opt => opt.MapFrom(s => s.Product.Category.Name));
+        CreateMap<CreateSupplyCommand, WarehouseStock>();
+        CreateMap<Supply, SupplyDto>();
     }
 }

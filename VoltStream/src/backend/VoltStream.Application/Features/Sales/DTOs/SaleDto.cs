@@ -3,14 +3,14 @@
 using VoltStream.Application.Features.CustomerOperations.DTOs;
 using VoltStream.Application.Features.Customers.DTOs;
 
-public class SaleDto
+public record SaleDto
 {
-    long Id { get; set; }
-    public DateTime OperationDate { get; set; } // operation kuni
-    public decimal CountRoll { get; set; }    // jami rulonlar soni
-    public decimal TotalQuantity { get; set; } // jami metr
-    public decimal Summa { get; set; } // jami summa
-    public decimal? Discount { get; set; } // chegirma
+    public long Id { get; set; }
+    public DateTime Date { get; set; } // entity: Sale.Date
+    public decimal RollCount { get; set; }    // entity: Sale.RollCount
+    public decimal Length { get; set; } // entity: Sale.Length
+    public decimal Amount { get; set; } // entity: Sale.Amount
+    public decimal Discount { get; set; } // entity: Sale.Discount
     public string Description { get; set; } = string.Empty;
 
     public long CustomerOperationId { get; set; }
