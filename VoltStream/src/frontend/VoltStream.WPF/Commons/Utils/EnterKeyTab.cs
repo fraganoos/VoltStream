@@ -43,7 +43,7 @@ public static class EnterKeyTab
             e.Handled = true; // предотвращаем стандартное поведение
 
             // Enter-ni Tab-ga aylantirish uchun yangi KeyEventArgs yaratamiz
-            KeyEventArgs tabKeyEvent = new KeyEventArgs(
+            KeyEventArgs tabKeyEvent = new(
                 Keyboard.PrimaryDevice,
                 Keyboard.PrimaryDevice.ActiveSource,
                 0,
@@ -64,7 +64,7 @@ public static class FocusMovement
     public static void MoveFocusToElement(string elementName, DependencyObject parent)
     {
         Window window = Window.GetWindow(parent);
-        if (window != null)
+        if (window is not null)
         {
             if (window.FindName(elementName) is UIElement targetElement)
             {

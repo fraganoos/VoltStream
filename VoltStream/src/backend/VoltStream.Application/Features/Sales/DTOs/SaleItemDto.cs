@@ -1,5 +1,6 @@
 ﻿namespace VoltStream.Application.Features.Sales.DTOs;
 
+using VoltStream.Application.Features.Products.DTOs;
 using VoltStream.Domain.Entities;
 
 public class SaleItemDto
@@ -15,6 +16,5 @@ public class SaleItemDto
     public decimal Discount { get; set; }
     public decimal TotalSumm { get; set; } // jami summa
 
-    public Sale Sale { get; set; } = default!;
-    public Product Product { get; set; } = default!;
+    public ProductDTO Product { get; set; } = default!;
 }

@@ -4,7 +4,7 @@ using VoltStream.Domain.Enums;
 
 public class Payment : Auditable
 {
-    public DateTimeOffset PaidDate { get; set; } // to'langan sana
+    public DateTime PaidDate { get; set; } // to'langan sana
     public PaymentType PaymentType { get; set; }
     public decimal Summa { get; set; } // orginal kirim summa
     public CurrencyType CurrencyType { get; set; } = default!;

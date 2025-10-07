@@ -20,7 +20,6 @@
   <ItemGroup>
     <Folder Include="LoginPages\ViewModels\" />
     <Folder Include="Payments\Models\" />
-    <Folder Include="Sales\ViewModels\" />
     <Folder Include="Supplies\ViewModels\" />
   </ItemGroup>
 

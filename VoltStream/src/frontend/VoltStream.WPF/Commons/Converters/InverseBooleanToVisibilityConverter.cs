@@ -6,7 +6,7 @@ using System.Windows.Data;
 
 public class InverseBooleanToVisibilityConverter : IValueConverter
 {
-    public bool Invert { get; set; } = false;
+    public bool Invert { get; set; } = true;
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

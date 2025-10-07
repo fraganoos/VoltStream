@@ -1,4 +1,5 @@
 ﻿namespace VoltStream.WPF.Payments.Views;
+
 using System;
 using System.Windows.Controls;
 

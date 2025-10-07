@@ -13,7 +13,7 @@ using VoltStream.Domain.Enums;
 
 public record CreateSaleCommand(
     long CustomerId,
-    DateTimeOffset OperationDate,
+    DateTime OperationDate,
     decimal Discount,
     decimal Summa,
     string Description,
@@ -26,6 +26,7 @@ public class CreateSaleCommandHandler(
 {
     public async Task<long> Handle(CreateSaleCommand request, CancellationToken cancellationToken)
     {
+        await context.BeginTransactionAsync(cancellationToken);
         var warehouse = await context.Warehouses
             .Include(w => w.Items)
             .FirstOrDefaultAsync(cancellationToken)
@@ -76,10 +77,16 @@ public class CreateSaleCommandHandler(
             var product = context.Products.FirstOrDefault(p => p.Id == item.ProductId)
                 ?? throw new NotFoundException(nameof(Product), nameof(item.Id), item.ProductId);
 
-            description.Append($"{product.Name} - {item.TotalQuantity} metr; ");
+            description.Append($"{product.Name} - {item.TotalQuantity} metr;");
         }
 
-        await context.BeginTransactionAsync(cancellationToken);
+        var discountOperation = new DiscountOperation
+        {
+            Date = request.OperationDate,
+            DiscountSumm = request.Discount,
+            Description = $"Chegirma savdo uchun: {description}",
+            Customer = customer
+        };
 
         var sale = mapper.Map<Sale>(request);
 
@@ -91,6 +98,7 @@ public class CreateSaleCommandHandler(
         customerOperation.Customer = customer;
         customerOperation.Description = $"Savdo ID = {sale.Id}: {request.Description}. {description}".Trimmer(200);
         sale.CustomerOperation = customerOperation;
+        sale.DiscountOperation = discountOperation;
 
         context.Sales.Add(sale);
 

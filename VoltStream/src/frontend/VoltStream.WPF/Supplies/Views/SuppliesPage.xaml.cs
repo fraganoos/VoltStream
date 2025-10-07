@@ -64,7 +64,7 @@ public partial class SuppliesPage : Page
                 a.Name.Equals(cbxCategory.Text.Trim(), StringComparison.OrdinalIgnoreCase)) is not null)
         {
             // Shu category ga oid productlarni yuklash
-            var products = await productsApi.GetAllProductsByCategoryIdAsync(selectedCategory.Id);
+            var products = await productsApi.GetAllByCategoryIdAsync(selectedCategory.Id);
 
             cbxProduct.ItemsSource = products.Content!.Data ?? [];
             return;
@@ -75,7 +75,7 @@ public partial class SuppliesPage : Page
             string.IsNullOrWhiteSpace(cbxCategory.Text))
         {
             // Barcha productlarni yuklash
-            var allProducts = await productsApi.GetAllProductsAsync();
+            var allProducts = await productsApi.GetAllAsync();
             cbxProduct.ItemsSource = allProducts.Content!.Data ?? [];
             return;
         }
@@ -85,7 +85,7 @@ public partial class SuppliesPage : Page
             string.IsNullOrWhiteSpace(cbxCategory.Text))
         {
             // Barcha productlarni yuklash
-            var allProducts = await productsApi.GetAllProductsAsync();
+            var allProducts = await productsApi.GetAllAsync();
             cbxProduct.ItemsSource = allProducts.Content!.Data ?? [];
             return;
         }
@@ -335,7 +335,7 @@ public partial class SuppliesPage : Page
     {
         try
         {
-            var response = await categoriesApi.GetAllCategoriesAsync();
+            var response = await categoriesApi.GetAllAsync();
             if (response.IsSuccessStatusCode && response.Content?.Data is not null)
             {
                 return response.Content.Data;

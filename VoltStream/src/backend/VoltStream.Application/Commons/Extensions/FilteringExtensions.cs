@@ -229,9 +229,18 @@ public static class FilteringExtensions
                 }
                 else if (value.StartsWith("include:", StringComparison.OrdinalIgnoreCase))
                 {
-                    var path = value["include:".Length..].Trim();
+                    var rawPath = value["include:".Length..].Trim();
 
-                    var fullPath = $"{propName}.{path}";
+                    var segments = rawPath.Split('.');
+                    for (int i = 0; i < segments.Length; i++)
+                    {
+                        var s = segments[i];
+                        if (!string.IsNullOrEmpty(s) && char.IsLower(s[0]))
+                            segments[i] = char.ToUpperInvariant(s[0]) + s[1..];
+                    }
+
+                    var normalizedPath = string.Join('.', segments);
+                    var fullPath = $"{propName}.{normalizedPath}";
                     query = query.Include(fullPath);
                 }
             }

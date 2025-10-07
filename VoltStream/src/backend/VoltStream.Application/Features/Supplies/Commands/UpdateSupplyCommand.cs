@@ -8,7 +8,7 @@ using VoltStream.Domain.Entities;
 
 public record UpdateSupplyCommand(
     long Id,
-    DateTimeOffset OperationDate,
+    DateTime OperationDate,
     long ProductId,
     decimal CountRoll,
     decimal QuantityPerRoll,

@@ -39,7 +39,7 @@ public class CreatePaymentCommandHandler(
             context.CashOperations.Add(new CashOperation
             {
                 CurrencyType = request.CurrencyType,
-                Date = DateTimeOffset.UtcNow,
+                Date = DateTime.UtcNow,
                 Description = $"ID = {request.CustomerId}. Mijozdan kirim",
                 Summa = request.Summa
             });

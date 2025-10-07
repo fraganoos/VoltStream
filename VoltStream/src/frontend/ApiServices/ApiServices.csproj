@@ -11,12 +11,4 @@
     <PackageReference Include="Refit" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTOs\Sales\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\backend\VoltStream.Domain\VoltStream.Domain.csproj" />
-  </ItemGroup>
-
 </Project>

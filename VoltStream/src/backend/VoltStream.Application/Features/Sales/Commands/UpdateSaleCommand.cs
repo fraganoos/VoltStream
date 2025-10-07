@@ -14,7 +14,7 @@ using VoltStream.Domain.Enums;
 
 public record UpdateSaleCommand(
     long Id,
-    DateTimeOffset OperationDate,
+    DateTime OperationDate,
     long CustomerId,
     decimal TotalQuantity,
     decimal Summa,

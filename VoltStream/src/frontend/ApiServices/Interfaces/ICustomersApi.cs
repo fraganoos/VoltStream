@@ -18,14 +18,11 @@ public interface ICustomersApi
     [Delete("/customers​/{id}")]
     Task<ApiResponse<Response<bool>>> DeleteAsync(long id);
 
-    [Get("/customers​/{id}")]
+    [Get("/customers/{id}")]
     Task<ApiResponse<Response<Customer>>> GetByIdAsync(long id);
 
     [Get("/customers")]
-    Task<ApiResponse<Response<List<Customer>>>> GetAllCustomersAsync();
-
-    [Get("/customers/{id}")]
-    Task<ApiResponse<Response<Customer>>> GetCustomerByIdAsync(long id);
+    Task<ApiResponse<Response<List<Customer>>>> GetAllAsync();
 
     [Post("/customers/filter")]
     Task<ApiResponse<Response<List<Customer>>>> Filter(FilteringRequest request);
