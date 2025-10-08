@@ -17,9 +17,14 @@ public class GetAllWarehouseItemQueryHandler(
     : IRequestHandler<GetAllWarehouseItemQuery, IReadOnlyCollection<WarehouseItemDto>>
 {
     public async Task<IReadOnlyCollection<WarehouseItemDto>> Handle(GetAllWarehouseItemQuery request, CancellationToken cancellationToken)
-         => mapper.Map<IReadOnlyCollection<WarehouseItemDto>>(await context.WarehouseItems
+    {
+      var ma=  mapper.Map<IReadOnlyCollection<WarehouseItemDto>>(await context.WarehouseItems
              .Where(w => w.IsDeleted != true)
+             .Include(p => p.Product)
+             .ThenInclude(c => c.Category)
              .ToListAsync(cancellationToken));
+        return ma;
+    }
 
 }
 

@@ -22,7 +22,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+            </Grid.ColumnDefinitions>
 
                 <!-- 🧩 Mahsulot turi -->
                 <StackPanel Grid.Column="0" Margin="10" >
@@ -33,20 +33,19 @@
                                    FontSize="13"
                                    Foreground="{DynamicResource PrimaryTextColor}"
                                    Margin="3,0,0,3"/>
-                        <ComboBox x:Name="cbxCategory"
-                                  Width="200"
-                                  ItemsSource="{Binding Categories}"
-                                  SelectedItem="{Binding SelectedCategory}"
-                                  DisplayMemberPath="Name"
-                                  IsEditable="True"
-                                  FontSize="14"
-                                  Margin="0,2"
-                                  Padding="4,2"
-                                  GotFocus="cbxCategory_GotFocus"
-                                  BorderThickness="1"
-                                  BorderBrush="#ccc"
-                                  utils:ComboBoxTabBehavior.EnableTabOnSelect="True"/>
-                    </StackPanel>
+                    <ComboBox x:Name="cbxCategory"
+                              Width="200"
+                              ItemsSource="{Binding Categories}"
+                              SelectedItem="{Binding SelectedCategory}"
+                              DisplayMemberPath="Name"
+                              IsEditable="True"
+                              FontSize="14"
+                              Margin="0,2"
+                              GotFocus="cbxCategory_GotFocus"
+                              Padding="4,2"
+                              BorderThickness="1"
+                              BorderBrush="#ccc"/>
+                </StackPanel>
 
                     <!-- 🏷 Mahsulot nomi -->
                     <StackPanel  Orientation="Horizontal" Margin="5,0">
@@ -56,7 +55,7 @@
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource PrimaryTextColor}"
                                    Margin="3,0,0,3"/>
-                        <ComboBox x:Name="cbxProductName"
+                    <ComboBox x:Name="cbxProductName"
                                   Width="200"
                                   ItemsSource="{Binding Products}"
                                   SelectedItem="{Binding SelectedProduct}"
@@ -65,9 +64,9 @@
                                   FontSize="14"
                                   Margin="0,2"
                                   Padding="4,2"
+                                  GotFocus="cbxProductName_GotFocus"
                                   BorderThickness="1"
-                                  BorderBrush="#ccc"
-                                  utils:ComboBoxTabBehavior.EnableTabOnSelect="True"/>
+                                  BorderBrush="#ccc"/>
                     </StackPanel>
                 </StackPanel>
             <StackPanel Grid.Column="1"
@@ -157,14 +156,163 @@
 
             <!-- Ustunlar -->
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Mahsulot turi" Binding="{Binding Category}" Width="*"/>
-                <DataGridTextColumn Header="Nomi" Binding="{Binding Name}" Width="2*"/>
-                <DataGridTextColumn Header="Rulon uzunligi" Binding="{Binding RollLength}" Width="*"/>
-                <DataGridTextColumn Header="Rulon soni" Binding="{Binding Quantity}" Width="*"/>
-                <DataGridTextColumn Header="Jami" Binding="{Binding TotalCount}" Width="*"/>
-                <DataGridTextColumn Header="O‘lchov birligi" Binding="{Binding Unit}" Width="*"/>
-                <DataGridTextColumn Header="Narxi" Binding="{Binding Price}" Width="*"/>
-                <DataGridTextColumn Header="Umumiy summa" Binding="{Binding TotalAmount}" Width="*"/>
+                <DataGridTextColumn Header="Mahsulot turi"
+        Binding="{Binding Category}"
+        Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextAlignment" Value="Left"/>
+                            <Setter Property="Padding" Value="5,0"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Nomi"
+        Binding="{Binding Name}"
+        Width="2*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextAlignment" Value="Left"/>
+                            <Setter Property="Padding" Value="5,0"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Rulon uzunligi"
+        Binding="{Binding RollLength, StringFormat={}{0:N0}}"
+        Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextAlignment" Value="Right"/>
+                            <Setter Property="Padding" Value="5 0"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox">
+                            <Setter Property="utils:NumericTextBox.IsNumeric" Value="True"/>
+                            <Setter Property="TextAlignment" Value="Right"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Rulon soni"
+        Binding="{Binding Quantity, StringFormat={}{0:N0}}"
+        Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextAlignment" Value="Right"/>
+                            <Setter Property="Padding" Value="5 0"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox">
+                            <Setter Property="utils:NumericTextBox.IsNumeric" Value="True"/>
+                            <Setter Property="TextAlignment" Value="Right"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Jami"
+        Binding="{Binding TotalCount, StringFormat={}{0:N0}}"
+        Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextAlignment" Value="Right"/>
+                            <Setter Property="Padding" Value="5 0"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox">
+                            <Setter Property="utils:NumericTextBox.IsNumeric" Value="True"/>
+                            <Setter Property="TextAlignment" Value="Right"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="O‘lchov birligi"
+        Binding="{Binding Unit}"
+        Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextAlignment" Value="Center"/>
+                            <Setter Property="Padding" Value="5,0"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Narxi"
+        Binding="{Binding Price, StringFormat={}{0:N2}}"
+        Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextAlignment" Value="Right"/>
+                            <Setter Property="Padding" Value="5 0"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox">
+                            <Setter Property="utils:NumericTextBox.IsNumeric" Value="True"/>
+                            <Setter Property="TextAlignment" Value="Right"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn Header="Umumiy summa"
+        Binding="{Binding TotalAmount, StringFormat={}{0:N2}}"
+        Width="1.5*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextAlignment" Value="Right"/>
+                            <Setter Property="Padding" Value="5 0"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="TextBox">
+                            <Setter Property="utils:NumericTextBox.IsNumeric" Value="True"/>
+                            <Setter Property="TextAlignment" Value="Right"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
