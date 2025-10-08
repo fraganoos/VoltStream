@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Payments.Views;
+using VoltStream.WPF.Products.Views;
 using VoltStream.WPF.Sales.Views;
 using VoltStream.WPF.Supplies.Views;
 
@@ -30,4 +31,8 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void ShowPaymentView()
         => CurrentChildView = new PaymentsPage(serviceProvider);
+
+    [RelayCommand]
+    private void ShowProductView()
+    => CurrentChildView = new ProductsPage(serviceProvider);
 }
