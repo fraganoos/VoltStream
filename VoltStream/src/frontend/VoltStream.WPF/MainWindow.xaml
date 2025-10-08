@@ -93,6 +93,18 @@
                                    Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
+
+                <RadioButton Style="{DynamicResource menuButton}"
+                             Tag="{DynamicResource color8}"
+                             Command="{Binding ShowProductViewCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <fa:IconImage Icon="Boxes"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Mahsulotlar qoldig'i"
+                                   Style="{StaticResource menuButtonText}" />
+                    </StackPanel>
+                </RadioButton>
+
             </StackPanel>
 
             <!--Header and content-->
