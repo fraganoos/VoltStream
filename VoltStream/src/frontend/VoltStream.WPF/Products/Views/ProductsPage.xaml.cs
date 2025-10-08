@@ -1,6 +1,6 @@
 ﻿namespace VoltStream.WPF.Products.Views;
+
 using System.Windows.Controls;
-using VoltStream.WPF.Products.Models;
 
 
 /// <summary>
@@ -18,8 +18,13 @@ public partial class ProductsPage : Page
         DataContext = vm;
     }
 
-    private void cbxCategory_GotFocus(object sender, System.Windows.RoutedEventArgs e)
+    private async void cbxCategory_GotFocus(object sender, System.Windows.RoutedEventArgs e)
     {
+        await vm.LoadCategoriesAsync();
+    }
 
+    private async void cbxProductName_GotFocus(object sender, System.Windows.RoutedEventArgs e)
+    {
+        await vm.LoadProductsAsync();
     }
 }

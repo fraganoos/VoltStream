@@ -1,20 +1,20 @@
-﻿namespace VoltStream.Application.Features.Sales.DTOs;
-
+﻿namespace VoltStream.Application.Features.WarehouseItems.DTOs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using VoltStream.Application.Features.Products.DTOs;
-using VoltStream.Domain.Entities;
 
-public class SaleItemDto
+public record WarehouseItemDto
 {
     public long Id { get; set; }
-    public long SaleId { get; set; }
     public long ProductId { get; set; }
     public decimal CountRoll { get; set; }  // rulon soni
     public decimal QuantityPerRoll { get; set; }  //rulon uzunligi
+    public decimal Price { get; set; }
+    public decimal DiscountPercent { get; set; }
     public decimal TotalQuantity { get; set; } // jami uzunlik
-    public decimal Price { get; set; } // 1 metr narxi
-    public decimal DiscountPersent { get; set; }
-    public decimal Discount { get; set; }
-    public decimal TotalSumm { get; set; } // jami summa
-
     public ProductDto Product { get; set; } = default!;
+
 }
