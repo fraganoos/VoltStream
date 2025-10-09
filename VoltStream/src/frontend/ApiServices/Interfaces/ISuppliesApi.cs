@@ -27,6 +27,6 @@ public interface ISuppliesApi
     Task<ApiResponse<Response<List<SupplyResponse>>>> GetAllSuppliesByDateAsync([Query] DateTimeOffset date);
 
     [Post("/supplies/filter")]
-    Task<ApiResponse<Response<List<SupplyResponse>>>> Filter();
+    Task<ApiResponse<Response<List<SupplyResponse>>>> Filter(FilteringRequest request);
 
 }

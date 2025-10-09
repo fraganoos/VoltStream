@@ -13,7 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Customer;
-using VoltStream.WPF.Sales.Models;
+using VoltStream.WPF.Sales.ViewModels;
 
 /// <summary>
 /// Логика взаимодействия для SalesPage.xaml

@@ -1,6 +1,7 @@
 ﻿namespace VoltStream.WPF.Supplies.Views;
 
 using ApiServices.Interfaces;
+using ApiServices.Models;
 using ApiServices.Models.Reqiuests;
 using ApiServices.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Sales.ViewModels;
 
 public partial class SuppliesPage : Page
 {
@@ -46,7 +48,7 @@ public partial class SuppliesPage : Page
                     string.IsNullOrWhiteSpace(cbxCategory.Text) &&
                     cbxProduct.SelectedItem is not null)
         {
-            var categorytId = (cbxProduct.SelectedItem as Product)!.CategoryId;
+            var categorytId = (cbxProduct.SelectedItem as ProductViewModel)!.CategoryId;
             cbxCategory.SelectedItem = _allCategories.FirstOrDefault(a => a.Id == categorytId);
         }
     }
@@ -91,7 +93,7 @@ public partial class SuppliesPage : Page
         }
 
         // — Product combobox bo‘sh bo‘lib qoladi
-        cbxProduct.ItemsSource = new List<Product>();
+        cbxProduct.ItemsSource = new List<ProductViewModel>();
     }
 
     private async Task LoadSuppliesAsync()
@@ -108,12 +110,19 @@ public partial class SuppliesPage : Page
                     out DateTime operationDate))
             {
 
-                var response = await suppliesApi.GetAllSuppliesByDateAsync(operationDate);
+                var filter = new FilteringRequest
+                {
+                    Filters = new()
+                    {
+                        ["Date"] = [operationDate.ToString()]
+                    },
+                    Descending = true
+                };
+
+                var response = await suppliesApi.Filter(filter);
                 if (response.IsSuccessStatusCode && response.Content?.Data is not null)
                 {
-                    // OperationDate bo‘yicha teskari tartibda (eng so‘nggi birinchi)
-                    List<SupplyResponse> supplies = [.. response.Content.Data.OrderByDescending(s => s.CreatedAt)];
-                    supplyDataGrid.ItemsSource = supplies;
+                    supplyDataGrid.ItemsSource = response.Content?.Data;
                 }
                 else
                 {

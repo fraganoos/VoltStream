@@ -1,9 +1,11 @@
 ﻿namespace ApiServices.Models;
 
-public record FilteringRequest(
-    Dictionary<string, List<string>>? Filters,
-    string? Search,
-    int Page,
-    int PageSize,
-    string? SortBy,
-    bool Descending);
+public record FilteringRequest
+{
+    public Dictionary<string, List<string>>? Filters { get; set; }
+    public string? Search { get; set; }
+    public int Page { get; set; }
+    public int PageSize { get; set; }
+    public string? SortBy { get; set; }
+    public bool Descending { get; set; }
+}

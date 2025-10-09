@@ -1,10 +1,11 @@
-﻿namespace VoltStream.WPF.Sales.Models;
+﻿namespace VoltStream.WPF.Sales.ViewModels;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using VoltStream.WPF.Commons;
 
 public partial class SaleItemViewModel : ViewModelBase
 {
+    public long Id { get; set; }
     [ObservableProperty] private long categoryId;
     [ObservableProperty] private string categoryName = string.Empty;
     [ObservableProperty] private long productId;
