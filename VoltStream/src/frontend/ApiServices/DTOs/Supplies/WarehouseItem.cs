@@ -24,6 +24,7 @@ public record WarehouseItem
 
     [JsonPropertyName("totalQuantity")]
     public decimal TotalQuantity { get; set; } // jami uzunlik
+
     [JsonPropertyName("product")]
     public ProductDto Product { get; set; } = default!;
 }
