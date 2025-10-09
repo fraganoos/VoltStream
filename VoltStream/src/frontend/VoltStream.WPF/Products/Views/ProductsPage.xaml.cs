@@ -18,13 +18,4 @@ public partial class ProductsPage : Page
         DataContext = vm;
     }
 
-    private async void cbxCategory_GotFocus(object sender, System.Windows.RoutedEventArgs e)
-    {
-        await vm.LoadCategoriesAsync();
-    }
-
-    private async void cbxProductName_GotFocus(object sender, System.Windows.RoutedEventArgs e)
-    {
-        await vm.LoadProductsAsync();
-    }
 }
