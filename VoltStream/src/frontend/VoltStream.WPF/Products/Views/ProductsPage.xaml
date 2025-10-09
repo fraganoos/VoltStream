@@ -9,7 +9,7 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="ProductsPage">
 
-    <Grid Background="Azure">
+    <Grid>
         <!-- Grid struktura: 2 ta qator -->
         <Grid.RowDefinitions>
             <RowDefinition Height="100"/>
