@@ -14,8 +14,8 @@ public class Payment : Auditable
     public long CurrencyId { get; set; }
     public Currency Currency { get; set; } = default!;
 
-    public long AccountId { get; set; }
-    public Account Account { get; set; } = default!;
+    public long CustomerId { get; set; }
+    public Customer Customer { get; set; } = default!;
 
     public long CashOperationId { get; set; }
     public CashOperation CashOperation { get; set; } = default!;

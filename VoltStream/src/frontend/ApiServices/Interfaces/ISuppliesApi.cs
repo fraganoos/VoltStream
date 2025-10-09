@@ -1,31 +1,32 @@
 ﻿namespace ApiServices.Interfaces;
 
-using ApiServices.DTOs.Supplies;
 using ApiServices.Models;
+using ApiServices.Models.Reqiuests;
+using ApiServices.Models.Responses;
 using Refit;
 
 [Headers("accept: application/json")]
 public interface ISuppliesApi
 {
     [Post("/supplies")]
-    Task<ApiResponse<Supply>> CreateSupplyAsync(Supply supplyCreate);
+    Task<ApiResponse<long>> CreateSupplyAsync(SupplyRequest request);
 
     [Put("/supplies")]
-    Task<ApiResponse<Supply>> UpdateSupplyAsync([Body] Supply supplyUpdate);
+    Task<ApiResponse<bool>> UpdateSupplyAsync([Body] SupplyRequest request);
 
     [Delete("/supplies/{id}")]
-    Task<ApiResponse<string>> DeleteSupplyAsync(long id);
+    Task<ApiResponse<bool>> DeleteSupplyAsync(long id);
 
     [Get("/supplies/{id}")]
-    Task<ApiResponse<Supply>> GetByIdSupplyAsync(long id);
+    Task<ApiResponse<SupplyResponse>> GetByIdSupplyAsync(long id);
 
     [Get("/supplies")]
-    Task<ApiResponse<Response<List<Supply>>>> GetAllSuppliesAsync();
+    Task<ApiResponse<Response<List<SupplyResponse>>>> GetAllSuppliesAsync();
 
     [Get("/supplies/by-date")]
-    Task<ApiResponse<Response<List<Supply>>>> GetAllSuppliesByDateAsync([Query] DateTimeOffset date);
+    Task<ApiResponse<Response<List<SupplyResponse>>>> GetAllSuppliesByDateAsync([Query] DateTimeOffset date);
 
     [Post("/supplies/filter")]
-    Task<ApiResponse<Response<List<Supply>>>> Filter();
+    Task<ApiResponse<Response<List<SupplyResponse>>>> Filter();
 
 }

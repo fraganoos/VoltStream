@@ -17,6 +17,6 @@ public class SaleMappingProfile : Profile
 
         CreateMap<Sale, SaleDto>();
         CreateMap<SaleItem, SaleItemDto>();
-        CreateMap<SaleItemCreateDto, SaleItem>();
+        CreateMap<SaleItemCommandDto, SaleItem>();
     }
 }

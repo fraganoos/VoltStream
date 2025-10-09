@@ -62,7 +62,7 @@ public class UpdateSaleCommandHandler(
             .Include(s => s.Customer)
                 .ThenInclude(c => c.Accounts)
             .Include(s => s.Discount)
-            .Include(s => s.SaleItems)
+            .Include(s => s.Items)
             .FirstOrDefaultAsync(s => s.Id == saleId, cancellationToken)
             ?? throw new NotFoundException(nameof(Sale), nameof(saleId), saleId);
     }
@@ -90,7 +90,7 @@ public class UpdateSaleCommandHandler(
 
     private async Task RevertOldSaleAsync(Sale sale, Warehouse warehouse, Account account, CancellationToken cancellationToken)
     {
-        foreach (var item in sale.SaleItems)
+        foreach (var item in sale.Items)
         {
             var residue = warehouse.Stocks.FirstOrDefault(r => r.ProductId == item.ProductId && r.LengthPerRoll == item.LengthPerRoll)
                 ?? throw new NotFoundException(nameof(WarehouseStock), nameof(item.Id), item.Id);
@@ -145,7 +145,7 @@ public class UpdateSaleCommandHandler(
         foreach (var item in request.SaleItems)
             await ProcessSaleItemAsync(item, warehouse, descriptionBuilder, cancellationToken);
 
-        // Account update faqat IsApplied = false bo'lsa
+        // Customer update faqat IsApplied = false bo'lsa
         if (!request.IsApplied)
         {
             account.Balance -= request.Amount;

@@ -1,5 +1,6 @@
 ﻿namespace VoltStream.Application.Features.Customers.DTOs;
 
+using VoltStream.Application.Features.Accounts.DTOs;
 using VoltStream.Application.Features.CustomerOperations.DTOs;
 using VoltStream.Application.Features.DiscountOperations.DTOs;
 

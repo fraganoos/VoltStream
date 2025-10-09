@@ -21,13 +21,13 @@ public class DeletePaymentCommandHandler(
             // === 1. Paymentni barcha bog‘lamalari bilan olish ===
             var payment = await context.Payments
                 .Include(p => p.CustomerOperation)
+                    .ThenInclude(co => co.Account)
                 .Include(p => p.CashOperation)
-                .Include(p => p.Account)
+                .Include(p => p.Customer)
                 .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
                 ?? throw new NotFoundException(nameof(Payment), nameof(request.Id), request.Id);
 
-            var account = payment.Account
-                ?? throw new ConflictException("To‘lovga tegishli hisob topilmadi.");
+
 
             // === 2. Agar kassa orqali to‘lov bo‘lgan bo‘lsa, kassadagi balansni kamaytirish ===
             if (payment.Type == Domain.Enums.PaymentType.Cash)
@@ -43,7 +43,7 @@ public class DeletePaymentCommandHandler(
             }
 
             // === 3. Mijoz hisobidagi balansni kamaytirish ===
-            account.Balance -= payment.NetAmount;
+            payment.CustomerOperation.Account.Balance -= payment.NetAmount;
 
             // === 4. Payment va bog‘liq operatsiyalarni soft delete qilish ===
             payment.IsDeleted = true;

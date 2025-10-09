@@ -9,5 +9,6 @@ public class DiscountMappingProfile : Profile
     public DiscountMappingProfile()
     {
         CreateMap<DiscountOperation, DiscountOperationDto>();
+        CreateMap<DiscountOperationCommandDto, DiscountOperation>();
     }
 }

@@ -7,17 +7,17 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using VoltStream.Application.Commons.Interfaces;
-using VoltStream.Application.Features.Warehouses.DTOs;
+using VoltStream.Application.Features.WarehouseStocks.DTOs;
 
-public record GetAllWarehouseItemQuery() : IRequest<IReadOnlyCollection<WarehouseItemDto>>;
+public record GetAllWarehouseItemQuery() : IRequest<IReadOnlyCollection<WarehouseStockDto>>;
 
 public class GetAllWarehouseItemQueryHandler(
     IAppDbContext context,
     IMapper mapper)
-    : IRequestHandler<GetAllWarehouseItemQuery, IReadOnlyCollection<WarehouseItemDto>>
+    : IRequestHandler<GetAllWarehouseItemQuery, IReadOnlyCollection<WarehouseStockDto>>
 {
-    public async Task<IReadOnlyCollection<WarehouseItemDto>> Handle(GetAllWarehouseItemQuery request, CancellationToken cancellationToken)
-         => mapper.Map<IReadOnlyCollection<WarehouseItemDto>>(await context.WarehouseStocks
+    public async Task<IReadOnlyCollection<WarehouseStockDto>> Handle(GetAllWarehouseItemQuery request, CancellationToken cancellationToken)
+         => mapper.Map<IReadOnlyCollection<WarehouseStockDto>>(await context.WarehouseStocks
              .Where(w => w.IsDeleted != true)
              .ToListAsync(cancellationToken));
 

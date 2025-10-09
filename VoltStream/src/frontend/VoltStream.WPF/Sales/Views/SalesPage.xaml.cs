@@ -1,13 +1,10 @@
 ﻿namespace VoltStream.WPF.Sales.Views;
 
-using ApiServices.DTOs.Customers;
-using ApiServices.DTOs.Products;
-using ApiServices.DTOs.Sales;
-using ApiServices.DTOs.Supplies;
-using ApiServices.Enums;
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
 using ApiServices.Models;
+using ApiServices.Models.Reqiuests;
+using ApiServices.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
 using System.Threading.Tasks;
@@ -30,7 +27,7 @@ public partial class SalesPage : Page
     private readonly ICustomersApi customersApi;
     private readonly ISaleApi salesApi;
 
-    public Sale sale = new();
+    public SaleViewModel sale = new();
 
     public SalesPage(IServiceProvider services)
     {
@@ -69,7 +66,7 @@ public partial class SalesPage : Page
         txtDiscount.PreviewLostKeyboardFocus += TxtDiscount_PreviewLostKeyboardFocus;
         txtFinalSumProduct.PreviewLostKeyboardFocus += TxtFinalSumProduct_PreviewLostKeyboardFocus;
 
-        CurrencyType.ItemsSource = Enum.GetNames<CurrencyType>();
+        //CurrencyType.ItemsSource = Enum.GetNames<CurrencyType>();
     }
 
     private void TxtRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -99,18 +96,18 @@ public partial class SalesPage : Page
             if (win.ShowDialog() == true)
             {
                 var customer = win.Result;
-                Customer newCustomer = new()
+                CustomerRequest newCustomer = new()
                 {
                     Name = customer!.name,
                     Phone = customer.phone,
                     Address = customer.address,
                     Description = customer.description,
-                    Account = new()
-                    {
-                        BeginningSumm = customer.beginningSum,
-                        CurrentSumm = customer.beginningSum,
-                        DiscountSumm = 0
-                    }
+                    //Accounts.Add(new()
+                    //{
+                    //    BeginningSumm = customer.beginningSum,
+                    //    CurrentSumm = customer.beginningSum,
+                    //    DiscountSumm = 0
+                    //})
 
                 };
 
@@ -155,8 +152,7 @@ public partial class SalesPage : Page
                 var response = await customersApi.GetByIdAsync(customerId.Value);
                 if (response.IsSuccessStatusCode && response.Content?.Data is not null)
                 {
-                    var accounts = response.Content.Data.Account;
-                    beginBalans.Text = accounts!.CurrentSumm.ToString("N2");
+                    beginBalans.Text = GetAccounts(response);
                     tel.Text = response.Content.Data.Phone;
                     CalcSaleSum();
 
@@ -180,6 +176,15 @@ public partial class SalesPage : Page
         }
     }
 
+    private static string GetAccounts(ApiResponse<Response<CustomerResponse>> response)
+    {
+        // response.Content.Data.Accounts;
+
+        // hisobini tekshirish kerak
+
+        return "";
+    }
+
     private async void CustomerName_GotFocus(object sender, RoutedEventArgs e)
     {
         await LoadCustomerNameAsync();
@@ -194,7 +199,7 @@ public partial class SalesPage : Page
 
             if (response.IsSuccessStatusCode && response.Content?.Data is not null)
             {
-                List<Customer> customers = response.Content.Data;
+                List<CustomerResponse> customers = response.Content.Data;
                 CustomerName.ItemsSource = customers;
                 CustomerName.DisplayMemberPath = "Name";
                 CustomerName.SelectedValuePath = "Id";
@@ -400,13 +405,13 @@ public partial class SalesPage : Page
 
     private void CbxPerRollCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (cbxPerRollCount.SelectedItem is WarehouseItem selectedWarehouseItem)
+        if (cbxPerRollCount.SelectedItem is WarehouseStockResponse selectedWarehouseItem)
         {
             // Rulon tanlanganda, uning narxi, chegirmasi o'zgartiramiz
-            txtPrice.Text = selectedWarehouseItem.Price.ToString();
-            txtPerDiscount.Text = selectedWarehouseItem.DiscountPercent.ToString();
-            sale.WarehouseCountRoll = selectedWarehouseItem.CountRoll;
-            sale.WarehouseQuantity = selectedWarehouseItem.TotalQuantity;
+            txtPrice.Text = selectedWarehouseItem.UnitPrice.ToString();
+            txtPerDiscount.Text = selectedWarehouseItem.DiscountRate.ToString();
+            sale.WarehouseCountRoll = selectedWarehouseItem.RollCount;
+            sale.WarehouseQuantity = selectedWarehouseItem.TotalLength;
             CalcFinalSumProduct(sender);
         }
     }
@@ -433,13 +438,13 @@ public partial class SalesPage : Page
     }
     private void CbxProductName_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (cbxProductName.SelectedItem is Product selectedProduct)
+        if (cbxProductName.SelectedItem is ProductResponse selectedProduct)
         {
             // maxsulot tanlanganda, uning categoryId sini ham olamiz va cbxCategoryName dagini o'zgartiramiz
-            cbxCategoryName.SelectedValue = selectedProduct.CategoryId;
-            sale.CategoryId = selectedProduct.CategoryId;
-            sale.CategoryName = (cbxCategoryName.ItemsSource as IEnumerable<Category>)?
-                .FirstOrDefault(c => c.Id == selectedProduct.CategoryId)?.Name ?? string.Empty;
+            cbxCategoryName.SelectedValue = selectedProduct.Category.Id;
+            sale.CategoryId = selectedProduct.Category.Id;
+            sale.CategoryName = (cbxCategoryName.ItemsSource as IEnumerable<CategoryResponse>)?
+                .FirstOrDefault(c => c.Id == selectedProduct.Category.Id)?.Name ?? string.Empty;
             sale.ProductId = selectedProduct.Id;
         }
     }
@@ -472,7 +477,7 @@ public partial class SalesPage : Page
             var response = await categoriesApi.GetAllAsync();
             if (response.IsSuccessStatusCode && response.Content?.Data is not null)
             {
-                List<Category> categories = response.Content.Data;
+                List<CategoryResponse> categories = response.Content.Data;
                 cbxCategoryName.ItemsSource = categories;
                 cbxCategoryName.DisplayMemberPath = "Name";
                 cbxCategoryName.SelectedValuePath = "Id";
@@ -500,7 +505,7 @@ public partial class SalesPage : Page
         {
             // Сохраняем текущее выбранное значение
             var selectedValue = cbxProductName.SelectedValue;
-            ApiResponse<Response<List<Product>>> response;
+            ApiResponse<Response<List<ProductResponse>>> response;
 
             if (categoryId.HasValue && categoryId.Value != 0)
             {
@@ -539,7 +544,7 @@ public partial class SalesPage : Page
         {
             // Сохраняем текущее выбранное значение
             var selectedValue = cbxPerRollCount.SelectedValue;
-            ApiResponse<Response<List<WarehouseItem>>> response;
+            ApiResponse<Response<List<WarehouseStockResponse>>> response;
             if (productId.HasValue && productId.Value != 0)
             {
                 response = await warehouseItemsApi.GetProductDetailsFromWarehouseAsync(productId.Value);
@@ -575,7 +580,7 @@ public partial class SalesPage : Page
 
     private void AddButton_Click(object sender, RoutedEventArgs e)
     {
-        SaleItem saleItem = new()
+        SaleItemViewModel saleItem = new()
         {
             CategoryId = cbxCategoryName.SelectedIndex,
             CategoryName = cbxCategoryName.Text,
@@ -665,21 +670,21 @@ public partial class SalesPage : Page
 
         var saleRequest = new SaleRequest
         {
-            OperationDate = sale.OperationDate,
+            Date = sale.OperationDate,
             CustomerId = sale.CustomerId,
-            Summa = sale.FinalSum ?? 0,
+            Amount = sale.FinalSum ?? 0,
             Discount = sale.TotalDiscount ?? 0,
             Description = sale.Description,
-            SaleItems = [.. sale.SaleItems.Select(i => new SaleItemRequest
+            Items = [.. sale.SaleItems.Select(i => new SaleItemRequest
             {
                 ProductId = i.ProductId,
-                CountRoll = i.RollCount ?? 0,
-                QuantityPerRoll = i.PerRollCount ?? 0,
-                TotalQuantity = i.Quantity ?? 0,
-                Price = i.Price ?? 0,
-                DiscountPersent = i.PerDiscount ?? 0,
-                Discount = i.Discount ?? 0,
-                TotalSumm = i.FinalSumProduct ?? 0
+                RollCount = i.RollCount ?? 0,
+                LengthPerRoll = i.PerRollCount ?? 0,
+                TotalLength = i.Quantity ?? 0,
+                UnitPrice = i.Price ?? 0,
+                DiscountRate = i.PerDiscount ?? 0,
+                DiscountAmount = i.Discount ?? 0,
+                TotalAmount = i.FinalSumProduct ?? 0
             })]
         };
 

@@ -8,7 +8,10 @@ using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
-public record CreateProductCommand(string Name, long CategoryId) : IRequest<long>;
+public record CreateProductCommand(
+    string Name,
+    long CategoryId)
+    : IRequest<long>;
 
 public class CreateProductCommandHandler(
     IAppDbContext context,

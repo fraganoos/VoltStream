@@ -9,14 +9,15 @@ using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
 
 public record CreatePaymentCommand(
-    DateTimeOffset PaidDate,
+    DateTime PaidAt,
     long CustomerId,
-    PaymentType PaymentType,
-    decimal Summa,
+    PaymentType Type,
+    decimal Amount,
     long CurrencyId,
     decimal ExchangeRate,
     decimal NetAmount,
-    string Description) : IRequest<long>;
+    string Description)
+    : IRequest<long>;
 
 public class CreatePaymentCommandHandler(
     IAppDbContext context,
@@ -44,22 +45,22 @@ public class CreatePaymentCommandHandler(
                 .FirstOrDefault(a => a.CurrencyId == request.CurrencyId)
                 ?? throw new ConflictException("Ushbu valyutada mijoz uchun hisob mavjud emas.");
 
-            // === 3. PaymentType bo‘yicha kassa yoki boshqa balansni yangilash ===
+            // === 3. Type bo‘yicha kassa yoki boshqa balansni yangilash ===
             Cash? cash = null;
-            if (request.PaymentType == PaymentType.Cash)
+            if (request.Type == PaymentType.Cash)
             {
                 cash = await context.Cashes
                     .FirstOrDefaultAsync(c => c.CurrencyId == request.CurrencyId, cancellationToken)
                     ?? throw new NotFoundException(nameof(Cash), nameof(request.CurrencyId), request.CurrencyId);
 
-                cash.Balance += request.Summa;
+                cash.Balance += request.Amount;
 
                 context.CashOperations.Add(new CashOperation
                 {
                     CurrencyId = request.CurrencyId,
                     Date = DateTime.UtcNow,
                     Description = GenerateDescription(request),
-                    Amount = request.Summa
+                    Amount = request.Amount
                 });
             }
 
@@ -70,7 +71,7 @@ public class CreatePaymentCommandHandler(
             // === 5. Payment va CustomerOperation yaratish ===
             var payment = mapper.Map<Payment>(request);
             payment.CurrencyId = request.CurrencyId;
-            payment.AccountId = account.Id;
+            payment.CustomerId = account.Id;
 
             var customerOperation = new CustomerOperation
             {
@@ -99,12 +100,12 @@ public class CreatePaymentCommandHandler(
 
     // === 7. Description generatsiyasi ===
     private static string GenerateDescription(CreatePaymentCommand request)
-        => request.PaymentType switch
+        => request.Type switch
         {
-            PaymentType.Cash => $"Naqd to‘lov: {request.Summa} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
-            PaymentType.BankAccount => $"Bank orqali to‘lov: {request.Summa} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
-            PaymentType.Card => $"Karta orqali to‘lov: {request.Summa} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
-            PaymentType.Mobile => $"Mobil to‘lov: {request.Summa} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
+            PaymentType.Cash => $"Naqd to‘lov: {request.Amount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
+            PaymentType.BankAccount => $"Bank orqali to‘lov: {request.Amount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
+            PaymentType.Card => $"Karta orqali to‘lov: {request.Amount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
+            PaymentType.Mobile => $"Mobil to‘lov: {request.Amount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
             _ => request.Description
         };
 

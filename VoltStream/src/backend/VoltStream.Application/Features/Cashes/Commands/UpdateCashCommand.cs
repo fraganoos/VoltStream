@@ -8,7 +8,6 @@ using VoltStream.Domain.Entities;
 
 public record UpdateCashCommand(
     long Id,
-    string Name,
     decimal Balance,
     bool IsActive,
     long CurrencyId) : IRequest<bool>;
@@ -22,7 +21,6 @@ public class UpdateCashCommandHandler(IAppDbContext context)
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Cash), nameof(request.Id), request.Id);
 
-        cash.Name = request.Name;
         cash.Balance = request.Balance;
         cash.IsActive = request.IsActive;
         cash.CurrencyId = request.CurrencyId;

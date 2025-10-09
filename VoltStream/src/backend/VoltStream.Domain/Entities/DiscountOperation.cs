@@ -9,4 +9,7 @@ public class DiscountOperation : Auditable
 
     public long CustomerId { get; set; }
     public Customer Customer { get; set; } = default!;
+
+    public long SaleId { get; set; }
+    public Sale Sale { get; set; } = default!;
 }

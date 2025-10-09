@@ -19,7 +19,7 @@ public record CreateSaleCommand(
     bool IsApplied,
     decimal Amount,
     string Description,
-    List<SaleItemCreateDto> SaleItems)
+    List<SaleItemCommandDto> SaleItems)
     : IRequest<long>;
 
 public class CreateSaleCommandHandler(
@@ -81,7 +81,7 @@ public class CreateSaleCommandHandler(
     }
 
     private async Task ProcessSaleItemsAsync(
-        List<SaleItemCreateDto> saleItems,
+        List<SaleItemCommandDto> saleItems,
         Warehouse warehouse,
         StringBuilder descriptionBuilder,
         CancellationToken cancellationToken)
@@ -107,7 +107,7 @@ public class CreateSaleCommandHandler(
         }
     }
 
-    private async Task HandleResidueAsync(SaleItemCreateDto item, Warehouse warehouse, CancellationToken cancellationToken)
+    private async Task HandleResidueAsync(SaleItemCommandDto item, Warehouse warehouse, CancellationToken cancellationToken)
     {
         if (item.LengthPerRoll * item.RollCount != item.TotalLength)
         {

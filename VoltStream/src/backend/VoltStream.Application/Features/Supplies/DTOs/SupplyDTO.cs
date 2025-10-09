@@ -2,13 +2,11 @@
 
 using VoltStream.Application.Features.Products.DTOs;
 
-public record SupplyDto
-{
-    public long Id { get; set; }
-    public DateTime Date { get; set; }
-    public decimal RollCount { get; set; }
-    public decimal LengthPerRoll { get; set; }
-    public decimal TotalLength { get; set; }
-
-    public ProductDTO Product { get; set; } = default!;
-}
+public record SupplyDto(
+    long Id,
+    DateTime Date, // operation kuni
+    decimal RollCount, // jami rulonlar soni
+    decimal LengthPerRoll, // bir rulondagi uzunlik
+    decimal TotalLength, // butun supply bo'yicha jami uzunlik
+    ProductDto Product
+);

@@ -1,8 +1,8 @@
 ﻿namespace VoltStream.WPF.Supplies.Views;
 
-using ApiServices.DTOs.Products;
-using ApiServices.DTOs.Supplies;
 using ApiServices.Interfaces;
+using ApiServices.Models.Reqiuests;
+using ApiServices.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,7 +19,7 @@ public partial class SuppliesPage : Page
     private readonly ICategoriesApi categoriesApi;
     private readonly ISuppliesApi suppliesApi;
     private readonly IWarehouseItemsApi warehouseItemsApi;
-    private List<Category> _allCategories = [];
+    private List<CategoryResponse> _allCategories = [];
     private ICollectionView? categoriesView;
 
     public SuppliesPage(IServiceProvider services)
@@ -57,7 +57,7 @@ public partial class SuppliesPage : Page
         cbxProduct.IsDropDownOpen = true;
 
         // Hozirgi tanlangan category ni olish
-        var selectedCategory = cbxCategory.SelectedItem as Category;
+        var selectedCategory = cbxCategory.SelectedItem as CategoryResponse;
 
         // 1️⃣ Agar tanlangan category mavjud bo‘lsa
         if (selectedCategory is not null && _allCategories.FirstOrDefault(a =>
@@ -112,7 +112,7 @@ public partial class SuppliesPage : Page
                 if (response.IsSuccessStatusCode && response.Content?.Data is not null)
                 {
                     // OperationDate bo‘yicha teskari tartibda (eng so‘nggi birinchi)
-                    List<Supply> supplies = [.. response.Content.Data.OrderByDescending(s => s.CreatedAt)];
+                    List<SupplyResponse> supplies = [.. response.Content.Data.OrderByDescending(s => s.CreatedAt)];
                     supplyDataGrid.ItemsSource = supplies;
                 }
                 else
@@ -154,12 +154,12 @@ public partial class SuppliesPage : Page
                 var warehouseItems = await warehouseItemsApi.GetAllWarehouseItemsAsync();
                 if (warehouseItems?.Content?.Data is not null)
                 {
-                    var warehouseItem = warehouseItems.Content.Data.FirstOrDefault(x => x.ProductId == productId);
+                    var warehouseItem = warehouseItems.Content.Data.FirstOrDefault(x => x.Product.Id == productId);
                     if (warehouseItem is not null)
                     {
                         //tbxPerRollCount.Text = warehouseItem.QuantityPerRoll.ToString("N2");
-                        txtPrice.Text = warehouseItem.Price.ToString("N2");
-                        tbxDiscountPercent.Text = warehouseItem.DiscountPercent.ToString("N2");
+                        txtPrice.Text = warehouseItem.UnitPrice.ToString("N2");
+                        tbxDiscountPercent.Text = warehouseItem.DiscountRate.ToString("N2");
                     }
                 }
             }
@@ -224,23 +224,23 @@ public partial class SuppliesPage : Page
             long categoryId = cbxCategory.SelectedValue is not null ? Convert.ToInt64(cbxCategory.SelectedValue) : 0;
             long productId = cbxProduct.SelectedValue is not null ? Convert.ToInt64(cbxProduct.SelectedValue) : 0;
 
-            var supply = new Supply
+            var supply = new SupplyRequest
             {
-                OperationDate = supplyDate.SelectedDate.Value.ToUniversalTime(),
+                Date = supplyDate.SelectedDate.Value.ToUniversalTime(),
                 CategoryId = categoryId,
                 ProductId = productId,
-                CountRoll = rollCount,
-                QuantityPerRoll = perRollCount,
-                TotalQuantity = totalQuantity,
-                ProductName = ((Product)cbxProduct.SelectedItem)?.Name ?? cbxProduct.Text ?? string.Empty,
-                CategoryName = ((Category)cbxCategory.SelectedItem)?.Name ?? cbxCategory.Text ?? string.Empty,
-                Price = price,
-                DiscountPercent = discountPercent
+                RollCount = rollCount,
+                LengthPerRoll = perRollCount,
+                TotalLength = totalQuantity,
+                ProductName = ((ProductRequest)cbxProduct.SelectedItem)?.Name ?? cbxProduct.Text ?? string.Empty,
+                CategoryName = ((CategoryResponse)cbxCategory.SelectedItem)?.Name ?? cbxCategory.Text ?? string.Empty,
+                UnitPrice = price,
+                DiscountRate = discountPercent
             };
 
             var response = await suppliesApi.CreateSupplyAsync(supply);
 
-            if (response.IsSuccessStatusCode && response.Content is not null)
+            if (response.IsSuccessStatusCode && response.Content > 0)
             {
                 // Formani tozalash
                 cbxCategory.SelectedItem = null;
@@ -331,7 +331,7 @@ public partial class SuppliesPage : Page
     //    }
     //}
 
-    private async Task<List<Category>> LoadCategoriesAsync()
+    private async Task<List<CategoryResponse>> LoadCategoriesAsync()
     {
         try
         {

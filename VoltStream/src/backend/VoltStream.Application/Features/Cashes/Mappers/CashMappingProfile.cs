@@ -10,6 +10,6 @@ public class CashMappingProfile : Profile
     public CashMappingProfile()
     {
         CreateMap<CreateCashCommand, Cash>();
-        CreateMap<Cash, CashDTO>();
+        CreateMap<Cash, CashDto>();
     }
 }

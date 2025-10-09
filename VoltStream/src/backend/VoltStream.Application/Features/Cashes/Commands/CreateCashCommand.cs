@@ -5,7 +5,10 @@ using MediatR;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
-public record CreateCashCommand(decimal UzsBalance, decimal UsdBalance, decimal Kurs) : IRequest<long>;
+public record CreateCashCommand(
+    decimal Balance,
+    long CurrencyId)
+    : IRequest<long>;
 
 public class CreateCashCommandHandler(
     IAppDbContext context,

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
-using VoltStream.Application.Features.Customers.DTOs;
+using VoltStream.Application.Features.Accounts.DTOs;
 using VoltStream.Domain.Entities;
 
 public record CreateCustomerCommand(
@@ -16,7 +16,7 @@ public record CreateCustomerCommand(
     string? Phone,
     string? Address,
     string? Description,
-    AccountCreationDto Account)
+    List<AccountCommandDto> Accounts)
     : IRequest<long>;
 
 public class CreateCustomerComandHandler(

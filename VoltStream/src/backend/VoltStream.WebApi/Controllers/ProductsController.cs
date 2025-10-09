@@ -8,7 +8,7 @@ using VoltStream.WebApi.Controllers.Common;
 using VoltStream.WebApi.Models;
 
 public class ProductsController
-    : CrudController<ProductDTO,
+    : CrudController<ProductDto,
     GetAllProductsQuery,
     GetProductByIdQuery,
     CreateProductCommand,

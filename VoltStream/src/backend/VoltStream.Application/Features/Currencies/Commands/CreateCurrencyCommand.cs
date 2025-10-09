@@ -8,7 +8,12 @@ using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
-public record CreateCurrencyCommand(string Name) : IRequest<long>;
+public record CreateCurrencyCommand(
+    string Name,
+    string Code,
+    string Symbol,
+    decimal ExchangeRate)
+    : IRequest<long>;
 
 public class CreateCurrencyCommandHandler(
     IAppDbContext context,

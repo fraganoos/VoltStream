@@ -16,8 +16,8 @@ public record UpdatePaymentCommand(
     long CurrencyId,
     decimal ExchangeRate,
     decimal NetAmount,
-    string Description
-) : IRequest<long>;
+    string Description)
+    : IRequest<long>;
 
 public class UpdatePaymentCommandHandler(
     IAppDbContext context)
@@ -27,8 +27,9 @@ public class UpdatePaymentCommandHandler(
     {
         var payment = await context.Payments
             .Include(p => p.CustomerOperation)
+                .ThenInclude(co => co.Account)
             .Include(p => p.CashOperation)
-            .Include(p => p.Account)
+            .Include(p => p.Customer)
             .Include(p => p.Currency)
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Payment), nameof(request.Id), request.Id);
@@ -58,7 +59,7 @@ public class UpdatePaymentCommandHandler(
             cash.Balance += diffAmount;
 
             // 🔹 Hisob balansini yangilash
-            payment.Account.Balance += diffNet;
+            payment.CustomerOperation.Account.Balance += diffNet;
 
             // 🔹 Payment ma'lumotlarini yangilash
             payment.PaidAt = request.PaidAt;

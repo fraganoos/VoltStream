@@ -1,7 +1,8 @@
 ﻿namespace ApiServices.Interfaces;
 
-using ApiServices.DTOs.Sales;
 using ApiServices.Models;
+using ApiServices.Models.Reqiuests;
+using ApiServices.Models.Responses;
 using Refit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -25,5 +26,5 @@ public interface ISaleApi
     Task<Response<bool>> Delete(long id);
 
     [Post("/sales/filter")]
-    Task<Response<bool>> Filter(FilteringRequest request);
+    Task<Response<SaleResponse>> Filter(FilteringRequest request);
 }

@@ -7,7 +7,13 @@ using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
-public record UpdateCurrencyCommand(long Id, string Name) : IRequest<bool>;
+public record UpdateCurrencyCommand(
+    long Id,
+    string Name,
+    string Code,
+    string Symbol,
+    decimal ExchangeRate)
+    : IRequest<bool>;
 
 public class UpdateCurrencyCommandHandler(
     IAppDbContext context,

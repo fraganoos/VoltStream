@@ -5,16 +5,16 @@ using MediatR;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Commons.Models;
-using VoltStream.Application.Features.Warehouses.DTOs;
+using VoltStream.Application.Features.WarehouseStocks.DTOs;
 
-public record WarehouseItemFilterQuery : FilteringRequest, IRequest<IReadOnlyCollection<WarehouseItemDto>>;
+public record WarehouseItemFilterQuery : FilteringRequest, IRequest<IReadOnlyCollection<WarehouseStockDto>>;
 
 public class WarehouseItemFilterQueryHandler(
     IAppDbContext context,
     IPagingMetadataWriter writer,
-    IMapper mapper) : IRequestHandler<WarehouseItemFilterQuery, IReadOnlyCollection<WarehouseItemDto>>
+    IMapper mapper) : IRequestHandler<WarehouseItemFilterQuery, IReadOnlyCollection<WarehouseStockDto>>
 {
-    public async Task<IReadOnlyCollection<WarehouseItemDto>> Handle(WarehouseItemFilterQuery request, CancellationToken cancellationToken)
-        => mapper.Map<IReadOnlyCollection<WarehouseItemDto>>(await context.WarehouseStocks
+    public async Task<IReadOnlyCollection<WarehouseStockDto>> Handle(WarehouseItemFilterQuery request, CancellationToken cancellationToken)
+        => mapper.Map<IReadOnlyCollection<WarehouseStockDto>>(await context.WarehouseStocks
             .ToPagedListAsync(request, writer, cancellationToken));
 }

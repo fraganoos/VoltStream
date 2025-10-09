@@ -242,7 +242,7 @@
 
                     <Button x:Name="btnLogin" 
                             Command="{Binding LoginCommand}"
-                            IsEnabled="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
                             BorderThickness="0"
                             Content="LOG IN"
                             Foreground="White"

@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using VoltStream.WPF.Commons;
 
-public partial class Sale : ViewModelBase
+public partial class SaleViewModel : ViewModelBase
 {
     [ObservableProperty] private decimal? totalSum;
     [ObservableProperty] private decimal? totalDiscount;
@@ -33,9 +33,9 @@ public partial class Sale : ViewModelBase
     [ObservableProperty] private string? discount;
     [ObservableProperty] private string? finalSumProduct;
 
-    public ObservableCollection<SaleItem> SaleItems { get; set; } = [];
+    public ObservableCollection<SaleItemViewModel> SaleItems { get; set; } = [];
 
-    public Sale()
+    public SaleViewModel()
     {
         SaleItems.CollectionChanged += SaleItems_CollectionChanged;
     }
@@ -44,7 +44,7 @@ public partial class Sale : ViewModelBase
     {
         if (e.NewItems != null)
         {
-            foreach (SaleItem item in e.NewItems)
+            foreach (SaleItemViewModel item in e.NewItems)
             {
                 item.PropertyChanged += (s, _) => RecalculateTotals();
             }
