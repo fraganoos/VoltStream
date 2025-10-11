@@ -43,7 +43,6 @@ public partial class SuppliesPage : Page
 
     private void CbxProduct_LostFocus(object sender, RoutedEventArgs e)
     {
-
         if ((cbxCategory.SelectedItem is null ||
                     cbxCategory.SelectedItem is not null) &&
                     string.IsNullOrWhiteSpace(cbxCategory.Text) &&

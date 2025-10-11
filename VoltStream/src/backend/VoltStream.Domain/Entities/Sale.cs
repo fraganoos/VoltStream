@@ -12,11 +12,11 @@ public class Sale : Auditable
     public long CurrencyId { get; set; }
     public Currency Currency { get; set; } = default!;
 
-    public long CustomerId { get; set; }
-    public Customer Customer { get; set; } = default!;
+    public long? CustomerId { get; set; }
+    public Customer? Customer { get; set; } = default!;
 
-    public CustomerOperation CustomerOperation { get; set; } = default!;
-    public DiscountOperation DiscountOperation { get; set; } = default!;
+    public CustomerOperation? CustomerOperation { get; set; } = default!;
+    public DiscountOperation? DiscountOperation { get; set; } = default!;
 
     public ICollection<SaleItem> Items { get; set; } = default!;
 }

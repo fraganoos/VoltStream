@@ -13,7 +13,7 @@ using VoltStream.Domain.Enums;
 
 public record CreateSaleCommand(
     DateTimeOffset Date,
-    long CustomerId,
+    long? CustomerId,
     long CurrencyId,
     int RollCount,
     decimal Length,
@@ -35,19 +35,21 @@ public class CreateSaleCommandHandler(
         try
         {
             var warehouse = await GetWarehouseAsync(cancellationToken);
-            var customer = await GetCustomerWithAccountAsync(request.CustomerId, request.CurrencyId, cancellationToken);
-            var account = customer.Accounts.First(a => a.CurrencyId == request.CurrencyId);
+            var customer = await GetCustomerAsync(request.CustomerId, request.CurrencyId, cancellationToken);
 
             var descriptionBuilder = new StringBuilder();
 
             await ProcessSaleItemsAsync(request.Items, warehouse, descriptionBuilder, cancellationToken);
-
-            var discountOperation = CreateDiscountOperation(request, customer, descriptionBuilder);
             var sale = mapper.Map<Sale>(request);
 
-            UpdateAccountBalance(account, sale.Amount, sale.Discount, request.IsApplied);
-            sale.CustomerOperation = CreateCustomerOperation(sale, account, request.Description, descriptionBuilder);
-            sale.DiscountOperation = discountOperation;
+
+            if (customer is not null)
+            {
+                var account = customer.Accounts.First(a => a.CurrencyId == request.CurrencyId);
+                UpdateAccountBalance(account, sale.Amount, sale.Discount, request.IsApplied);
+                sale.CustomerOperation = CreateCustomerOperation(sale, account, request.Description, descriptionBuilder);
+                sale.DiscountOperation = CreateDiscountOperation(request, customer, descriptionBuilder);
+            }
 
             context.Sales.Add(sale);
             await context.CommitTransactionAsync(cancellationToken);
@@ -69,15 +71,13 @@ public class CreateSaleCommandHandler(
             ?? throw new NotFoundException(nameof(Warehouse));
     }
 
-    private async Task<Customer> GetCustomerWithAccountAsync(long customerId, long currencyId, CancellationToken cancellationToken)
+    private async Task<Customer?> GetCustomerAsync(long? customerId, long currencyId, CancellationToken cancellationToken)
     {
+        if (customerId is null)
+            return default;
         var customer = await context.Customers
             .Include(c => c.Accounts)
-            .FirstOrDefaultAsync(a => a.Id == customerId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Customer));
-
-        if (!customer.Accounts.Any(a => a.CurrencyId == currencyId))
-            throw new NotFoundException(nameof(Account), "CurrencyId", currencyId);
+            .FirstOrDefaultAsync(a => a.Id == customerId, cancellationToken);
 
         return customer;
     }

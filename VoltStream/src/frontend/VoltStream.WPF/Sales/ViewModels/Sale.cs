@@ -12,7 +12,7 @@ public partial class Sale : ViewModelBase
     [ObservableProperty] private decimal? finalSum;
 
     [ObservableProperty] private DateTime operationDate = DateTime.Now;
-    [ObservableProperty] private long customerId;
+    [ObservableProperty] private long? customerId;
     [ObservableProperty] private string customerName = string.Empty;
     [ObservableProperty] private long currencyId;
     [ObservableProperty] private bool checkedDiscount = false;
