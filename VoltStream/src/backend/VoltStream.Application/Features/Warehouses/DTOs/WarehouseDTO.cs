@@ -1,7 +1,9 @@
 ﻿namespace VoltStream.Application.Features.Warehouses.DTOs;
 
-public record WarehouseDTO
-{
-    public long Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-}
+using VoltStream.Application.Features.WarehouseStocks.DTOs;
+
+public record WarehouseDto(
+    long Id,
+    string Name,
+    ICollection<WarehouseStockDto> Stocks
+);

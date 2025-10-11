@@ -12,12 +12,16 @@ using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
 
 public record CreateSaleCommand(
-    long CustomerId,
-    DateTime OperationDate,
+    DateTimeOffset Date,
+    long? CustomerId,
+    long CurrencyId,
+    int RollCount,
+    decimal Length,
+    decimal Amount,
+    bool IsApplied,
     decimal Discount,
-    decimal Summa,
     string Description,
-    List<SaleItemCreateDto> SaleItems)
+    List<SaleItemCommandDto> Items)
     : IRequest<long>;
 
 public class CreateSaleCommandHandler(
@@ -27,83 +31,139 @@ public class CreateSaleCommandHandler(
     public async Task<long> Handle(CreateSaleCommand request, CancellationToken cancellationToken)
     {
         await context.BeginTransactionAsync(cancellationToken);
-        var warehouse = await context.Warehouses
-            .Include(w => w.Items)
-            .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new NotFoundException(nameof(Warehouse));
 
-        var customer = await context.Customers
-            .Include(c => c.Account)
-            .FirstOrDefaultAsync(a => a.Id == request.CustomerId, cancellationToken)
-            ?? throw new NotFoundException(nameof(Account));
-
-        var description = new StringBuilder();
-        foreach (var item in request.SaleItems)
+        try
         {
-            var residue = warehouse.Items.FirstOrDefault(r => r.ProductId == item.ProductId && r.QuantityPerRoll == item.QuantityPerRoll)
-                ?? throw new NotFoundException(nameof(WarehouseItem), nameof(item.Id), item.Id);
+            var warehouse = await GetWarehouseAsync(cancellationToken);
+            var customer = await GetCustomerAsync(request.CustomerId, request.CurrencyId, cancellationToken);
 
-            if (residue.TotalQuantity < item.TotalQuantity)
-                throw new ConflictException($"Omborda faqat {residue.TotalQuantity} miqdorda mahsulot bor");
+            var descriptionBuilder = new StringBuilder();
 
-            residue.CountRoll -= item.CountRoll;
-            residue.TotalQuantity -= item.TotalQuantity;
+            await ProcessSaleItemsAsync(request.Items, warehouse, descriptionBuilder, cancellationToken);
+            var sale = mapper.Map<Sale>(request);
 
-            if (item.QuantityPerRoll * item.CountRoll != item.TotalQuantity)
+
+            if (customer is not null)
             {
-                var detail = item.QuantityPerRoll * item.CountRoll - item.TotalQuantity;
-                var existItem = await context.WarehouseItems.FirstOrDefaultAsync(i => i.ProductId == item.ProductId && i.QuantityPerRoll == detail, cancellationToken);
-
-                if (existItem is null)
-                    context.WarehouseItems.Add(new()
-                    {
-                        CountRoll = 1,
-                        ProductId = item.ProductId,
-                        QuantityPerRoll = detail,
-                        DiscountPercent = item.DiscountPersent,
-                        Price = item.Price,
-                        TotalQuantity = detail,
-                        Warehouse = warehouse
-                    });
-                else
-                {
-                    existItem.CountRoll += 1;
-                    existItem.DiscountPercent = item.DiscountPersent;
-                    existItem.Price = item.Price;
-                    existItem.TotalQuantity += detail;
-                }
+                var account = customer.Accounts.First(a => a.CurrencyId == request.CurrencyId);
+                UpdateAccountBalance(account, sale.Amount, sale.Discount, request.IsApplied);
+                sale.CustomerOperation = CreateCustomerOperation(sale, account, request.Description, descriptionBuilder);
+                sale.DiscountOperation = CreateDiscountOperation(request, customer, descriptionBuilder);
             }
 
-            var product = context.Products.FirstOrDefault(p => p.Id == item.ProductId)
+            context.Sales.Add(sale);
+            await context.CommitTransactionAsync(cancellationToken);
+
+            return sale.Id;
+        }
+        catch
+        {
+            await context.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+    }
+
+    private async Task<Warehouse> GetWarehouseAsync(CancellationToken cancellationToken)
+    {
+        return await context.Warehouses
+            .Include(w => w.Stocks)
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException(nameof(Warehouse));
+    }
+
+    private async Task<Customer?> GetCustomerAsync(long? customerId, long currencyId, CancellationToken cancellationToken)
+    {
+        if (customerId is null)
+            return default;
+        var customer = await context.Customers
+            .Include(c => c.Accounts)
+            .FirstOrDefaultAsync(a => a.Id == customerId, cancellationToken);
+
+        return customer;
+    }
+
+    private async Task ProcessSaleItemsAsync(
+        List<SaleItemCommandDto> saleItems,
+        Warehouse warehouse,
+        StringBuilder descriptionBuilder,
+        CancellationToken cancellationToken)
+    {
+        foreach (var item in saleItems)
+        {
+            var residue = warehouse.Stocks
+                .FirstOrDefault(r => r.ProductId == item.ProductId && r.LengthPerRoll == item.LengthPerRoll)
+                ?? throw new NotFoundException(nameof(WarehouseStock), nameof(item.Id), item.Id);
+
+            if (residue.TotalLength < item.TotalLength)
+                throw new ConflictException($"Omborda faqat {residue.TotalLength} metr mahsulot bor");
+
+            residue.RollCount -= item.RollCount;
+            residue.TotalLength -= item.TotalLength;
+
+            await HandleResidueAsync(item, warehouse, cancellationToken);
+
+            var product = await context.Products.FirstOrDefaultAsync(p => p.Id == item.ProductId, cancellationToken)
                 ?? throw new NotFoundException(nameof(Product), nameof(item.Id), item.ProductId);
 
-            description.Append($"{product.Name} - {item.TotalQuantity} metr;");
+            descriptionBuilder.Append($"{product.Name} - {item.TotalLength} metr; ");
         }
+    }
 
-        var discountOperation = new DiscountOperation
+    private async Task HandleResidueAsync(SaleItemCommandDto item, Warehouse warehouse, CancellationToken cancellationToken)
+    {
+        if (item.LengthPerRoll * item.RollCount != item.TotalLength)
         {
-            Date = request.OperationDate,
-            DiscountSumm = request.Discount,
+            var detail = item.LengthPerRoll * item.RollCount - item.TotalLength;
+            var existStock = await context.WarehouseStocks
+                .FirstOrDefaultAsync(i => i.ProductId == item.ProductId && i.LengthPerRoll == detail, cancellationToken);
+
+            if (existStock is null)
+                context.WarehouseStocks.Add(new WarehouseStock
+                {
+                    RollCount = 1,
+                    ProductId = item.ProductId,
+                    LengthPerRoll = detail,
+                    UnitPrice = item.UnitPrice,
+                    TotalLength = detail,
+                    Warehouse = warehouse
+                });
+            else
+            {
+                existStock.RollCount += 1;
+                existStock.UnitPrice = item.UnitPrice;
+                existStock.TotalLength += detail;
+            }
+        }
+    }
+
+    private static DiscountOperation CreateDiscountOperation(CreateSaleCommand request, Customer customer, StringBuilder description)
+    {
+        return new DiscountOperation
+        {
+            Date = request.Date.ToOffset(TimeSpan.Zero),
+            Amount = request.Discount,
+            IsApplied = request.IsApplied,
             Description = $"Chegirma savdo uchun: {description}",
             Customer = customer
         };
+    }
 
-        var sale = mapper.Map<Sale>(request);
+    private static void UpdateAccountBalance(Account account, decimal amount, decimal discount, bool isApplied)
+    {
+        account.Balance -= amount;
+        if (!isApplied)
+            account.Discount += discount;
+    }
 
-        customer.Account.CurrentSumm -= sale.Summa;
-        customer.Account.DiscountSumm += sale.Discount;
-
-        var customerOperation = mapper.Map<CustomerOperation>(request);
-        customerOperation.OperationType = OperationType.Sale;
-        customerOperation.Customer = customer;
-        customerOperation.Description = $"Savdo ID = {sale.Id}: {request.Description}. {description}".Trimmer(200);
-        sale.CustomerOperation = customerOperation;
-        sale.DiscountOperation = discountOperation;
-
-        context.Sales.Add(sale);
-
-        await context.CommitTransactionAsync(cancellationToken);
-
-        return sale.Id;
+    private static CustomerOperation CreateCustomerOperation(Sale sale, Account account, string description, StringBuilder descriptionBuilder)
+    {
+        return new CustomerOperation
+        {
+            Amount = sale.Amount,
+            Account = account,
+            AccountId = account.Id,
+            OperationType = OperationType.Sale,
+            Description = $"Savdo ID = {sale.Id}: {description}. {descriptionBuilder}".Trimmer(200)
+        };
     }
 }

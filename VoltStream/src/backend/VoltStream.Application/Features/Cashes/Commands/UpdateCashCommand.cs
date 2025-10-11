@@ -8,22 +8,22 @@ using VoltStream.Domain.Entities;
 
 public record UpdateCashCommand(
     long Id,
-    decimal UzsBalance,
-    decimal UsdBalance,
-    decimal Kurs) : IRequest<bool>;
+    decimal Balance,
+    bool IsActive,
+    long CurrencyId) : IRequest<bool>;
 
-public class UpdateCashCommandHandler(
-    IAppDbContext context)
+public class UpdateCashCommandHandler(IAppDbContext context)
     : IRequestHandler<UpdateCashCommand, bool>
 {
     public async Task<bool> Handle(UpdateCashCommand request, CancellationToken cancellationToken)
     {
-        var cash = await context.Cashes.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
+        var cash = await context.Cashes
+            .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Cash), nameof(request.Id), request.Id);
 
-        cash.UzsBalance = request.UzsBalance;
-        cash.UsdBalance = request.UsdBalance;
-        cash.Kurs = request.Kurs;
+        cash.Balance = request.Balance;
+        cash.IsActive = request.IsActive;
+        cash.CurrencyId = request.CurrencyId;
 
         return await context.SaveAsync(cancellationToken) > 0;
     }

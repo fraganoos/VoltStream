@@ -1,17 +1,18 @@
 ﻿namespace ApiServices.Interfaces;
 
-using ApiServices.DTOs.Supplies;
 using ApiServices.Models;
+using ApiServices.Models.Responses;
 using Refit;
 
 [Headers("accept: application/json")]
-public interface IWarehouseItemsApi
+public interface IWarehouseStocksApi
 {
     [Get("/warehouse-items")]
-    Task<ApiResponse<Response<List<WarehouseItem>>>> GetAllWarehouseItemsAsync();
+    Task<Response<List<WarehouseStockResponse>>> GetAllWarehouseItemsAsync();
+
     [Get("/warehouse-items/productId={id}")]
-    Task<ApiResponse<Response<List<WarehouseItem>>>> GetProductDetailsFromWarehouseAsync(long id);
+    Task<Response<List<WarehouseStockResponse>>> GetProductDetailsFromWarehouseAsync(long id);
 
     [Post("/warehouse-items/filter")]
-    Task<ApiResponse<Response<List<WarehouseItem>>>> GetFilterFromWarehouseAsync(FilteringRequest filter);
+    Task<Response<List<WarehouseStockResponse>>> Filter(FilteringRequest filter);
 }

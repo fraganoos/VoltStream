@@ -18,7 +18,7 @@ public partial class UserCalendar : UserControl
         InitializeComponent();
         dateTextBox.PreviewTextInput += DateTextBox_PreviewTextInput;
         dateTextBox.TextChanged += DateTextBox_TextChanged;
-        dateTextBox.PreviewLostKeyboardFocus += DateTextBox_PreviewLostKeyboardFocus;
+        //dateTextBox.PreviewLostKeyboardFocus += DateTextBox_PreviewLostKeyboardFocus;
         SetDefaultDate();
     }
 
@@ -92,37 +92,37 @@ public partial class UserCalendar : UserControl
         }
     }
 
-    private void DateTextBox_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-    {
-        if (sender is TextBox textBox)
-        {
-            if (string.IsNullOrWhiteSpace(textBox.Text))
-            {
-                SelectedDate = null;
-                return;
-            }
-            if (!IsValidDateFormat(textBox.Text))
-            {
-                MessageBox.Show("Неверный формат даты. Используйте формат dd.MM.yyyy.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                e.Handled = true; // Предотвращаем потерю фокуса
-            }
-            else
-            {
-                var parts = textBox.Text.Split('.');
-                if (parts.Length == 3 && parts[2].Length == 2)
-                {
-                    parts[2] = "20" + parts[2];
-                    textBox.Text = string.Join(".", parts);
-                }
+    //private void DateTextBox_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    //{
+    //    if (sender is TextBox textBox)
+    //    {
+    //        if (string.IsNullOrWhiteSpace(textBox.Text))
+    //        {
+    //            SelectedDate = null;
+    //            return;
+    //        }
+    //        if (!IsValidDateFormat(textBox.Text))
+    //        {
+    //            MessageBox.Show("Неверный формат даты. Используйте формат dd.MM.yyyy.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+    //            e.Handled = true; // Предотвращаем потерю фокуса
+    //        }
+    //        else
+    //        {
+    //            var parts = textBox.Text.Split('.');
+    //            if (parts.Length == 3 && parts[2].Length == 2)
+    //            {
+    //                parts[2] = "20" + parts[2];
+    //                textBox.Text = string.Join(".", parts);
+    //            }
 
-                if (!DateTime.TryParseExact(textBox.Text, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out _))
-                {
-                    MessageBox.Show("Неверная дата. Пожалуйста, введите корректную дату.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    e.Handled = true; // Предотвращаем потерю фокуса
-                }
-            }
-        }
-    }
+    //            if (!DateTime.TryParseExact(textBox.Text, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out _))
+    //            {
+    //                MessageBox.Show("Неверная дата. Пожалуйста, введите корректную дату.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+    //                e.Handled = true; // Предотвращаем потерю фокуса
+    //            }
+    //        }
+    //    }
+    //}
 
     private void OpenCalendar_Click(object sender, RoutedEventArgs e)
     {

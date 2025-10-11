@@ -1,40 +1,28 @@
 ﻿namespace VoltStream.WPF.LoginPages.Models;
 
-using ApiServices.DTOs.Users;
+using ApiServices.Extensions;
 using ApiServices.Interfaces;
+using ApiServices.Models.Reqiuests;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using VoltStream.WPF.Commons;
 
-public partial class LoginViewModel(ILoginApi loginApi) : ObservableObject
+public partial class LoginViewModel(ILoginApi loginApi) : ViewModelBase
 {
-    [ObservableProperty] private string username = "";
-    [ObservableProperty] private string password = "";
-    [ObservableProperty] private string errorMessage = "";
+    [ObservableProperty] private string username = string.Empty;
+    [ObservableProperty] private string password = string.Empty;
     [ObservableProperty] private bool isViewVisible = true;
-    [ObservableProperty] private bool isBusy = false;
 
     public event Action? LoginSucceeded;
 
     [RelayCommand]
     private async Task Login()
     {
-        if (IsBusy) return;
-        IsBusy = true;
-        ErrorMessage = "";
+        LoginRequest credentials = new() { Username = Username, Password = Password };
+        var res = await loginApi.LoginAsync(credentials)
+            .Handle(loading => IsLoading = loading);
 
-        try
-        {
-            var res = await loginApi.LoginAsync(new LoginRequest { Username = Username, Password = Password });
-            if (res.IsSuccessStatusCode) LoginSucceeded?.Invoke();
-            else ErrorMessage = res.Content?.Message ?? "Invalid username or password!";
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = $"Login failed: {ex.Message}";
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        if (res.IsSuccess) LoginSucceeded?.Invoke();
+        else Error = res.Message ?? "Invalid username or password!";
     }
 }

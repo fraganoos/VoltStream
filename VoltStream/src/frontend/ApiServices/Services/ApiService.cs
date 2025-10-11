@@ -14,6 +14,7 @@ public static class ApiService
             ContentSerializer = new SystemTextJsonContentSerializer(
                 new JsonSerializerOptions
                 {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                     Converters = { new JsonStringEnumConverter() }
                 })
         };

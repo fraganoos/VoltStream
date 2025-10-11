@@ -1,23 +1,23 @@
 ﻿namespace VoltStream.Application.Features.Sales.DTOs;
 
+using VoltStream.Application.Features.Currencies.DTOs;
 using VoltStream.Application.Features.CustomerOperations.DTOs;
 using VoltStream.Application.Features.Customers.DTOs;
+using VoltStream.Application.Features.DiscountOperations.DTOs;
 
-public class SaleDto
+public record SaleDto
 {
-    long Id { get; set; }
-    public DateTime OperationDate { get; set; } // operation kuni
-    public decimal CountRoll { get; set; }    // jami rulonlar soni
-    public decimal TotalQuantity { get; set; } // jami metr
-    public decimal Summa { get; set; } // jami summa
-    public decimal? Discount { get; set; } // chegirma
+    public long Id { get; set; }
+    public DateTimeOffset Date { get; set; } // operation kuni
+    public int RollCount { get; set; } // jami rulonlar soni
+    public decimal Length { get; set; } // butun savdo bo'yicha jami uzunlik
+    public decimal Amount { get; set; } // jami narxi
+    public decimal Discount { get; set; } // chegirma narxi
     public string Description { get; set; } = string.Empty;
-
-    public long CustomerOperationId { get; set; }
     public CustomerOperationDto CustomerOperation { get; set; } = default!;
-
-    public long CustomerId { get; set; }
+    public DiscountOperationDto DiscountOperation { get; set; } = default!;
+    public CurrencyDto Currency { get; set; } = default!;
     public CustomerDto Customer { get; set; } = default!;
+    public ICollection<SaleItemDto> Items { get; set; } = default!;
 
-    public ICollection<SaleItemDto> SaleItems { get; set; } = default!;
 }

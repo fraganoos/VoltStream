@@ -3,20 +3,21 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
 public record CreateSupplyCommand(
-    DateTime OperationDate,
+    DateTimeOffset Date,
     long CategoryId,
     string CategoryName,
     long ProductId,
     string ProductName,
-    decimal CountRoll,
-    decimal QuantityPerRoll,
-    decimal TotalQuantity,
-    decimal Price,
-    decimal DiscountPercent)
+    decimal RollCount,
+    decimal LengthPerRoll,
+    decimal TotalLength,
+    decimal UnitPrice,
+    decimal DiscountRate)
     : IRequest<long>;
 
 public class CreateSupplyCommandHandler(
@@ -27,13 +28,13 @@ public class CreateSupplyCommandHandler(
     public async Task<long> Handle(CreateSupplyCommand request, CancellationToken cancellationToken)
     {
         var warehouse = await context.Warehouses
-            .Include(w => w.Items)
+            .Include(w => w.Stocks)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (warehouse is null)
         {
             context.Warehouses.Add(warehouse = new());
-            warehouse.Items = [];
+            warehouse.Stocks = [];
         }
 
         await context.BeginTransactionAsync(cancellationToken);
@@ -44,7 +45,7 @@ public class CreateSupplyCommandHandler(
             var category = new Category()
             {
                 Name = request.CategoryName.Trim(),
-                NormalizedName = request.CategoryName.Trim().ToUpper(),
+                NormalizedName = request.CategoryName.ToNormalized(),
             };
             context.Categories.Add(category);
             await context.SaveAsync(cancellationToken);
@@ -60,32 +61,28 @@ public class CreateSupplyCommandHandler(
                 NormalizedName = request.ProductName.Trim().ToUpper(),
                 CategoryId = newCategoryId
             };
+
             context.Products.Add(product);
             await context.SaveAsync(cancellationToken);
             newProductId = product.Id;
         }
 
-
-        var warehouseItem = warehouse.Items.FirstOrDefault(wh
-            => wh.ProductId == newProductId && wh.QuantityPerRoll == request.QuantityPerRoll);
+        var warehouseItem = warehouse.Stocks.FirstOrDefault(wh
+            => wh.ProductId == newProductId && wh.LengthPerRoll == request.LengthPerRoll);
 
 
         if (warehouseItem is null)
-            warehouse.Items.Add(new WarehouseItem()
-            {
-                CountRoll = request.CountRoll,
-                DiscountPercent = request.DiscountPercent,
-                Price = request.Price,
-                ProductId = newProductId,
-                QuantityPerRoll = request.QuantityPerRoll,
-                TotalQuantity = request.TotalQuantity,
-            });
+        {
+            var stock = mapper.Map<WarehouseStock>(request);
+            stock.ProductId = newProductId;
+            warehouse.Stocks.Add(stock);
+        }
         else
         {
-            warehouseItem.CountRoll += request.CountRoll;
-            warehouseItem.TotalQuantity += request.TotalQuantity;
-            warehouseItem.Price = request.Price;
-            warehouseItem.DiscountPercent = request.DiscountPercent;
+            warehouseItem.RollCount += request.RollCount;
+            warehouseItem.TotalLength += request.TotalLength;
+            warehouseItem.UnitPrice = request.UnitPrice;
+            warehouseItem.DiscountRate = request.DiscountRate;
         }
 
         var supply = mapper.Map<Supply>(request);

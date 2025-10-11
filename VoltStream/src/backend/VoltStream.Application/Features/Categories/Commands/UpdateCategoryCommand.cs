@@ -7,7 +7,10 @@ using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
-public record UpdateCategoryCommand(long Id, string Name) : IRequest<bool>;
+public record UpdateCategoryCommand(
+    long Id,
+    string Name)
+    : IRequest<bool>;
 
 public class UpdateCategoryCommandHandler(
     IAppDbContext context,

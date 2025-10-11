@@ -19,7 +19,7 @@ public class GetSaleByIdQueryHandler(
 {
     public async Task<SaleDto> Handle(GetSaleByIdQuery request, CancellationToken cancellationToken)
         => mapper.Map<SaleDto>(await context.Sales
-            .Include(sale => sale.SaleItems)
+            .Include(sale => sale.Items)
             .Include(s => s.CustomerOperation)
             .FirstOrDefaultAsync(s => s.Id == request.Id, cancellationToken))
         ?? throw new NotFoundException(nameof(Sale), nameof(request.Id), request.Id);

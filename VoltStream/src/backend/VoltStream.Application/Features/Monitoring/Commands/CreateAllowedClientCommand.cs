@@ -12,7 +12,7 @@ using VoltStream.Domain.Entities;
 public record CreateAllowedClientCommand(
     string IpAddress,
     string? DeviceName,
-    bool IsBlocked)
+    bool IsActive)
     : IRequest<long>;
 
 public class CreateAllowedClientCommandHandler(

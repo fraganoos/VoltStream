@@ -6,7 +6,11 @@ using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
-public record UpdateProductCommand(long Id, string Name, long CategoryId) : IRequest<bool>;
+public record UpdateProductCommand(
+    long Id,
+    string Name,
+    long CategoryId)
+    : IRequest<bool>;
 
 public class UpdateProductCommandHandler(
     IAppDbContext context)

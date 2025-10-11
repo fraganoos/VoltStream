@@ -31,7 +31,7 @@ public partial class IPAccessPage : Page
 
     private void IpDataGrid_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
     {
-        if (e.EditAction == DataGridEditAction.Commit && e.Row.Item is AllowedClientDto editedRow)
+        if (e.EditAction == DataGridEditAction.Commit && e.Row.Item is AllowedClientResponse editedRow)
         {
             Dispatcher.BeginInvoke(new Action(async () =>
             {

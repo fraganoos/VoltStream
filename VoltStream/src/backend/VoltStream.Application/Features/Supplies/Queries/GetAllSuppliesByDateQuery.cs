@@ -31,7 +31,7 @@ public class GetAllSuppliesByDateQueryHandler(
 
         var supplies = mapper.Map<IReadOnlyCollection<SupplyDto>>(await context.Supplies
             .Where(s => !s.IsDeleted)
-            .Where(s => s.OperationDate >= startUtc && s.OperationDate < endUtc)
+            .Where(s => s.Date >= startUtc && s.Date < endUtc)
             .Include(s => s.Product)
                 .ThenInclude(p => p.Category)
             .ToListAsync(cancellationToken));

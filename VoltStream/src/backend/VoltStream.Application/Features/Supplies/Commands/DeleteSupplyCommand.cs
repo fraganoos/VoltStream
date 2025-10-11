@@ -14,23 +14,38 @@ public class DeleteSupplyCommandHandler(
 {
     public async Task<bool> Handle(DeleteSupplyCommand request, CancellationToken cancellationToken)
     {
-        var supply = await context.Supplies.FirstOrDefaultAsync(s => s.Id == request.Id, cancellationToken)
+        // Supply ni olish
+        var supply = await context.Supplies
+            .FirstOrDefaultAsync(s => s.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Supply), nameof(request.Id), request.Id);
 
-        var resedue = await context.WarehouseItems
-            .FirstOrDefaultAsync(wh => wh.ProductId == supply.ProductId &&
-                wh.QuantityPerRoll == supply.QuantityPerRoll, cancellationToken)
-            ?? throw new NotFoundException(nameof(WarehouseItem), nameof(request.Id), request.Id);
+        // WarehouseStock ni olish
+        var stock = await context.WarehouseStocks
+            .FirstOrDefaultAsync(ws => ws.ProductId == supply.ProductId &&
+                                       ws.LengthPerRoll == supply.LengthPerRoll,
+                                   cancellationToken)
+            ?? throw new NotFoundException(nameof(WarehouseStock), nameof(supply.Id), supply.Id);
 
-        if (resedue.TotalQuantity < supply.TotalQuantity)
-            throw new ConflictException($"Omborda bu maxsulotdan faqat {resedue.TotalQuantity} metr mavjud!");
+        if (stock.TotalLength < supply.TotalLength)
+            throw new ConflictException($"Omborda bu mahsulotdan faqat {stock.TotalLength} metr mavjud!");
 
         await context.BeginTransactionAsync(cancellationToken);
 
-        resedue.TotalQuantity -= supply.TotalQuantity;
-        resedue.CountRoll -= supply.CountRoll;
-        supply.IsDeleted = true;
+        try
+        {
+            // WarehouseStockni kamaytirish
+            stock.TotalLength -= supply.TotalLength;
+            stock.RollCount -= supply.RollCount;
 
-        return await context.CommitTransactionAsync(cancellationToken);
+            // Supply ni soft delete qilish
+            supply.IsDeleted = true;
+
+            return await context.CommitTransactionAsync(cancellationToken);
+        }
+        catch
+        {
+            await context.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
     }
 }

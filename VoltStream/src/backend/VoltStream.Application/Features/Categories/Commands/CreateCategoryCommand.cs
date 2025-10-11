@@ -8,7 +8,9 @@ using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
-public record CreateCategoryCommand(string Name) : IRequest<long>;
+public record CreateCategoryCommand(
+    string Name)
+    : IRequest<long>;
 
 public class CreateCategoryCommandHandler(
     IAppDbContext context,

@@ -1,7 +1,8 @@
 ﻿namespace ApiServices.Interfaces;
 
-using ApiServices.DTOs.Users;
 using ApiServices.Models;
+using ApiServices.Models.Reqiuests;
+using ApiServices.Models.Responses;
 using Refit;
 using System.Threading.Tasks;
 
@@ -9,5 +10,5 @@ using System.Threading.Tasks;
 public interface ILoginApi
 {
     [Post("/user/login")]
-    Task<ApiResponse<Response<User>>> LoginAsync([Body] LoginRequest request);
+    Task<Response<UserResponse>> LoginAsync([Body] LoginRequest request);
 }

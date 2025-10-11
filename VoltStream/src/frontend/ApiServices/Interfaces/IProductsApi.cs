@@ -1,26 +1,31 @@
 ﻿namespace ApiServices.Interfaces;
 
-using ApiServices.DTOs.Products;
 using ApiServices.Models;
+using ApiServices.Models.Reqiuests;
+using ApiServices.Models.Responses;
 using Refit;
 
 [Headers("accept: application/json")]
 public interface IProductsApi
 {
     [Post("/products")]
-    Task<ApiResponse<Product>> CreateAsync([Body] Product productCreate);
+    Task<Response<long>> CreateAsync([Body] ProductRequest request);
 
     [Put("/products")]
-    Task<ApiResponse<Product>> UpdateAsync([Body] Product productUpdate);
+    Task<Response<bool>> UpdateAsync([Body] ProductRequest request);
 
     [Delete("/products/{id}")]
-    Task<ApiResponse<string>> DeleteAsync(long id);
+    Task<Response<bool>> DeleteAsync(long id);
 
     [Get("/products/{id}")]
-    Task<ApiResponse<Product>> GetByIdAsync(long id);
+    Task<Response<ProductResponse>> GetByIdAsync(long id);
 
     [Get("/products")]
-    Task<ApiResponse<Response<List<Product>>>> GetAllAsync();
+    Task<Response<List<ProductResponse>>> GetAllAsync();
+
     [Get("/products/categoryId={Id}")]
-    Task<ApiResponse<Response<List<Product>>>> GetAllByCategoryIdAsync(long id);
+    Task<Response<List<ProductResponse>>> GetAllByCategoryIdAsync(long id);
+
+    [Post("/products/filter")]
+    Task<Response<List<ProductResponse>>> Filter(FilteringRequest request);
 }

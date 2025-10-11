@@ -2,16 +2,18 @@
 
 public class SaleItem : Auditable
 {
-    public long SaleId { get; set; }
-    public long ProductId { get; set; }
-    public decimal CountRoll { get; set; }  // rulon soni
-    public decimal QuantityPerRoll { get; set; }  //rulon uzunligi
-    public decimal TotalQuantity { get; set; } // jami uzunlik
-    public decimal Price { get; set; } // 1 metr narxi
-    public decimal DiscountPersent { get; set; }
-    public decimal Discount { get; set; }
-    public decimal TotalSumm { get; set; } // jami summa
+    public int RollCount { get; set; }  // rulon soni
+    public decimal LengthPerRoll { get; set; }  //rulon uzunligi
+    public decimal TotalLength { get; set; } // jami uzunlik
+    public decimal UnitPrice { get; set; } // 1 metr narxi
+    public decimal DiscountRate { get; set; }
+    public decimal DiscountAmount { get; set; }
+    public decimal TotalAmount { get; set; } // jami summa
+    public decimal FinalAmount { get; set; }
 
+    public long SaleId { get; set; }
     public Sale Sale { get; set; } = default!;
+
+    public long ProductId { get; set; }
     public Product Product { get; set; } = default!;
 }

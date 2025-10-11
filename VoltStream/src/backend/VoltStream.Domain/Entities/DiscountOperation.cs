@@ -2,12 +2,14 @@
 
 public class DiscountOperation : Auditable
 {
-    public DateTime Date { get; set; }
+    public DateTimeOffset Date { get; set; }
     public string Description { get; set; } = string.Empty;
-    public decimal Summa { get; set; }
-    public bool IsDiscountUsed { get; set; }
-    public decimal DiscountSumm { get; set; }
+    public bool IsApplied { get; set; }
+    public decimal Amount { get; set; }
 
     public long CustomerId { get; set; }
     public Customer Customer { get; set; } = default!;
+
+    public long SaleId { get; set; }
+    public Sale Sale { get; set; } = default!;
 }

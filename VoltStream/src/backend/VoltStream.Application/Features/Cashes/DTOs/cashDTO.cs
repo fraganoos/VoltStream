@@ -1,8 +1,15 @@
 ﻿namespace VoltStream.Application.Features.Cashes.DTOs;
-public record CashDTO
+
+using VoltStream.Domain.Entities;
+
+public record CashDto
 {
     public long Id { get; set; }
-    public decimal UzsBalance { get; set; }
-    public decimal UsdBalance { get; set; }
-    public decimal Kurs { get; set; }
+    public decimal Balance { get; set; }
+    public bool IsActive { get; set; } = true;
+
+    public long CurrencyId { get; set; }
+    public Currency Currency { get; set; } = default!;
+
+    public ICollection<CashOperationDto> CashOperations { get; set; } = default!;
 }

@@ -9,14 +9,15 @@ using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
 
 public record CreatePaymentCommand(
-    DateTimeOffset PaidDate,
+    DateTimeOffset PaidAt,
     long CustomerId,
-    PaymentType PaymentType,
-    decimal Summa,
-    CurrencyType CurrencyType,
-    decimal Kurs,
-    decimal DefaultSumm,
-    string Description) : IRequest<long>;
+    PaymentType Type,
+    decimal Amount,
+    long CurrencyId,
+    decimal ExchangeRate,
+    decimal NetAmount,
+    string Description)
+    : IRequest<long>;
 
 public class CreatePaymentCommandHandler(
     IAppDbContext context,
@@ -25,71 +26,94 @@ public class CreatePaymentCommandHandler(
 {
     public async Task<long> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
     {
-        var customer = context.Customers
-            .Include(c => c.Account)
-            .FirstOrDefault(dk => dk.Id == request.CustomerId)
-            ?? throw new NotFoundException(nameof(Account));
-        var account = customer.Account;
-
-        if (request.PaymentType == PaymentType.Cash)
-        {
-            var cash = await context.Cashes.FirstOrDefaultAsync(cancellationToken)
-                ?? throw new NotFoundException(nameof(Cash));
-
-            context.CashOperations.Add(new CashOperation
-            {
-                CurrencyType = request.CurrencyType,
-                Date = DateTime.UtcNow,
-                Description = $"ID = {request.CustomerId}. Mijozdan kirim",
-                Summa = request.Summa
-            });
-
-            if (request.CurrencyType == CurrencyType.UZS)
-                cash.UzsBalance += request.Summa;
-            else
-                cash.UsdBalance += request.Summa;
-        }
-
         await context.BeginTransactionAsync(cancellationToken);
 
-        account.CurrentSumm += request.DefaultSumm;
+        try
+        {
+            // === 1. Asosiy entitylarni olish ===
+            var customer = await context.Customers
+                .Include(c => c.Accounts)
+                .FirstOrDefaultAsync(c => c.Id == request.CustomerId, cancellationToken)
+                ?? throw new NotFoundException(nameof(Customer), nameof(request.CustomerId), request.CustomerId);
 
-        var payment = mapper.Map<Payment>(request);
-        var customerOperation = mapper.Map<CustomerOperation>(request);
-        customerOperation.OperationType = OperationType.Payment;
-        customerOperation.Description = GenerateDescription(request);
-        payment.CustomerOperation = customerOperation;
+            var currency = await context.Currencies
+                .FirstOrDefaultAsync(c => c.Id == request.CurrencyId, cancellationToken)
+                ?? throw new NotFoundException(nameof(Currency), nameof(request.CurrencyId), request.CurrencyId);
 
-        context.Payments.Add(payment);
+            // === 2. Mijoz uchun valyuta hisobini aniqlash ===
+            var account = customer.Accounts
+                .FirstOrDefault(a => a.CurrencyId == request.CurrencyId)
+                ?? throw new ConflictException("Ushbu valyutada mijoz uchun hisob mavjud emas.");
 
-        await context.CommitTransactionAsync(cancellationToken);
-        return payment.Id;
+            // === 3. Type bo‘yicha kassa yoki boshqa balansni yangilash ===
+            Cash? cash = null;
+            if (request.Type == PaymentType.Cash)
+            {
+                cash = await context.Cashes
+                    .FirstOrDefaultAsync(c => c.CurrencyId == request.CurrencyId, cancellationToken)
+                    ?? throw new NotFoundException(nameof(Cash), nameof(request.CurrencyId), request.CurrencyId);
+
+                cash.Balance += request.Amount;
+
+                context.CashOperations.Add(new CashOperation
+                {
+                    CurrencyId = request.CurrencyId,
+                    Date = DateTime.UtcNow,
+                    Description = GenerateDescription(request),
+                    Amount = request.Amount
+                });
+            }
+
+            // === 4. Mijoz account balansini yangilash ===
+            account.Balance += request.NetAmount;
+            currency.ExchangeRate = request.ExchangeRate;
+
+            // === 5. Payment va CustomerOperation yaratish ===
+            var payment = mapper.Map<Payment>(request);
+            payment.CurrencyId = request.CurrencyId;
+            payment.CustomerId = account.Id;
+
+            var customerOperation = new CustomerOperation
+            {
+                AccountId = account.Id,
+                OperationType = OperationType.Payment,
+                Amount = request.NetAmount,
+                Description = GenerateDescription(request),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            payment.CustomerOperation = customerOperation;
+
+            context.Payments.Add(payment);
+
+            // === 6. Transactionni commit qilish ===
+            await context.CommitTransactionAsync(cancellationToken);
+
+            return payment.Id;
+        }
+        catch
+        {
+            await context.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
     }
 
+    // === 7. Description generatsiyasi ===
     private static string GenerateDescription(CreatePaymentCommand request)
-        => request.PaymentType switch
+        => request.Type switch
         {
-            PaymentType.Cash => request.CurrencyType switch
-            {
-                CurrencyType.UZS => $"Naqd: {request.Summa} UZS.",
-                CurrencyType.USD => $"Naqd: {request.Summa} USD. Kurs: {request.Kurs} UZS",
-                _ => request.Description
-            },
-            PaymentType.BankAccount => request.CurrencyType switch
-            {
-                CurrencyType.UZS => $"Bank: {request.Summa} UZS. {request.Kurs}% dan",
-                _ => request.Description
-            },
-            PaymentType.Mobile => request.CurrencyType switch
-            {
-                CurrencyType.UZS => $"Online: {request.Summa} UZS. {request.Kurs}% dan.",
-                _ => request.Description
-            },
-            PaymentType.Card => request.CurrencyType switch
-            {
-                CurrencyType.UZS => $"Plastik: {request.Summa} UZS. {request.Kurs}% dan",
-                _ => request.Description
-            },
+            PaymentType.Cash => $"Naqd to‘lov: {request.Amount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
+            PaymentType.BankAccount => $"Bank orqali to‘lov: {request.Amount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
+            PaymentType.Card => $"Karta orqali to‘lov: {request.Amount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
+            PaymentType.Mobile => $"Mobil to‘lov: {request.Amount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
             _ => request.Description
+        };
+
+    private static string GetCurrencyCode(long currencyId)
+        => currencyId switch
+        {
+            1 => "UZS",
+            2 => "USD",
+            _ => "VALYUTA"
         };
 }

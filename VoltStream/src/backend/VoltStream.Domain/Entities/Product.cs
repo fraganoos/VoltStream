@@ -8,5 +8,5 @@ public class Product : Auditable
     public long CategoryId { get; set; }
     public Category Category { get; set; } = default!;
 
-    public ICollection<WarehouseItem> WarehouseItems { get; set; } = default!;
+    public ICollection<WarehouseStock> Stocks { get; set; } = default!;
 }

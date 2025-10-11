@@ -8,7 +8,7 @@ public class Customer : Auditable
     public string? Address { get; set; }
     public string? Description { get; set; }
 
-    public Account Account { get; set; } = default!;
+    public ICollection<Account> Accounts { get; set; } = default!;
     public ICollection<CustomerOperation> CustomerOperations { get; set; } = default!;
     public ICollection<DiscountOperation> DiscountOperations { get; set; } = default!;
 }

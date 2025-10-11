@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Commons.Models;
+
 public class HttpPagingMetadataWriter(IHttpContextAccessor accessor) : IPagingMetadataWriter
 {
     public void Write(PagedListMetadata metadata)

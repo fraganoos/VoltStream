@@ -1,8 +1,13 @@
-﻿using ApiServices.DTOs.Products;
+﻿namespace VoltStream.WPF.Products.Models;
+
+using ApiServices.Extensions;
 using ApiServices.Interfaces;
+using ApiServices.Models;
+using ApiServices.Models.Responses;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DocumentFormat.OpenXml;
+using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -12,8 +17,6 @@ using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
 using VoltStream.WPF.Commons;
-using VoltStream.WPF.Products.Models;
-using MessageBox = System.Windows.MessageBox;
 
 public partial class ProductViewModel : ViewModelBase
 {
@@ -22,18 +25,18 @@ public partial class ProductViewModel : ViewModelBase
     public ProductViewModel(IServiceProvider services)
     {
         this.services = services;
-        LoadInitialDataAsync();
+        _ = LoadInitialDataAsync();
     }
 
-    [ObservableProperty] private Category? selectedCategory;
-    [ObservableProperty] private ObservableCollection<Category> categories = new();
+    [ObservableProperty] private CategoryResponse? selectedCategory;
+    [ObservableProperty] private ObservableCollection<CategoryResponse> categories = [];
 
-    [ObservableProperty] private Product? selectedProduct;
-    [ObservableProperty] private ObservableCollection<Product> allProducts = new(); // Barcha mahsulotlar
-    [ObservableProperty] private ObservableCollection<Product> products = new(); // ComboBox uchun filtrlangan productlar
+    [ObservableProperty] private ProductResponse? selectedProduct;
+    [ObservableProperty] private ObservableCollection<ProductResponse> allProducts = []; // Barcha mahsulotlar
+    [ObservableProperty] private ObservableCollection<ProductResponse> products = []; // ComboBox uchun filtrlangan productlar
 
-    [ObservableProperty] private ObservableCollection<ProductItemViewModel> productItems = new();
-    [ObservableProperty] private ObservableCollection<ProductItemViewModel> filteredProductItems = new();
+    [ObservableProperty] private ObservableCollection<ProductItemViewModel> productItems = [];
+    [ObservableProperty] private ObservableCollection<ProductItemViewModel> filteredProductItems = [];
 
     [ObservableProperty] private decimal? finalAmount;
 
@@ -53,7 +56,7 @@ public partial class ProductViewModel : ViewModelBase
         SelectedProduct = null;
 
         // Barcha productlarni qayta tiklaymiz
-        Products = new ObservableCollection<Product>(AllProducts);
+        Products = new ObservableCollection<ProductResponse>(AllProducts);
 
         // Datagridni to‘liq ko‘rsatamiz
         FilteredProductItems = new ObservableCollection<ProductItemViewModel>(ProductItems);
@@ -110,25 +113,25 @@ public partial class ProductViewModel : ViewModelBase
                     worksheet.Cell(row, 2).Value = item.Name;
 
                     worksheet.Cell(row, 3).Value = item.RollLength;
-                    worksheet.Cell(row, 3).Value = (int)item.RollLength;
+                    worksheet.Cell(row, 3).Value = (int)item.RollLength!;
                     worksheet.Cell(row, 3).Style.NumberFormat.Format = "#,##0";
 
                     worksheet.Cell(row, 4).Value = item.Quantity;
-                    worksheet.Cell(row, 4).Value = (int)item.Quantity;
+                    worksheet.Cell(row, 4).Value = (int)item.Quantity!;
                     worksheet.Cell(row, 4).Style.NumberFormat.Format = "#,##0";
 
                     worksheet.Cell(row, 5).Value = item.TotalCount;
-                    worksheet.Cell(row, 5).Value = (int)item.TotalCount;
+                    worksheet.Cell(row, 5).Value = (int)item.TotalCount!;
                     worksheet.Cell(row, 5).Style.NumberFormat.Format = "#,##0";
-                    
+
                     worksheet.Cell(row, 6).Value = item.Unit;
 
                     worksheet.Cell(row, 7).Value = item.Price;
-                    worksheet.Cell(row, 7).Value = (decimal)item.Price;
+                    worksheet.Cell(row, 7).Value = (decimal)item.Price!;
                     worksheet.Cell(row, 7).Style.NumberFormat.Format = "#,##0.00";
-                    
+
                     worksheet.Cell(row, 8).Value = item.TotalAmount;
-                    worksheet.Cell(row, 8).Value = (decimal)item.TotalAmount;
+                    worksheet.Cell(row, 8).Value = (decimal)item.TotalAmount!;
                     worksheet.Cell(row, 8).Style.NumberFormat.Format = "#,##0.00";
                     // --- Raqamli ustunlar o‘ngga tekislansin
                     worksheet.Range(row, 3, row, 8)
@@ -143,7 +146,7 @@ public partial class ProductViewModel : ViewModelBase
                 worksheet.Cell(row, 1).Style.Font.Bold = true;
                 worksheet.Cell(row, 8).Value = FinalAmount ?? 0;
                 worksheet.Cell(row, 8).Style.Font.Bold = true;
-                worksheet.Cell(row, 8).Value = (decimal)FinalAmount;
+                worksheet.Cell(row, 8).Value = (decimal)FinalAmount!;
                 worksheet.Cell(row, 8).Style.NumberFormat.Format = "#,##0.00";
                 worksheet.Cell(row, 8).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Right;
 
@@ -223,7 +226,7 @@ public partial class ProductViewModel : ViewModelBase
         double pageHeight = 1122.51969;  // 11.69 * 96
         double margin = 40;              // page inner margin
 
-        var items = FilteredProductItems?.ToList() ?? new List<ProductItemViewModel>();
+        var items = FilteredProductItems?.ToList() ?? [];
         int rowsPerPage = 25; // adjust depending on row height — tweak if you need more/less per page
 
         int totalPages = (int)Math.Ceiling((double)items.Count / rowsPerPage);
@@ -274,7 +277,7 @@ public partial class ProductViewModel : ViewModelBase
 
             // Define 8 columns (you can adjust widths)
             // We'll use proportional widths: you can tweak numbers to your layout
-            tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.4, GridUnitType.Star) }); // Category
+            tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.4, GridUnitType.Star) }); // CategoryResponse
             tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2.4, GridUnitType.Star) }); // Name
             tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star) }); // RollLength
             tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star) }); // Quantity
@@ -285,7 +288,7 @@ public partial class ProductViewModel : ViewModelBase
 
             // Header row
             tableGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            string[] headers = { "Mahsulot turi", "Nomi", "Rulon uzunligi", "Rulon soni", "Jami", "O‘lchov", "Narxi", "Umumiy summa" };
+            string[] headers = ["Mahsulot turi", "Nomi", "Rulon uzunligi", "Rulon soni", "Jami", "O‘lchov", "Narxi", "Umumiy summa"];
             for (int c = 0; c < headers.Length; c++)
             {
                 var border = new Border
@@ -317,7 +320,7 @@ public partial class ProductViewModel : ViewModelBase
                 tableGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(24) });
 
                 string[] values =
-                {
+                [
                 item.Category ?? string.Empty,
                 item.Name ?? string.Empty,
                 item.RollLength?.ToString("N0") ?? string.Empty,
@@ -326,7 +329,7 @@ public partial class ProductViewModel : ViewModelBase
                 item.Unit ?? string.Empty,
                 item.Price?.ToString("N2") ?? string.Empty,
                 (item.TotalAmount ?? 0m).ToString("N2")
-            };
+            ];
 
                 for (int c = 0; c < values.Length; c++)
                 {
@@ -449,22 +452,30 @@ public partial class ProductViewModel : ViewModelBase
     {
         try
         {
-            var response = await services.GetRequiredService<IWarehouseItemsApi>()
-                .GetAllWarehouseItemsAsync();
+            FilteringRequest request = new()
+            {
+                Filters = new()
+                {
+                    ["Product"] = ["include:Category"]
+                }
+            };
 
-            if (response.IsSuccessful && response.Content.Data != null)
+            var srvc = services.GetRequiredService<IWarehouseStocksApi>();
+            var response = await srvc.Filter(request).Handle();
+
+            if (response.IsSuccess)
             {
                 ProductItems.Clear();
-                foreach (var item in response.Content.Data)
-                { 
+                foreach (var item in response.Data!)
+                {
                     ProductItems.Add(new ProductItemViewModel
                     {
                         Category = item.Product.Category.Name,
                         Name = item.Product.Name,
-                        RollLength = item.QuantityPerRoll,
-                        Quantity = item.CountRoll,
-                        Price = item.Price,
-                        TotalCount = (int)item.TotalQuantity,
+                        RollLength = item.LengthPerRoll,
+                        Quantity = item.RollCount,
+                        Price = item.UnitPrice,
+                        TotalCount = (int)item.TotalLength,
                     });
                 }
             }
@@ -476,7 +487,7 @@ public partial class ProductViewModel : ViewModelBase
     }
 
     // --- Kategoriya bo‘yicha filtr
-    partial void OnSelectedCategoryChanged(Category? value)
+    partial void OnSelectedCategoryChanged(CategoryResponse? value)
     {
         if (value != null)
         {
@@ -504,8 +515,8 @@ public partial class ProductViewModel : ViewModelBase
         ApplyFilter();
     }
 
-    // --- Product tanlanganda DataGrid filtrlansin
-    partial void OnSelectedProductChanged(Product? value)
+    // --- ProductResponse tanlanganda DataGrid filtrlansin
+    partial void OnSelectedProductChanged(ProductResponse? value)
     {
         ApplyFilter();
     }
@@ -515,9 +526,10 @@ public partial class ProductViewModel : ViewModelBase
     {
         try
         {
-            var response = await services.GetRequiredService<ICategoriesApi>().GetAllAsync();
-            if (response.IsSuccessful && response.Content.Data != null)
-                Categories = new ObservableCollection<Category>(response.Content.Data);
+            var response = await services.GetRequiredService<ICategoriesApi>().GetAllAsync().Handle();
+            var mapper = services.GetRequiredService<IMapper>();
+            if (response.IsSuccess)
+                Categories = mapper.Map<ObservableCollection<CategoryResponse>>(response.Data!);
         }
         catch (Exception ex)
         {
@@ -530,10 +542,11 @@ public partial class ProductViewModel : ViewModelBase
     {
         try
         {
-            var response = await services.GetRequiredService<IProductsApi>().GetAllAsync();
-            if (response.IsSuccessful && response.Content.Data != null)
+            var response = await services.GetRequiredService<IProductsApi>().GetAllAsync().Handle();
+            var mapper = services.GetRequiredService<IMapper>();
+            if (response.IsSuccess)
             {
-                AllProducts = new ObservableCollection<Product>(response.Content.Data);
+                AllProducts = mapper.Map<ObservableCollection<ProductResponse>>(response.Data!);
 
                 // Default holatda barcha productlar ComboBox’da ko‘rinadi
                 Products.Clear();
