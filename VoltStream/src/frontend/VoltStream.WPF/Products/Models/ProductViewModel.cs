@@ -1,9 +1,9 @@
 ﻿namespace VoltStream.WPF.Products.Models;
 
-using ApiServices.DTOs.Supplies;
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
 using ApiServices.Models;
+using ApiServices.Models.Responses;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DocumentFormat.OpenXml;
@@ -17,7 +17,6 @@ using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
 using VoltStream.WPF.Commons;
-using MessageBox = System.Windows.MessageBox;
 
 public partial class ProductViewModel : ViewModelBase
 {
@@ -29,12 +28,12 @@ public partial class ProductViewModel : ViewModelBase
         _ = LoadInitialDataAsync();
     }
 
-    [ObservableProperty] private Category? selectedCategory;
-    [ObservableProperty] private ObservableCollection<Category> categories = [];
+    [ObservableProperty] private CategoryResponse? selectedCategory;
+    [ObservableProperty] private ObservableCollection<CategoryResponse> categories = [];
 
-    [ObservableProperty] private Product? selectedProduct;
-    [ObservableProperty] private ObservableCollection<Product> allProducts = []; // Barcha mahsulotlar
-    [ObservableProperty] private ObservableCollection<Product> products = []; // ComboBox uchun filtrlangan productlar
+    [ObservableProperty] private ProductResponse? selectedProduct;
+    [ObservableProperty] private ObservableCollection<ProductResponse> allProducts = []; // Barcha mahsulotlar
+    [ObservableProperty] private ObservableCollection<ProductResponse> products = []; // ComboBox uchun filtrlangan productlar
 
     [ObservableProperty] private ObservableCollection<ProductItemViewModel> productItems = [];
     [ObservableProperty] private ObservableCollection<ProductItemViewModel> filteredProductItems = [];
@@ -57,7 +56,7 @@ public partial class ProductViewModel : ViewModelBase
         SelectedProduct = null;
 
         // Barcha productlarni qayta tiklaymiz
-        Products = new ObservableCollection<Product>(AllProducts);
+        Products = new ObservableCollection<ProductResponse>(AllProducts);
 
         // Datagridni to‘liq ko‘rsatamiz
         FilteredProductItems = new ObservableCollection<ProductItemViewModel>(ProductItems);
@@ -278,7 +277,7 @@ public partial class ProductViewModel : ViewModelBase
 
             // Define 8 columns (you can adjust widths)
             // We'll use proportional widths: you can tweak numbers to your layout
-            tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.4, GridUnitType.Star) }); // Category
+            tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.4, GridUnitType.Star) }); // CategoryResponse
             tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2.4, GridUnitType.Star) }); // Name
             tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star) }); // RollLength
             tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star) }); // Quantity
@@ -488,7 +487,7 @@ public partial class ProductViewModel : ViewModelBase
     }
 
     // --- Kategoriya bo‘yicha filtr
-    partial void OnSelectedCategoryChanged(Category? value)
+    partial void OnSelectedCategoryChanged(CategoryResponse? value)
     {
         if (value != null)
         {
@@ -516,8 +515,8 @@ public partial class ProductViewModel : ViewModelBase
         ApplyFilter();
     }
 
-    // --- Product tanlanganda DataGrid filtrlansin
-    partial void OnSelectedProductChanged(Product? value)
+    // --- ProductResponse tanlanganda DataGrid filtrlansin
+    partial void OnSelectedProductChanged(ProductResponse? value)
     {
         ApplyFilter();
     }
@@ -530,7 +529,7 @@ public partial class ProductViewModel : ViewModelBase
             var response = await services.GetRequiredService<ICategoriesApi>().GetAllAsync().Handle();
             var mapper = services.GetRequiredService<IMapper>();
             if (response.IsSuccess)
-                Categories = mapper.Map<ObservableCollection<Category>>(response.Data!);
+                Categories = mapper.Map<ObservableCollection<CategoryResponse>>(response.Data!);
         }
         catch (Exception ex)
         {
@@ -547,7 +546,7 @@ public partial class ProductViewModel : ViewModelBase
             var mapper = services.GetRequiredService<IMapper>();
             if (response.IsSuccess)
             {
-                AllProducts = mapper.Map<ObservableCollection<Product>>(response.Data!);
+                AllProducts = mapper.Map<ObservableCollection<ProductResponse>>(response.Data!);
 
                 // Default holatda barcha productlar ComboBox’da ko‘rinadi
                 Products.Clear();

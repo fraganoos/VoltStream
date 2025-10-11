@@ -92,7 +92,7 @@ public partial class SuppliesPage : Page
             return;
         }
 
-        // — Product combobox bo‘sh bo‘lib qoladi
+        // — ProductResponse combobox bo‘sh bo‘lib qoladi
         cbxProduct.ItemsSource = new List<ProductViewModel>();
     }
 
