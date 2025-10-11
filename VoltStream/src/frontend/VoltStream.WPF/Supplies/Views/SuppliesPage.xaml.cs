@@ -245,7 +245,7 @@ public partial class SuppliesPage : Page
                 RollCount = rollCount,
                 LengthPerRoll = perRollCount,
                 TotalLength = totalQuantity,
-                ProductName = ((ProductRequest)cbxProduct.SelectedItem)?.Name ?? cbxProduct.Text ?? string.Empty,
+                ProductName = ((ProductResponse)cbxProduct.SelectedItem)?.Name ?? cbxProduct.Text ?? string.Empty,
                 CategoryName = ((CategoryResponse)cbxCategory.SelectedItem)?.Name ?? cbxCategory.Text ?? string.Empty,
                 UnitPrice = price,
                 DiscountRate = discountPercent

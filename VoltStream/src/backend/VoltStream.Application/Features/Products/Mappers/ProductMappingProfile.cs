@@ -20,8 +20,8 @@ public class ProductMappingProfile : Profile
 
         CreateMap<Product, ProductDto>();
 
-        CreateMap<WarehouseStock, WarehouseStockForProductDto>();
-        CreateMap<Category, CategoryForProductDto>();
         CreateMap<Product, ProductDto>();
+        CreateMap<Product, ProductForWarehouseDto>();
+        CreateMap<Product, ProductForCategoryDto>();
     }
 }

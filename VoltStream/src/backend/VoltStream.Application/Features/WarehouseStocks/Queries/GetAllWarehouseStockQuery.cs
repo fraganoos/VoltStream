@@ -11,7 +11,7 @@ using VoltStream.Application.Features.WarehouseStocks.DTOs;
 
 public record GetAllWarehouseStockQuery() : IRequest<IReadOnlyCollection<WarehouseStockDto>>;
 
-public class GetAllWarehouseItemQueryHandler(
+public class GetAllWarehouseStockQueryHandler(
     IAppDbContext context,
     IMapper mapper)
     : IRequestHandler<GetAllWarehouseStockQuery, IReadOnlyCollection<WarehouseStockDto>>

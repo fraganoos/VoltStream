@@ -1,4 +1,4 @@
-﻿namespace VoltStream.Application.Features.WarehouseStocks.DTOs;
+﻿namespace VoltStream.Application.Features.Products.DTOs;
 
 using VoltStream.Application.Features.Categories.DTOs;
 
@@ -8,5 +8,5 @@ public record ProductForWarehouseDto
     public string Name { get; set; } = string.Empty;
 
     public long CategoryId { get; set; }
-    public CategoryDto? Category { get; set; } = default!;
+    public CategoryForProductDto? Category { get; set; } = default!;
 }

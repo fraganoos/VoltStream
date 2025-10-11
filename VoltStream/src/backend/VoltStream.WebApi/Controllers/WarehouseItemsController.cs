@@ -17,6 +17,6 @@ public class WarehouseItemsController : BaseController
         => Ok(new Response { Data = await Mediator.Send(new GetProductDetailsFromWarehouse(Id)) });
 
     [HttpPost("filter")]
-    public async Task<IActionResult> GetFiltered(WarehouseItemFilterQuery query)
+    public async Task<IActionResult> GetFiltered(WarehouseStockFilterQuery query)
             => Ok(new Response { Data = await Mediator.Send(query) });
 }

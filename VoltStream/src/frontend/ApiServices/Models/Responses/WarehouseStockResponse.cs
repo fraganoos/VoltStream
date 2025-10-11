@@ -1,6 +1,6 @@
 ﻿namespace ApiServices.Models.Responses;
 
-public class WarehouseStockResponse
+public record WarehouseStockResponse
 {
     public long Id { get; set; }
     public decimal RollCount { get; set; }  // rulon soni

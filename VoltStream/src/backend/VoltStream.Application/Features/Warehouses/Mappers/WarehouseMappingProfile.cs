@@ -15,8 +15,8 @@ public class WarehouseMappingProfile : Profile
         CreateMap<WarehouseStock, WarehouseStockDto>();
         CreateMap<Warehouse, WarehouseDto>();
 
-        CreateMap<WarehouseItem, WarehouseItemDto>();
-        CreateMap<Warehouse, WarehouseDTO>();
+        CreateMap<WarehouseStock, WarehouseStockDto>();
+        CreateMap<Warehouse, WarehouseDto>();
         CreateMap<Product, ProductDto>();
         CreateMap<CreateWarehouseCommand, Warehouse>()
             .ForMember(dest => dest.NormalizedName,

@@ -1,4 +1,4 @@
-﻿namespace VoltStream.Application.Features.Products.DTOs;
+﻿namespace VoltStream.Application.Features.Categories.DTOs;
 
 public class CategoryForProductDto
 {

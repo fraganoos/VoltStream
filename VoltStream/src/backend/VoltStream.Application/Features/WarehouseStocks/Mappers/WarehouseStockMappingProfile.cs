@@ -9,6 +9,6 @@ public class WarehouseStockMappingProfile : Profile
     public WarehouseStockMappingProfile()
     {
         CreateMap<WarehouseStock, WarehouseStockDto>();
-        CreateMap<Product, ProductForWarehouseDto>();
+        CreateMap<WarehouseStock, WarehouseStockForProductDto>();
     }
 }

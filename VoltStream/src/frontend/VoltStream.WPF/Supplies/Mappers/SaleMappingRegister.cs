@@ -1,4 +1,4 @@
-﻿namespace VoltStream.WPF.Sales.Mappers;
+﻿namespace VoltStream.WPF.Supplies.Mappers;
 
 using ApiServices.Models.Reqiuests;
 using ApiServices.Models.Responses;

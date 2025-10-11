@@ -2,12 +2,15 @@
 
 using System.Text.Json.Serialization;
 
-public record CategoryDto
+public class Product
 {
     [JsonPropertyName("id")]
     public long Id { get; set; }
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
-}
 
+    [JsonPropertyName("categoryId")]
+    public long CategoryId { get; set; }
+    public Category Category { get; set; }
+}

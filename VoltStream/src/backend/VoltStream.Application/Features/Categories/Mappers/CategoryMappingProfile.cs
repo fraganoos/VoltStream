@@ -20,7 +20,7 @@ public class CategoryMappingProfile : Profile
 
         CreateMap<Category, CategoryDto>();
 
-        CreateMap<Product, ProductForCategoryDto>();
+        CreateMap<Category, CategoryForProductDto>();
 
     }
 }

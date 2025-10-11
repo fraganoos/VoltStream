@@ -1,6 +1,7 @@
 ﻿namespace VoltStream.WPF.Products.Views;
 
 using System.Windows.Controls;
+using VoltStream.WPF.Products.Models;
 
 
 /// <summary>

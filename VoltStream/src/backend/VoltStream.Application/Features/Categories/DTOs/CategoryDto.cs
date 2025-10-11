@@ -1,5 +1,7 @@
 ﻿namespace VoltStream.Application.Features.Categories.DTOs;
 
+using VoltStream.Application.Features.Products.DTOs;
+
 public class CategoryDto
 {
     public long Id { get; set; }
