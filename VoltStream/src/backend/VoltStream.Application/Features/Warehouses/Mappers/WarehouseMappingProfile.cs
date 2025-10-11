@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using VoltStream.Application.Commons.Extensions;
+using VoltStream.Application.Features.Products.DTOs;
 using VoltStream.Application.Features.Warehouses.Commands;
 using VoltStream.Application.Features.Warehouses.DTOs;
 using VoltStream.Application.Features.WarehouseStocks.DTOs;
@@ -14,6 +15,9 @@ public class WarehouseMappingProfile : Profile
         CreateMap<WarehouseStock, WarehouseStockDto>();
         CreateMap<Warehouse, WarehouseDto>();
 
+        CreateMap<WarehouseItem, WarehouseItemDto>();
+        CreateMap<Warehouse, WarehouseDTO>();
+        CreateMap<Product, ProductDto>();
         CreateMap<CreateWarehouseCommand, Warehouse>()
             .ForMember(dest => dest.NormalizedName,
                 opt => opt.MapFrom(src => src.Name.ToNormalized()));

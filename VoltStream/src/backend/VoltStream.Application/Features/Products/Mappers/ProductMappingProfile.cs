@@ -22,5 +22,6 @@ public class ProductMappingProfile : Profile
 
         CreateMap<WarehouseStock, WarehouseStockForProductDto>();
         CreateMap<Category, CategoryForProductDto>();
+        CreateMap<Product, ProductDto>();
     }
 }
