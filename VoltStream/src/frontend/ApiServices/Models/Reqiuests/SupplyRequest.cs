@@ -3,7 +3,7 @@
 public record SupplyRequest
 {
     public long Id { get; set; }
-    public DateTime Date { get; set; }
+    public DateTimeOffset Date { get; set; }
     public long CategoryId { get; set; }
     public string CategoryName { get; set; } = string.Empty;
     public long ProductId { get; set; }

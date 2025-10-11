@@ -10,6 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Payments\Models\**" />
+    <EmbeddedResource Remove="Payments\Models\**" />
+    <None Remove="Payments\Models\**" />
+    <Page Remove="Payments\Models\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Commons\Source\Icons\voltstream.ico" />
     <None Remove="Commons\Source\Images\key-icon.png" />
     <None Remove="Commons\Source\Images\LogoVolt.jpg" />
@@ -19,13 +26,12 @@
 
   <ItemGroup>
     <Folder Include="LoginPages\ViewModels\" />
-    <Folder Include="Payments\Models\" />
-    <Folder Include="Supplies\ViewModels\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="FontAwesome.Sharp" Version="6.6.0" />
+    <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>

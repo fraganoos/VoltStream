@@ -7,4 +7,5 @@ public record CurrencyRequest
     public string Code { get; set; } = string.Empty;
     public string Symbol { get; set; } = string.Empty;
     public decimal ExchangeRate { get; set; }
+    public bool IsDefault { get; set; }
 }

@@ -10,6 +10,7 @@ public class SaleItemResponse
     public decimal DiscountRate { get; set; } // chegirma bahosi foizda %
     public decimal DiscountAmount { get; set; } // chegirma qiymati narxi
     public decimal TotalAmount { get; set; } // shu tur bo'yicha olinayotgan kabelni jami narxi
+    public decimal FinalAmount { get; set; }
     public long SaleId { get; set; }
 
     public ProductResponse Product { get; set; } = default!;

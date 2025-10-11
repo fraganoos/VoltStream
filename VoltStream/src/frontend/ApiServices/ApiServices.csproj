@@ -11,10 +11,4 @@
     <PackageReference Include="Refit" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTOs\Sales\" />
-    <Folder Include="DTOs\Supplies\" />
-    <Folder Include="DTOs\Users\" />
-  </ItemGroup>
-
 </Project>

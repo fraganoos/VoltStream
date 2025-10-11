@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,12 +14,10 @@ public record SupplyFilterQuery : FilteringRequest, IRequest<IReadOnlyCollection
 
 public class SupplyFilterQueryHandler(
     IAppDbContext context,
-    IMapper mapper)
-    : IRequestHandler<SupplyFilterQuery, IReadOnlyCollection<SupplyDto>>
+    IPagingMetadataWriter writer,
+    IMapper mapper) : IRequestHandler<SupplyFilterQuery, IReadOnlyCollection<SupplyDto>>
 {
     public async Task<IReadOnlyCollection<SupplyDto>> Handle(SupplyFilterQuery request, CancellationToken cancellationToken)
         => mapper.Map<IReadOnlyCollection<SupplyDto>>(await context.Supplies
-            .AsQueryable()
-            .AsFilterable(request)
-            .ToListAsync(cancellationToken));
+            .ToPagedListAsync(request, writer, cancellationToken));
 }

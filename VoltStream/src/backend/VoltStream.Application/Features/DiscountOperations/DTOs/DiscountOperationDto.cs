@@ -1,10 +1,12 @@
 ﻿namespace VoltStream.Application.Features.DiscountOperations.DTOs;
 
-public record DiscountOperationDto(
-    long Id,
-    DateTime Date,
-    string Description,
-    bool IsApplied,
-    decimal Amount,
-    long CustomerId,
-    long SaleId);
+public record DiscountOperationDto
+{
+    public long Id { get; set; }
+    public DateTimeOffset Date { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public bool IsApplied { get; set; }
+    public decimal Amount { get; set; }
+    public long CustomerId { get; set; }
+    public long SaleId { get; set; }
+};

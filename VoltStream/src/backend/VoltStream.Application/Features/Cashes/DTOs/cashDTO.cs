@@ -8,6 +8,7 @@ public record CashDto
     public decimal Balance { get; set; }
     public bool IsActive { get; set; } = true;
 
+    public long CurrencyId { get; set; }
     public Currency Currency { get; set; } = default!;
 
     public ICollection<CashOperationDto> CashOperations { get; set; } = default!;

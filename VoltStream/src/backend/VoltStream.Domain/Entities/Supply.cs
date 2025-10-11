@@ -2,7 +2,7 @@
 
 public class Supply : Auditable
 {
-    public DateTime Date { get; set; }
+    public DateTimeOffset Date { get; set; }
     public decimal RollCount { get; set; }
     public decimal LengthPerRoll { get; set; }
     public decimal TotalLength { get; set; }

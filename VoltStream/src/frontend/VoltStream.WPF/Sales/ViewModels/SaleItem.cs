@@ -3,7 +3,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using VoltStream.WPF.Commons;
 
-public partial class SaleItemViewModel : ViewModelBase
+public partial class SaleItem : ViewModelBase
 {
     public long Id { get; set; }
     [ObservableProperty] private long categoryId;

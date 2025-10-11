@@ -6,5 +6,5 @@ public class AllowedClient : Auditable
     public string? DeviceName { get; set; }
     public string? NormalizedName { get; set; }
     public bool IsActive { get; set; }
-    public DateTime LastRequestAt { get; set; }
+    public DateTimeOffset LastRequestAt { get; set; }
 }

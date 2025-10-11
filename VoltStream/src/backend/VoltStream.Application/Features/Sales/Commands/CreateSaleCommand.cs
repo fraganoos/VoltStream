@@ -12,14 +12,16 @@ using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
 
 public record CreateSaleCommand(
+    DateTimeOffset Date,
     long CustomerId,
-    DateTime Date,
     long CurrencyId,
-    decimal Discount,
-    bool IsApplied,
+    int RollCount,
+    decimal Length,
     decimal Amount,
+    bool IsApplied,
+    decimal Discount,
     string Description,
-    List<SaleItemCommandDto> SaleItems)
+    List<SaleItemCommandDto> Items)
     : IRequest<long>;
 
 public class CreateSaleCommandHandler(
@@ -38,7 +40,7 @@ public class CreateSaleCommandHandler(
 
             var descriptionBuilder = new StringBuilder();
 
-            await ProcessSaleItemsAsync(request.SaleItems, warehouse, descriptionBuilder, cancellationToken);
+            await ProcessSaleItemsAsync(request.Items, warehouse, descriptionBuilder, cancellationToken);
 
             var discountOperation = CreateDiscountOperation(request, customer, descriptionBuilder);
             var sale = mapper.Map<Sale>(request);
@@ -134,11 +136,11 @@ public class CreateSaleCommandHandler(
         }
     }
 
-    private DiscountOperation CreateDiscountOperation(CreateSaleCommand request, Customer customer, StringBuilder description)
+    private static DiscountOperation CreateDiscountOperation(CreateSaleCommand request, Customer customer, StringBuilder description)
     {
         return new DiscountOperation
         {
-            Date = request.Date,
+            Date = request.Date.ToOffset(TimeSpan.Zero),
             Amount = request.Discount,
             IsApplied = request.IsApplied,
             Description = $"Chegirma savdo uchun: {description}",
@@ -146,14 +148,14 @@ public class CreateSaleCommandHandler(
         };
     }
 
-    private void UpdateAccountBalance(Account account, decimal amount, decimal discount, bool isApplied)
+    private static void UpdateAccountBalance(Account account, decimal amount, decimal discount, bool isApplied)
     {
         account.Balance -= amount;
         if (!isApplied)
             account.Discount += discount;
     }
 
-    private CustomerOperation CreateCustomerOperation(Sale sale, Account account, string description, StringBuilder descriptionBuilder)
+    private static CustomerOperation CreateCustomerOperation(Sale sale, Account account, string description, StringBuilder descriptionBuilder)
     {
         return new CustomerOperation
         {

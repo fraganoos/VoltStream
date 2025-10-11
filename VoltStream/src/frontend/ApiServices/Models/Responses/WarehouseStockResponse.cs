@@ -10,5 +10,6 @@ public class WarehouseStockResponse
     public decimal DiscountRate { get; set; }
     public long WarehouseId { get; set; }
 
+    public long ProductId { get; set; }
     public ProductResponse Product { get; set; } = default!;
 }

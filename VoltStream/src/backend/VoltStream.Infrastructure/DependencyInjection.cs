@@ -14,11 +14,13 @@ public static class DependencyInjection
     {
         services.AddHttpContextAccessor();
 
-        services.AddScoped<AuditInterceptor>();
+        services.AddSingleton<AuditInterceptor>();
+
         services.AddDbContext<IAppDbContext, AppDbContext>((sp, options) =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"),
-            b => b.MigrationsAssembly("VoltStream.Infrastructure"))
-            .AddInterceptors(sp.GetRequiredService<AuditInterceptor>()));
+                b => b.MigrationsAssembly("VoltStream.Infrastructure"))
+                .AddInterceptors(sp.GetRequiredService<AuditInterceptor>())
+        );
 
         services.AddScoped<IPagingMetadataWriter, HttpPagingMetadataWriter>();
     }

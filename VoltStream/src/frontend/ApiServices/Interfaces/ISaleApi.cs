@@ -26,5 +26,5 @@ public interface ISaleApi
     Task<Response<bool>> Delete(long id);
 
     [Post("/sales/filter")]
-    Task<Response<SaleResponse>> Filter(FilteringRequest request);
+    Task<Response<SaleResponse>> Filtering(FilteringRequest request);
 }

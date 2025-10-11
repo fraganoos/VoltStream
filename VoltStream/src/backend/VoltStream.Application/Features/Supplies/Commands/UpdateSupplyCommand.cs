@@ -9,7 +9,7 @@ using VoltStream.Domain.Entities;
 
 public record UpdateSupplyCommand(
     long Id,
-    DateTime Date,
+    DateTimeOffset Date,
     long CategoryId,
     string CategoryName,
     long ProductId,

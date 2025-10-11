@@ -9,19 +9,23 @@ using Refit;
 public interface IProductsApi
 {
     [Post("/products")]
-    Task<ApiResponse<long>> CreateAsync([Body] ProductRequest request);
+    Task<Response<long>> CreateAsync([Body] ProductRequest request);
 
     [Put("/products")]
-    Task<ApiResponse<bool>> UpdateAsync([Body] ProductRequest request);
+    Task<Response<bool>> UpdateAsync([Body] ProductRequest request);
 
     [Delete("/products/{id}")]
-    Task<ApiResponse<bool>> DeleteAsync(long id);
+    Task<Response<bool>> DeleteAsync(long id);
 
     [Get("/products/{id}")]
-    Task<ApiResponse<ProductResponse>> GetByIdAsync(long id);
+    Task<Response<ProductResponse>> GetByIdAsync(long id);
 
     [Get("/products")]
-    Task<ApiResponse<Response<List<ProductResponse>>>> GetAllAsync();
+    Task<Response<List<ProductResponse>>> GetAllAsync();
+
     [Get("/products/categoryId={Id}")]
-    Task<ApiResponse<Response<List<ProductResponse>>>> GetAllByCategoryIdAsync(long id);
+    Task<Response<List<ProductResponse>>> GetAllByCategoryIdAsync(long id);
+
+    [Post("/products/filter")]
+    Task<Response<List<ProductResponse>>> Filter(FilteringRequest request);
 }

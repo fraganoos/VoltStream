@@ -19,5 +19,8 @@ public class CategoryMappingProfile : Profile
             opt => opt.MapFrom(src => src.Name.ToNormalized()));
 
         CreateMap<Category, CategoryDto>();
+
+        CreateMap<Product, ProductForCategoryDto>();
+
     }
 }

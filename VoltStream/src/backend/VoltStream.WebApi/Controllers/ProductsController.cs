@@ -15,6 +15,10 @@ public class ProductsController
     UpdateProductCommand,
     DeleteProductCommand>
 {
+    [HttpPost("filter")]
+    public async Task<IActionResult> GetFiltered(ProductFilterQuery query)
+        => Ok(new Response { Data = await Mediator.Send(query) });
+
     [HttpGet("categoryId={Id:long}")]
     public async Task<IActionResult> GetAllProductByCategoryId(long Id)
     => Ok(new Response { Data = await Mediator.Send(new GetAllProductsByCategoryIdQuery(Id)) });

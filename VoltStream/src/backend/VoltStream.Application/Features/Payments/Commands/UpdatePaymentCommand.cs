@@ -9,7 +9,7 @@ using VoltStream.Domain.Enums;
 
 public record UpdatePaymentCommand(
     long Id,
-    DateTime PaidAt,
+    DateTimeOffset PaidAt,
     long CustomerId,
     PaymentType Type,
     decimal Amount,

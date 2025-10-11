@@ -8,4 +8,5 @@ public record AccountDto(
     decimal Balance,
     decimal Discount,
     long CustomerId,
+    long CurrencyId,
     CurrencyDto Currency);

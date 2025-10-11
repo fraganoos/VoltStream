@@ -5,7 +5,7 @@ using ApiServices.Enums;
 public record PaymentRequest
 {
     public long Id { get; set; }
-    public DateTime PaidAt { get; set; }
+    public DateTimeOffset PaidAt { get; set; }
     public PaymentType Type { get; set; }
     public decimal Amount { get; set; }
     public decimal ExchangeRate { get; set; }

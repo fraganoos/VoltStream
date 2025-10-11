@@ -6,7 +6,6 @@ using ApiServices.Models;
 using ApiServices.Models.Reqiuests;
 using ApiServices.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
-using Refit;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,11 +22,12 @@ public partial class SalesPage : Page
     private readonly IServiceProvider services;
     private readonly ICategoriesApi categoriesApi;
     private readonly IProductsApi productsApi;
-    private readonly IWarehouseItemsApi warehouseItemsApi;
+    private readonly IWarehouseStocksApi warehouseItemsApi;
     private readonly ICustomersApi customersApi;
+    private readonly ICurrenciesApi currenciesApi;
     private readonly ISaleApi salesApi;
 
-    public SaleViewModel sale = new();
+    public Sale sale = new();
 
     public SalesPage(IServiceProvider services)
     {
@@ -36,9 +36,10 @@ public partial class SalesPage : Page
         DataContext = sale;
         categoriesApi = services.GetRequiredService<ICategoriesApi>();
         productsApi = services.GetRequiredService<IProductsApi>();
-        warehouseItemsApi = services.GetRequiredService<IWarehouseItemsApi>();
+        warehouseItemsApi = services.GetRequiredService<IWarehouseStocksApi>();
         customersApi = services.GetRequiredService<ICustomersApi>();
         salesApi = services.GetRequiredService<ISaleApi>();
+        currenciesApi = services.GetRequiredService<ICurrenciesApi>();
 
         CustomerName.GotFocus += CustomerName_GotFocus;
 
@@ -66,7 +67,13 @@ public partial class SalesPage : Page
         txtDiscount.PreviewLostKeyboardFocus += TxtDiscount_PreviewLostKeyboardFocus;
         txtFinalSumProduct.PreviewLostKeyboardFocus += TxtFinalSumProduct_PreviewLostKeyboardFocus;
 
-        //CurrencyType.ItemsSource = Enum.GetNames<CurrencyType>();
+
+        CurrencyType.SelectionChanged += CurrencyType_SelectionChanged;
+    }
+
+    private void CurrencyType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        sale.CategoryId = CurrencyType.SelectedValue is not null ? (long)CurrencyType.SelectedValue : 0;
     }
 
     private void TxtRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -111,15 +118,15 @@ public partial class SalesPage : Page
 
                 };
 
-                var response = await customersApi.CreateAsync(newCustomer);
-                if (response.IsSuccessStatusCode && response.Content is not null)
+                var response = await customersApi.CreateAsync(newCustomer).Handle();
+                if (response.IsSuccess)
                 {
                     await LoadCustomerNameAsync();
                 }
                 else
                 {
                     e.Handled = true;
-                    MessageBox.Show($"Xatolik yuz berdi. {response.Error?.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Xatolik yuz berdi. {response.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 // тут можете сохранить customer в БД или список
             }
@@ -149,17 +156,27 @@ public partial class SalesPage : Page
         {
             if (customerId.HasValue && customerId.Value != 0)
             {
-                var response = await customersApi.GetByIdAsync(customerId.Value);
-                if (response.IsSuccessStatusCode && response.Content?.Data is not null)
+                FilteringRequest request = new()
                 {
-                    beginBalans.Text = GetAccounts(response);
-                    tel.Text = response.Content.Data.Phone;
-                    CalcSaleSum();
+                    Filters = new()
+                    {
+                        ["id"] = [customerId.Value.ToString()],
+                        ["accounts"] = ["include:currency"]
+                    }
+                };
 
+                var response = await customersApi.Filter(request).Handle();
+                if (response.IsSuccess)
+                {
+                    var customer = response.Data!.First();
+
+                    beginBalans.Text = GetAccountsSumInUzsString(customer);
+                    tel.Text = customer.Phone;
+                    CalcSaleSum();
                 }
                 else
                 {
-                    var errorMsg = response.Error?.Message ?? "Unknown error";
+                    var errorMsg = response.Message ?? "Unknown error";
                     sale.Error = errorMsg;
                 }
             }
@@ -176,14 +193,25 @@ public partial class SalesPage : Page
         }
     }
 
-    private static string GetAccounts(ApiResponse<Response<CustomerResponse>> response)
+
+    private static string GetAccountsSumInUzsString(CustomerResponse customer)
     {
-        // response.Content.Data.Accounts;
+        if (customer?.Accounts == null) return "0";
 
-        // hisobini tekshirish kerak
+        decimal totalUzs = 0m;
+        foreach (var acc in customer.Accounts)
+        {
+            if (acc == null) continue;
+            var rate = acc.Currency?.ExchangeRate ?? 1m;
+            if (rate == 0m) rate = 1m;
+            totalUzs += acc.Balance * rate;
+        }
 
-        return "";
+        var rounded = Math.Round(totalUzs, 0, MidpointRounding.AwayFromZero);
+        return rounded.ToString("F0");
     }
+
+
 
     private async void CustomerName_GotFocus(object sender, RoutedEventArgs e)
     {
@@ -197,9 +225,9 @@ public partial class SalesPage : Page
             var selectedValue = CustomerName.SelectedValue;
             var response = await customersApi.GetAllAsync();
 
-            if (response.IsSuccessStatusCode && response.Content?.Data is not null)
+            if (response.IsSuccess)
             {
-                List<CustomerResponse> customers = response.Content.Data;
+                List<CustomerResponse> customers = response.Data!;
                 CustomerName.ItemsSource = customers;
                 CustomerName.DisplayMemberPath = "Name";
                 CustomerName.SelectedValuePath = "Id";
@@ -210,7 +238,7 @@ public partial class SalesPage : Page
             else
             {
                 // Проверяем на null, чтобы избежать CS8602
-                var errorMsg = response.Error?.Message ?? "Unknown error";
+                var errorMsg = response.Message ?? "Unknown error";
                 MessageBox.Show("Error fetching customers: " + errorMsg);
             }
 
@@ -474,10 +502,10 @@ public partial class SalesPage : Page
             // Сохраняем текущее выбранное значение
             var selectedValue = cbxCategoryName.SelectedValue;
 
-            var response = await categoriesApi.GetAllAsync();
-            if (response.IsSuccessStatusCode && response.Content?.Data is not null)
+            var response = await categoriesApi.GetAllAsync().Handle();
+            if (response.IsSuccess)
             {
-                List<CategoryResponse> categories = response.Content.Data;
+                List<CategoryResponse> categories = response.Data!;
                 cbxCategoryName.ItemsSource = categories;
                 cbxCategoryName.DisplayMemberPath = "Name";
                 cbxCategoryName.SelectedValuePath = "Id";
@@ -489,7 +517,7 @@ public partial class SalesPage : Page
             else
             {
                 // Проверяем на null, чтобы избежать CS8602
-                var errorMsg = response.Error?.Message ?? "Unknown error";
+                var errorMsg = response.Message ?? "Unknown error";
                 MessageBox.Show("Error fetching categories: " + errorMsg);
             }
         }
@@ -505,20 +533,24 @@ public partial class SalesPage : Page
         {
             // Сохраняем текущее выбранное значение
             var selectedValue = cbxProductName.SelectedValue;
-            ApiResponse<Response<List<ProductResponse>>> response;
+            Response<List<ProductResponse>> response;
+
+            FilteringRequest request = new()
+            {
+                Filters = new()
+                {
+                    ["category"] = ["include"]
+                }
+            };
 
             if (categoryId.HasValue && categoryId.Value != 0)
-            {
-                response = await productsApi.GetAllByCategoryIdAsync(categoryId.Value);
-            }
-            else
-            {
-                response = await productsApi.GetAllAsync();
-            }
+                request.Filters["CategoryId"] = [categoryId.Value.ToString()];
 
-            if (response.IsSuccessStatusCode && response.Content?.Data is not null)
+            response = await productsApi.Filter(request).Handle();
+
+            if (response.IsSuccess)
             {
-                var products = response.Content.Data;
+                var products = response.Data;
                 cbxProductName.ItemsSource = products;
                 cbxProductName.DisplayMemberPath = "Name";
                 cbxProductName.SelectedValuePath = "Id";
@@ -528,7 +560,7 @@ public partial class SalesPage : Page
             }
             else
             {
-                var errorMsg = response.Error?.Message ?? "Unknown error";
+                var errorMsg = response.Message ?? "Unknown error";
                 MessageBox.Show("Ошибка при получении продукции: " + errorMsg);
             }
         }
@@ -544,10 +576,10 @@ public partial class SalesPage : Page
         {
             // Сохраняем текущее выбранное значение
             var selectedValue = cbxPerRollCount.SelectedValue;
-            ApiResponse<Response<List<WarehouseStockResponse>>> response;
+            Response<List<WarehouseStockResponse>> response;
             if (productId.HasValue && productId.Value != 0)
             {
-                response = await warehouseItemsApi.GetProductDetailsFromWarehouseAsync(productId.Value);
+                response = await warehouseItemsApi.GetProductDetailsFromWarehouseAsync(productId.Value).Handle();
             }
             else
             {
@@ -556,19 +588,19 @@ public partial class SalesPage : Page
                 cbxPerRollCount.ItemsSource = null;
                 return;
             }
-            if (response.IsSuccessStatusCode && response.Content?.Data is not null)
+            if (response.IsSuccess)
             {
-                var warehouseItems = response.Content.Data;
+                var warehouseItems = response.Data;
                 cbxPerRollCount.ItemsSource = warehouseItems;
-                cbxPerRollCount.DisplayMemberPath = "QuantityPerRoll";
-                cbxPerRollCount.SelectedValuePath = "QuantityPerRoll";
+                cbxPerRollCount.DisplayMemberPath = "LengthPerRoll";
+                cbxPerRollCount.SelectedValuePath = "LengthPerRoll";
                 // Восстанавливаем выбранное значение
                 if (selectedValue is not null)
                     cbxPerRollCount.SelectedValue = selectedValue;
             }
             else
             {
-                var errorMsg = response.Error?.Message ?? "Unknown error";
+                var errorMsg = response.Message ?? "Unknown error";
                 MessageBox.Show("Ошибка при получении данных со склада: " + errorMsg);
             }
         }
@@ -580,7 +612,7 @@ public partial class SalesPage : Page
 
     private void AddButton_Click(object sender, RoutedEventArgs e)
     {
-        SaleItemViewModel saleItem = new()
+        SaleItem saleItem = new()
         {
             CategoryId = cbxCategoryName.SelectedIndex,
             CategoryName = cbxCategoryName.Text,
@@ -599,7 +631,7 @@ public partial class SalesPage : Page
             FinalSumProduct = decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSumProduct) ? finalSumProduct : 0
         };
         sale.SaleItems.Insert(0, saleItem);
-        //sale.FinalSum=sale.SaleItems.Sum(s => s.Sum);
+
         CalcSaleSum();
         cbxCategoryName.SelectedValue = null;
         cbxProductName.SelectedValue = null;
@@ -652,16 +684,11 @@ public partial class SalesPage : Page
     private void ClearButton_Click(object sender, RoutedEventArgs e)
     {
         sale = new();
+        ClearUI();
     }
 
     private async void SubmitButton_Click(object sender, RoutedEventArgs e)
     {
-        if (sale.CustomerId <= 0)
-        {
-            sale.Error = "Mijoz tanlanmagan!";
-            return;
-        }
-
         if (sale.SaleItems.Count == 0)
         {
             sale.Warning = "Hech qanday mahsulot kiritilmagan!";
@@ -675,6 +702,7 @@ public partial class SalesPage : Page
             Amount = sale.FinalSum ?? 0,
             Discount = sale.TotalDiscount ?? 0,
             Description = sale.Description,
+            CurrencyId = 1,
             Items = [.. sale.SaleItems.Select(i => new SaleItemRequest
             {
                 ProductId = i.ProductId,
@@ -687,6 +715,8 @@ public partial class SalesPage : Page
                 TotalAmount = i.FinalSumProduct ?? 0
             })]
         };
+
+        var s = sale.CurrencyId;
 
         var response = await salesApi.CreateAsync(saleRequest)
             .Handle(isLoading => sale.IsLoading = isLoading);
@@ -701,6 +731,54 @@ public partial class SalesPage : Page
         {
             sale.Error = $"Server xatosi: {response.StatusCode}";
         }
-        sale = new();
+    }
+
+    private async void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        await LoadCategoryAsync();
+        var response = await currenciesApi.GetAllAsync().Handle();
+        if (response.IsSuccess)
+        {
+            CurrencyType.ItemsSource = response.Data;
+            CurrencyType.SelectedValuePath = "Id";
+        }
+    }
+
+    private void ClearUI()
+    {
+        // ComboBoxlarni tozalash
+        CustomerName.Text = string.Empty;
+        CustomerName.SelectedIndex = -1;
+
+        cbxCategoryName.Text = string.Empty;
+        cbxCategoryName.SelectedIndex = -1;
+
+        cbxProductName.Text = string.Empty;
+        cbxProductName.SelectedIndex = -1;
+
+        cbxPerRollCount.Text = string.Empty;
+        cbxPerRollCount.SelectedIndex = -1;
+
+        CurrencyType.Text = "So'm"; // hozircha faqat so'm bo'lgani uchun
+
+        // TextBoxlarni tozalash
+        txtRollCount.Text = string.Empty;
+        txtQuantity.Text = string.Empty;
+        txtPrice.Text = string.Empty;
+        txtSum.Text = string.Empty;
+        txtPerDiscount.Text = string.Empty;
+        txtDiscount.Text = string.Empty;
+        txtFinalSumProduct.Text = string.Empty;
+        txtTotalDiscount.Text = string.Empty;
+        finalSumm.Text = string.Empty;
+        TotalSum.Text = string.Empty;
+        noteTextBox.Text = string.Empty;
+        beginBalans.Text = string.Empty;
+        lastBalans.Text = string.Empty;
+        tel.Text = string.Empty;
+
+        // CheckBox va kalendarni tozalash
+        checkedDiscount.IsChecked = false;
+        supplyDate.SelectedDate = DateTime.Now;
     }
 }

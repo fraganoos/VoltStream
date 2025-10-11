@@ -9,24 +9,24 @@ using Refit;
 public interface ISuppliesApi
 {
     [Post("/supplies")]
-    Task<ApiResponse<long>> CreateSupplyAsync(SupplyRequest request);
+    Task<Response<long>> CreateSupplyAsync(SupplyRequest request);
 
     [Put("/supplies")]
-    Task<ApiResponse<bool>> UpdateSupplyAsync([Body] SupplyRequest request);
+    Task<Response<bool>> UpdateSupplyAsync([Body] SupplyRequest request);
 
     [Delete("/supplies/{id}")]
-    Task<ApiResponse<bool>> DeleteSupplyAsync(long id);
+    Task<Response<bool>> DeleteSupplyAsync(long id);
 
     [Get("/supplies/{id}")]
-    Task<ApiResponse<SupplyResponse>> GetByIdSupplyAsync(long id);
+    Task<Response<SupplyResponse>> GetByIdSupplyAsync(long id);
 
     [Get("/supplies")]
-    Task<ApiResponse<Response<List<SupplyResponse>>>> GetAllSuppliesAsync();
+    Task<Response<List<SupplyResponse>>> GetAllSuppliesAsync();
 
     [Get("/supplies/by-date")]
-    Task<ApiResponse<Response<List<SupplyResponse>>>> GetAllSuppliesByDateAsync([Query] DateTimeOffset date);
+    Task<Response<List<SupplyResponse>>> GetAllSuppliesByDateAsync([Query] DateTimeOffset date);
 
     [Post("/supplies/filter")]
-    Task<ApiResponse<Response<List<SupplyResponse>>>> Filter(FilteringRequest request);
+    Task<Response<List<SupplyResponse>>> Filter(FilteringRequest request);
 
 }

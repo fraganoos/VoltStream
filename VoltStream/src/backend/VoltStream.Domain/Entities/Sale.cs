@@ -2,8 +2,8 @@
 
 public class Sale : Auditable
 {
-    public DateTime Date { get; set; } // operation kuni
-    public decimal RollCount { get; set; } // jami rulonlar soni
+    public DateTimeOffset Date { get; set; } // operation kuni
+    public int RollCount { get; set; } // jami rulonlar soni
     public decimal Length { get; set; } // jami metr
     public decimal Amount { get; set; } // jami summa
     public decimal Discount { get; set; } // chegirma
@@ -16,7 +16,6 @@ public class Sale : Auditable
     public Customer Customer { get; set; } = default!;
 
     public CustomerOperation CustomerOperation { get; set; } = default!;
-
     public DiscountOperation DiscountOperation { get; set; } = default!;
 
     public ICollection<SaleItem> Items { get; set; } = default!;

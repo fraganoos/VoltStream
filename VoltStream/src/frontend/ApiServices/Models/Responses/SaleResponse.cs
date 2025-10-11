@@ -3,8 +3,8 @@
 public class SaleResponse
 {
     public long Id { get; set; }
-    public DateTime Date { get; set; } // operation kuni
-    public decimal RollCount { get; set; } // jami rulonlar soni
+    public DateTimeOffset Date { get; set; } // operation kuni
+    public int RollCount { get; set; } // jami rulonlar soni
     public decimal Length { get; set; } // butun savdo bo'yicha jami uzunlik
     public decimal Amount { get; set; } // jami narxi
     public decimal Discount { get; set; } // chegirma narxi

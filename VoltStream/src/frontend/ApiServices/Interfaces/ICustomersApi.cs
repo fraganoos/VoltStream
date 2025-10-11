@@ -11,20 +11,20 @@ using System.Threading.Tasks;
 public interface ICustomersApi
 {
     [Post("/customers")]
-    Task<ApiResponse<Response<long>>> CreateAsync([Body] CustomerRequest request);
+    Task<Response<long>> CreateAsync([Body] CustomerRequest request);
 
     [Put("/customers​")]
-    Task<ApiResponse<Response<bool>>> UpdateAsync([Body] CustomerRequest request);
+    Task<Response<bool>> UpdateAsync([Body] CustomerRequest request);
 
     [Delete("/customers​/{id}")]
-    Task<ApiResponse<Response<bool>>> DeleteAsync(long id);
+    Task<Response<bool>> DeleteAsync(long id);
 
     [Get("/customers/{id}")]
-    Task<ApiResponse<Response<CustomerResponse>>> GetByIdAsync(long id);
+    Task<Response<CustomerResponse>> GetByIdAsync(long id);
 
     [Get("/customers")]
-    Task<ApiResponse<Response<List<CustomerResponse>>>> GetAllAsync();
+    Task<Response<List<CustomerResponse>>> GetAllAsync();
 
     [Post("/customers/filter")]
-    Task<ApiResponse<Response<List<CustomerResponse>>>> Filter(FilteringRequest request);
+    Task<Response<List<CustomerResponse>>> Filter(FilteringRequest request);
 }

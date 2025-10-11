@@ -1,5 +1,6 @@
 ﻿namespace VoltStream.WPF.Supplies.Views;
 
+using ApiServices.Extensions;
 using ApiServices.Interfaces;
 using ApiServices.Models;
 using ApiServices.Models.Reqiuests;
@@ -20,7 +21,7 @@ public partial class SuppliesPage : Page
     private readonly IProductsApi productsApi;
     private readonly ICategoriesApi categoriesApi;
     private readonly ISuppliesApi suppliesApi;
-    private readonly IWarehouseItemsApi warehouseItemsApi;
+    private readonly IWarehouseStocksApi warehouseItemsApi;
     private List<CategoryResponse> _allCategories = [];
     private ICollectionView? categoriesView;
 
@@ -32,7 +33,7 @@ public partial class SuppliesPage : Page
         productsApi = services.GetRequiredService<IProductsApi>();
         categoriesApi = services.GetRequiredService<ICategoriesApi>();
         suppliesApi = services.GetRequiredService<ISuppliesApi>();
-        warehouseItemsApi = services.GetRequiredService<IWarehouseItemsApi>();
+        warehouseItemsApi = services.GetRequiredService<IWarehouseStocksApi>();
         supplyDate.SelectedDate = DateTime.Now;
         supplyDate.dateTextBox.Focus();
 
@@ -66,9 +67,9 @@ public partial class SuppliesPage : Page
                 a.Name.Equals(cbxCategory.Text.Trim(), StringComparison.OrdinalIgnoreCase)) is not null)
         {
             // Shu category ga oid productlarni yuklash
-            var products = await productsApi.GetAllByCategoryIdAsync(selectedCategory.Id);
+            var products = await productsApi.GetAllByCategoryIdAsync(selectedCategory.Id).Handle();
 
-            cbxProduct.ItemsSource = products.Content!.Data ?? [];
+            cbxProduct.ItemsSource = products.Data ?? [];
             return;
         }
 
@@ -77,8 +78,8 @@ public partial class SuppliesPage : Page
             string.IsNullOrWhiteSpace(cbxCategory.Text))
         {
             // Barcha productlarni yuklash
-            var allProducts = await productsApi.GetAllAsync();
-            cbxProduct.ItemsSource = allProducts.Content!.Data ?? [];
+            var allProducts = await productsApi.GetAllAsync().Handle();
+            cbxProduct.ItemsSource = allProducts.Data ?? [];
             return;
         }
 
@@ -87,8 +88,8 @@ public partial class SuppliesPage : Page
             string.IsNullOrWhiteSpace(cbxCategory.Text))
         {
             // Barcha productlarni yuklash
-            var allProducts = await productsApi.GetAllAsync();
-            cbxProduct.ItemsSource = allProducts.Content!.Data ?? [];
+            var allProducts = await productsApi.GetAllAsync().Handle();
+            cbxProduct.ItemsSource = allProducts.Data ?? [];
             return;
         }
 
@@ -102,33 +103,35 @@ public partial class SuppliesPage : Page
         {
             var text = supplyDate.dateTextBox.Text;
 
-            if (DateTime.TryParseExact(
-                    text,
-                    "dd.MM.yyyy",
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    System.Globalization.DateTimeStyles.None,
-                    out DateTime operationDate))
+            // Frontda faqat format tekshiruvi
+            if (!string.IsNullOrWhiteSpace(text) &&
+                DateTime.TryParse(text, out _)) // Tekshiradi, backend parsing qiladi
             {
-
                 var filter = new FilteringRequest
                 {
                     Filters = new()
                     {
-                        ["Date"] = [operationDate.ToString()]
+                        ["date"] = [text],        // faqat string
+                        ["product"] = ["include:category"]
                     },
                     Descending = true
                 };
 
-                var response = await suppliesApi.Filter(filter);
-                if (response.IsSuccessStatusCode && response.Content?.Data is not null)
+                var response = await suppliesApi.Filter(filter).Handle();
+                if (response.IsSuccess)
                 {
-                    supplyDataGrid.ItemsSource = response.Content?.Data;
+                    supplyDataGrid.ItemsSource = response.Data;
                 }
                 else
                 {
-                    MessageBox.Show($"Ta'minotlarni olishda xatolik: {response.Error?.Message ?? "Ma'lumotlar yo'q"}",
+                    MessageBox.Show($"Ta'minotlarni olishda xatolik: {response.Message ?? "Ma'lumotlar yo'q"}",
                         "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+            }
+            else
+            {
+                MessageBox.Show("Iltimos, to‘g‘ri sana kiriting.", "Xato",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         catch (Exception ex)
@@ -146,7 +149,7 @@ public partial class SuppliesPage : Page
             if (decimal.TryParse(tbxPerRollCount.Text, out decimal perRollCount) &&
                 decimal.TryParse(tbxRollCount.Text, out decimal rollCount))
             {
-                var warehouseItem = await warehouseItemsApi.GetAllWarehouseItemsAsync();
+                var warehouseItem = await warehouseItemsApi.GetAllWarehouseItemsAsync().Handle();
                 // Ko‘paytma hisoblash
                 decimal total = perRollCount * rollCount;
                 // totalMeters ga joylash
@@ -160,13 +163,14 @@ public partial class SuppliesPage : Page
 
             if (cbxProduct.SelectedValue is not null && long.TryParse(cbxProduct.SelectedValue.ToString(), out long productId))
             {
-                var warehouseItems = await warehouseItemsApi.GetAllWarehouseItemsAsync();
-                if (warehouseItems?.Content?.Data is not null)
+
+
+                var warehouseItems = await warehouseItemsApi.GetAllWarehouseItemsAsync().Handle();
+                if (warehouseItems?.Data is not null)
                 {
-                    var warehouseItem = warehouseItems.Content.Data.FirstOrDefault(x => x.Product.Id == productId);
+                    var warehouseItem = warehouseItems.Data.FirstOrDefault(x => x.ProductId == productId);
                     if (warehouseItem is not null)
                     {
-                        //tbxPerRollCount.Text = warehouseItem.QuantityPerRoll.ToString("N2");
                         txtPrice.Text = warehouseItem.UnitPrice.ToString("N2");
                         tbxDiscountPercent.Text = warehouseItem.DiscountRate.ToString("N2");
                     }
@@ -247,9 +251,9 @@ public partial class SuppliesPage : Page
                 DiscountRate = discountPercent
             };
 
-            var response = await suppliesApi.CreateSupplyAsync(supply);
+            var response = await suppliesApi.CreateSupplyAsync(supply).Handle();
 
-            if (response.IsSuccessStatusCode && response.Content > 0)
+            if (response.IsSuccess)
             {
                 // Formani tozalash
                 cbxCategory.SelectedItem = null;
@@ -266,7 +270,7 @@ public partial class SuppliesPage : Page
             }
             else
             {
-                MessageBox.Show($"Ta'minot qo‘shishda xatolik: {response.Error?.Message ?? "Ma'lumotlar yo‘q"}",
+                MessageBox.Show($"Ta'minot qo‘shishda xatolik: {response.Message ?? "Ma'lumotlar yo‘q"}",
                     "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -344,10 +348,10 @@ public partial class SuppliesPage : Page
     {
         try
         {
-            var response = await categoriesApi.GetAllAsync();
-            if (response.IsSuccessStatusCode && response.Content?.Data is not null)
+            var response = await categoriesApi.GetAllAsync().Handle();
+            if (response.IsSuccess)
             {
-                return response.Content.Data;
+                return response.Data!;
             }
             MessageBox.Show("Kategoriyalar topilmadi.", "Ma'lumot",
                             MessageBoxButton.OK, MessageBoxImage.Information);
@@ -359,6 +363,7 @@ public partial class SuppliesPage : Page
         }
         return [];
     }
+
     private async void CbxCategory_GotFocus(object sender, RoutedEventArgs e)
     {
         _allCategories = await LoadCategoriesAsync();
