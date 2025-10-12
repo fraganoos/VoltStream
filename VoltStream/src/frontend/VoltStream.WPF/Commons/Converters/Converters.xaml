@@ -5,6 +5,7 @@
     <converter:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
     <converter:StringIsNotEmptyConverter x:Key="StringIsNotEmptyConverter" />
     <converter:UtcToUzbekistanTimeConverter x:Key="UtcToUzbekistanTimeConverter" />
+    <converter:ToStringConverter x:Key="ToStringConverter" />
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
 </ResourceDictionary>
