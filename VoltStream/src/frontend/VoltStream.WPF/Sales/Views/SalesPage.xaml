@@ -339,6 +339,7 @@
                      Text="{Binding RollCount}"
                      Margin="1 3"
                      FontSize="14"
+                     utils:NumericTextBox.DecimalDigits="0"
                      utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                      utils:NumericTextBox.IsNumeric="True" />
             <TextBlock Grid.Column="4"
@@ -440,8 +441,17 @@
                               CanUserDeleteRows="True"
                               SelectionMode="Single"
                               SelectionUnit="FullRow"
-                              FontSize="14">
-                        <DataGrid.Columns>
+                          FontSize="14">
+                    <DataGrid.Resources>
+                        <Style x:Key="RightAlignedText"
+                               TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment"
+                                    Value="Right" />
+                            <Setter Property="TextAlignment"
+                                    Value="Right" />
+                        </Style>
+                    </DataGrid.Resources>
+                    <DataGrid.Columns>
                             <DataGridTextColumn Header="Maxsulot turi"
                                                 Binding="{Binding CategoryName}"
                                                 Width="1.5*"
@@ -452,29 +462,40 @@
                                                 MinWidth="120" />
                             <DataGridTextColumn Header="Rulon metr"
                                                 Binding="{Binding PerRollCount}"
-                                                Width="*" />
+                                            ElementStyle="{StaticResource RightAlignedText}"
+                                            Width="*" />
                             <DataGridTextColumn Header="Rulon soni"
-                                                Binding="{Binding RollCount}"
-                                                Width="*" />
+                                            Binding="{Binding RollCount, Converter={StaticResource ToStringConverter}}"
+                                            ElementStyle="{StaticResource RightAlignedText}"
+                                            Width="*" />
                             <DataGridTextColumn Header="Jami metr"
-                                                Binding="{Binding Quantity}"
+                                            Binding="{Binding Quantity, Converter={StaticResource ToStringConverter}}"
+                                            ElementStyle="{StaticResource RightAlignedText}"
                                                 Width="*" />
                             <DataGridTextColumn Header="Narxi"
-                                                Binding="{Binding Price}"
-                                                Width="*" />
+                                            Binding="{Binding Price, Converter={StaticResource ToStringConverter}}"
+                                            ElementStyle="{StaticResource RightAlignedText}"
+                                            utils:NumericTextBox.IsNumeric="True"
+                                            Width="*" />
                             <DataGridTextColumn Header="Jami summa"
-                                                Binding="{Binding Sum}"
-                                                Width="*"
+                                            Binding="{Binding Sum, Converter={StaticResource ToStringConverter}}"
+                                            ElementStyle="{StaticResource RightAlignedText}"
+                                            Width="*"
                                                 utils:NumericTextBox.IsNumeric="True" />
                             <DataGridTextColumn Header="Chegirma%"
-                                                Binding="{Binding PerDiscount}"
-                                                Width="*" />
+                                            Binding="{Binding PerDiscount, Converter={StaticResource ToStringConverter}}"
+                                            ElementStyle="{StaticResource RightAlignedText}"
+                                            Width="*" />
                             <DataGridTextColumn Header="Chegirma summasi"
-                                                Binding="{Binding Discount}"
-                                                Width="*" />
+                                            Binding="{Binding Discount, Converter={StaticResource ToStringConverter}}"
+                                            utils:NumericTextBox.IsNumeric="True"
+                                            ElementStyle="{StaticResource RightAlignedText}"
+                                            Width="*" />
                             <DataGridTextColumn Header="Umumiy summa"
-                                                Binding="{Binding FinalSumProduct}"
-                                                Width="*" />
+                                            Binding="{Binding FinalSumProduct, Converter={StaticResource ToStringConverter}}"
+                                            ElementStyle="{StaticResource RightAlignedText}"
+                                            utils:NumericTextBox.IsNumeric="True"
+                                            Width="*" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

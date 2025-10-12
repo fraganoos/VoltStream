@@ -11,11 +11,11 @@ public partial class SaleItem : ViewModelBase
     [ObservableProperty] private long productId;
     [ObservableProperty] private string productName = string.Empty;
     [ObservableProperty] private decimal? perRollCount;
-    [ObservableProperty] private decimal warehouseQuantity = decimal.Zero;
-    [ObservableProperty] private decimal? rollCount;
-    [ObservableProperty] private decimal warehouseCountRoll = decimal.Zero;
+    [ObservableProperty] private decimal warehouseQuantity;
+    [ObservableProperty] private int? rollCount;
+    [ObservableProperty] private decimal warehouseCountRoll;
     [ObservableProperty] private decimal? quantity;
-    [ObservableProperty] private decimal newQuantity = decimal.Zero;
+    [ObservableProperty] private decimal newQuantity;
     [ObservableProperty] private decimal? price;
     [ObservableProperty] private decimal? sum;
     [ObservableProperty] private decimal? perDiscount;
@@ -23,7 +23,7 @@ public partial class SaleItem : ViewModelBase
     [ObservableProperty] private decimal? finalSumProduct;
 
     partial void OnPerRollCountChanged(decimal? value) => Recalculate();
-    partial void OnRollCountChanged(decimal? value) => Recalculate();
+    partial void OnRollCountChanged(int? value) => Recalculate();
     partial void OnQuantityChanged(decimal? value) => Recalculate();
     partial void OnPriceChanged(decimal? value) => Recalculate();
     partial void OnPerDiscountChanged(decimal? value) => Recalculate();

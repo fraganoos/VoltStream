@@ -586,5 +586,4 @@ public partial class ProductViewModel : ViewModelBase
     {
         FinalAmount = ProductItems.Sum(x => x.TotalAmount);
     }
-
 }

@@ -73,7 +73,7 @@ public partial class SalesPage : Page
 
     private void CurrencyType_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        sale.CategoryId = CurrencyType.SelectedValue is not null ? (long)CurrencyType.SelectedValue : 0;
+        sale.CurrencyId = CurrencyType.SelectedValue is not null ? (long)CurrencyType.SelectedValue : 0;
     }
 
     private void TxtRollCount_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -619,7 +619,7 @@ public partial class SalesPage : Page
             ProductId = (long)cbxProductName.SelectedValue,
             ProductName = cbxProductName.Text,
             PerRollCount = decimal.TryParse(cbxPerRollCount.Text, out decimal perRollCount) ? perRollCount : 0,
-            RollCount = decimal.TryParse(txtRollCount.Text, out decimal rollCount) ? rollCount : 0,
+            RollCount = int.TryParse(txtRollCount.Text, out int rollCount) ? rollCount : 0,
             WarehouseCountRoll = sale.WarehouseCountRoll,
             Quantity = decimal.TryParse(txtQuantity.Text, out decimal quantity) ? quantity : 0,
             NewQuantity = sale.NewQuantity,
@@ -702,7 +702,10 @@ public partial class SalesPage : Page
             Amount = sale.FinalSum ?? 0,
             Discount = sale.TotalDiscount ?? 0,
             Description = sale.Description,
-            CurrencyId = 1,
+            CurrencyId = sale.CurrencyId,
+            Length = (decimal)sale.SaleItems.Sum(si => si.Quantity)!,
+            RollCount = (int)sale.SaleItems.Sum(si => si.RollCount)!,
+            IsApplied = sale.CheckedDiscount,
             Items = [.. sale.SaleItems.Select(i => new SaleItemRequest
             {
                 ProductId = i.ProductId,
@@ -780,5 +783,8 @@ public partial class SalesPage : Page
         // CheckBox va kalendarni tozalash
         checkedDiscount.IsChecked = false;
         supplyDate.SelectedDate = DateTime.Now;
+
+        sale.SaleItems.Clear();
+        dataGrid.ItemsSource = sale.SaleItems;
     }
 }
