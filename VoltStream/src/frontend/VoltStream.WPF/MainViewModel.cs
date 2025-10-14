@@ -6,6 +6,7 @@ using VoltStream.WPF.Commons;
 using VoltStream.WPF.Payments.Views;
 using VoltStream.WPF.Products.Views;
 using VoltStream.WPF.Sales.Views;
+using VoltStream.WPF.Sales_history.Views;
 using VoltStream.WPF.Supplies.Views;
 
 public partial class MainViewModel : ViewModelBase
@@ -35,4 +36,8 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand]
     private void ShowProductView()
     => CurrentChildView = new ProductsPage(serviceProvider);
+
+    [RelayCommand]
+    private void ShowSalesHistoryView()
+    => CurrentChildView = new SalesHistoryPage(serviceProvider);
 }

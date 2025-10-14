@@ -1,6 +1,6 @@
 ﻿namespace ApiServices.Models.Responses;
 
-public class SaleResponse
+public record SaleResponse
 {
     public long Id { get; set; }
     public DateTimeOffset Date { get; set; } // operation kuni
@@ -15,4 +15,5 @@ public class SaleResponse
     public CurrencyResponse Currency { get; set; } = default!;
     public CustomerResponse Customer { get; set; } = default!;
     public ICollection<SaleItemResponse> Items { get; set; } = default!;
+
 }
