@@ -689,11 +689,21 @@ public partial class SalesPage : Page
 
     private async void SubmitButton_Click(object sender, RoutedEventArgs e)
     {
+        if (supplyDate.SelectedDate is null)
+        {
+            MessageBox.Show("Sana tanlanmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            supplyDate.Focus();
+            return;
+        }
+
+        sale.OperationDate = supplyDate.SelectedDate.Value;
+
         if (sale.SaleItems.Count == 0)
         {
             sale.Warning = "Hech qanday mahsulot kiritilmagan!";
             return;
         }
+
 
         var saleRequest = new SaleRequest
         {
@@ -787,4 +797,28 @@ public partial class SalesPage : Page
         sale.SaleItems.Clear();
         dataGrid.ItemsSource = sale.SaleItems;
     }
+
+    private void supplyDate_LostFocus(object sender, RoutedEventArgs e)
+    {
+        // 1. Agar foydalanuvchi sanani kiritmagan bo‘lsa
+        if (string.IsNullOrWhiteSpace(supplyDate.dateTextBox.Text))
+        {
+            MessageBox.Show("Sana kiritilmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            supplyDate.Focus();
+            return;
+        }
+
+        // 2. Qo‘lda yozilgan sanani DateTime ga o‘tkazamiz
+        if (DateTime.TryParse(supplyDate.dateTextBox.Text, out DateTime parsedDate))
+        {
+            supplyDate.SelectedDate = parsedDate; // ✅ foydalanuvchi yozgan sana tanlangan bo‘ladi
+        }
+        else
+        {
+            MessageBox.Show("Kiritilgan sana noto‘g‘ri formatda!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            supplyDate.Focus();
+            return;
+        }
+    }
+
 }
