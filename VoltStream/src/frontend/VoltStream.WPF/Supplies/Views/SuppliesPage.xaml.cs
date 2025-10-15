@@ -3,7 +3,7 @@
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
 using ApiServices.Models;
-using ApiServices.Models.Reqiuests;
+using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;

@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <Folder Include="LoginPages\ViewModels\" />
+    <Folder Include="Settings\ViewModels\" />
   </ItemGroup>
 
   <ItemGroup>
