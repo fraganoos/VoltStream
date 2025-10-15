@@ -6,6 +6,7 @@ using VoltStream.WPF.Commons;
 using VoltStream.WPF.Payments.Views;
 using VoltStream.WPF.Products.Views;
 using VoltStream.WPF.Sales.Views;
+using VoltStream.WPF.Settings.Views;
 using VoltStream.WPF.Supplies.Views;
 
 public partial class MainViewModel : ViewModelBase
@@ -13,6 +14,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly IServiceProvider serviceProvider;
 
     [ObservableProperty] private object currentChildView;
+    [ObservableProperty] private string currentPageTitle = "Bosh sahifa";
 
     public MainViewModel(IServiceProvider serviceProvider)
     {
@@ -22,17 +24,36 @@ public partial class MainViewModel : ViewModelBase
 
     [RelayCommand]
     private void ShowSalesView()
-        => CurrentChildView = new SalesPage(serviceProvider);
+    {
+        CurrentChildView = new SalesPage(serviceProvider);
+        CurrentPageTitle = "Savdo";
+    }
 
     [RelayCommand]
     private void ShowSuppliesView()
-        => CurrentChildView = new SuppliesPage(serviceProvider);
+    {
+        CurrentChildView = new SuppliesPage(serviceProvider);
+        CurrentPageTitle = "Ishlab chiqarish";
+    }
 
     [RelayCommand]
     private void ShowPaymentView()
-        => CurrentChildView = new PaymentsPage(serviceProvider);
+    {
+        CurrentChildView = new PaymentsPage(serviceProvider);
+        CurrentPageTitle = "Oldi-berdi";
+    }
 
     [RelayCommand]
     private void ShowProductView()
-    => CurrentChildView = new ProductsPage(serviceProvider);
+    {
+        CurrentChildView = new ProductsPage(serviceProvider);
+        CurrentPageTitle = "Mahsulotlar qoldig'i";
+    }
+
+    [RelayCommand]
+    private void ShowSettings()
+    {
+        CurrentChildView = new SettingsPage();
+        CurrentPageTitle = "Sozlamalar";
+    }
 }

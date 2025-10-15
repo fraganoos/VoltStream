@@ -1,7 +1,7 @@
 ﻿namespace ApiServices.Interfaces;
 
 using ApiServices.Models;
-using ApiServices.Models.Reqiuests;
+using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Refit;
 using System.Collections.Generic;

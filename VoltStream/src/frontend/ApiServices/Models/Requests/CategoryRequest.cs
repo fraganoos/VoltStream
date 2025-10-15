@@ -1,6 +1,6 @@
-﻿namespace ApiServices.Models.Reqiuests;
+﻿namespace ApiServices.Models.Requests;
 
-public record WarehouseRequest
+public record CategoryRequest
 {
     public long Id { get; set; }
     public string Name { get; set; } = string.Empty;

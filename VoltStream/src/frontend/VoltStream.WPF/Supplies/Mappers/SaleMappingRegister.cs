@@ -1,6 +1,6 @@
 ﻿namespace VoltStream.WPF.Supplies.Mappers;
 
-using ApiServices.Models.Reqiuests;
+using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Mapster;
 using VoltStream.WPF.Sales.ViewModels;

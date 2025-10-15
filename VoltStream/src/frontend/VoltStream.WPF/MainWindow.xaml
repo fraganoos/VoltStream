@@ -105,6 +105,17 @@
                     </StackPanel>
                 </RadioButton>
 
+
+                <RadioButton Style="{DynamicResource menuButton}"
+                             Tag="{DynamicResource color4}"
+                             Command="{Binding ShowSettingsCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <fa:IconImage Icon="Sliders"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Sozlamalar"
+                                   Style="{StaticResource menuButtonText}" />
+                    </StackPanel>
+                </RadioButton>
             </StackPanel>
 
             <!--Header and content-->
@@ -116,11 +127,11 @@
 
                 <Border Grid.Row="0"
                         Background="#0A003A">
-                    <TextBlock Text="Bosh sahifa"
+                    <TextBlock Text="{Binding CurrentPageTitle}"
                                VerticalAlignment="Center"
                                FontSize="16"
                                Foreground="White"
-                               Margin="20,0,0,0" />
+                               Margin="20 0 0 0" />
                 </Border>
 
                 <Frame Grid.Row="1"

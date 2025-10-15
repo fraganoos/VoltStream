@@ -14,10 +14,10 @@ public record SaleDto
     public decimal Amount { get; set; } // jami narxi
     public decimal Discount { get; set; } // chegirma narxi
     public string Description { get; set; } = string.Empty;
+
     public CustomerOperationDto CustomerOperation { get; set; } = default!;
     public DiscountOperationDto DiscountOperation { get; set; } = default!;
     public CurrencyDto Currency { get; set; } = default!;
     public CustomerDto Customer { get; set; } = default!;
     public ICollection<SaleItemDto> Items { get; set; } = default!;
-
 }

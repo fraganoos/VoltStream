@@ -3,7 +3,7 @@
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
 using ApiServices.Models;
-using ApiServices.Models.Reqiuests;
+using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
@@ -109,13 +109,13 @@ public partial class SalesPage : Page
                     Phone = customer.phone,
                     Address = customer.address,
                     Description = customer.description,
-                    //Accounts.Add(new()
-                    //{
-                    //    BeginningSumm = customer.beginningSum,
-                    //    CurrentSumm = customer.beginningSum,
-                    //    DiscountSumm = 0
-                    //})
-
+                    Accounts = [new()
+                    {
+                        OpeningBalance = customer.beginningSum,
+                        Balance = customer.beginningSum,
+                        Discount = 0,
+                        CurrencyId = 1
+                    }]
                 };
 
                 var response = await customersApi.CreateAsync(newCustomer).Handle();
