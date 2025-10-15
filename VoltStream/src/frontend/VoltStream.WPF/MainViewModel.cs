@@ -2,6 +2,7 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Payments.Views;
 using VoltStream.WPF.Products.Views;
@@ -46,14 +47,15 @@ public partial class MainViewModel : ViewModelBase
 
     [RelayCommand]
     private void ShowProductView()
-    => CurrentChildView = new ProductsPage(serviceProvider);
-
+     {
+        CurrentChildView = new ProductsPage(serviceProvider);
+    CurrentPageTitle = "Mahsulotlar qoldig'i";
+    }
     [RelayCommand]
     private void ShowSalesHistoryView()
-    => CurrentChildView = new SalesHistoryPage(serviceProvider);
     {
-        CurrentChildView = new ProductsPage(serviceProvider);
-        CurrentPageTitle = "Mahsulotlar qoldig'i";
+        CurrentChildView = new SalesHistoryPage(serviceProvider);
+        CurrentPageTitle = "Savdo Tarixi";
     }
 
     [RelayCommand]
