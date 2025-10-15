@@ -116,6 +116,17 @@
                                    Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
+                <RadioButton Style="{DynamicResource menuButton}"
+                             Tag="{DynamicResource color7}"
+                             Command="{Binding ShowSalesHistoryViewCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <fa:IconImage Icon="FileAlt"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Sotuv tarixi"
+                                   Style="{StaticResource menuButtonText}" />
+                    </StackPanel>
+                </RadioButton>
+
             </StackPanel>
 
             <!--Header and content-->

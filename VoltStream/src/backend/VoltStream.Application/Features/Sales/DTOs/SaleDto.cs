@@ -1,4 +1,4 @@
-﻿namespace VoltStream.Application.Features.Sales.DTOs;
+﻿    namespace VoltStream.Application.Features.Sales.DTOs;
 
 using VoltStream.Application.Features.Currencies.DTOs;
 using VoltStream.Application.Features.CustomerOperations.DTOs;

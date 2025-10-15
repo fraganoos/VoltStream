@@ -1,16 +1,17 @@
-﻿<Application x:Class="VoltStream.WPF.App"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:VoltStream.WPF">
+﻿<Application
+    x:Class="VoltStream.WPF.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:VoltStream.WPF">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- begin::Converters -->
+                <!--  begin::Converters  -->
                 <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Converters/Converters.xaml" />
-                <!-- end::Converters -->
-                
-                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/ButtonStyles.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/Colors.xaml"/>
+                <!--  end::Converters  -->
+
+                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/ButtonStyles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/Colors.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/FloatingLable.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
