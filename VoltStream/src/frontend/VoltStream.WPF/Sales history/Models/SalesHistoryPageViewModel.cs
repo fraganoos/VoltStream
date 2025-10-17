@@ -1,4 +1,5 @@
 ﻿namespace VoltStream.WPF.Sales_history.Models;
+
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
 using ApiServices.Models;
@@ -16,6 +17,7 @@ using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
 using VoltStream.WPF.Commons;
+using ApiServices.Interfaces;
 
 public partial class SalesHistoryPageViewModel : ViewModelBase
 {
@@ -43,9 +45,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     [ObservableProperty] private decimal? finalAmount;
     [ObservableProperty] private DateTime? beginDate;
     [ObservableProperty] private DateTime? endDate;
-
-
-
 
     // --- Boshlang‘ich ma’lumotlarni yuklash
     private async Task LoadInitialDataAsync()
@@ -80,11 +79,15 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         SelectedProduct = null;
         SelectedCustomer = null;
 
+        // 🔁 Dastlabki (bazadan kelgan) ma'lumotlarni qayta tiklaymiz
         Products = new ObservableCollection<ProductResponse>(AllProducts);
+        Categories = new ObservableCollection<CategoryResponse>(Categories.DistinctBy(x => x.Id)); // original kategoriyalar
+        Customers = new ObservableCollection<CustomerResponse>(Customers.DistinctBy(x => x.Id));   // original customerlar
+
+        // 🔄 Barcha sotuvlarni qayta yuklash
         FilteredSaleItems = new ObservableCollection<ProductItemViewModel>(SaleItems);
         FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
     }
-
     [RelayCommand]
     private void ExportToExcel()
     {
@@ -220,7 +223,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         if (dlg.ShowDialog() == true)
             dlg.PrintDocument(fixedDoc.DocumentPaginator, "Savdo tarixi");
     }
-
 
     // Create FixedDocument (A4), pages with grid table, footer and total.
     private FixedDocument CreateFixedDocumentForPrint()
@@ -388,6 +390,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
         return fixedDoc;
     }
+    
     // --- Ombordagi mahsulotlar
     public async Task LoadSalesHistoryAsync()
     {
@@ -524,7 +527,15 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     {
         try
         {
-            var response = await services.GetRequiredService<IProductsApi>().GetAllAsync().Handle();
+            FilteringRequest request = new()
+            {
+                Filters = new()
+                {
+                    ["Category"] = ["include"]
+                }
+            };
+
+            var response = await services.GetRequiredService<IProductsApi>().Filter(request).Handle();
             var mapper = services.GetRequiredService<IMapper>();
             if (response.IsSuccess)
             {
@@ -545,21 +556,14 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     // --- Filtrlash funksiyasi (DataGrid uchun)
     private void ApplyFilter()
     {
-        IEnumerable<ProductItemViewModel> filtered = SaleItems;
-
-        if (SelectedCategory != null)
-            filtered = filtered.Where(x => x.Category == SelectedCategory.Name);
-
-        if (SelectedProduct != null)
-            filtered = filtered.Where(x => x.Name == SelectedProduct.Name);
-
-        if (SelectedCustomer != null)
-            filtered = filtered.Where(x => x.Customer == SelectedCustomer.Name);
-
-        FilteredSaleItems = new ObservableCollection<ProductItemViewModel>(filtered);
+        IEnumerable<ProductItemViewModel> filtered = SaleItems; 
+        if (SelectedCategory != null) filtered = filtered.Where(x => x.Category == SelectedCategory.Name); 
+        if (SelectedProduct != null) filtered = filtered.Where(x => x.Name == SelectedProduct.Name); 
+        if (SelectedCustomer != null) filtered = filtered.Where(x => x.Customer == SelectedCustomer.Name); 
+        FilteredSaleItems = new ObservableCollection<ProductItemViewModel>(filtered); 
         FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
     }
-
+    
     // --- Har bir product item o‘zgarishida summa qayta hisoblanadi
     private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
