@@ -6,7 +6,6 @@ using System.Windows;
 using VoltStream.ServerManager.Api;
 using VoltStream.ServerManager.Enums;
 using VoltStream.ServerManager.Services;
-using Application = System.Windows.Application;
 
 public partial class App : Application
 {
