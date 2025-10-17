@@ -1,4 +1,4 @@
-﻿namespace ApiServices.Models.Reqiuests;
+﻿namespace ApiServices.Models.Requests;
 
 using ApiServices.Enums;
 

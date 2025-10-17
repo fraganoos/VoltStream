@@ -1,4 +1,4 @@
-﻿namespace ApiServices.Models.Reqiuests;
+﻿namespace ApiServices.Models.Requests;
 
 public record CustomerRequest
 {

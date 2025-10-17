@@ -2,7 +2,7 @@
 
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
-using ApiServices.Models.Reqiuests;
+using ApiServices.Models.Requests;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using VoltStream.WPF.Commons;
