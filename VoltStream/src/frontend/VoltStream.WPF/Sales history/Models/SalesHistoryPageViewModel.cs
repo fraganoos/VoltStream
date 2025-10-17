@@ -3,11 +3,9 @@ using ApiServices.Extensions;
 using ApiServices.Interfaces;
 using ApiServices.Models;
 using ApiServices.Models.Responses;
-using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Wordprocessing;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
@@ -201,7 +199,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             Content = new DocumentViewer
             {
                 Document = fixedDoc,
-                Margin = new Thickness(10,5,5,5)
+                Margin = new Thickness(10, 5, 5, 5)
             }
         };
         previewWindow.ShowDialog();
@@ -561,7 +559,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         FilteredSaleItems = new ObservableCollection<ProductItemViewModel>(filtered);
         FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
     }
-    
+
     // --- Har bir product item o‘zgarishida summa qayta hisoblanadi
     private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {

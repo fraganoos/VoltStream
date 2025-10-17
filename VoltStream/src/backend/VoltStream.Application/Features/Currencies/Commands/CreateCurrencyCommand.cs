@@ -12,7 +12,8 @@ public record CreateCurrencyCommand(
     string Name,
     string Code,
     string Symbol,
-    decimal ExchangeRate)
+    bool IsDefault,
+decimal ExchangeRate)
     : IRequest<long>;
 
 public class CreateCurrencyCommandHandler(

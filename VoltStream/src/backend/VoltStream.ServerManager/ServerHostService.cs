@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Net.Http;
+using VoltStream.ServerManager.Api;
 using VoltStream.ServerManager.Enums;
 using VoltStream.WebApi;
 using VoltStream.WebApi.Extensions;
@@ -118,6 +119,18 @@ public class ServerHostService
     {
         await StopAsync(cancellationToken);
         await StartAsync(cancellationToken);
+
+
+        var config = new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false)
+            .Build();
+
+        var port = config.GetValue("Server:Port", 5000);
+        var host = config.GetValue("Server:Host", "localhost");
+        var baseUrl = $"http://{host}:{port}/api";
+
+        App.AllowedClientsApi = ApiFactory.CreateAllowedClients(baseUrl);
     }
 
     private void ForwardLog(RequestLog log)
