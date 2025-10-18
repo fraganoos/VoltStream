@@ -11,25 +11,25 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Commons.ViewModels;
 using VoltStream.WPF.Customer.ViewModels;
-using VoltStream.WPF.Payments.ViewModels;
 
 public partial class SaleViewModel : ViewModelBase
 {
+    private IServiceProvider services;
     private readonly IMapper mapper;
     private readonly ICurrenciesApi currenciesApi;
     private readonly ICustomersApi customersApi;
     private readonly ICategoriesApi categoriesApi;
-    private readonly IProductsApi productsApi;
     private readonly IWarehouseStocksApi stocksApi;
 
     public SaleViewModel(IServiceProvider services)
     {
+        this.services = services;
         mapper = services.GetRequiredService<IMapper>();
         currenciesApi = services.GetRequiredService<ICurrenciesApi>();
         customersApi = services.GetRequiredService<ICustomersApi>();
         categoriesApi = services.GetRequiredService<ICategoriesApi>();
-        productsApi = services.GetRequiredService<IProductsApi>();
         stocksApi = services.GetRequiredService<IWarehouseStocksApi>();
 
         _ = LoadPageAsync();
@@ -61,7 +61,7 @@ public partial class SaleViewModel : ViewModelBase
     [ObservableProperty] private CurrencyViewModel currency = new();
 
     [ObservableProperty] private long customerId;
-    [ObservableProperty] private CustomerViewModel customer = new();
+    [ObservableProperty] private CustomerViewModel customer;
 
     [ObservableProperty] private ObservableCollection<SaleItemViewModel> items = [];
 
