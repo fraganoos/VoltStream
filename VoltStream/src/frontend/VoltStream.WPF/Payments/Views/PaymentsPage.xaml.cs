@@ -1,109 +1,66 @@
 ﻿namespace VoltStream.WPF.Payments.Views;
 
-using VoltStream.WPF.Payments.ViewModels;
-using ApiServices.Interfaces;
-using ApiServices.Models.Responses;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Threading.Tasks;
+using ApiServices.Extensions;
+using ApiServices.Models.Requests;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using VoltStream.WPF.Commons;
+using VoltStream.WPF.Customer;
+using VoltStream.WPF.Payments.ViewModels;
 
 /// <summary>
 /// Логика взаимодействия для PaymentsPage.xaml
 /// </summary>
 public partial class PaymentsPage : Page
 {
-    public Payment payment=new();
-    private readonly ICustomersApi customersApi;
-    private readonly ICurrenciesApi currenciesApi;
-
-    public PaymentsPage(IServiceProvider service)
+    PaymentPageViewModel vm;
+    public PaymentsPage(IServiceProvider services)
     {
         InitializeComponent();
-        customersApi = service.GetRequiredService<ICustomersApi>();
-        currenciesApi = service.GetRequiredService<ICurrenciesApi>();
-        DataContext = payment;
-        Loaded += PaymentsPage_Loaded;
-        CustomerName.LostFocus += CustomerName_LostFocus;
+        vm = new PaymentPageViewModel(services);
+        DataContext = vm;
     }
 
-    private void CustomerName_LostFocus(object sender, RoutedEventArgs e)
+    private async void CustomerName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        if (CustomerName.SelectedValue is not null)
-        {
-            payment.CustomerId = (long)CustomerName.SelectedValue;
-        }
-        else
-        {
-            beginBalans.Clear();
-            lastBalans.Text = null;
-            //tel.Text = null;
-            return;
-        }
-    }
 
-    private async void PaymentsPage_Loaded(object sender, RoutedEventArgs e)
-    {
-        await LoadCustomerNameAsync();
-        await LoadCurrenciesAsync();
-    }
+        bool accept = ComboBoxHelper.BeforeUpdate(sender, e, "Xaridor", true);
+        if (accept)
+        {
+            var win = new CustomerWindow(CustomerName.Text);
+            if (win.ShowDialog() == true)
+            {
+                var customer = win.Result;
+                CustomerRequest newCustomer = new()
+                {
+                    Name = customer!.name,
+                    Phone = customer.phone,
+                    Address = customer.address,
+                    Description = customer.description,
+                    Accounts = [new()
+                    {
+                        OpeningBalance = customer.beginningSum,
+                        Balance = customer.beginningSum,
+                        Discount = 0,
+                        CurrencyId = 1
+                    }]
+                };
 
-    private async Task LoadCustomerNameAsync()
-    {
-        try
-        {
-            // Сохраняем текущее выбранное значение
-            var selectedValue = CustomerName.SelectedValue;
-            var response = await customersApi.GetAllAsync();
-
-            if (response.IsSuccess)
-            {
-                List<CustomerResponse> customers = response.Data!;
-                CustomerName.ItemsSource = customers;
-                CustomerName.DisplayMemberPath = "Name";
-                CustomerName.SelectedValuePath = "Id";
-                // Восстанавливаем выбранное значение
-                if (selectedValue is not null)
-                    CustomerName.SelectedValue = selectedValue;
+                var response = await vm.customersApi.CreateAsync(newCustomer).Handle();
+                if (response.IsSuccess)
+                {
+                    CustomerName.Text = newCustomer.Name;
+                    await vm.LoadCustomersAsync();
+                }
+                else
+                {
+                    e.Handled = true;
+                    MessageBox.Show($"Xatolik yuz berdi. {response.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                // тут можете сохранить customer в БД или список
             }
-            else
-            {
-                // Проверяем на null, чтобы избежать CS8602
-                var errorMsg = response.Message ?? "Unknown error";
-                MessageBox.Show("Error fetching customers: " + errorMsg);
-            }
-
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show("An error occurred: " + ex.Message);
-        }
-    }
-    private async Task LoadCurrenciesAsync()
-    {
-        try
-        {
-            var selectedValue = CurrencyType.SelectedValue;
-            var response = await currenciesApi.GetAllAsync();
-            if (response.IsSuccess)
-            {
-                List<CurrencyResponse> currencies = response.Data!;
-                CurrencyType.ItemsSource = currencies;
-                CurrencyType.DisplayMemberPath = "Name";
-                CurrencyType.SelectedValuePath = "Id";
-                if (selectedValue is not null)
-                    CurrencyType.SelectedValue = selectedValue;
-            }
-            else
-            {
-                var errorMsg = response.Message ?? "Unknown error";
-                MessageBox.Show("Error fetching currencies: " + errorMsg);
-            }
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show("An error occurred: " + ex.Message);
+            else { e.Handled = true; }
         }
     }
 }

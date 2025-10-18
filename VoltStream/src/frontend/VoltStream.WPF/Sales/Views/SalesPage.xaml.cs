@@ -121,6 +121,7 @@ public partial class SalesPage : Page
                 var response = await customersApi.CreateAsync(newCustomer).Handle();
                 if (response.IsSuccess)
                 {
+                    CustomerName.Text = newCustomer.Name;
                     await LoadCustomerNameAsync();
                 }
                 else
@@ -210,7 +211,6 @@ public partial class SalesPage : Page
         var rounded = Math.Round(totalUzs, 0, MidpointRounding.AwayFromZero);
         return rounded.ToString("F0");
     }
-
 
 
     private async void CustomerName_GotFocus(object sender, RoutedEventArgs e)

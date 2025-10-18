@@ -126,9 +126,10 @@ public class ServerHostService
             .AddJsonFile("appsettings.json", optional: false)
             .Build();
 
+        bool.TryParse(config.GetValue("Server:UseHttps", "false"), out bool UseHttps);
         var port = config.GetValue("Server:Port", 5000);
         var host = config.GetValue("Server:Host", "localhost");
-        var baseUrl = $"http://{host}:{port}/api";
+        var baseUrl = $"{(UseHttps ? "https" : "http")}://{host}:{port}/api";
 
         App.AllowedClientsApi = ApiFactory.CreateAllowedClients(baseUrl);
     }
