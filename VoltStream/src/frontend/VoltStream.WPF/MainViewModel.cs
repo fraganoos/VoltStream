@@ -16,6 +16,7 @@ public partial class MainViewModel : ViewModelBase
 
     [ObservableProperty] private object currentChildView;
     [ObservableProperty] private string currentPageTitle = "Bosh sahifa";
+    [ObservableProperty] private bool isSidebarCollapsed = false;
 
     public MainViewModel(IServiceProvider serviceProvider)
     {
@@ -50,6 +51,7 @@ public partial class MainViewModel : ViewModelBase
         CurrentChildView = new ProductsPage(serviceProvider);
         CurrentPageTitle = "Mahsulotlar qoldig'i";
     }
+
     [RelayCommand]
     private void ShowSalesHistoryView()
     {

@@ -62,7 +62,7 @@ public class UpdateSaleCommandHandler(
         return await context.Sales
             .Include(s => s.CustomerOperation)
             .Include(s => s.Customer)
-                .ThenInclude(c => c.Accounts)
+                .ThenInclude(c => c!.Accounts)
             .Include(s => s.Discount)
             .Include(s => s.Items)
             .FirstOrDefaultAsync(s => s.Id == saleId, cancellationToken)
@@ -108,7 +108,7 @@ public class UpdateSaleCommandHandler(
         }
 
         // Accountni revert qilish faqat IsApplied = false bo'lsa
-        if (!sale.DiscountOperation.IsApplied)
+        if (!sale.DiscountOperation!.IsApplied)
         {
             account.Balance += sale.Amount;
             account.Discount -= sale.Discount;
@@ -169,7 +169,7 @@ public class UpdateSaleCommandHandler(
         sale.CustomerOperation = customerOperation;
 
         // DiscountOperation
-        sale.DiscountOperation.Date = request.Date;
+        sale.DiscountOperation!.Date = request.Date;
         sale.DiscountOperation.Amount = request.Discount;
         sale.DiscountOperation.IsApplied = request.IsApplied;
         sale.DiscountOperation.Description = $"Chegirma savdo uchun: {descriptionBuilder}";
