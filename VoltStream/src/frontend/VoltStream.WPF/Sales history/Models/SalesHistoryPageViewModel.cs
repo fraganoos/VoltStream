@@ -17,7 +17,6 @@ using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
 using VoltStream.WPF.Commons;
-using ApiServices.Interfaces;
 
 public partial class SalesHistoryPageViewModel : ViewModelBase
 {
@@ -236,7 +235,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
         // Sahifaga nechta satr sig‘ishini hisoblash uchun
         int maxRowsPerPage = 45; // tajriba asosida sozlasa bo‘ladi
-        int currentRow = 0;
         int pageNumber = 0;
 
         var items = FilteredSaleItems.ToList();
@@ -390,7 +388,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
         return fixedDoc;
     }
-    
+
     // --- Ombordagi mahsulotlar
     public async Task LoadSalesHistoryAsync()
     {
@@ -556,14 +554,14 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     // --- Filtrlash funksiyasi (DataGrid uchun)
     private void ApplyFilter()
     {
-        IEnumerable<ProductItemViewModel> filtered = SaleItems; 
-        if (SelectedCategory != null) filtered = filtered.Where(x => x.Category == SelectedCategory.Name); 
-        if (SelectedProduct != null) filtered = filtered.Where(x => x.Name == SelectedProduct.Name); 
-        if (SelectedCustomer != null) filtered = filtered.Where(x => x.Customer == SelectedCustomer.Name); 
-        FilteredSaleItems = new ObservableCollection<ProductItemViewModel>(filtered); 
+        IEnumerable<ProductItemViewModel> filtered = SaleItems;
+        if (SelectedCategory != null) filtered = filtered.Where(x => x.Category == SelectedCategory.Name);
+        if (SelectedProduct != null) filtered = filtered.Where(x => x.Name == SelectedProduct.Name);
+        if (SelectedCustomer != null) filtered = filtered.Where(x => x.Customer == SelectedCustomer.Name);
+        FilteredSaleItems = new ObservableCollection<ProductItemViewModel>(filtered);
         FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
     }
-    
+
     // --- Har bir product item o‘zgarishida summa qayta hisoblanadi
     private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
