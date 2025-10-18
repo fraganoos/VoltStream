@@ -1,5 +1,6 @@
 ﻿namespace VoltStream.WPF.Payments.Views;
 
+using VoltStream.WPF.Payments.ViewModels;
 using ApiServices.Interfaces;
 using ApiServices.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,7 @@ using System.Windows.Controls;
 /// </summary>
 public partial class PaymentsPage : Page
 {
+    public Payment payment=new();
     private readonly ICustomersApi customersApi;
     private readonly ICurrenciesApi currenciesApi;
 
@@ -21,7 +23,24 @@ public partial class PaymentsPage : Page
         InitializeComponent();
         customersApi = service.GetRequiredService<ICustomersApi>();
         currenciesApi = service.GetRequiredService<ICurrenciesApi>();
+        DataContext = payment;
         Loaded += PaymentsPage_Loaded;
+        CustomerName.LostFocus += CustomerName_LostFocus;
+    }
+
+    private void CustomerName_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (CustomerName.SelectedValue is not null)
+        {
+            payment.CustomerId = (long)CustomerName.SelectedValue;
+        }
+        else
+        {
+            beginBalans.Clear();
+            lastBalans.Text = null;
+            //tel.Text = null;
+            return;
+        }
     }
 
     private async void PaymentsPage_Loaded(object sender, RoutedEventArgs e)
