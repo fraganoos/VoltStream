@@ -10,7 +10,4 @@ public class CustomerOperation : Auditable
 
     public long AccountId { get; set; }
     public Account Account { get; set; } = default!;
-
-    public long SaleId { get; set; }
-    public Sale Sale { get; set; } = default!;
 }

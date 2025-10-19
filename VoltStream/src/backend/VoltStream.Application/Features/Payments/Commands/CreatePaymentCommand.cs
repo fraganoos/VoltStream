@@ -54,14 +54,6 @@ public class CreatePaymentCommandHandler(
                     ?? throw new NotFoundException(nameof(Cash), nameof(request.CurrencyId), request.CurrencyId);
 
                 cash.Balance += request.Amount;
-
-                context.CashOperations.Add(new CashOperation
-                {
-                    CurrencyId = request.CurrencyId,
-                    Date = DateTime.UtcNow,
-                    Description = GenerateDescription(request),
-                    Amount = request.Amount
-                });
             }
 
             // === 4. Mijoz account balansini yangilash ===
@@ -73,7 +65,7 @@ public class CreatePaymentCommandHandler(
             payment.CurrencyId = request.CurrencyId;
             payment.CustomerId = account.Id;
 
-            var customerOperation = new CustomerOperation
+            payment.CustomerOperation = new CustomerOperation
             {
                 AccountId = account.Id,
                 OperationType = OperationType.Payment,
@@ -81,8 +73,6 @@ public class CreatePaymentCommandHandler(
                 Description = GenerateDescription(request),
                 CreatedAt = DateTime.UtcNow
             };
-
-            payment.CustomerOperation = customerOperation;
 
             context.Payments.Add(payment);
 

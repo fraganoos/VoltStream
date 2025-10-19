@@ -3,7 +3,9 @@
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
 using ApiServices.Models;
+using ApiServices.Models.Requests;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -16,12 +18,14 @@ partial class PaymentPageViewModel : ViewModelBase
 {
     public readonly ICustomersApi customersApi;
     public readonly ICurrenciesApi currenciesApi;
+    public readonly IPaymentApi paymentApi;
     public readonly IMapper mapper;
     public PaymentPageViewModel(IServiceProvider services)
     {
         customersApi = services.GetRequiredService<ICustomersApi>();
         currenciesApi = services.GetRequiredService<ICurrenciesApi>();
         mapper = services.GetRequiredService<IMapper>();
+        paymentApi = services.GetRequiredService<IPaymentApi>();
 
         _ = LoadDataAsync();
     }
@@ -31,13 +35,42 @@ partial class PaymentPageViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<CurrencyViewModel> availableCurrencies = [];
     [ObservableProperty] private ObservableCollection<CustomerViewModel> availableCustomers = [];
 
-    [ObservableProperty] private CurrencyViewModel currency;
+    [ObservableProperty] private PaymentViewModel payment = new();
     [ObservableProperty] private CustomerViewModel customer;
     private long customerId;
 
+    [ObservableProperty] private CurrencyViewModel currency;
 
+    #region Commands
 
+    [RelayCommand]
+    private async Task Submit()
+    {
+        var request = new PaymentRequest
+        {
+            CustomerId = Customer.Id,
+            CurrencyId = Currency.Id,
+            PaidAt = Payment.PaidAt,
+            Amount = Payment.Amount,
+            ExchangeRate = Payment.ExchangeRate,
+            NetAmount = Payment.NetAmount,
+            Description = Payment.Description,
+        };
 
+        var response = await paymentApi.CreateAsync(request).Handle();
+
+        if (response.IsSuccess)
+        {
+            Success = "To'lov muvaffaqiyatli ro'yxatga qo'shildi!";
+
+            Payment = new();
+            Customer = new();
+            Currency = new();
+        }
+        else Error = response.Message ?? "Texnik xatolik!";
+    }
+
+    #endregion Commands
 
 
     #region Load data
@@ -90,7 +123,13 @@ partial class PaymentPageViewModel : ViewModelBase
         var response = await customersApi.Filter(request).Handle();
 
         if (response.IsSuccess)
+        {
             Customer = mapper.Map<CustomerViewModel>(response.Data.FirstOrDefault() ?? new());
+            if (Customer.Accounts is not null)
+                foreach (var account in Customer.Accounts)
+                    if (account.Currency is not null && account.Currency.Code == "UZS")
+                        Payment.Balance = account.Balance;
+        }
         else Error = response.Message ?? "Mijoz ma'lumotlarnini yuklashda xatolik!";
     }
 

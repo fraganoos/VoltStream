@@ -8,8 +8,11 @@ public class PaymentMapperProfile : Profile
 {
     public PaymentMapperProfile()
     {
-        CreateMap<CreatePaymentCommand, Payment>();
-        CreateMap<UpdatePaymentCommand, Payment>();
+        CreateMap<CreatePaymentCommand, Payment>()
+            .ForMember(dest => dest.PaidAt, opt => opt
+                .MapFrom(src => src.PaidAt.ToUniversalTime()));
+        CreateMap<UpdatePaymentCommand, Payment>()
+            .ForMember(dest => dest.PaidAt, opt => opt.MapFrom(src => src.PaidAt.ToUniversalTime()));
 
         CreateMap<UpdatePaymentCommand, CustomerOperation>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())

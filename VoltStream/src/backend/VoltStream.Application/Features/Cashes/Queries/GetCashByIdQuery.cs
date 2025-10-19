@@ -17,7 +17,6 @@ public class GetCashByIdQueryHandler(
 {
     public async Task<CashDto> Handle(GetCashByIdQuery request, CancellationToken cancellationToken)
         => mapper.Map<CashDto>(await context.Cashes
-            .Include(c => c.CashOperations)
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken))
         ?? throw new NotFoundException(nameof(Cash), nameof(request.Id), request.Id);
 }

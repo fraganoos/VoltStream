@@ -22,7 +22,6 @@ public class DeletePaymentCommandHandler(
             var payment = await context.Payments
                 .Include(p => p.CustomerOperation)
                     .ThenInclude(co => co.Account)
-                .Include(p => p.CashOperation)
                 .Include(p => p.Customer)
                 .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
                 ?? throw new NotFoundException(nameof(Payment), nameof(request.Id), request.Id);
@@ -33,8 +32,8 @@ public class DeletePaymentCommandHandler(
             if (payment.Type == Domain.Enums.PaymentType.Cash)
             {
                 var cash = await context.Cashes
-                    .FirstOrDefaultAsync(c => c.Id == payment.CashOperationId, cancellationToken)
-                    ?? throw new NotFoundException(nameof(Cash), nameof(payment.CashOperationId), payment.CashOperationId);
+                    .FirstOrDefaultAsync(c => c.CurrencyId == payment.CurrencyId, cancellationToken)
+                    ?? throw new NotFoundException(nameof(Cash), nameof(payment.CurrencyId), payment.CurrencyId);
 
                 if (cash.Balance < payment.Amount)
                     throw new ConflictException("Kassada mablag‘ yetarli emas!");
@@ -50,9 +49,6 @@ public class DeletePaymentCommandHandler(
 
             if (payment.CustomerOperation is not null)
                 payment.CustomerOperation.IsDeleted = true;
-
-            if (payment.CashOperation is not null)
-                payment.CashOperation.IsDeleted = true;
 
             if (payment.DiscountOperation is not null)
                 payment.DiscountOperation.IsDeleted = true;
