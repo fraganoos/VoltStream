@@ -18,7 +18,7 @@ public partial class SalesHistoryPage : Page
         DataContext = vm;
     }
 
-    private void beginDate_LostFocus(object sender, System.Windows.RoutedEventArgs e)
+    private async void beginDate_LostFocus(object sender, System.Windows.RoutedEventArgs e)
     {
         // 1. Agar foydalanuvchi sanani kiritmagan bo‘lsa
         if (string.IsNullOrWhiteSpace(beginDate.dateTextBox.Text))
@@ -39,6 +39,7 @@ public partial class SalesHistoryPage : Page
             beginDate.Focus();
             return;
         }
+        await vm.LoadSalesHistoryAsync();
 
     }
 

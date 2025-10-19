@@ -178,7 +178,7 @@
 
         <!-- 📋 DataGrid -->
         <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding FilteredSaleItems}"
+                  ItemsSource="{Binding FilteredSaleItems,Mode=TwoWay}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
                   CanUserDeleteRows="False"
