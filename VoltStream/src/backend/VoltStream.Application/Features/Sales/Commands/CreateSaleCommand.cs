@@ -163,6 +163,7 @@ public class CreateSaleCommandHandler(
             Amount = sale.Amount,
             Account = account,
             AccountId = account.Id,
+            CustomerId= sale.CustomerId,
             OperationType = OperationType.Sale,
             Description = $"Savdo ID = {sale.Id}: {description}. {descriptionBuilder}".Trimmer(200)
         };
