@@ -70,7 +70,8 @@ public class CreatePaymentCommandHandler(
                 AccountId = account.Id,
                 OperationType = OperationType.Payment,
                 Amount = request.NetAmount,
-                Description = GenerateDescription(request),
+                CustomerId = customer.Id,
+                Description = GenerateDescription(request)+ ". " + payment.Description.ToString(),
                 CreatedAt = DateTime.UtcNow
             };
 
