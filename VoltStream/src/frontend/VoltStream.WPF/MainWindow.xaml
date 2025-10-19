@@ -1,15 +1,16 @@
-﻿<Window
-    x:Class="VoltStream.WPF.MainWindow"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="MainWindow"
-    Width="1300"
-    Height="700"
-    WindowStartupLocation="CenterScreen"
-    mc:Ignorable="d">
+﻿<Window x:Class="VoltStream.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        xmlns:vm="clr-namespace:VoltStream.WPF"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Title="Volt Stream"
+        Height="700"
+        Width="1300"
+        Loaded="MainWindow_Loaded">
 
     <Border>
         <Grid>
@@ -18,8 +19,6 @@
                                   Width="250" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-
-            <!--  Notification stack  -->
             <StackPanel
                 x:Name="NotificationHost"
                 Grid.Column="1"
@@ -30,76 +29,103 @@
                 IsHitTestVisible="False"
                 Orientation="Vertical" />
 
-            <!--  Navigation menu  -->
-            <StackPanel Grid.Column="0" Background="#0A003A">
-                <StackPanel
-                    Height="35"
-                    Margin="15,5,0,15"
-                    Orientation="Horizontal">
-                    <Image Source="/Commons/Source/Images/LogoVolt.png" />
-                    <TextBlock
-                        Margin="20,0,0,0"
-                        VerticalAlignment="Center"
-                        FontSize="20"
-                        FontWeight="Medium"
-                        Foreground="White"
-                        Text="VoltStream" />
-                </StackPanel>
+            <!-- Sidebar -->
+            <StackPanel Grid.Column="0"
+                        x:Name="Sidebar"
+                        Background="#0A003A">
 
-                <RadioButton Style="{DynamicResource menuButton}" Tag="{DynamicResource color1}">
-                    <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="Home" Style="{StaticResource menuButtonIcon}" />
-                        <TextBlock Style="{StaticResource menuButtonText}" Text="Bosh sahifa" />
+                <!-- Logo ToggleButton -->
+                <ToggleButton Style="{DynamicResource menuToggleButton}"
+                              IsChecked="{Binding IsSidebarCollapsed}">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+                        <Image Source="/Commons/Source/Images/LogoVolt.png"
+                               Width="30"
+                               Height="30" />
+                        <TextBlock Text="Volt Stream"
+                                   Margin="15 0"
+                                   Foreground="White"
+                                   FontSize="20"
+                                   FontWeight="Bold"/>
+                    </StackPanel>
+                </ToggleButton>
+
+                <!-- Menyu -->
+                <RadioButton Style="{DynamicResource menuButton}"
+                             Tag="{DynamicResource color1}"
+                             GroupName="MenuGroup">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+                        <fa:IconImage Icon="Home"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Bosh sahifa"
+                                   Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
 
-                <RadioButton
-                    Command="{Binding ShowSuppliesViewCommand}"
-                    Style="{DynamicResource menuButton}"
-                    Tag="{DynamicResource color2}">
-                    <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="ProjectDiagram" Style="{StaticResource menuButtonIcon}" />
-                        <TextBlock Style="{StaticResource menuButtonText}" Text="Ishlab chiqarish" />
+                <RadioButton Style="{DynamicResource menuButton}"
+                             Tag="{DynamicResource color2}"
+                             Command="{Binding ShowSuppliesViewCommand}"
+                             GroupName="MenuGroup">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+                        <fa:IconImage Icon="ProjectDiagram"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Ishlab chiqarish"
+                                   Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
 
-                <RadioButton
-                    Command="{Binding ShowSalesViewCommand}"
-                    Style="{DynamicResource menuButton}"
-                    Tag="{DynamicResource color3}">
-                    <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="ShoppingCart" Style="{StaticResource menuButtonIcon}" />
-                        <TextBlock Style="{StaticResource menuButtonText}" Text="Savdo" />
+                <RadioButton Style="{DynamicResource menuButton}"
+                             Tag="{DynamicResource color3}"
+                             Command="{Binding ShowSalesViewCommand}"
+                             GroupName="MenuGroup">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+                        <fa:IconImage Icon="ShoppingCart"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Savdo"
+                                   Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
 
-                <RadioButton
-                    Command="{Binding ShowPaymentViewCommand}"
-                    Style="{DynamicResource menuButton}"
-                    Tag="{DynamicResource color6}">
-                    <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="MoneyCheckDollar" Style="{StaticResource menuButtonIcon}" />
-                        <TextBlock Style="{StaticResource menuButtonText}" Text="Oldi-berdi" />
+
+                <RadioButton Style="{DynamicResource menuButton}"
+                             Tag="{DynamicResource color6}"
+                             Command="{Binding ShowPaymentViewCommand}"
+                             GroupName="MenuGroup">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+                        <fa:IconImage Icon="MoneyCheckDollar"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Oldi-berdi"
+                                   Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
 
-                <RadioButton
-                    Command="{Binding ShowProductViewCommand}"
-                    Style="{DynamicResource menuButton}"
-                    Tag="{DynamicResource color8}">
-                    <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="Boxes" Style="{StaticResource menuButtonIcon}" />
-                        <TextBlock Style="{StaticResource menuButtonText}" Text="Mahsulotlar qoldig'i" />
+                <RadioButton Style="{DynamicResource menuButton}"
+                             Tag="{DynamicResource color8}"
+                             Command="{Binding ShowProductViewCommand}"
+                             GroupName="MenuGroup">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+                        <fa:IconImage Icon="Boxes"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Mahsulotlar qoldig'i"
+                                   Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
 
-                <RadioButton
-                    Command="{Binding ShowSalesHistoryViewCommand}"
-                    Style="{DynamicResource menuButton}"
-                    Tag="{DynamicResource color7}">
-                    <StackPanel Orientation="Horizontal">
-                        <fa:IconImage Icon="FileAlt" Style="{StaticResource menuButtonIcon}" />
-                        <TextBlock Style="{StaticResource menuButtonText}" Text="Sotuv tarixi" />
+                <RadioButton Style="{DynamicResource menuButton}"
+                             Tag="{DynamicResource color7}"
+                             Command="{Binding ShowSalesHistoryViewCommand}"
+                             GroupName="MenuGroup">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+                        <fa:IconImage Icon="FileAlt"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Sotuv tarixi"
+                                   Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
 
@@ -117,27 +143,27 @@
                 </RadioButton>
             </StackPanel>
 
-            <!--  Header and content  -->
+            <!-- Header va content -->
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <Border Grid.Row="0" Background="#0A003A">
-                    <TextBlock
-                        Margin="20,0,0,0"
-                        VerticalAlignment="Center"
-                        FontSize="16"
-                        Foreground="White"
-                        Text="Bosh sahifa" />
+                <Border Grid.Row="0"
+                        Background="#0A003A">
+                    <TextBlock Text="{Binding CurrentPageTitle}"
+                               VerticalAlignment="Center"
+                               FontSize="16"
+                               Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BooleanToVisibilityConverter}}"
+                               Foreground="White"
+                               Margin="20 0 0 0" />
                 </Border>
 
-                <Frame
-                    Grid.Row="1"
-                    Margin="10"
-                    Content="{Binding CurrentChildView}"
-                    NavigationUIVisibility="Hidden" />
+                <Frame Grid.Row="1"
+                       Content="{Binding CurrentChildView}"
+                       Margin="10"
+                       NavigationUIVisibility="Hidden" />
             </Grid>
         </Grid>
     </Border>
