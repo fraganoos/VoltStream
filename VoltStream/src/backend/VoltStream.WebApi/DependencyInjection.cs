@@ -1,5 +1,6 @@
 ﻿namespace VoltStream.WebApi;
 
+using Discovery.Extensions;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Scalar.AspNetCore;
 using System.Text.Json.Serialization;
@@ -14,6 +15,9 @@ public static class DependencyInjection
     {
         services.AddApplicationServices();
         services.AddInfrastructureServices(conf);
+
+        services.AddDiscoveryModule(conf);
+
         services.AddControllers(options
             => options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())))
                 .AddApplicationPart(typeof(DependencyInjection).Assembly)

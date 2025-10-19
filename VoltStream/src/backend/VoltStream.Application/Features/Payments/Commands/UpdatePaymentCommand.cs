@@ -17,18 +17,17 @@ public record UpdatePaymentCommand(
     decimal ExchangeRate,
     decimal NetAmount,
     string Description)
-    : IRequest<long>;
+    : IRequest<bool>;
 
 public class UpdatePaymentCommandHandler(
     IAppDbContext context)
-    : IRequestHandler<UpdatePaymentCommand, long>
+    : IRequestHandler<UpdatePaymentCommand, bool>
 {
-    public async Task<long> Handle(UpdatePaymentCommand request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(UpdatePaymentCommand request, CancellationToken cancellationToken)
     {
         var payment = await context.Payments
             .Include(p => p.CustomerOperation)
                 .ThenInclude(co => co.Account)
-            .Include(p => p.CashOperation)
             .Include(p => p.Customer)
             .Include(p => p.Currency)
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
@@ -70,15 +69,6 @@ public class UpdatePaymentCommandHandler(
             payment.Description = request.Description;
             payment.CurrencyId = request.CurrencyId;
 
-            // 🔹 CashOperation yangilash
-            if (payment.CashOperation is not null)
-            {
-                payment.CashOperation.Date = DateTime.UtcNow;
-                payment.CashOperation.Amount = request.Amount;
-                payment.CashOperation.Description = GenerateDescription(request);
-                payment.CashOperation.CurrencyId = request.CurrencyId;
-            }
-
             // 🔹 CustomerOperation yangilash
             if (payment.CustomerOperation is not null)
             {
@@ -86,9 +76,7 @@ public class UpdatePaymentCommandHandler(
                 payment.CustomerOperation.Description = GenerateDescription(request);
             }
 
-            await context.CommitTransactionAsync(cancellationToken);
-
-            return payment.Id;
+            return await context.CommitTransactionAsync(cancellationToken);
         }
         catch
         {

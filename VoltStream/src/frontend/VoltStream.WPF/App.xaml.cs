@@ -25,6 +25,7 @@ public partial class App : Application
         // ✅ API konfiguratsiyasi
         ApiService.ConfigureServices(services, "https://localhost:7287/api");
 
+
         // ✅ Mapster konfiguratsiyasi
         var config = TypeAdapterConfig.GlobalSettings;
         config.Scan(Assembly.GetExecutingAssembly()); // barcha IRegister’larni topadi

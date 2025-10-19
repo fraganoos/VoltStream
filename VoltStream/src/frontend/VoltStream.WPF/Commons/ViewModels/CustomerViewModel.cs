@@ -7,7 +7,6 @@ using VoltStream.WPF.Customer.ViewModels;
 
 public partial class CustomerViewModel : ViewModelBase
 {
-
     public CustomerViewModel()
     {
         Accounts.CollectionChanged += Accounts_CollectionChanged;

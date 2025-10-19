@@ -35,7 +35,7 @@ public class CreateSaleCommandHandler(
         try
         {
             var warehouse = await GetWarehouseAsync(cancellationToken);
-            var customer = await GetCustomerAsync(request.CustomerId, request.CurrencyId, cancellationToken);
+            var customer = await GetCustomerAsync(request.CustomerId, cancellationToken);
 
             var descriptionBuilder = new StringBuilder();
 
@@ -49,7 +49,7 @@ public class CreateSaleCommandHandler(
 
                 UpdateAccountBalance(account, sale.Amount, sale.Discount, request.IsApplied);
                 sale.CustomerOperation = CreateCustomerOperation(sale, account, request.Description, descriptionBuilder);
-                sale.DiscountOperation = CreateDiscountOperation(request, customer, descriptionBuilder);
+                sale.DiscountOperation = CreateDiscountOperation(request, account, descriptionBuilder);
             }
 
             context.Sales.Add(sale);
@@ -72,7 +72,7 @@ public class CreateSaleCommandHandler(
             ?? throw new NotFoundException(nameof(Warehouse));
     }
 
-    private async Task<Customer?> GetCustomerAsync(long? customerId, long currencyId, CancellationToken cancellationToken)
+    private async Task<Customer?> GetCustomerAsync(long? customerId, CancellationToken cancellationToken)
     {
         if (customerId is null)
             return default;
@@ -137,7 +137,7 @@ public class CreateSaleCommandHandler(
         }
     }
 
-    private static DiscountOperation CreateDiscountOperation(CreateSaleCommand request, Customer customer, StringBuilder description)
+    private static DiscountOperation CreateDiscountOperation(CreateSaleCommand request, Account account, StringBuilder description)
     {
         return new DiscountOperation
         {
@@ -145,7 +145,7 @@ public class CreateSaleCommandHandler(
             Amount = request.Discount,
             IsApplied = request.IsApplied,
             Description = $"Chegirma savdo uchun: {description}",
-            Customer = customer
+            Account = account
         };
     }
 

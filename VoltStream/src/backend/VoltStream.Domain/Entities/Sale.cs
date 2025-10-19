@@ -15,7 +15,10 @@ public class Sale : Auditable
     public long? CustomerId { get; set; }
     public Customer? Customer { get; set; } = default!;
 
+    public long CustomerOperationId { get; set; }
     public CustomerOperation? CustomerOperation { get; set; } = default!;
+
+    public long DiscountOperationId { get; set; }
     public DiscountOperation? DiscountOperation { get; set; } = default!;
 
     public ICollection<SaleItem> Items { get; set; } = default!;
