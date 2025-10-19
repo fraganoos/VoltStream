@@ -1,7 +1,4 @@
 ﻿namespace VoltStream.WPF.Sales_history.Views;
-
-using System.ComponentModel.Design;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using VoltStream.WPF.Sales_history.Models;
@@ -65,6 +62,6 @@ public partial class SalesHistoryPage : Page
             endDate.Focus();
             return;
         }
-       await vm.LoadSalesHistoryAsync();
+        await vm.LoadSalesHistoryAsync();
     }
 }

@@ -14,7 +14,7 @@ using VoltStream.WPF.Sales.Views;
 
 public partial class App : Application
 {
-    public IServiceProvider? Services { get; private set; }
+    public static IServiceProvider? Services { get; private set; }
 
     protected override void OnStartup(StartupEventArgs e)
     {

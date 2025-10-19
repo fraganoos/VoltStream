@@ -11,19 +11,11 @@
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
 
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/ButtonStyles.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/Colors.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
-
     <Border>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250" />
+                <ColumnDefinition x:Name="SidebarColumn"
+                                  Width="250" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
@@ -111,6 +103,18 @@
                     </StackPanel>
                 </RadioButton>
 
+                <RadioButton Style="{DynamicResource menuButton}"
+                             Tag="{DynamicResource color9}"
+                             Command="{Binding ShowSettingsCommand}"
+                             GroupName="MenuGroup">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+                        <fa:IconImage Icon="Sliders"
+                                      Style="{StaticResource menuButtonIcon}" />
+                        <TextBlock Text="Sozlamalar"
+                                   Style="{StaticResource menuButtonText}" />
+                    </StackPanel>
+                </RadioButton>
             </StackPanel>
 
             <!--  Header and content  -->

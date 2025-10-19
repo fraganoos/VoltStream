@@ -11,6 +11,8 @@ public abstract partial class ViewModelBase : ObservableObject
     [ObservableProperty] private string? success;
     [ObservableProperty] private string? warning;
     [ObservableProperty] private string? info;
+    [ObservableProperty] private bool isSelected;
+    [ObservableProperty] private bool idEditing;
 
     partial void OnErrorChanged(string? value)
         => HandleMessage(value, NotificationType.Error, () => Error = null);

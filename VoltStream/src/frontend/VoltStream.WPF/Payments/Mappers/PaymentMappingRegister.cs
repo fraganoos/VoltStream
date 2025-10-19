@@ -1,9 +1,9 @@
 ﻿namespace VoltStream.WPF.Payments.Mappers;
 
-using ApiServices.Models.Reqiuests;
+using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Mapster;
-using VoltStream.WPF.Payments.ViewModels;
+using VoltStream.WPF.Commons.ViewModels;
 
 public class PaymentMappingRegister : IRegister
 {
@@ -11,5 +11,8 @@ public class PaymentMappingRegister : IRegister
     {
         config.NewConfig<CurrencyResponse, CurrencyViewModel>();
         config.NewConfig<CurrencyViewModel, CurrencyRequest>();
+
+        config.NewConfig<CustomerResponse, CustomerViewModel>();
+        config.NewConfig<CustomerViewModel, CustomerRequest>();
     }
 }

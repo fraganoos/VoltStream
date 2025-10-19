@@ -1,14 +1,18 @@
-﻿namespace VoltStream.WPF.Sales.ViewModels;
+﻿namespace VoltStream.WPF.Commons.ViewModels;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Linq;
-using VoltStream.WPF.Commons;
 using VoltStream.WPF.Customer.ViewModels;
 
 public partial class CustomerViewModel : ViewModelBase
 {
+
+    public CustomerViewModel()
+    {
+        Accounts.CollectionChanged += Accounts_CollectionChanged;
+    }
+
     [ObservableProperty] private long id;
     [ObservableProperty] private string name = string.Empty;
     [ObservableProperty] private string? phone;
@@ -17,30 +21,19 @@ public partial class CustomerViewModel : ViewModelBase
 
     [ObservableProperty] private ObservableCollection<CustomerOperationViewModel> customerOperations = [];
     [ObservableProperty] private ObservableCollection<DiscountOperationViewModel> discountOperations = [];
-    private ObservableCollection<AccountViewModel> accounts = [];
-    public ObservableCollection<AccountViewModel> Accounts
-    {
-        get => accounts;
-        set
-        {
-            if (accounts != null)
-            {
-                UnsubscribeAccountEvents(accounts);
-            }
-
-            accounts = value ?? [];
-            SubscribeAccountEvents(accounts);
-            RecalculateBalance();
-        }
-    }
-
-    public CustomerViewModel()
-    {
-        Accounts.CollectionChanged += Accounts_CollectionChanged;
-    }
+    [ObservableProperty] private ObservableCollection<AccountViewModel> accounts = [];
 
     [ObservableProperty] private decimal balance;
     [ObservableProperty] private decimal openingBalance;
+
+    partial void OnAccountsChanged(ObservableCollection<AccountViewModel> value)
+    {
+        if (Accounts is not null)
+            foreach (var account in Accounts)
+                if (account.Currency is not null && account.Currency.Code == "UZS")
+                    Balance = account.Balance;
+    }
+
 
     private void Accounts_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {

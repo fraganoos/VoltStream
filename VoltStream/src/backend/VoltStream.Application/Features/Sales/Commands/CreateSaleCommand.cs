@@ -45,7 +45,8 @@ public class CreateSaleCommandHandler(
 
             if (customer is not null)
             {
-                var account = customer.Accounts.First(a => a.CurrencyId == request.CurrencyId);
+                var account = customer.Accounts.FirstOrDefault(a => a.CurrencyId == request.CurrencyId);
+
                 UpdateAccountBalance(account, sale.Amount, sale.Discount, request.IsApplied);
                 sale.CustomerOperation = CreateCustomerOperation(sale, account, request.Description, descriptionBuilder);
                 sale.DiscountOperation = CreateDiscountOperation(request, customer, descriptionBuilder);

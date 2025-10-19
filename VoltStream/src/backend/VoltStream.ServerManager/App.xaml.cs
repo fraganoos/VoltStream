@@ -6,11 +6,10 @@ using System.Windows;
 using VoltStream.ServerManager.Api;
 using VoltStream.ServerManager.Enums;
 using VoltStream.ServerManager.Services;
-using Application = System.Windows.Application;
 
 public partial class App : Application
 {
-    public static IAllowedClientsApi AllowedClientsApi { get; private set; } = default!;
+    public static IAllowedClientsApi AllowedClientsApi { get; set; } = default!;
     public static ServerHostService ServerHost { get; private set; } = new();
 
     private NotifyIcon? trayIcon;
@@ -26,7 +25,7 @@ public partial class App : Application
 
         var config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("settings.json", optional: true, reloadOnChange: true)
+            .AddJsonFile("appsettings.json", false, true)
             .Build();
 
         var port = config.GetValue("ServerPort", 5000);
