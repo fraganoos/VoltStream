@@ -11,6 +11,7 @@ using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -38,7 +39,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<ProductResponse> allProducts = []; // Barcha mahsulotlar
     [ObservableProperty] private ObservableCollection<ProductResponse> products = []; // ComboBox uchun filtrlangan productlar
 
-    [ObservableProperty] private ObservableCollection<ProductItemViewModel> saleItems = [];
     [ObservableProperty] private ObservableCollection<ProductItemViewModel> filteredSaleItems = [];
 
     [ObservableProperty] private decimal? finalAmount;
@@ -52,7 +52,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         await LoadProductsAsync();
         await LoadCustomersAsync();
         await LoadSalesHistoryAsync();
-        ApplyFilter();
     }
 
     public async Task LoadCustomersAsync()
@@ -72,24 +71,18 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
 
     [RelayCommand]
-    private void ClearFilter()
+    private async Task ClearFilter()
     {
         SelectedCategory = null;
         SelectedProduct = null;
         SelectedCustomer = null;
-
-        // 🔁 Dastlabki (bazadan kelgan) ma'lumotlarni qayta tiklaymiz
-        Products = new ObservableCollection<ProductResponse>(AllProducts);
-        Categories = new ObservableCollection<CategoryResponse>(Categories.DistinctBy(x => x.Id)); // original kategoriyalar
-        Customers = new ObservableCollection<CustomerResponse>(Customers.DistinctBy(x => x.Id));   // original customerlar
-
-        // 🔄 Barcha sotuvlarni qayta yuklash
-        FilteredSaleItems = new ObservableCollection<ProductItemViewModel>(SaleItems);
-        FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
+        await LoadSalesHistoryAsync();
     }
     [RelayCommand]
     private void ExportToExcel()
     {
+        FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
+
         try
         {
             if (FilteredSaleItems == null || !FilteredSaleItems.Any())
@@ -190,6 +183,9 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             MessageBox.Show("Ko‘rsatish uchun ma’lumot yo‘q.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
+
+        FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
+
 
         var fixedDoc = CreateFixedDocumentForPrint();
         var previewWindow = new Window
@@ -410,39 +406,39 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 }
             };
 
-            //// 🔍 Agar foydalanuvchi sana tanlamagan bo‘lsa — bugungi sana
-            //if (BeginDate == null && EndDate == null)
-            //{
-            //    request.Filters["Date"] = [today];
-            //}
-            //else if (BeginDate != null && EndDate == null)
-            //{
-            //    // faqat boshlanish sanasi bor — o‘sha kundan boshlab
-            //    request.Filters["Date"] = [$"<={begin}"];
-            //}
-            //else if (BeginDate == null && EndDate != null)
-            //{
-            //    // faqat tugash sanasi bor — o‘sha kungacha
-            //    request.Filters["Date"] = [$">={end}"];
-            //}
-            //else
-            //{
-            //    // Ikkalasi ham bor — oralig‘i bo‘yicha
-            //    request.Filters["Date"] = [$"{$">={begin}"}, {$"<={end}"}"];
-            //}
+            // 🔍 Agar foydalanuvchi sana tanlamagan bo‘lsa — bugungi sana
+            if (BeginDate == null && EndDate == null)
+            {
+                request.Filters["Date"] = [today];
+            }
+            else if (BeginDate != null && EndDate == null)
+            {
+                // faqat boshlanish sanasi bor — o‘sha kundan boshlab
+                request.Filters["Date"] = [$">={begin}"];
+            }
+            else if (BeginDate == null && EndDate != null)
+            {
+                // faqat tugash sanasi bor — o‘sha kungacha
+                request.Filters["Date"] = [$"<={end}"];
+            }
+            else
+            {
+                // Ikkalasi ham bor — oralig‘i bo‘yicha
+                request.Filters["Date"] = [$">={begin}", $"<={end}"];
+            }
 
             var srvc = services.GetRequiredService<ISaleApi>();
             var response = await srvc.Filtering(request).Handle();
 
             if (response.IsSuccess)
             {
-                SaleItems.Clear();
+                FilteredSaleItems.Clear();
 
                 foreach (var sale in response.Data!)
                 {
                     foreach (var item in sale.Items)
                     {
-                        SaleItems.Add(new ProductItemViewModel
+                        FilteredSaleItems.Add(new ProductItemViewModel
                         {
                             OperationDate = sale.Date,
                             Category = item.Product.Category.Name,
@@ -489,19 +485,18 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 Products.Add(product);
         }
 
-        ApplyFilter();
     }
 
     // --- ProductResponse tanlanganda DataGrid filtrlansin
     partial void OnSelectedProductChanged(ProductResponse? value)
     {
-        ApplyFilter();
+        _ = LoadSalesHistoryAsync();
     }
 
     // customerResponse tanlanganda DataGrid filtrlash
     partial void OnSelectedCustomerChanged(CustomerResponse? value)
     {
-        ApplyFilter();
+        _ = LoadSalesHistoryAsync();
     }
 
     // --- Kategoriya yuklash
@@ -551,17 +546,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         }
     }
 
-    // --- Filtrlash funksiyasi (DataGrid uchun)
-    private void ApplyFilter()
-    {
-        IEnumerable<ProductItemViewModel> filtered = SaleItems;
-        if (SelectedCategory != null) filtered = filtered.Where(x => x.Category == SelectedCategory.Name);
-        if (SelectedProduct != null) filtered = filtered.Where(x => x.Name == SelectedProduct.Name);
-        if (SelectedCustomer != null) filtered = filtered.Where(x => x.Customer == SelectedCustomer.Name);
-        FilteredSaleItems = new ObservableCollection<ProductItemViewModel>(filtered);
-        FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
-    }
-
+ 
     // --- Har bir product item o‘zgarishida summa qayta hisoblanadi
     private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -571,6 +556,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
     private void RecalculateTotals()
     {
-        FinalAmount = SaleItems.Sum(x => x.TotalAmount);
+        FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
     }
 }

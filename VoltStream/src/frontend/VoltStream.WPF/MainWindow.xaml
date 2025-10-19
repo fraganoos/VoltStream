@@ -19,6 +19,15 @@
                                   Width="250" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+            <StackPanel
+                x:Name="NotificationHost"
+                Grid.Column="1"
+                Margin="20"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Panel.ZIndex="9999"
+                IsHitTestVisible="False"
+                Orientation="Vertical" />
 
             <!-- Sidebar -->
             <StackPanel Grid.Column="0"
@@ -79,6 +88,7 @@
                                    Style="{StaticResource menuButtonText}" />
                     </StackPanel>
                 </RadioButton>
+
 
                 <RadioButton Style="{DynamicResource menuButton}"
                              Tag="{DynamicResource color6}"
