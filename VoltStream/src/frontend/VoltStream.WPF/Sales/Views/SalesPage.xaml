@@ -65,7 +65,7 @@
                        Margin="5 0 0 0" />
                 <Grid Grid.Row="0"
                       Grid.Column="1">
-                    <controls:UserCalendar x:Name="supplyDate"
+                    <controls:UserCalendar x:Name="saleDate"
                                            SelectedDate="{Binding OperationDate}"
                                            VerticalAlignment="Center"
                                            HorizontalAlignment="Left"
@@ -101,8 +101,8 @@
                               HorizontalAlignment="Stretch"
                               FontSize="14"
                               IsReadOnly="True"
-                              Margin="0 2 10 2"
-                              IsTabStop="False" />
+                              IsTabStop="False" 
+                              Margin="0 2 10 2" />
 
                     <Label Grid.Column="1"
                            Content="Jami summa:"

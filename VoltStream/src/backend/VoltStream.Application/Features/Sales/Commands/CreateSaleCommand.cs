@@ -144,6 +144,7 @@ public class CreateSaleCommandHandler(
             Date = request.Date.ToOffset(TimeSpan.Zero),
             Amount = request.Discount,
             IsApplied = request.IsApplied,
+            CustomerId = account.CustomerId,
             Description = $"Chegirma savdo uchun: {description}",
             Account = account
         };
