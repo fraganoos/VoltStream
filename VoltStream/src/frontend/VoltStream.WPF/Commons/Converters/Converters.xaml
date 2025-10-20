@@ -7,6 +7,7 @@
     <converter:StringIsNotEmptyConverter x:Key="StringIsNotEmptyConverter" />
     <converter:UtcToUzbekistanTimeConverter x:Key="UtcToUzbekistanTimeConverter" />
     <converter:ToStringConverter x:Key="ToStringConverter" />
+    <converter:StringToNullableDecimalConverter x:Key="StringToNullableDecimalConverter" />
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
 </ResourceDictionary>
