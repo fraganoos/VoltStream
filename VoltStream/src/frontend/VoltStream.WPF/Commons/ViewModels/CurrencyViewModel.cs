@@ -11,10 +11,10 @@ public partial class CurrencyViewModel : ViewModelBase
     [ObservableProperty] private decimal exchangeRate;
     [ObservableProperty] private bool isDefault;
 
-    public CurrencyViewModel selected = new();
+    public CurrencyViewModel? selected;
     public CurrencyViewModel Selected
     {
-        get => selected;
+        get => selected!;
         set
         {
             if (SetProperty(ref selected, value) && value != null)
