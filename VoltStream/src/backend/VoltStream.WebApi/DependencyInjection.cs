@@ -28,7 +28,6 @@ public static class DependencyInjection
 
         services.AddControllers(options
             => options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())))
-                .AddApplicationPart(typeof(RegistryController).Assembly)
                 .AddJsonOptions(opt => opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
         services.AddOpenApi();

@@ -16,7 +16,7 @@ using VoltStream.WPF.Customer.ViewModels;
 
 public partial class SaleViewModel : ViewModelBase
 {
-    private IServiceProvider services;
+    private readonly IServiceProvider services;
     private readonly IMapper mapper;
     private readonly ICurrenciesApi currenciesApi;
     private readonly ICustomersApi customersApi;
@@ -61,7 +61,7 @@ public partial class SaleViewModel : ViewModelBase
     [ObservableProperty] private CurrencyViewModel currency = new();
 
     [ObservableProperty] private long customerId;
-    [ObservableProperty] private CustomerViewModel customer;
+    [ObservableProperty] private CustomerViewModel? customer;
 
     [ObservableProperty] private ObservableCollection<SaleItemViewModel> items = [];
 

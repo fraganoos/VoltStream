@@ -11,7 +11,7 @@ public partial class CurrencyViewModel : ViewModelBase
     [ObservableProperty] private decimal exchangeRate;
     [ObservableProperty] private bool isDefault;
 
-    public CurrencyViewModel selected;
+    public CurrencyViewModel selected = new();
     public CurrencyViewModel Selected
     {
         get => selected;

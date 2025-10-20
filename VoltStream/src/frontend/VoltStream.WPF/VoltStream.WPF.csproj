@@ -17,18 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="appsettings.json" />
     <None Remove="Commons\Source\Icons\voltstream.ico" />
     <None Remove="Commons\Source\Images\key-icon.png" />
     <None Remove="Commons\Source\Images\LogoVolt.jpg" />
     <None Remove="Commons\Source\Images\oramkabel.png" />
     <None Remove="Commons\Source\Images\user-icon.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>

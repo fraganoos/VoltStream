@@ -3,7 +3,6 @@
 using ApiServices.Services;
 using Mapster;
 using MapsterMapper;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -24,23 +23,18 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        const string configPath = "appsettings.json";
-        host = Host.CreateDefaultBuilder().ConfigureAppConfiguration(config =>
-        {
-            config.AddJsonFile(configPath, optional: false, reloadOnChange: true);
-
-        })
-        .ConfigureServices((context, services) =>
-        {
-            ConfigureUiServices(services);
-            ConfigureCoreServices(services, context.Configuration);
-        })
-        .ConfigureLogging(logging =>
-        {
-            logging.ClearProviders();
-            logging.AddConsole();
-            logging.AddDebug();
-        }).Build();
+        host = Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
+            {
+                ConfigureUiServices(services);
+                ConfigureCoreServices(services);
+            })
+            .ConfigureLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddConsole();
+                logging.AddDebug();
+            }).Build();
 
         Services = host.Services;
 
@@ -50,6 +44,7 @@ public partial class App : Application
         var mainWindow = Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
     }
+
     protected override async void OnExit(ExitEventArgs e)
     {
         if (host is not null)
@@ -82,12 +77,11 @@ public partial class App : Application
         RegisterByBaseType<ViewModelBase>(ServiceLifetime.Transient);
     }
 
-    private static void ConfigureCoreServices(IServiceCollection services, IConfiguration configuration)
+    private static void ConfigureCoreServices(IServiceCollection services)
     {
         services.AddSingleton<DiscoveryClient>();
         services.AddSingleton<AppInitializer>();
-        var baseApiUrl = configuration["ApiBaseUrl"] ?? "https://localhost:7287/api";
-        ApiService.ConfigureServices(services, baseApiUrl);
+        ApiService.ConfigureServices(services);
     }
 }
 
@@ -96,7 +90,7 @@ public class DiscoveryClient
     private const int DiscoveryPort = 5001;
     private const int TimeoutMs = 2000;
 
-    public async Task<Uri?> DiscoverAsync()
+    public static async Task<Uri?> DiscoverAsync()
     {
         using var udp = new UdpClient();
         udp.EnableBroadcast = true;
@@ -123,11 +117,11 @@ public class DiscoveryClient
     }
 }
 
-public class AppInitializer(DiscoveryClient discoveryClient, IHostEnvironment env)
+public class AppInitializer(IHostEnvironment env)
 {
     public async Task InitializeAsync()
     {
-        var uri = await discoveryClient.DiscoverAsync();
+        var uri = await DiscoveryClient.DiscoverAsync();
         if (uri is null)
         {
             Console.WriteLine("❌ Server not found via UDP.");
@@ -138,6 +132,8 @@ public class AppInitializer(DiscoveryClient discoveryClient, IHostEnvironment en
         var apiUrl = $"{uri.Scheme}://{host}:{uri.Port}/api";
 
         Console.WriteLine($"✅ Final API: {apiUrl}");
-        ApiService.Reconfigure(App.Services!, apiUrl);
+
+        var urlHolder = App.Services!.GetRequiredService<ApiUrlHolder>();
+        urlHolder.Url = apiUrl;
     }
 }

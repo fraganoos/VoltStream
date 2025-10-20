@@ -26,7 +26,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     public SalesHistoryPageViewModel(IServiceProvider services)
     {
         this.services = services;
-        LoadInitialDataAsync();
+        _ = LoadInitialDataAsync();
     }
 
     [ObservableProperty] private CustomerResponse? selectedCustomer;
