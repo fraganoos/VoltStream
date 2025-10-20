@@ -6,7 +6,7 @@ public class DiscountOperation : Auditable
     public string Description { get; set; } = string.Empty;
     public bool IsApplied { get; set; }
     public decimal Amount { get; set; }
-
+    public long? CustomerId { get; set; }
     public long AccountId { get; set; }
     public Account Account { get; set; } = default!;
 }
