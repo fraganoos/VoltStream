@@ -1,5 +1,7 @@
 ﻿namespace VoltStream.WPF;
 
+using ApiServices.Extensions;
+using ApiServices.Interfaces;
 using ApiServices.Services;
 using Mapster;
 using MapsterMapper;
@@ -81,6 +83,7 @@ public partial class App : Application
     {
         services.AddSingleton<DiscoveryClient>();
         services.AddSingleton<AppInitializer>();
+        services.AddHostedService<ConnectionMonitor>();
         ApiService.ConfigureServices(services);
     }
 }
@@ -89,28 +92,35 @@ public class DiscoveryClient
 {
     private const int DiscoveryPort = 5001;
     private const int TimeoutMs = 2000;
+    private const int MaxAttempts = 3;
+    private const int RetryDelayMs = 2000;
 
     public static async Task<Uri?> DiscoverAsync()
     {
-        using var udp = new UdpClient();
-        udp.EnableBroadcast = true;
-
-        var request = Encoding.UTF8.GetBytes("DISCOVER");
-        var broadcast = new IPEndPoint(IPAddress.Broadcast, DiscoveryPort);
-
-        await udp.SendAsync(request, request.Length, broadcast);
-
-        var receiveTask = udp.ReceiveAsync();
-        var timeoutTask = Task.Delay(TimeoutMs);
-        var completed = await Task.WhenAny(receiveTask, timeoutTask);
-
-        if (completed == receiveTask)
+        for (int attempt = 1; attempt <= MaxAttempts; attempt++)
         {
-            var result = receiveTask.Result;
-            var response = Encoding.UTF8.GetString(result.Buffer).Trim();
+            using var udp = new UdpClient();
+            udp.EnableBroadcast = true;
 
-            if (Uri.TryCreate(response, UriKind.Absolute, out var uri))
-                return uri;
+            var request = Encoding.UTF8.GetBytes("DISCOVER");
+            var broadcast = new IPEndPoint(IPAddress.Broadcast, DiscoveryPort);
+
+            await udp.SendAsync(request, request.Length, broadcast);
+
+            var receiveTask = udp.ReceiveAsync();
+            var timeoutTask = Task.Delay(TimeoutMs);
+            var completed = await Task.WhenAny(receiveTask, timeoutTask);
+
+            if (completed == receiveTask)
+            {
+                var result = receiveTask.Result;
+                var response = Encoding.UTF8.GetString(result.Buffer).Trim();
+
+                if (Uri.TryCreate(response, UriKind.Absolute, out var uri))
+                    return uri;
+            }
+
+            await Task.Delay(RetryDelayMs);
         }
 
         return null;
@@ -123,10 +133,7 @@ public class AppInitializer(IHostEnvironment env)
     {
         var uri = await DiscoveryClient.DiscoverAsync();
         if (uri is null)
-        {
-            Console.WriteLine("❌ Server not found via UDP.");
             return;
-        }
 
         var host = env.IsDevelopment() ? "localhost" : uri.Host;
         var apiUrl = $"{uri.Scheme}://{host}:{uri.Port}/api";
@@ -135,5 +142,43 @@ public class AppInitializer(IHostEnvironment env)
 
         var urlHolder = App.Services!.GetRequiredService<ApiUrlHolder>();
         urlHolder.Url = apiUrl;
+    }
+}
+
+public class ConnectionMonitor(
+    ApiUrlHolder urlHolder,
+    IHostEnvironment env,
+    IHealthCheckApi client)
+    : BackgroundService
+{
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            var response = await client.GetAsync(stoppingToken).Handle();
+            if (!response.IsSuccess)
+                await TryRediscoverAsync();
+            await Task.Delay(5000, stoppingToken);
+        }
+    }
+
+    private async Task TryRediscoverAsync()
+    {
+        while (true)
+        {
+            var uri = await DiscoveryClient.DiscoverAsync();
+            if (uri is not null)
+            {
+                var host = env.IsDevelopment() ? "localhost" : uri.Host;
+                var newUrl = $"{uri.Scheme}://{host}:{uri.Port}/api";
+
+                if (urlHolder.Url != newUrl)
+                    urlHolder.Url = newUrl;
+
+                return; // ✅ Rediscovery successful, exit loop
+            }
+
+            await Task.Delay(5000);
+        }
     }
 }
