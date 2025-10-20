@@ -9,23 +9,21 @@ using System.Net.Sockets;
 
 public class IpScannerDiscovery(
     ILogger<IpScannerDiscovery> logger,
-    IOptions<DiscoveryOptions> options) :
-    IServerDiscovery
+    IOptions<DiscoveryOptions> options) : IServerDiscovery
 {
     private readonly DiscoveryOptions _options = options.Value;
 
     public async Task<IPEndPoint?> DiscoverAsync(CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Starting IP scan in range {Range}", _options.IpRange);
+        logger.LogInformation("🔍 Starting IP scan in range {Range}", _options.IpRange);
 
         var (start, end) = ParseRange(_options.IpRange);
-
         var tasks = new List<Task<IPEndPoint?>>();
 
         for (uint ip = start; ip <= end; ip++)
         {
-            var ipAddress = new IPAddress(BitConverter.GetBytes(ip).Reverse().ToArray());
-            tasks.Add(CheckHostAsync(ipAddress, _options.Port, cancellationToken));
+            var ipAddress = UInt32ToIp(ip);
+            tasks.Add(CheckHostAsync(ipAddress, _options.ServerPort, cancellationToken));
         }
 
         var results = await Task.WhenAll(tasks);
@@ -38,17 +36,17 @@ public class IpScannerDiscovery(
         {
             using var client = new TcpClient();
             var connectTask = client.ConnectAsync(ip, port);
-
             var completed = await Task.WhenAny(connectTask, Task.Delay(300, ct));
+
             if (completed == connectTask && client.Connected)
             {
-                logger.LogInformation("Discovered server at {Ip}:{Port}", ip, port);
+                logger.LogInformation("✅ Discovered server at {Ip}:{Port}", ip, port);
                 return new IPEndPoint(ip, port);
             }
         }
         catch
         {
-            // ignore unreachable hosts
+            // unreachable host — ignore
         }
 
         return null;
@@ -56,10 +54,16 @@ public class IpScannerDiscovery(
 
     private static (uint start, uint end) ParseRange(string range)
     {
-        var parts = range.Split('-');
-        var startBytes = IPAddress.Parse(parts[0]).GetAddressBytes().Reverse().ToArray();
-        var endBytes = IPAddress.Parse(parts[1]).GetAddressBytes().Reverse().ToArray();
+        var parts = range.Split('-', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length != 2)
+            throw new ArgumentException("Invalid IP range format. Expected: 'start-end'");
 
-        return (BitConverter.ToUInt32(startBytes, 0), BitConverter.ToUInt32(endBytes, 0));
+        return (IpToUInt32(IPAddress.Parse(parts[0])), IpToUInt32(IPAddress.Parse(parts[1])));
     }
+
+    private static uint IpToUInt32(IPAddress ip)
+        => BitConverter.ToUInt32([.. ip.GetAddressBytes().Reverse()], 0);
+
+    private static IPAddress UInt32ToIp(uint ip)
+        => new([.. BitConverter.GetBytes(ip).Reverse()]);
 }

@@ -12,26 +12,26 @@ using Microsoft.Extensions.Logging;
 
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Server tarafda discovery modulini ro‘yxatdan o‘tkazadi (UDP responder + strategiyalar)
+    /// </summary>
     public static IServiceCollection AddDiscoveryModule(this IServiceCollection services, IConfiguration configuration)
     {
-        // Use configuration section and the Options configuration extension (requires Options.ConfigurationExtensions)
-        var discoverySection = configuration.GetSection("Discovery");
-        services.Configure<DiscoveryOptions>(discoverySection);
+        var section = configuration.GetSection("Discovery");
+        services.Configure<DiscoveryOptions>(section);
 
-        // get cache path from section (requires Configuration.Binder for GetValue)
-        var cacheFilePath = discoverySection.GetValue<string>("CacheFilePath") ?? "discovery.cache";
-        services.AddSingleton(new DiscoveryCache(cacheFilePath));
+        var cacheFile = section.GetValue<string>("CacheFilePath") ?? "discovery.cache";
+        services.AddSingleton(new DiscoveryCache(cacheFile));
 
-        // register implementations
+        // Discovery strategiyalari
         services.AddSingleton<UdpBroadcastDiscovery>();
         services.AddSingleton<UdpMulticastDiscovery>();
         services.AddSingleton<IpScannerDiscovery>();
 
-        // register DiscoveryManager and expose as IServerDiscovery
-        services.AddSingleton<DiscoveryManager>();
+        // Discovery manager
         services.AddSingleton<IServerDiscovery>(sp =>
         {
-            var list = new IServerDiscovery[]
+            var strategies = new IServerDiscovery[]
             {
                 sp.GetRequiredService<UdpBroadcastDiscovery>(),
                 sp.GetRequiredService<UdpMulticastDiscovery>(),
@@ -39,33 +39,32 @@ public static class ServiceCollectionExtensions
             };
 
             return new DiscoveryManager(
-                list,
+                strategies,
                 sp.GetRequiredService<DiscoveryCache>(),
                 sp.GetRequiredService<ILogger<DiscoveryManager>>()
             );
         });
 
-        // responder service
+        // ❗ HostedService faqat serverda ro‘yxatdan o‘tadi
         services.AddHostedService<DiscoveryResponderService>();
 
         return services;
     }
 
+    /// <summary>
+    /// Client tarafda discovery modulini ro‘yxatdan o‘tkazadi (UDP scanner + cache)
+    /// </summary>
     public static IServiceCollection AddDiscoveryClient(this IServiceCollection services, IConfiguration configuration)
     {
-        // ⚙️ Config (Options) – backend bilan mos bo‘lishi uchun
         var section = configuration.GetSection("Discovery");
         services.Configure<DiscoveryOptions>(section);
 
-        // 📂 Cache (server IP’ni saqlab qolish uchun)
         var cachePath = section.GetValue<string>("CacheFilePath") ?? "discovery.cache";
         services.AddSingleton(new DiscoveryCache(cachePath));
 
-        // 🌐 HttpClient factory (requires Microsoft.Extensions.Http)
-        services.AddHttpClient("discovery");
+        services.AddHttpClient(); // health check uchun
 
-        // 💡 Client discovery (faqat bitta interface orqali backend serverni topadi)
-        services.AddSingleton<DiscoveryClient>();
+        services.AddSingleton<DiscoveryClient>(); // UDP scanner + registry client
 
         return services;
     }

@@ -8,10 +8,9 @@ public class InMemoryDiscoveryStore : IDiscoveryStore
 
     public void Register(ServiceRegistration registration)
     {
-        // Agar shu host va serviceId bilan bor bo‘lsa – yangilaymiz
         var existing = _registrations.FirstOrDefault(x =>
             x.ServiceId == registration.ServiceId &&
-            x.Host == registration.Host &&
+            x.IpAddress == registration.IpAddress &&
             x.Port == registration.Port);
 
         if (existing is not null)
@@ -25,7 +24,11 @@ public class InMemoryDiscoveryStore : IDiscoveryStore
     }
 
     public IEnumerable<ServiceRegistration> GetNodes(string serviceId)
-        => _registrations
-            .Where(x => x.ServiceId == serviceId)
+    {
+        var now = DateTime.UtcNow;
+
+        return _registrations
+            .Where(x => x.ServiceId == serviceId && (now - x.RegisteredAt).TotalSeconds < 60)
             .OrderByDescending(x => x.RegisteredAt);
+    }
 }

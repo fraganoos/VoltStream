@@ -36,10 +36,10 @@ partial class PaymentPageViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<CustomerViewModel> availableCustomers = [];
 
     [ObservableProperty] private PaymentViewModel payment = new();
-    [ObservableProperty] private CustomerViewModel customer;
+    [ObservableProperty] private CustomerViewModel? customer;
     private long customerId;
 
-    [ObservableProperty] private CurrencyViewModel currency;
+    [ObservableProperty] private CurrencyViewModel? currency;
 
     #region Commands
 

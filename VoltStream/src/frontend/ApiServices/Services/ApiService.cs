@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 public static class ApiService
 {
-    public static IServiceCollection ConfigureServices(IServiceCollection services, string baseApiUrl)
+    public static IServiceCollection ConfigureServices(IServiceCollection services)
     {
         var refitSettings = new RefitSettings
         {
@@ -19,11 +19,26 @@ public static class ApiService
                 })
         };
 
+        services.AddSingleton<ApiUrlHolder>();
+
         typeof(ApiService).Assembly.GetTypes()
             .Where(t => t.IsInterface && t.Name.EndsWith("Api"))
             .ToList()
-            .ForEach(apiType => services.AddSingleton(apiType, RestService.For(apiType, baseApiUrl, refitSettings)));
+            .ForEach(apiType =>
+            {
+                services.AddRefitClient(apiType, refitSettings)
+                    .ConfigureHttpClient((provider, client) =>
+                    {
+                        var urlHolder = provider.GetRequiredService<ApiUrlHolder>();
+                        client.BaseAddress = new Uri(urlHolder.Url);
+                    });
+            });
 
         return services;
     }
+}
+
+public class ApiUrlHolder
+{
+    public string Url { get; set; } = "https://localhost:7288/api";
 }
