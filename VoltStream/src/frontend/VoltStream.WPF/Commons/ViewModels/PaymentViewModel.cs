@@ -33,9 +33,22 @@ public partial class PaymentViewModel : ViewModelBase
         else 
         {
             IsExpenseEnabled = false;
+            expenseAmount = null;
         }
     }
-    partial void OnExpenseAmountChanged(decimal? value) => ReCalculateExpense();
+    partial void OnExpenseAmountChanged(decimal? value)
+    {
+        ReCalculateExpense();
+        if (value is null || value == 0)
+        {
+            IsIncomeEnabled = true;
+        }
+        else 
+        {
+            IsIncomeEnabled = false;
+            incomeAmount = null;
+        }
+    }
 
 
     private void ReCalculateIncome()

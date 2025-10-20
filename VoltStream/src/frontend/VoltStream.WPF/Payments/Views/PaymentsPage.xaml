@@ -157,20 +157,21 @@
                              x:Name="Kirim"
                              FontSize="14"
                              Margin="5,2"
-                             Text="{Binding Payment.IncomeAmount, TargetNullValue='', FallbackValue=null}"
+                             IsEnabled="{Binding Payment.IsIncomeEnabled}"
                              utils:NumericTextBox.IsNumeric="True"
                              utils:TextBoxTabBehavior.EnableTabOnKeys="True"
-                             Visibility="{Binding ElementName=Chiqim, Path=Text.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                             Text="{Binding Payment.IncomeAmount, Converter={StaticResource StringToNullableDecimalConverter}}"/>
+                    <!--Visibility="{Binding ElementName=Chiqim, Path=Text.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"/>-->
                     <TextBox Grid.Column="1"
                              Grid.Row="2"
                              x:Name="Chiqim"
                              FontSize="14"
                              Margin="5,2"
-                             Text="{Binding Payment.ExpenseAmount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue='', FallbackValue=null}"
                              IsEnabled="{Binding Payment.IsExpenseEnabled}"
                              utils:NumericTextBox.IsNumeric="True"
-                             utils:TextBoxTabBehavior.EnableTabOnKeys="True"/>
-                             <!--Visibility="{Binding ElementName=Kirim, Path=Text.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"-->
+                             utils:TextBoxTabBehavior.EnableTabOnKeys="True"
+                             Text="{Binding Payment.ExpenseAmount, Converter={StaticResource StringToNullableDecimalConverter}}"/>
+                    <!--Visibility="{Binding ElementName=Kirim, Path=Text.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"-->
                 </Grid>
                 <Grid Grid.Column="1">
                     <Grid.RowDefinitions>
