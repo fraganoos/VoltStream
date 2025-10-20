@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\modules\Discovery\Discovery.csproj" />
+    <ProjectReference Include="..\..\frontend\ApiServices\ApiServices.csproj" />
     <ProjectReference Include="..\VoltStream.Application\VoltStream.Application.csproj" />
     <ProjectReference Include="..\VoltStream.Infrastructure\VoltStream.Infrastructure.csproj" />
   </ItemGroup>

@@ -546,7 +546,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         }
     }
 
- 
+
     // --- Har bir product item o‘zgarishida summa qayta hisoblanadi
     private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
