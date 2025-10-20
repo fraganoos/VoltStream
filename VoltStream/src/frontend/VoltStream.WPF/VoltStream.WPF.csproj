@@ -27,7 +27,6 @@
   <ItemGroup>
     <Folder Include="Customer\ViewModels\" />
     <Folder Include="LoginPages\ViewModels\" />
-    <Folder Include="Configurations\" />
     <Folder Include="Settings\ViewModels\" />
   </ItemGroup>
 
