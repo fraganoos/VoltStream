@@ -1,7 +1,7 @@
 ﻿namespace VoltStream.WPF.Commons;
 
 using CommunityToolkit.Mvvm.ComponentModel;
-using VoltStream.Wpf.Common.Enums;
+using VoltStream.WPF.Commons.Enums;
 using VoltStream.WPF.Commons.Services;
 
 public abstract partial class ViewModelBase : ObservableObject

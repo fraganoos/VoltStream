@@ -1,4 +1,4 @@
-﻿namespace VoltStream.Wpf.Common.Enums;
+﻿namespace VoltStream.WPF.Commons.Enums;
 
 public enum NotificationType
 {
