@@ -2,12 +2,14 @@
 
 using ApiServices.Extensions;
 using ApiServices.Models.Requests;
+using CommunityToolkit.Mvvm.Messaging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Customer;
 using VoltStream.WPF.Payments.ViewModels;
+using VoltStream.WPF.Commons.Messages;
 
 /// <summary>
 /// Логика взаимодействия для PaymentsPage.xaml
@@ -20,6 +22,16 @@ public partial class PaymentsPage : Page
         InitializeComponent();
         vm = new PaymentPageViewModel(services);
         DataContext = vm;
+        WeakReferenceMessenger.Default.Register<FocusRequestMessage>(this, async (r, m) =>
+        {
+            if (m.Value == "Income" && Chiqim.IsEnabled)
+            {
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    Chiqim.Focus();
+                });
+            }
+        });
     }
 
     private async void CustomerName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
