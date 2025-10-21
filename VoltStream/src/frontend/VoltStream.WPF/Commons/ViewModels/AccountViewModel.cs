@@ -1,4 +1,4 @@
-﻿namespace VoltStream.WPF.Customer.ViewModels;
+﻿namespace VoltStream.WPF.Commons.ViewModels;
 
 using ApiServices.Models.Responses;
 using VoltStream.WPF.Commons;

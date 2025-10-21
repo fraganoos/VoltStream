@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using VoltStream.Wpf.Common.Enums;
+using VoltStream.WPF.Commons.Enums;
 using VoltStream.WPF.Commons.Extensions;
 
 public static class NotificationService

@@ -1,11 +1,15 @@
 ﻿namespace VoltStream.WPF;
 
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using VoltStream.WPF.Commons.Animations;
+using VoltStream.WPF.Commons.Enums;
+using VoltStream.WPF.Commons.ViewModels;
 
 public partial class MainWindow : Window
 {
@@ -14,7 +18,7 @@ public partial class MainWindow : Window
     public MainWindow(IServiceProvider serviceProvider)
     {
         InitializeComponent();
-        vm = new MainViewModel(serviceProvider);
+        vm = serviceProvider.GetRequiredService<MainViewModel>();
         DataContext = vm;
     }
 
@@ -23,8 +27,13 @@ public partial class MainWindow : Window
         if (vm is not null)
         {
             vm.PropertyChanged += ViewModel_PropertyChanged;
+            vm.ApiConnection.PropertyChanged += ApiConnection_PropertyChanged;
+
+            ApiConnection_PropertyChanged(vm.ApiConnection,
+                new PropertyChangedEventArgs(nameof(vm.ApiConnection.Status)));
         }
     }
+
 
     private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -101,5 +110,27 @@ public partial class MainWindow : Window
             foreach (var childOfChild in FindVisualChildren<T>(child))
                 yield return childOfChild;
         }
+    }
+
+    private void ApiConnection_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is not ApiConnectionViewModel api)
+            return;
+
+        if (e.PropertyName == nameof(api.Status))
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ServerStatusIndicator.Fill = api.Status switch
+                {
+                    ConnectionStatus.Disconnected =>
+                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF0000")), // 🔴 Red
+                    ConnectionStatus.Connected =>
+                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00FF00")), // 🟢 Green
+                    ConnectionStatus.Connecting =>
+                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFF00")), // 🟡 Yellow
+                    _ =>
+                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#808080")), // ⚪ Gray
+                };
+            });
     }
 }

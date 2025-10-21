@@ -738,7 +738,7 @@ public partial class SalesPage : Page
         {
             sale.Success = "Sotuv muvaffaqiyatli saqlandi!";
             //sale.SaleItems.Clear();
-            sale=new();
+            sale = new();
             ClearUI();
             CustomerName.Focus();
         }
