@@ -25,6 +25,8 @@ public partial class PaymentViewModel : ViewModelBase
     // UI control properties
     [ObservableProperty] private bool isIncomeEnabled = true;
     [ObservableProperty] private bool isExpenseEnabled = true;
+
+
     partial void OnIncomeAmountChanged(decimal? value)
     {
         ReCalculateIncome();
@@ -33,12 +35,13 @@ public partial class PaymentViewModel : ViewModelBase
             IsExpenseEnabled = true;
             WeakReferenceMessenger.Default.Send(new FocusRequestMessage("Expense"));
         }
-        else 
+        else
         {
             IsExpenseEnabled = false;
             expenseAmount = null;
         }
     }
+
     partial void OnExpenseAmountChanged(decimal? value)
     {
         ReCalculateExpense();
@@ -47,13 +50,12 @@ public partial class PaymentViewModel : ViewModelBase
             IsIncomeEnabled = true;
             WeakReferenceMessenger.Default.Send(new FocusRequestMessage("Income"));
         }
-        else 
+        else
         {
             IsIncomeEnabled = false;
             incomeAmount = null;
         }
     }
-
 
     private void ReCalculateIncome()
     {

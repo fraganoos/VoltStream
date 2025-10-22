@@ -1,44 +1,51 @@
 ﻿namespace VoltStream.WPF.Configurations;
-
-using ApiServices.Extensions;
-using ApiServices.Interfaces;
-using ApiServices.Services;
 using Microsoft.Extensions.Hosting;
+using VoltStream.WPF.Commons.ViewModels;
 
 public class ConnectionMonitor(
-    ApiUrlHolder urlHolder,
-    IHostEnvironment env,
-    IHealthCheckApi client)
+    ApiConnectionViewModel state,
+    ConnectionTester tester)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var response = await client.GetAsync(stoppingToken).Handle();
-            if (!response.IsSuccess)
-                await TryRediscoverAsync();
+            if (!state.CheckUrlEnabled && !state.AutoReconnectEnabled)
+            {
+                await Task.Delay(5000, stoppingToken);
+                continue;
+            }
+
+            try
+            {
+                state.IsConnected = await tester.TestAsync();
+            }
+            catch (Exception) { state.IsConnected = false; }
+
+            if (!state.IsConnected && state.AutoReconnectEnabled)
+                await TryRediscoverAsync(stoppingToken);
+
             await Task.Delay(5000, stoppingToken);
         }
     }
 
-    private async Task TryRediscoverAsync()
+    private async Task TryRediscoverAsync(CancellationToken token)
     {
-        while (true)
+        while (!token.IsCancellationRequested && state.AutoReconnectEnabled)
         {
             var uri = await DiscoveryClient.DiscoverAsync();
             if (uri is not null)
             {
-                var host = env.IsDevelopment() ? "localhost" : uri.Host;
-                var newUrl = $"{uri.Scheme}://{host}:{uri.Port}/api";
+                var newUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}/";
+                if (state.Url != newUrl)
+                    state.Url = newUrl;
 
-                if (urlHolder.Url != newUrl)
-                    urlHolder.Url = newUrl;
-
-                return; // ✅ Rediscovery successful, exit loop
+                state.IsConnected = true;
+                return;
             }
 
-            await Task.Delay(5000);
+            await Task.Delay(5000, token);
         }
     }
 }

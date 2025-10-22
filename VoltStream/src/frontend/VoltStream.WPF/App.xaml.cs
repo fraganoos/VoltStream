@@ -1,11 +1,9 @@
 ﻿namespace VoltStream.WPF;
 
-using ApiServices.Services;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,20 +24,10 @@ public partial class App : Application
             {
                 ConfigureUiServices(services);
                 ConfigureCoreServices(services);
-            })
-            .ConfigureLogging(logging =>
-            {
-                logging.ClearProviders();
-                logging.AddConsole();
-                logging.AddDebug();
             }).Build();
 
         await host.StartAsync();
-
         Services = host.Services;
-
-        var initializer = Services.GetRequiredService<AppInitializer>();
-        await initializer.InitializeAsync();
 
         var mainWindow = Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
@@ -80,7 +68,6 @@ public partial class App : Application
     private static void ConfigureCoreServices(IServiceCollection services)
     {
         services.AddSingleton<DiscoveryClient>();
-        services.AddSingleton<AppInitializer>();
         services.AddHostedService<ConnectionMonitor>();
         ApiService.ConfigureServices(services);
     }

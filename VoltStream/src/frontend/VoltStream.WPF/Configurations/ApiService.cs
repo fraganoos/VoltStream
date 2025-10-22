@@ -1,9 +1,11 @@
-﻿namespace ApiServices.Services;
+﻿namespace VoltStream.WPF.Configurations;
 
+using ApiServices.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using VoltStream.WPF.Commons.ViewModels;
 
 public static class ApiService
 {
@@ -19,9 +21,21 @@ public static class ApiService
                 })
         };
 
-        services.AddSingleton<ApiUrlHolder>();
+        var store = new ApiConnectionStore();
+        var apiConnection = store.Load();
+        store.BindAutoSave(apiConnection);
 
-        typeof(ApiService).Assembly.GetTypes()
+        var rawUrl = apiConnection.Url.Trim();
+        apiConnection.Url = string.IsNullOrWhiteSpace(rawUrl) ||
+            !Uri.IsWellFormedUriString(rawUrl, UriKind.Absolute)
+            ? "https://example.com/"
+            : rawUrl;
+
+        services.AddSingleton(store);
+        services.AddSingleton(apiConnection);
+        services.AddSingleton<ConnectionTester>();
+
+        typeof(IHealthCheckApi).Assembly.GetTypes()
             .Where(t => t.IsInterface && t.Name.EndsWith("Api"))
             .ToList()
             .ForEach(apiType =>
@@ -29,8 +43,8 @@ public static class ApiService
                 services.AddRefitClient(apiType, refitSettings)
                     .ConfigureHttpClient((provider, client) =>
                     {
-                        var urlHolder = provider.GetRequiredService<ApiUrlHolder>();
-                        client.BaseAddress = new Uri(urlHolder.Url);
+                        var state = provider.GetRequiredService<ApiConnectionViewModel>();
+                        client.BaseAddress = new Uri(state.Url + "api");
                     });
             });
 
@@ -38,7 +52,3 @@ public static class ApiService
     }
 }
 
-public class ApiUrlHolder
-{
-    public string Url { get; set; } = "https://localhost:7288/api";
-}

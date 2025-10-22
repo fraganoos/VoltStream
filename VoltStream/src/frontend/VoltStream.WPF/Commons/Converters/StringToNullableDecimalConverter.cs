@@ -9,19 +9,19 @@ public class StringToNullableDecimalConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        return value?.ToString();
+        return value?.ToString()!;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
         var text = value?.ToString()?.Trim();
         if (string.IsNullOrEmpty(text))
-            return null;
+            return null!;
 
         if (decimal.TryParse(text, NumberStyles.Any, culture, out var result))
             return result;
 
-        return null;
+        return null!;
     }
 }
 
