@@ -1,6 +1,8 @@
 ﻿namespace VoltStream.WPF.Commons.ViewModels;
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+using VoltStream.WPF.Commons.Messages;
 
 public partial class PaymentViewModel : ViewModelBase
 {
@@ -31,6 +33,7 @@ public partial class PaymentViewModel : ViewModelBase
         if (value is null || value == 0)
         {
             IsExpenseEnabled = true;
+            WeakReferenceMessenger.Default.Send(new FocusRequestMessage("Expense"));
         }
         else
         {
@@ -45,6 +48,7 @@ public partial class PaymentViewModel : ViewModelBase
         if (value is null || value == 0)
         {
             IsIncomeEnabled = true;
+            WeakReferenceMessenger.Default.Send(new FocusRequestMessage("Income"));
         }
         else
         {
