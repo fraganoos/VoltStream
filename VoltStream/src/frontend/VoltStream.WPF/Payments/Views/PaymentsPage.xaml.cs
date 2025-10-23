@@ -7,9 +7,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Commons.Messages;
 using VoltStream.WPF.Customer;
 using VoltStream.WPF.Payments.ViewModels;
-using VoltStream.WPF.Commons.Messages;
 
 /// <summary>
 /// Логика взаимодействия для PaymentsPage.xaml
