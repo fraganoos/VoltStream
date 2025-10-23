@@ -1,6 +1,8 @@
 ﻿namespace VoltStream.WPF.Commons.ViewModels;
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+using VoltStream.WPF.Commons.Messages;
 
 public partial class PaymentViewModel : ViewModelBase
 {
@@ -13,42 +15,77 @@ public partial class PaymentViewModel : ViewModelBase
     [ObservableProperty] private long currencyId;
     [ObservableProperty] private long customerId;
 
-
     // for UI
-    [ObservableProperty] private decimal incomeAmount;
-    [ObservableProperty] private decimal expenseAmount;
+    [ObservableProperty] private decimal? incomeAmount;
+    [ObservableProperty] private decimal? expenseAmount;
 
     [ObservableProperty] private decimal lastBalance;
     [ObservableProperty] private decimal balance;
 
-    partial void OnIncomeAmountChanged(decimal value) => ReCalculateIncome();
-    partial void OnExpenseAmountChanged(decimal value) => ReCalculateExpense();
+    // UI control properties
+    [ObservableProperty] private bool isIncomeEnabled = true;
+    [ObservableProperty] private bool isExpenseEnabled = true;
 
+
+    partial void OnIncomeAmountChanged(decimal? value)
+    {
+        ReCalculateIncome();
+        if (value is null || value == 0)
+        {
+            IsExpenseEnabled = true;
+            WeakReferenceMessenger.Default.Send(new FocusRequestMessage("Expense"));
+        }
+        else
+        {
+            IsExpenseEnabled = false;
+            expenseAmount = null;
+        }
+    }
+
+    partial void OnExpenseAmountChanged(decimal? value)
+    {
+        ReCalculateExpense();
+        if (value is null || value == 0)
+        {
+            IsIncomeEnabled = true;
+            WeakReferenceMessenger.Default.Send(new FocusRequestMessage("Income"));
+        }
+        else
+        {
+            IsIncomeEnabled = false;
+            incomeAmount = null;
+        }
+    }
 
     private void ReCalculateIncome()
     {
-        if (ExpenseAmount != 0)
+        if (IncomeAmount.HasValue && IncomeAmount != 0)
         {
-            IncomeAmount = 0;
-            return;
+            NetAmount = (decimal)IncomeAmount;
+            Amount = NetAmount * ExchangeRate;
+            LastBalance = Balance + Amount;
         }
-
-        NetAmount = IncomeAmount;
-        Amount = NetAmount * ExchangeRate;
-        LastBalance = Balance + Amount;
+        else
+        {
+            NetAmount = 0;
+            Amount = 0;
+            LastBalance = Balance;
+        }
     }
 
     private void ReCalculateExpense()
     {
-        if (IncomeAmount != 0)
+        if (ExpenseAmount.HasValue && ExpenseAmount != 0)
         {
-            ExpenseAmount = 0;
-            return;
+            NetAmount = (decimal)-ExpenseAmount;
+            Amount = NetAmount * ExchangeRate;
+            LastBalance = Balance + Amount;
         }
-
-        IncomeAmount = 0;
-        NetAmount = -ExpenseAmount;
-        Amount = NetAmount * ExchangeRate;
-        LastBalance = Balance + Amount;
+        else
+        {
+            NetAmount = 0;
+            Amount = 0;
+            LastBalance = Balance;
+        }
     }
 }

@@ -26,7 +26,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     public SalesHistoryPageViewModel(IServiceProvider services)
     {
         this.services = services;
-        LoadInitialDataAsync();
+        _ = LoadInitialDataAsync();
     }
 
     [ObservableProperty] private CustomerResponse? selectedCustomer;
@@ -546,7 +546,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         }
     }
 
- 
+
     // --- Har bir product item o‘zgarishida summa qayta hisoblanadi
     private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {

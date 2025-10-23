@@ -1,53 +1,74 @@
 ﻿namespace VoltStream.WPF;
 
-using ApiServices.Services;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
-using System;
+using Microsoft.Extensions.Hosting;
 using System.Reflection;
 using System.Windows;
-using VoltStream.WPF.Customer;
-using VoltStream.WPF.LoginPages.Models;
-using VoltStream.WPF.LoginPages.Views;
-using VoltStream.WPF.Sales.Views;
+using System.Windows.Controls;
+using VoltStream.WPF.Commons;
+using VoltStream.WPF.Configurations;
 
 public partial class App : Application
 {
     public static IServiceProvider? Services { get; private set; }
+    private IHost? host;
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
-        var services = new ServiceCollection();
+        host = Host.CreateDefaultBuilder()
+            .ConfigureServices((context, services) =>
+            {
+                ConfigureUiServices(services);
+                ConfigureCoreServices(services);
+            }).Build();
 
-        // ✅ API konfiguratsiyasi
-        ApiService.ConfigureServices(services, "https://localhost:7287/api");
+        await host.StartAsync();
+        Services = host.Services;
 
+        var mainWindow = Services.GetRequiredService<MainWindow>();
+        mainWindow.Show();
+    }
 
-        // ✅ Mapster konfiguratsiyasi
+    protected override async void OnExit(ExitEventArgs e)
+    {
+        if (host is not null)
+            await host.StopAsync();
+
+        host?.Dispose();
+        base.OnExit(e);
+    }
+
+    private static void ConfigureUiServices(IServiceCollection services)
+    {
         var config = TypeAdapterConfig.GlobalSettings;
-        config.Scan(Assembly.GetExecutingAssembly()); // barcha IRegister’larni topadi
+        config.Scan(Assembly.GetExecutingAssembly());
         services.AddSingleton(config);
         services.AddScoped<IMapper, ServiceMapper>();
 
-        // ✅ ViewModel va View'larni ro‘yxatga olish
-        services.AddTransient<LoginViewModel>();
-        services.AddTransient<LoginWindow>();
+        var assembly = Assembly.GetExecutingAssembly();
 
-        services.AddSingleton<MainViewModel>();
-        services.AddTransient<MainWindow>();
+        void RegisterByBaseType<TBase>(ServiceLifetime lifetime)
+        {
+            var types = assembly.GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract && typeof(TBase).IsAssignableFrom(t));
 
-        services.AddTransient<SalesPage>();
+            foreach (var type in types)
+                services.Add(new ServiceDescriptor(type, type, lifetime));
+        }
 
-        services.AddTransient<CustomerWindow>();
+        RegisterByBaseType<Window>(ServiceLifetime.Singleton);
+        RegisterByBaseType<Page>(ServiceLifetime.Transient);
+        RegisterByBaseType<ViewModelBase>(ServiceLifetime.Transient);
+    }
 
-        // ✅ DI konteynerni yaratish
-        Services = services.BuildServiceProvider();
-
-        // ⚙️ Login qismini hozircha o‘tkazamiz (agar kerak bo‘lsa qayta qo‘shamiz)
-        var mainWindow = Services.GetRequiredService<MainWindow>();
-        mainWindow.Show();
+    private static void ConfigureCoreServices(IServiceCollection services)
+    {
+        services.AddSingleton<DiscoveryClient>();
+        services.AddHostedService<ConnectionMonitor>();
+        ApiService.ConfigureServices(services);
     }
 }
