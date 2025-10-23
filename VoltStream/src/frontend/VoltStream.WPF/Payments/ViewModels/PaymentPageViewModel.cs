@@ -102,9 +102,8 @@ partial class PaymentPageViewModel : ViewModelBase
     // tanlangan customer ma'lumotlarini yuklash
     partial void OnCustomerChanged(CustomerViewModel value)
     {
-        if (value is null || customerId == value.Id)
+        if (customerId == value.Id)
             return;
-
         customerId = value.Id;
         _ = LoadCustomerAsync();
     }
@@ -126,9 +125,17 @@ partial class PaymentPageViewModel : ViewModelBase
         {
             Customer = mapper.Map<CustomerViewModel>(response.Data.FirstOrDefault() ?? new());
             if (Customer.Accounts is not null)
+            {
                 foreach (var account in Customer.Accounts)
                     if (account.Currency is not null && account.Currency.Code == "UZS")
+                    {
                         Payment.Balance = account.Balance;
+                        Payment.Discount = account.Discount;
+                    }
+
+                Payment.ReCalculateIncome();
+                Payment.ReCalculateExpense();
+            }
         }
         else Error = response.Message ?? "Mijoz ma'lumotlarnini yuklashda xatolik!";
     }
