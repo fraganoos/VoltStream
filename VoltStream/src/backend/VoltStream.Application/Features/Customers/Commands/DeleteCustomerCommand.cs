@@ -22,7 +22,6 @@ public class DeleteCustomerCommandHandler(
             .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Customer), nameof(request.Id), request.Id);
 
-        // Accountlar bo'yicha balans va chegirma tekshirish
         foreach (var account in customer.Accounts)
         {
             if (account.Balance > 0)

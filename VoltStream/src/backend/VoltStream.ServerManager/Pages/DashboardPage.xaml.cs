@@ -1,10 +1,11 @@
 ﻿namespace VoltStream.ServerManager.Pages;
 
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using VoltStream.ServerManager.Enums;
-using VoltStream.WebApi.Extensions;
+using VoltStream.WebApi.Models;
 
 public partial class DashboardPage : Page
 {
@@ -17,32 +18,29 @@ public partial class DashboardPage : Page
         this.serverHost = serverHost;
         this.statusIndicator = statusIndicator;
 
+        // Load existing logs
         foreach (var log in serverHost.Logs)
-        {
             AddLogToList(log);
-        }
 
-        this.serverHost.StatusChanged += OnServerStatusChanged;
-        this.serverHost.RequestReceived += OnRequestReceived;
+        // Subscribe to local events only
+        serverHost.StatusChanged += OnServerStatusChanged;
+        serverHost.RequestReceived += OnRequestReceived;
 
-        // Initialize indicator immediately based on current state
+        // Set initial indicator
         var initialStatus = serverHost.IsRunning ? ServerStatus.Running : ServerStatus.Stopped;
         SetIndicator(initialStatus);
 
-        // Unsubscribe on unload to avoid callbacks after page/window closed
-        this.Unloaded += (_, __) =>
+        // Unsubscribe on unload
+        Unloaded += (_, __) =>
         {
-            this.serverHost.StatusChanged -= OnServerStatusChanged;
-            this.serverHost.RequestReceived -= OnRequestReceived;
+            serverHost.StatusChanged -= OnServerStatusChanged;
+            serverHost.RequestReceived -= OnRequestReceived;
         };
     }
 
     private void OnRequestReceived(object? sender, RequestLog log)
     {
-        Dispatcher.Invoke(() =>
-        {
-            AddLogToList(log);
-        });
+        Dispatcher.Invoke(() => AddLogToList(log));
     }
 
     private void OnServerStatusChanged(object? sender, ServerStatus status)
@@ -53,6 +51,7 @@ public partial class DashboardPage : Page
     private void SetIndicator(ServerStatus status)
     {
         if (statusIndicator is null) return;
+
         statusIndicator.Fill = status switch
         {
             ServerStatus.Running => Brushes.Green,
@@ -67,16 +66,16 @@ public partial class DashboardPage : Page
     {
         LogsListBox.Items.Insert(0,
             $"{(log.IsSuccess ? "⚡" : "❌")} {log.TimeStamp:HH:mm:ss} | " +
-            $"{log.IpAddress} | {log.Method} {log.Path} | " +
-            $"{log.UserAgent} | {log.StatusCode}");
+            $"{log.Method} {log.Path} | {log.StatusCode} | " +
+            $"{log.ElapsedMs}ms");
     }
 
-    private async void StartButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    private async void StartButton_Click(object sender, RoutedEventArgs e)
         => await serverHost.StartAsync();
 
-    private async void StopButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    private async void StopButton_Click(object sender, RoutedEventArgs e)
         => await serverHost.StopAsync();
 
-    private async void RestartButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    private async void RestartButton_Click(object sender, RoutedEventArgs e)
         => await serverHost.RestartAsync();
 }

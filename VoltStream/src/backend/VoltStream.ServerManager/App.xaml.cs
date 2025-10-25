@@ -44,17 +44,12 @@ public partial class App : Application
         };
         trayIcon.MouseClick += TrayIcon_MouseClick;
 
-        // Server status o‘zgarganda tray yangilansin
         ServerHost.StatusChanged += (_, __) =>
         {
             if (Dispatcher.CheckAccess())
-            {
                 RefreshTray();
-            }
             else
-            {
                 Dispatcher.Invoke(RefreshTray);
-            }
         };
 
         RefreshTray();
