@@ -6,6 +6,7 @@ using ApiServices.Models;
 using ApiServices.Models.Requests;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DocumentFormat.OpenXml.Spreadsheet;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -30,6 +31,8 @@ partial class PaymentPageViewModel : ViewModelBase
         _ = LoadDataAsync();
     }
 
+    [ObservableProperty] private ObservableCollection<PaymentViewModel> historyPayments = [];
+
 
     [ObservableProperty] private ObservableCollection<PaymentViewModel> availablePayments = [];
     [ObservableProperty] private ObservableCollection<CurrencyViewModel> availableCurrencies = [];
@@ -48,8 +51,8 @@ partial class PaymentPageViewModel : ViewModelBase
     {
         var request = new PaymentRequest
         {
-            CustomerId = Customer.Id,
-            CurrencyId = Currency.Id,
+            CustomerId = Customer!.Id,
+            CurrencyId = Currency!.Id,
             PaidAt = Payment.PaidAt,
             Amount = Payment.Amount,
             ExchangeRate = Payment.ExchangeRate,
@@ -79,8 +82,28 @@ partial class PaymentPageViewModel : ViewModelBase
     {
         await LoadCustomersAsync();
         await LoadCurrenciesAsync();
+        await LoadDatagrid();
     }
 
+    private async Task LoadDatagrid() 
+    {
+        string date = DateTime.Now.ToString("dd.MM.yyyy");
+        FilteringRequest request = new()
+        {
+            Filters = new()
+            {
+                ["paidAt"] = [date],
+                ["customer"] = ["include"],
+                ["currency"] = ["include"]
+
+             }
+        };
+        var response = await paymentApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
+        if (response.IsSuccess)
+            HistoryPayments = mapper.Map<ObservableCollection<PaymentViewModel>>(response.Data);
+        else
+            Error = response.Message ?? "To'lovlarni olishda xatolik!";
+    }
     private async Task LoadCurrenciesAsync()
     {
         var response = await currenciesApi.GetAllAsync().Handle();

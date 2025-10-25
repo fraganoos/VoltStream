@@ -11,6 +11,13 @@
       d:DesignHeight="450"
       d:DesignWidth="950"
       Title="PaymentsPage">
+    <Page.Resources>
+        <Style x:Key="RightAlignedCellStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="TextAlignment" Value="Right" />
+        </Style>
+    </Page.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="80" />
@@ -189,13 +196,13 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0"
-                               Text="Balans:"
-                               VerticalAlignment="Center"
-                               FontSize="12"
-                               Foreground="#888"
-                               Margin="5,0,0,0"
-                               FontStyle="Italic"
-                               Visibility="{Binding ElementName=beginBalans, Path=Text.IsEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                   Text="Balans:"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Foreground="#888"
+                                   Margin="5,0,0,0"
+                                   FontStyle="Italic"
+                                   Visibility="{Binding ElementName=beginBalans, Path=Text.IsEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                         <TextBox Grid.Column="1"
                                  x:Name="beginBalans"
                                  IsReadOnly="True" IsTabStop="False"
@@ -205,13 +212,13 @@
                                  utils:NumericTextBox.IsNumeric="   True"
                                  Text="{Binding Customer.Balance}" />
                         <TextBlock Grid.Column="2"
-                               Text="Natija:"
-                               VerticalAlignment="Center"
-                               FontSize="12"
-                               Foreground="#888"
-                               Margin="5,0,0,0"
-                               FontStyle="Italic"
-                               Visibility="{Binding ElementName=lastBalans, Path=Text.IsEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                   Text="Natija:"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Foreground="#888"
+                                   Margin="5,0,0,0"
+                                   FontStyle="Italic"
+                                   Visibility="{Binding ElementName=lastBalans, Path=Text.IsEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                         <TextBox Grid.Column="3"
                                  Text="{Binding Payment.LastBalance}"
                                  x:Name="lastBalans"
@@ -222,13 +229,13 @@
                                  Background="Transparent"
                                  utils:NumericTextBox.IsNumeric="True" />
                         <TextBlock Grid.Column="4"
-                               Text="Chegirma:"
-                               VerticalAlignment="Center"
-                               FontSize="12"
-                               Foreground="#888"
-                               Margin="2,0,0,0"
-                               FontStyle="Italic"
-                               Visibility="{Binding ElementName=Discount, Path=Text.IsEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                   Text="Chegirma:"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Foreground="#888"
+                                   Margin="2,0,0,0"
+                                   FontStyle="Italic"
+                                   Visibility="{Binding ElementName=Discount, Path=Text.IsEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                         <TextBox Grid.Column="5"
                                  Text="{Binding Payment.Discount}"
                                  x:Name="Discount"
@@ -279,9 +286,103 @@
                 </Grid>
             </Grid>
         </Grid>
-        <DataGrid Grid.Row="1">
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding HistoryPayments}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  HeadersVisibility="Column"
+                  Margin="5"
+                  AlternatingRowBackground="#F9F9F9"
+                  GridLinesVisibility="Horizontal"
+                  FontSize="14">
+
+            <!-- Barcha headerlarni o‘rtaga tekislash -->
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+
+            <DataGrid.Columns>
+                <!-- Sana -->
+                <DataGridTextColumn Header="Sana"
+                                    Binding="{Binding PaidAt, StringFormat={}{0:dd.MM.yyyy}}"
+                                    Width="120">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <!-- Mijoz -->
+                <DataGridTextColumn Header="Mijoz"
+                                    Binding="{Binding Customer.Name}"
+                                    Width="200" />
+
+                <!-- Net summa -->
+                <DataGridTextColumn Header="Net summa"
+                                    Binding="{Binding NetAmount, StringFormat=N2}"
+                                    Width="120">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="Padding" Value="0,0,5,0"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <!-- Valyuta turi -->
+                <DataGridTextColumn Header="Valyuta turi"
+                                    Binding="{Binding Currency.Name}"
+                                    Width="120">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <!-- Kurs -->
+                <DataGridTextColumn Header="Kurs"
+                                    Binding="{Binding ExchangeRate, StringFormat=N2}"
+                                    Width="100">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="Padding" Value="0,0,5,0"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <!-- Summa -->
+                <DataGridTextColumn Header="Summa"
+                                    Binding="{Binding Amount, StringFormat=N2}"
+                                    Width="120">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="Padding" Value="0,0,5,0"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
 
 
+                <!-- Izoh -->
+                <DataGridTextColumn Header="Izoh"
+                                    Binding="{Binding Description}"
+                                    Width="*">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Padding" Value="5,0,0,0"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
         </DataGrid>
+
     </Grid>
 </Page>
