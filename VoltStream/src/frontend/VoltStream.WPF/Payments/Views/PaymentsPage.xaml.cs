@@ -2,12 +2,17 @@
 
 using ApiServices.Extensions;
 using ApiServices.Models.Requests;
+using CommunityToolkit.Mvvm.Messaging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Commons.Messages;
 using VoltStream.WPF.Customer;
 using VoltStream.WPF.Payments.ViewModels;
+using VoltStream.WPF.Commons.Messages;
+using VoltStream.WPF.Commons.ViewModels;
+using System;
 
 /// <summary>
 /// Логика взаимодействия для PaymentsPage.xaml
@@ -20,11 +25,13 @@ public partial class PaymentsPage : Page
         InitializeComponent();
         vm = new PaymentPageViewModel(services);
         DataContext = vm;
+        Loaded += PaymentsPage_Loaded;
+        Unloaded += PaymentsPage_Unloaded;
     }
+
 
     private async void CustomerName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-
         bool accept = ComboBoxHelper.BeforeUpdate(sender, e, "Xaridor", true);
         if (accept)
         {
@@ -62,5 +69,50 @@ public partial class PaymentsPage : Page
             }
             else { e.Handled = true; }
         }
+        if (CustomerName.Text is null or "")
+        {
+            lastBalans.Clear();
+            beginBalans.Clear();
+            Discount.Clear();
+        }
+
     }
+
+    #region Messenger for Focus
+    private void PaymentsPage_Loaded(object sender, RoutedEventArgs e)
+    {
+        // Регистрируем мессенджер
+        WeakReferenceMessenger.Default.Register<FocusRequestMessage>(this, OnFocusRequestMessage);
+    }
+    private void PaymentsPage_Unloaded(object sender, RoutedEventArgs e)
+    {
+        // Отписываемся при выгрузке страницы (во избежание утечек)
+        WeakReferenceMessenger.Default.Unregister<FocusRequestMessage>(this);
+    }
+
+    private async void OnFocusRequestMessage(object recipient, FocusRequestMessage m)
+    {
+        if (m.Value == "Income" && Chiqim.IsEnabled)
+        {
+            await Dispatcher.InvokeAsync(() =>
+            {
+                Chiqim.Focus();
+            });
+        }
+        else if (m.Value == "Expense" && Kirim.IsEnabled)
+        {
+            await Dispatcher.InvokeAsync(() =>
+            {
+                Kirim.Focus();
+            });
+        }
+        else if (m.Value == "Discription")
+        {
+            await Dispatcher.InvokeAsync(() =>
+            {
+                Discription.Focus();
+            });
+        }
+    }
+    #endregion Messenger for Focus}
 }

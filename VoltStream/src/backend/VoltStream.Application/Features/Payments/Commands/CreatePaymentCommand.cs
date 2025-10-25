@@ -57,7 +57,7 @@ public class CreatePaymentCommandHandler(
             }
 
             // === 4. Mijoz account balansini yangilash ===
-            account.Balance += request.NetAmount;
+            account.Balance += request.Amount;
             currency.ExchangeRate = request.ExchangeRate;
 
             // === 5. Payment va CustomerOperation yaratish ===
@@ -69,7 +69,7 @@ public class CreatePaymentCommandHandler(
             {
                 AccountId = account.Id,
                 OperationType = OperationType.Payment,
-                Amount = request.NetAmount,
+                Amount = request.Amount,
                 CustomerId = customer.Id,
                 Description = GenerateDescription(request) + ". " + payment.Description.ToString(),
                 CreatedAt = DateTime.UtcNow
@@ -93,10 +93,10 @@ public class CreatePaymentCommandHandler(
     private static string GenerateDescription(CreatePaymentCommand request)
         => request.Type switch
         {
-            PaymentType.Cash => $"Naqd to‘lov: {request.Amount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
-            PaymentType.BankAccount => $"Bank orqali to‘lov: {request.Amount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
-            PaymentType.Card => $"Karta orqali to‘lov: {request.Amount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
-            PaymentType.Mobile => $"Mobil to‘lov: {request.Amount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
+            PaymentType.Cash => $"Naqd to‘lov: {request.NetAmount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
+            PaymentType.BankAccount => $"Bank orqali to‘lov: {request.NetAmount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
+            PaymentType.Card => $"Karta orqali to‘lov: {request.NetAmount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
+            PaymentType.Mobile => $"Mobil to‘lov: {request.NetAmount} {GetCurrencyCode(request.CurrencyId)}. Kurs: {request.ExchangeRate}",
             _ => request.Description
         };
 
