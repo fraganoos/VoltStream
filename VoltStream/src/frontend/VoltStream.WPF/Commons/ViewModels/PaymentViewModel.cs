@@ -1,5 +1,6 @@
 ﻿namespace VoltStream.WPF.Commons.ViewModels;
 
+using ApiServices.Models.Responses;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using System.Windows;
@@ -16,6 +17,8 @@ public partial class PaymentViewModel : ViewModelBase
     [ObservableProperty] private string description = string.Empty;
     [ObservableProperty] private long currencyId;
     [ObservableProperty] private long customerId;
+    [ObservableProperty] private CurrencyResponse currency  = default!;
+    [ObservableProperty] private CustomerResponse customer  = default!;
 
     // for UI
     [ObservableProperty] private decimal? incomeAmount;
@@ -28,6 +31,10 @@ public partial class PaymentViewModel : ViewModelBase
     [ObservableProperty] private bool isIncomeEnabled = true;
     [ObservableProperty] private bool isExpenseEnabled = true;
 
+    partial void OnNetAmountChanged(decimal value)
+    {
+        Amount = value * ExchangeRate;
+    }
     partial void OnExchangeRateChanged(decimal value)
     {
         ReCalculateIncome();
