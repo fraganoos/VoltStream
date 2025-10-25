@@ -1,11 +1,14 @@
 ﻿namespace VoltStream.WebApi;
 
 using VoltStream.WebApi.Extensions;
-using VoltStream.WebApi.Middlewares;
+using VoltStream.WebApi.Models;
 
 public static class WebApiHostBuilder
 {
-    public static WebApplication Build(string[] args, IConfiguration? externalConfig = null, Action<RequestLog>? logCallback = null)
+    public static WebApplication Build(
+        string[] args,
+        IConfiguration? externalConfig = null,
+        Action<RequestLog>? logCallback = null)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -18,11 +21,7 @@ public static class WebApiHostBuilder
 
         app.UseInfrastructure();
         app.UseOpenApiDocumentation();
-
-        if (externalConfig is not null)
-            app.UseMiddleware<ClientIpMiddleware>();
-
-        app.UseRequestLogging(logCallback);
+        app.UseVoltStreamMiddlewares(logCallback);
 
         app.MapControllers();
 

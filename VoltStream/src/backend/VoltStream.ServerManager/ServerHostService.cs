@@ -2,19 +2,20 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using System.Diagnostics;
 using System.Net.Http;
 using VoltStream.ServerManager.Api;
 using VoltStream.ServerManager.Enums;
 using VoltStream.WebApi;
-using VoltStream.WebApi.Extensions;
+using VoltStream.WebApi.Models;
 
 public class ServerHostService
 {
     private WebApplication? app;
     private CancellationTokenSource? cts;
+
     private readonly List<RequestLog> logs = [];
+    private static readonly HttpClient http = new() { Timeout = TimeSpan.FromSeconds(5) };
 
     private ServerStatus status = ServerStatus.Stopped;
     public ServerStatus Status
@@ -43,22 +44,18 @@ public class ServerHostService
 
         Status = ServerStatus.Starting;
 
-        var config = new ConfigurationBuilder()
-            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: false)
-            .Build();
-
+        var config = LoadConfiguration();
         var port = config.GetValue("Server:Port", 5000);
         var scheme = config.GetValue("Server:UseHttps", false) ? "https" : "http";
 
-        app = WebApiHostBuilder.Build([], config, log =>
-        {
-            if (log.Path!.StartsWith("/api"))
+        app = WebApiHostBuilder.Build(
+            args: [],
+            externalConfig: config,
+            logCallback: log =>
             {
                 logs.Add(log);
                 RequestReceived?.Invoke(this, log);
-            }
-        });
+            });
 
         app.Urls.Clear();
         app.Urls.Add($"{scheme}://0.0.0.0:{port}");
@@ -66,41 +63,7 @@ public class ServerHostService
         cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         await app.StartAsync(cts.Token);
 
-        var realUrl = $"{scheme}://localhost:{port}";
-        var pathQuery = "/scalar/v1";
-
-        var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
-        lifetime.ApplicationStarted.Register(async () =>
-        {
-            try
-            {
-                using var http = new HttpClient();
-                http.Timeout = TimeSpan.FromSeconds(5);
-
-                var response = await http.GetAsync(realUrl + pathQuery);
-
-                var log = new RequestLog
-                {
-                    TimeStamp = DateTime.Now,
-                    IpAddress = "127.0.0.1",
-                    Method = "GET",
-                    Path = pathQuery,
-                    UserAgent = "ServerMonitor",
-                    StatusCode = (int)response.StatusCode,
-                    IsSuccess = response.IsSuccessStatusCode
-                };
-
-                ForwardLog(log);
-
-                Status = response.IsSuccessStatusCode
-                    ? ServerStatus.Running
-                    : ServerStatus.Stopped;
-            }
-            catch
-            {
-                Status = ServerStatus.Stopped;
-            }
-        });
+        await CheckHealthAsync(scheme, port);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken = default)
@@ -120,23 +83,69 @@ public class ServerHostService
         await StopAsync(cancellationToken);
         await StartAsync(cancellationToken);
 
-
-        var config = new ConfigurationBuilder()
-            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: false)
-            .Build();
-
-        bool.TryParse(config.GetValue("Server:UseHttps", "false"), out bool UseHttps);
+        var config = LoadConfiguration();
         var port = config.GetValue("Server:Port", 5000);
         var host = config.GetValue("Server:Host", "localhost");
-        var baseUrl = $"{(UseHttps ? "https" : "http")}://{host}:{port}/api";
+        var scheme = config.GetValue("Server:UseHttps", false) ? "https" : "http";
 
+        var baseUrl = $"{scheme}://{host}:{port}/api";
         App.AllowedClientsApi = ApiFactory.CreateAllowedClients(baseUrl);
     }
 
-    private void ForwardLog(RequestLog log)
+    private async Task CheckHealthAsync(string scheme, int port)
     {
-        logs.Add(log);
-        RequestReceived?.Invoke(this, log);
+        var url = $"{scheme}://localhost:{port}/scalar/v1";
+        var sw = Stopwatch.StartNew();
+
+        try
+        {
+            var response = await http.GetAsync(url);
+            sw.Stop();
+
+            var log = new RequestLog(
+                TimeStamp: DateTime.UtcNow,
+                IpAddress: "127.0.0.1",
+                Method: "GET",
+                Path: "/scalar/v1",
+                UserAgent: "ServerMonitor",
+                StatusCode: (int)response.StatusCode,
+                IsSuccess: response.IsSuccessStatusCode,
+                ElapsedMs: sw.ElapsedMilliseconds
+            );
+
+            logs.Add(log);
+            RequestReceived?.Invoke(this, log);
+
+            Status = response.IsSuccessStatusCode
+                ? ServerStatus.Running
+                : ServerStatus.Stopped;
+        }
+        catch
+        {
+            sw.Stop();
+
+            var log = new RequestLog(
+                TimeStamp: DateTime.UtcNow,
+                IpAddress: "127.0.0.1",
+                Method: "GET",
+                Path: "/scalar/v1",
+                UserAgent: "ServerMonitor",
+                StatusCode: 500,
+                IsSuccess: false,
+                ElapsedMs: sw.ElapsedMilliseconds
+            );
+
+            logs.Add(log);
+            RequestReceived?.Invoke(this, log);
+
+            Status = ServerStatus.Stopped;
+        }
     }
+
+
+    private static IConfiguration LoadConfiguration() =>
+        new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false)
+            .Build();
 }

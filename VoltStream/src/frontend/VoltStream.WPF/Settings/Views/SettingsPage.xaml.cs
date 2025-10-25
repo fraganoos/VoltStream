@@ -8,9 +8,11 @@ using VoltStream.WPF.Settings.ViewModels;
 /// </summary>
 public partial class SettingsPage : Page
 {
+    private readonly SettingsPageViewModel vm;
     public SettingsPage(SettingsPageViewModel vm)
     {
         InitializeComponent();
+        this.vm = vm;
         DataContext = vm;
     }
 }

@@ -2,12 +2,15 @@
 
 using System.Text.RegularExpressions;
 
-public class SlugifyParameterTransformer : IOutboundParameterTransformer
+public partial class SlugifyParameterTransformer : IOutboundParameterTransformer
 {
     public string? TransformOutbound(object? value)
     {
-        if (value == null) return null;
+        if (value is null) return null;
 
-        return Regex.Replace(value.ToString()!, "([a-z])([A-Z])", "$1-$2").ToLower();
+        return Segregate().Replace(value.ToString()!, "$1-$2").ToLower();
     }
+
+    [GeneratedRegex("([a-z])([A-Z])")]
+    private static partial Regex Segregate();
 }
