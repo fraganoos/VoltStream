@@ -60,7 +60,7 @@
                 <Grid Grid.Row="0"
                       Grid.Column="1">
                     <controls:UserCalendar x:Name="PaymentDate"
-                                           SelectedDate="{Binding Payment.PaidAt}"
+                                           SelectedDate="{Binding Payment.PaidAt, Mode=TwoWay,NotifyOnSourceUpdated=True}"
                                            VerticalAlignment="Center"
                                            HorizontalAlignment="Left"
                                            Width="150"
