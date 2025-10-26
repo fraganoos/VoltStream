@@ -80,7 +80,7 @@
                               HorizontalAlignment="Stretch"
                               FontSize="14"
                               Margin="5,1"
-                              utils:ComboBoxTabBehavior.EnableTabOnSelect="True" />
+                              utils:ComboBoxQuickNavBehavior.EnableQuickNavigation="True"/>
                 </Grid>
                 <Grid Grid.Row="2"
                       Grid.Column="1">
@@ -98,7 +98,7 @@
                               HorizontalAlignment="Stretch"
                               FontSize="14"
                               Margin="5,1,5,1"
-                              utils:ComboBoxTabBehavior.EnableTabOnSelect="True" />
+                              utils:ComboBoxQuickNavBehavior.EnableQuickNavigation="True"/>
                     <TextBlock Grid.Column="1"
                                Text="kurs /(%)"
                                VerticalAlignment="Center"
