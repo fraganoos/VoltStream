@@ -6,12 +6,13 @@ using ApiServices.Models;
 using ApiServices.Models.Requests;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DocumentFormat.OpenXml.Spreadsheet;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Threading.Tasks;
+using System.Windows;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
 
@@ -28,6 +29,9 @@ partial class PaymentPageViewModel : ViewModelBase
         mapper = services.GetRequiredService<IMapper>();
         paymentApi = services.GetRequiredService<IPaymentApi>();
 
+        Payment = new();
+        Payment.PropertyChanged  += Payment_PropertyChanged;
+
         _ = LoadDataAsync();
     }
 
@@ -43,6 +47,15 @@ partial class PaymentPageViewModel : ViewModelBase
     private long customerId;
 
     [ObservableProperty] private CurrencyViewModel? currency;
+
+    private async void Payment_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(Payment.PaidAt))
+        {
+            await LoadDatagrid();
+        }
+    }
+
 
     #region Commands
 
@@ -65,10 +78,13 @@ partial class PaymentPageViewModel : ViewModelBase
         if (response.IsSuccess)
         {
             Success = "To'lov muvaffaqiyatli ro'yxatga qo'shildi!";
-
+            DateTime date = Payment.PaidAt;
             Payment = new();
+            Payment.PropertyChanged += Payment_PropertyChanged;
             Customer = new();
             Currency = new();
+            Payment.PaidAt = date;
+            await LoadDataAsync();
         }
         else Error = response.Message ?? "Texnik xatolik!";
     }
@@ -87,7 +103,7 @@ partial class PaymentPageViewModel : ViewModelBase
 
     private async Task LoadDatagrid() 
     {
-        string date = DateTime.Now.ToString("dd.MM.yyyy");
+        string date = Payment.PaidAt.ToString("dd.MM.yyyy");
         FilteringRequest request = new()
         {
             Filters = new()
