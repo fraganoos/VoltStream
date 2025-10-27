@@ -12,7 +12,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using System.Windows;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
 
@@ -30,7 +29,7 @@ partial class PaymentPageViewModel : ViewModelBase
         paymentApi = services.GetRequiredService<IPaymentApi>();
 
         Payment = new();
-        Payment.PropertyChanged  += Payment_PropertyChanged;
+        Payment.PropertyChanged += Payment_PropertyChanged;
 
         _ = LoadDataAsync();
     }
@@ -101,7 +100,7 @@ partial class PaymentPageViewModel : ViewModelBase
         await LoadDatagrid();
     }
 
-    private async Task LoadDatagrid() 
+    private async Task LoadDatagrid()
     {
         string date = Payment.PaidAt.ToString("dd.MM.yyyy");
         FilteringRequest request = new()
@@ -112,7 +111,7 @@ partial class PaymentPageViewModel : ViewModelBase
                 ["customer"] = ["include"],
                 ["currency"] = ["include"]
 
-             }
+            }
         };
         var response = await paymentApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
         if (response.IsSuccess)

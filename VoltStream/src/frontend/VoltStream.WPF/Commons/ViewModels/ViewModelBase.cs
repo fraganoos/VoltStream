@@ -6,6 +6,7 @@ using VoltStream.WPF.Commons.Services;
 
 public abstract partial class ViewModelBase : ObservableObject
 {
+
     [ObservableProperty] private bool isLoading;
     [ObservableProperty] private string? error;
     [ObservableProperty] private string? success;
@@ -13,7 +14,6 @@ public abstract partial class ViewModelBase : ObservableObject
     [ObservableProperty] private string? info;
     [ObservableProperty] private bool isSelected;
     [ObservableProperty] private bool idEditing;
-    [ObservableProperty] private string? name;
 
     partial void OnErrorChanged(string? value)
         => HandleMessage(value, NotificationType.Error, () => Error = null);

@@ -2,13 +2,14 @@
 
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
-using ApiServices.Models.Responses;
+using ApiServices.Models.Requests;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
 
@@ -27,25 +28,24 @@ public partial class SettingsPageViewModel : ViewModelBase
     }
 
     [ObservableProperty] private ApiConnectionViewModel apiConnection;
-    [ObservableProperty] private ObservableCollection<CurrencyViewModel>? currencies = [];
+    [ObservableProperty] private ObservableCollection<CurrencyViewModel> currencies = [];
 
     #region Commands
 
     [RelayCommand]
     private void AddCurrency()
     {
-        Currencies ??= [];
         Currencies.Add(new CurrencyViewModel());
     }
 
     [RelayCommand]
     private void RemoveCurrency(CurrencyViewModel currency)
     {
-        Currencies?.Remove(currency);
+        Currencies.Remove(currency);
     }
 
     [RelayCommand]
-    private void SaveCurrencies()
+    private async Task SaveCurrencies()
     {
         if (Currencies is null || Currencies.Count == 0)
         {
@@ -54,13 +54,13 @@ public partial class SettingsPageViewModel : ViewModelBase
         }
 
         var client = services.GetRequiredService<ICurrenciesApi>();
-        var dtoList = mapper.Map<List<CurrencyResponse>>(Currencies);
+        var dtoList = mapper.Map<List<CurrencyRequest>>(Currencies);
 
-        //var response = await client.SaveAllAsync(dtoList).Handle();
-        //if (response.IsSuccess)
-        //    Success = "Valyutalar saqlandi";
-        //else
-        //    Error = response.Message ?? "Saqlashda xatolik";
+        var response = await client.SaveAllAsync(dtoList)
+            .Handle(isLoading => IsSelected = isLoading);
+
+        if (response.IsSuccess) Success = "O'zgarishlar muvaffaqiyatli saqlandi";
+        else Error = response.Message ?? "Valyutalarni saqlashda xatolik";
     }
 
     #endregion Commands

@@ -3,7 +3,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
 using VoltStream.WPF.Payments.Views;

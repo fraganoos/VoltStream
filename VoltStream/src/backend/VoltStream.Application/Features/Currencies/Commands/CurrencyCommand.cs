@@ -1,14 +1,13 @@
-﻿namespace VoltStream.Domain.Entities;
+﻿namespace VoltStream.Application.Features.Currencies.Commands;
 
-public class Currency : Auditable
+public sealed record CurrencyCommand
 {
+    public long Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string NormalizedName { get; set; } = string.Empty;
     public string Code { get; set; } = string.Empty;
     public string Symbol { get; set; } = string.Empty;
     public decimal ExchangeRate { get; set; }
     public bool IsDefault { get; set; }
     public bool IsActive { get; set; }
     public bool IsEditable { get; set; }
-
 }

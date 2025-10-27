@@ -3,7 +3,6 @@
 using ApiServices.Models.Responses;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
-using System.Windows;
 using VoltStream.WPF.Commons.Messages;
 
 public partial class PaymentViewModel : ViewModelBase
@@ -17,8 +16,8 @@ public partial class PaymentViewModel : ViewModelBase
     [ObservableProperty] private string description = string.Empty;
     [ObservableProperty] private long currencyId;
     [ObservableProperty] private long customerId;
-    [ObservableProperty] private CurrencyResponse currency  = default!;
-    [ObservableProperty] private CustomerResponse customer  = default!;
+    [ObservableProperty] private CurrencyResponse currency = default!;
+    [ObservableProperty] private CustomerResponse customer = default!;
 
     // for UI
     [ObservableProperty] private decimal? incomeAmount;

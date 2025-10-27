@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using VoltStream.WPF.Commons.Animations;
 using VoltStream.WPF.Commons.Enums;
+using VoltStream.WPF.Commons.Services;
 using VoltStream.WPF.Commons.ViewModels;
 
 public partial class MainWindow : Window
@@ -20,6 +21,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         vm = serviceProvider.GetRequiredService<MainViewModel>();
         DataContext = vm;
+        NotificationService.Init(this);
     }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)

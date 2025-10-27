@@ -7,21 +7,23 @@ using Refit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-[Headers("accept: application/json")]
 public interface ICurrenciesApi
 {
-    [Post("/Currencies")]
+    [Post("/currencies")]
     Task<Response<long>> CreateAsync([Body] CurrencyRequest request);
 
-    [Put("/Currencies​")]
+    [Put("/currencies​")]
     Task<Response<bool>> UpdateAsync([Body] CurrencyRequest request);
 
-    [Delete("/Currencies​/{id}")]
+    [Put("/currencies/all")]
+    Task<Response<bool>> SaveAllAsync(List<CurrencyRequest> dtoList);
+
+    [Delete("/currencies​/{id}")]
     Task<Response<bool>> DeleteAsync(long id);
 
-    [Get("/Currencies/{id}")]
+    [Get("/currencies/{id}")]
     Task<Response<CurrencyResponse>> GetByIdAsync(long id);
 
-    [Get("/Currencies")]
+    [Get("/currencies")]
     Task<Response<List<CurrencyResponse>>> GetAllAsync();
 }

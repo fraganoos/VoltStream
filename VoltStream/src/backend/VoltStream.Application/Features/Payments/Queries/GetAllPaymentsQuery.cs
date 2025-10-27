@@ -5,7 +5,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Payments.DTOs;
-using VoltStream.Application.Features.Sales.DTOs;
 
 public record GetAllPaymentsQuery : IRequest<IReadOnlyCollection<PaymentDto>>;
 

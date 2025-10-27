@@ -10,6 +10,8 @@ public partial class CurrencyViewModel : ViewModelBase
     [ObservableProperty] private string symbol = string.Empty;
     [ObservableProperty] private decimal exchangeRate;
     [ObservableProperty] private bool isDefault;
+    [ObservableProperty] private bool isActive;
+    [ObservableProperty] private bool isEditable;
 
     public CurrencyViewModel? selected;
     public CurrencyViewModel Selected
@@ -17,7 +19,7 @@ public partial class CurrencyViewModel : ViewModelBase
         get => selected!;
         set
         {
-            if (SetProperty(ref selected, value) && value != null)
+            if (SetProperty(ref selected, value) && value is not null)
             {
                 Id = value.Id;
                 Name = value.Name;
@@ -25,6 +27,7 @@ public partial class CurrencyViewModel : ViewModelBase
                 Symbol = value.Symbol;
                 ExchangeRate = value.ExchangeRate;
                 IsDefault = value.IsDefault;
+                IsActive = value.IsActive;
             }
         }
     }
