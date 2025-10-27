@@ -13,6 +13,9 @@
                 <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/ButtonStyles.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/Colors.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/VoltStream.WPF;component/Commons/Styles/FloatingLable.xaml" />
+
+
+                <ResourceDictionary Source="/Commons/Styles/ScrollBarStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
 

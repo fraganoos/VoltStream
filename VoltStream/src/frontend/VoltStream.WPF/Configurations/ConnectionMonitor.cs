@@ -1,4 +1,5 @@
 ﻿namespace VoltStream.WPF.Configurations;
+
 using Microsoft.Extensions.Hosting;
 using VoltStream.WPF.Commons.ViewModels;
 

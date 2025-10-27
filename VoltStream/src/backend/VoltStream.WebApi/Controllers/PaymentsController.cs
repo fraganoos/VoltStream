@@ -1,6 +1,5 @@
 ﻿namespace VoltStream.WebApi.Controllers;
 
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using VoltStream.Application.Features.Payments.Commands;
 using VoltStream.Application.Features.Payments.DTOs;

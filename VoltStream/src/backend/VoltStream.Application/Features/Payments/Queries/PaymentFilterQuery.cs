@@ -2,7 +2,6 @@
 
 using AutoMapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Commons.Models;
@@ -15,7 +14,7 @@ public class PaymentFilterQueryHandler(
     IPagingMetadataWriter writer,
     IMapper mapper) : IRequestHandler<PaymentFilterQuery, IReadOnlyCollection<PaymentDto>>
 {
- 
+
     public async Task<IReadOnlyCollection<PaymentDto>> Handle(PaymentFilterQuery request, CancellationToken cancellationToken)
     => mapper.Map<IReadOnlyCollection<PaymentDto>>(await context.Payments
             .ToPagedListAsync(request, writer, cancellationToken));

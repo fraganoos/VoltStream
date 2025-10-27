@@ -18,6 +18,10 @@ public class CurrencyMappingProfile : Profile
             .ForMember(dest => dest.NormalizedName,
             opt => opt.MapFrom(src => src.Name.ToNormalized()));
 
+        CreateMap<CurrencyCommand, Currency>()
+            .ForMember(dest => dest.NormalizedName,
+            opt => opt.MapFrom(src => src.Name.ToNormalized()));
+
         CreateMap<Currency, CurrencyDto>();
     }
 }

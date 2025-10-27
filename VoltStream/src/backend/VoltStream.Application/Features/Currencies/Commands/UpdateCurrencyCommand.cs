@@ -12,6 +12,9 @@ public record UpdateCurrencyCommand(
     string Name,
     string Code,
     string Symbol,
+    bool IsActive,
+    bool IsDefault,
+    bool IsEditable,
     decimal ExchangeRate)
     : IRequest<bool>;
 
