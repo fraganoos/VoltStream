@@ -9,12 +9,12 @@
     xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
     Title="Sotuv tarixi"
     d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DesignWidth="900"
     mc:Ignorable="d">
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="100" />
+            <RowDefinition Height="80" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -25,25 +25,30 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <!--  🧾 Filtr bo‘limi  -->
-            <StackPanel Grid.Column="0" Margin="2,10">
-
-                <!--  👤 Mijoz  -->
-                <StackPanel Margin="5" Orientation="Horizontal">
-                    <TextBlock
-                        Width="100"
-                        Margin="3,0,0,3"
+                    <!--  👤 Mijoz  -->
+            <Grid  Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0"  Grid.Column="0"
+                        Margin="5,0"
                         VerticalAlignment="Center"
                         FontSize="13"
-                        Foreground="{DynamicResource PrimaryTextColor}"
                         Text="Mijoz" />
-                    <ComboBox
+                        <!--Foreground="{DynamicResource PrimaryTextColor}"-->
+                <ComboBox Grid.Row="0"  Grid.Column="1"
                         x:Name="cbxCustomer"
-                        Width="210"
-                        Margin="0,2"
+                          VerticalAlignment="Center"
+                        Margin="0"
                         Padding="4,2"
                         BorderBrush="#ccc"
                         BorderThickness="1"
@@ -52,147 +57,142 @@
                         IsEditable="True"
                         ItemsSource="{Binding Customers}"
                         SelectedItem="{Binding SelectedCustomer}" />
-                </StackPanel>
-                <StackPanel Margin="5,0" Orientation="Horizontal">
                     <!--  📅 Sana oralig‘i  -->
-                    <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
-                        <TextBlock
-                            Width="30"
-                            Margin="3,0,0,3"
+                <TextBlock Grid.Row="1"  Grid.Column="0"
+                            Margin="05,0"
                             VerticalAlignment="Center"
                             FontSize="13"
-                            Foreground="{DynamicResource PrimaryTextColor}"
-                            Text="Davr" />
-                        <controls:UserCalendar
+                            Text="Xisobot davri" />
+                <Grid Grid.Row="1"  Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <controls:UserCalendar Grid.Column="0"
                             x:Name="beginDate"
                             Width="110"
                             Margin="0"
-                            HorizontalAlignment="Left"
                             VerticalAlignment="Center"
                             utils:EnterKeyTab.IsEnabled="True"
                             FontSize="14"
                             LostFocus="beginDate_LostFocus"
                             SelectedDate="{Binding BeginDate, Mode=TwoWay}" />
-
-                    </StackPanel>
-
-                    <StackPanel Margin="0" Orientation="Horizontal">
-                        <TextBlock
+                    <TextBlock Grid.Column="1"
                             Width="25"
-                            Margin="0,0,0,3"
+                            Margin="2,0"
                             VerticalAlignment="Center"
                             FontSize="13"
-                            Foreground="{DynamicResource PrimaryTextColor}"
                             Text="dan" />
-                        <controls:UserCalendar
+                    <controls:UserCalendar Grid.Column="2"
                             x:Name="endDate"
                             Width="110"
                             Margin="0"
-                            HorizontalAlignment="Left"
                             VerticalAlignment="Center"
                             utils:EnterKeyTab.IsEnabled="True"
                             FontSize="14"
                             LostFocus="endDate_LostFocus"
                             SelectedDate="{Binding EndDate, Mode=TwoWay}" />
-                        <TextBlock
+                    <TextBlock Grid.Column="3"
                             Width="35"
-                            Margin="0,0,0,3"
+                            Margin="0"
                             VerticalAlignment="Center"
                             FontSize="13"
-                            Foreground="{DynamicResource PrimaryTextColor}"
                             Text="gacha" />
+                </Grid>
 
-                    </StackPanel>
-                </StackPanel>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Margin="2,15">
-                <!--  🧩 Mahsulot turi  -->
-                <StackPanel Margin="5,0" Orientation="Horizontal">
-                    <TextBlock
-                        Width="80"
-                        Margin="3,0,0,3"
+            </Grid>
+            <Grid Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <!--  🧩 Mahs8ulot turi  -->
+                <TextBlock Grid.Row="0"  Grid.Column="0"
+                        Margin="15,0,3,0"
                         VerticalAlignment="Center"
                         FontSize="13"
-                        Foreground="{DynamicResource PrimaryTextColor}"
                         Text="Mahsulot turi" />
-                    <ComboBox
+                <ComboBox Grid.Row="0"  Grid.Column="1"
                         x:Name="cbxCategory"
-                        Width="150"
-                        Margin="0,2,0,4"
-                        Padding="4,2"
-                        BorderBrush="#ccc"
-                        BorderThickness="1"
+                        VerticalAlignment="Center"
+                        Width="180"
+                        Margin="0"
                         DisplayMemberPath="Name"
                         FontSize="14"
                         IsEditable="True"
                         ItemsSource="{Binding Categories}"
                         SelectedItem="{Binding SelectedCategory}" />
-                </StackPanel>
-
-                <!--  🏷 Mahsulot nomi  -->
-                <StackPanel Margin="5,0" Orientation="Horizontal">
-                    <TextBlock
-                        MinWidth="80"
-                        Margin="3,0,0,3"
+                <TextBlock Grid.Row="1"  Grid.Column="0"
+                           TextAlignment="Right"
+                        Margin="3,0"
                         VerticalAlignment="Center"
-                        FontSize="14"
-                        Foreground="{DynamicResource PrimaryTextColor}"
+                        FontSize="13"
                         Text="Nomi" />
-                    <ComboBox
+                <ComboBox Grid.Row="1"  Grid.Column="1"
                         x:Name="cbxProductName"
-                        Width="150"
-                        Margin="0,2"
-                        Padding="4,2"
-                        BorderBrush="#ccc"
-                        BorderThickness="1"
+                        VerticalAlignment="Center"
+                        Width="180"
+                        Margin="2,0"
                         DisplayMemberPath="Name"
                         FontSize="14"
                         IsEditable="True"
                         ItemsSource="{Binding Products}"
                         SelectedItem="{Binding SelectedProduct}" />
-                </StackPanel>
-            </StackPanel>
-
+            </Grid>
             <!--  🔘 Tugmalar  -->
-            <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                <Button
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Button Grid.Row="0"
+                    VerticalAlignment="Center"
                     Margin="5"
                     Padding="10,3"
                     Command="{Binding PreviewCommand}"
                     Content="📄 Ko‘rish"
                     FontSize="13"
                     ToolTip="Chop etishdan oldin ma'lumotlarni ko‘rish (Print Preview)" />
-
-                <Button
-                    Margin="5,2,5,5"
+                <Button Grid.Row="1"
+                    VerticalAlignment="Center"
+                    Margin="5"
                     Padding="10,3"
                     Command="{Binding ClearFilterCommand}"
                     Content="🧹 Tozalash"
                     FontSize="13"
-                    Style="{DynamicResource ActionButton}"
                     ToolTip="Filterni tozalash yoki barcha ma'lumotlarni qayta ko‘rsatish" />
-            </StackPanel>
-
-            <StackPanel Grid.Column="3" VerticalAlignment="Center">
-                <Button
+            </Grid>
+            <Grid Grid.Column="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Button Grid.Row="0"
+                    VerticalAlignment="Center"
                     Margin="5"
                     Padding="10,3"
                     Command="{Binding PrintCommand}"
                     Content="🖨 Pechat"
                     FontSize="13"
-                    Style="{DynamicResource actionButton}"
                     ToolTip="Chiqarish (Printerga yuborish)" />
 
-                <Button
-                    Margin="5,2,5,5"
+                <Button Grid.Row="1"
+                    VerticalAlignment="Center"
+                    Margin="5"
                     Padding="10,3"
                     Command="{Binding ExportToExcelCommand}"
                     Content="📊 Excel"
                     FontSize="13"
                     ToolTip="Excel faylga eksport qilish" />
-            </StackPanel>
+                
+            </Grid>
         </Grid>
-
         <!--  📋 DataGrid  -->
         <DataGrid
             Grid.Row="1"
