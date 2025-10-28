@@ -4,6 +4,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:vm="clr-namespace:VoltStream.WPF.Settings.ViewModels"
       xmlns:conv="clr-namespace:VoltStream.WPF.Commons.Converters"
+      xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
       Title="Sozlamalar">
 
     <Grid>
@@ -135,6 +136,7 @@
                                 <ColumnDefinition Width="100" />
                                 <ColumnDefinition Width="100" />
                                 <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="100" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
@@ -153,38 +155,44 @@
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
 
-                            <TextBlock Text="O'zgaruvchan"
+                            <TextBlock Text="Naqd"
                                        FontWeight="SemiBold"
                                        Grid.Column="2"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
 
-                            <TextBlock Text="Nomi"
+                            <TextBlock Text="O'zgaruvchan"
                                        FontWeight="SemiBold"
                                        Grid.Column="3"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
 
-                            <TextBlock Text="Kodi"
-                                       Grid.Column="4"
+                            <TextBlock Text="Nomi"
                                        FontWeight="SemiBold"
+                                       Grid.Column="4"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
 
-                            <TextBlock Text="Belgisi"
+                            <TextBlock Text="Kodi"
                                        Grid.Column="5"
                                        FontWeight="SemiBold"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
 
-                            <TextBlock Text="Kurs"
+                            <TextBlock Text="Belgisi"
                                        Grid.Column="6"
                                        FontWeight="SemiBold"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
 
-                            <TextBlock Text="Amallar"
+                            <TextBlock Text="Kurs"
                                        Grid.Column="7"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+
+                            <TextBlock Text="Amallar"
+                                       Grid.Column="8"
                                        FontWeight="SemiBold"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
@@ -195,7 +203,9 @@
                     <ScrollViewer Grid.Row="1"
                                   VerticalScrollBarVisibility="Auto"
                                   Margin="0,5">
-                        <ItemsControl ItemsSource="{Binding Currencies}">
+                        <ItemsControl ItemsSource="{Binding Currencies}"
+                                      AllowDrop="True"
+                                      Drop="ItemsControl_Drop">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border BorderBrush="LightGray"
@@ -210,13 +220,24 @@
                                                 <ColumnDefinition Width="100" />
                                                 <ColumnDefinition Width="100" />
                                                 <ColumnDefinition Width="100" />
+                                                <ColumnDefinition Width="100" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-
+                                            <fa:IconImage Icon="GripVertical"
+                                                          Width="16"
+                                                          Height="16"
+                                                          Cursor="SizeAll"
+                                                          VerticalAlignment="Center"
+                                                          HorizontalAlignment="Left"
+                                                          Margin="4"
+                                                          MouseDown="DragHandle_MouseDown"
+                                                          MouseMove="DragHandle_MouseMove"
+                                                          MouseUp="DragHandle_MouseUp"
+                                                          ToolTip="Joyini o‘zgartirish" />
                                             <RadioButton GroupName="DefaultCurrency"
                                                          IsChecked="{Binding IsDefault}"
                                                          IsEnabled="{Binding IsActive}"
@@ -239,8 +260,14 @@
                                                       VerticalAlignment="Center"
                                                       Command="{Binding GetMiddlemanCommand}" />
 
-                                            <CheckBox IsChecked="{Binding IsEditable}"
+                                            <CheckBox IsChecked="{Binding IsCash}"
                                                       Grid.Column="2"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"
+                                                      Command="{Binding GetMiddlemanCommand}" />
+
+                                            <CheckBox IsChecked="{Binding IsEditable}"
+                                                      Grid.Column="3"
                                                       HorizontalAlignment="Center"
                                                       VerticalAlignment="Center"
                                                       Command="{Binding GetMiddlemanCommand}" />
@@ -248,25 +275,25 @@
                                             <TextBox Text="{Binding Name}"
                                                      BorderThickness="0"
                                                      HorizontalAlignment="Center"
-                                                     Grid.Column="3" />
+                                                     Grid.Column="4" />
 
                                             <TextBox Text="{Binding Code}"
                                                      BorderThickness="0"
                                                      HorizontalAlignment="Center"
-                                                     Grid.Column="4" />
+                                                     Grid.Column="5" />
 
                                             <TextBox Text="{Binding Symbol}"
                                                      BorderThickness="0"
                                                      HorizontalAlignment="Center"
-                                                     Grid.Column="5" />
+                                                     Grid.Column="6" />
 
                                             <TextBox Text="{Binding ExchangeRate}"
                                                      BorderThickness="0"
                                                      HorizontalAlignment="Center"
-                                                     Grid.Column="6" />
+                                                     Grid.Column="7" />
 
                                             <Button Content="O‘chirish"
-                                                    Grid.Column="7"
+                                                    Grid.Column="8"
                                                     HorizontalAlignment="Center"
                                                     BorderThickness="0"
                                                     Command="{Binding DataContext.RemoveCurrencyCommand, ElementName=RootPage}"

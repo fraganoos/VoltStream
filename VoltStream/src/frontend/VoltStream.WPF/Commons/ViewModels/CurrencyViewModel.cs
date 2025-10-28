@@ -12,6 +12,8 @@ public partial class CurrencyViewModel : ViewModelBase
     [ObservableProperty] private bool isDefault;
     [ObservableProperty] private bool isActive;
     [ObservableProperty] private bool isEditable;
+    [ObservableProperty] private bool isCash;
+    [ObservableProperty] private int position;
 
     public CurrencyViewModel? selected;
     public CurrencyViewModel Selected
@@ -28,6 +30,7 @@ public partial class CurrencyViewModel : ViewModelBase
                 ExchangeRate = value.ExchangeRate;
                 IsDefault = value.IsDefault;
                 IsActive = value.IsActive;
+                Position = value.Position;
             }
         }
     }

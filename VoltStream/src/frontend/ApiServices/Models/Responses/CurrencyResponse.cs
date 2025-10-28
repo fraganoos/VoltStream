@@ -10,4 +10,6 @@ public class CurrencyResponse
     public bool IsDefault { get; set; }
     public bool IsActive { get; set; }
     public bool IsEditable { get; set; }
+    public int Position { get; set; }
+    public bool IsCash { get; set; }
 }
