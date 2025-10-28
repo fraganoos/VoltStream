@@ -179,7 +179,7 @@
                              utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                              utils:NumericTextBox.IsNumeric="True"
                              Text="{Binding Payment.ExpenseAmount, Converter={StaticResource StringToNullableDecimalConverter}}"/>
-                    <!--Visibility="{Binding ElementName=Kirim, Path=Text.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}}"-->
+                   
                 </Grid>
                 <Grid Grid.Column="1">
                     <Grid.RowDefinitions>
