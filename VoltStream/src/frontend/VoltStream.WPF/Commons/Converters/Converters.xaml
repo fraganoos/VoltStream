@@ -10,5 +10,5 @@
     <converter:StringToNullableDecimalConverter x:Key="StringToNullableDecimalConverter" />
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     <converter:EmptyToVisibleConverter x:Key="EmptyToVisibleConverter" />
-
+    <converter:BalanceToColorConverter x:Key="BalanceToColorConverter" />
 </ResourceDictionary>

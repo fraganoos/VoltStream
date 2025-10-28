@@ -8,12 +8,13 @@
       xmlns:local="clr-namespace:VoltStream.WPF.Debitors.Views"
       mc:Ignorable="d"
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="Haqdorlik va qarzdorlik oynasi">
+      Title="Haqdorlik va qarzdorlik oynasi" >
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="80" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="40" />
         </Grid.RowDefinitions>
 
         <!--  🔍 Filter panel  -->
@@ -53,7 +54,7 @@
                           DisplayMemberPath="Name"
                           FontSize="14"
                           IsEditable="True"
-                          ItemsSource="{Binding Customers}"
+                          ItemsSource="{Binding AvailableCustomers}"
                           SelectedItem="{Binding SelectedCustomer}" />
                 <!--  📅 Sana oralig‘i  -->
                 <TextBlock Grid.Row="1"  Grid.Column="0"
@@ -73,14 +74,14 @@
                               Width="50"
                               VerticalAlignment="Center"
                               Margin="0"
+                              Foreground="Black"
                               Padding="4,2"
                               BorderBrush="#ccc"
                               BorderThickness="1"
-                              DisplayMemberPath="Name"
                               FontSize="14"
-                              IsEditable="True"
-                              ItemsSource="{Binding }"
-                              SelectedItem="{Binding sign}" />
+                              IsEditable="False"
+                              ItemsSource="{Binding Signs}"
+                              SelectedItem="{Binding Sign}" />
                     <TextBox Grid.Column="1"
                              Width="120"
                              Margin="0"
@@ -146,40 +147,45 @@
             </Grid>
         </Grid>
         <!--  📋 DataGrid  -->
-        <DataGrid
-            Grid.Row="1"
-            Margin="10,5,10,-5"
-            AlternatingRowBackground="#F5F5F5"
-            AutoGenerateColumns="False"
-            CanUserAddRows="False"
-            CanUserDeleteRows="False"
-            FontSize="14"
-            HeadersVisibility="Column"
-            IsReadOnly="True"
-            ItemsSource="{Binding FilteredSaleItems, Mode=TwoWay}"
-            RowHeaderWidth="0"
-            SelectionMode="Single">
+        <DataGrid Grid.Row="1"
+                  Margin="10,5,10,-5"
+                  AlternatingRowBackground="#F5F5F5"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  FontSize="14"
+                  HeadersVisibility="Column"
+                  IsReadOnly="True"
+                  ItemsSource="{Binding FilteredDebitorCreditorItems}"
+                  RowHeaderWidth="0"
+                  SelectionMode="Single">
 
             <DataGrid.Columns>
                 <!--  🕓 Sana  -->
                 <DataGridTextColumn
-                    Width="1.5*"
+                    Width="3*"
                     Binding="{Binding Customer}"
                     Header="Mijoz">
-
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="TextAlignment" Value="Left" />
                             <Setter Property="Padding" Value="5,0" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
+
+                    <!-- 🔹 Header o‘rtada joylashsin -->
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
 
 
 
                 <DataGridTextColumn
                     Width="*"
-                    Binding="{Binding Price, StringFormat={}{0:N2}}"
+                    Binding="{Binding Debitor, StringFormat={}{0:N2}}"
                     Header="Debitor">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -202,7 +208,7 @@
 
                 <DataGridTextColumn
                     Width="*"
-                    Binding="{Binding TotalAmount, StringFormat={}{0:N2}}"
+                    Binding="{Binding Creditor, StringFormat={}{0:N2}}"
                     Header="Kreditor">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -225,5 +231,75 @@
 
             </DataGrid.Columns>
         </DataGrid>
+        <!--  Jami qatori  -->
+        <Grid Grid.Row="2" Margin="10,5,10,5">
+            <Grid.ColumnDefinitions>
+                <!-- Mijoz ustuni (bo'sh) -->
+                <ColumnDefinition Width="*" />
+                <!-- Debitor jami -->
+                <ColumnDefinition Width="*" />
+                <!-- Kreditor jami -->
+                <ColumnDefinition Width="*" />
+                <!-- Umumiy balans -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Debitor jami -->
+            <Border Grid.Column="0"
+                    Background="#F9F9F9"
+                    BorderBrush="#DDD"
+                    BorderThickness="1,1,0,1"
+                    Padding="5">
+                <StackPanel Orientation="Horizontal"  HorizontalAlignment="Right">
+                    <TextBlock Text="Jami debitor:"
+                               FontWeight="Bold"
+                               FontSize="14"
+                               Margin="0,0,10,0" />
+                    <TextBlock Text="{Binding FinalDebitor, StringFormat=N2}"
+                               FontWeight="Bold"
+                               FontSize="14"
+
+                               Foreground="#006400" />
+                    <!-- Yashil -->
+                </StackPanel>
+            </Border>
+
+            <!-- Kreditor jami -->
+            <Border Grid.Column="1"
+                    Background="#F9F9F9"
+                    BorderBrush="#DDD"
+                    BorderThickness="1,1,0,1"
+                    Padding="5">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="Jami kreditor:"
+                               FontWeight="Bold"
+                               FontSize="14"
+                               Margin="0,0,10,0" />
+                    <TextBlock Text="{Binding FinalKreditor, StringFormat=N2}"
+                               FontWeight="Bold"
+                               FontSize="14"
+                               Foreground="#DC143C" />
+                    <!-- Qizil -->
+                </StackPanel>
+            </Border>
+
+            <!-- Umumiy balans -->
+            <Border Grid.Column="2"
+                    Background="#E6F3FF"
+                    BorderBrush="#007ACC"
+                    BorderThickness="1"
+                    Padding="5">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="Umumiy balans:"
+                               FontWeight="Bold"
+                               FontSize="14"
+                               Margin="0,0,10,0"
+                               Foreground="#007ACC" />
+                    <TextBlock Text="{Binding FinalAmount, StringFormat=N2}"
+                               FontWeight="Bold"
+                               FontSize="14"
+                               Foreground="{Binding FinalAmount, Converter={StaticResource BalanceToColorConverter}}" />
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Page>

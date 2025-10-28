@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <Folder Include="Customer\ViewModels\" />
-    <Folder Include="Debitors\Models\" />
     <Folder Include="LoginPages\ViewModels\" />
   </ItemGroup>
 
