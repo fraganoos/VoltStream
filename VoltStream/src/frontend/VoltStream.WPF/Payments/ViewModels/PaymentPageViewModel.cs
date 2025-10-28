@@ -45,8 +45,6 @@ partial class PaymentPageViewModel : ViewModelBase
     [ObservableProperty] private CustomerViewModel? customer;
     private long customerId;
 
-    [ObservableProperty] private CurrencyViewModel? currency;
-
     private async void Payment_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(Payment.PaidAt))
@@ -61,16 +59,7 @@ partial class PaymentPageViewModel : ViewModelBase
     [RelayCommand]
     private async Task Submit()
     {
-        var request = new PaymentRequest
-        {
-            CustomerId = Customer!.Id,
-            CurrencyId = Currency!.Id,
-            PaidAt = Payment.PaidAt,
-            Amount = Payment.Amount,
-            ExchangeRate = Payment.ExchangeRate,
-            NetAmount = Payment.NetAmount,
-            Description = Payment.Description,
-        };
+        var request = mapper.Map<PaymentRequest>(Payment);
 
         var response = await paymentApi.CreateAsync(request).Handle();
 
@@ -81,7 +70,6 @@ partial class PaymentPageViewModel : ViewModelBase
             Payment = new();
             Payment.PropertyChanged += Payment_PropertyChanged;
             Customer = new();
-            Currency = new();
             Payment.PaidAt = date;
             await LoadDataAsync();
         }
@@ -89,7 +77,6 @@ partial class PaymentPageViewModel : ViewModelBase
     }
 
     #endregion Commands
-
 
     #region Load data
 
@@ -138,11 +125,11 @@ partial class PaymentPageViewModel : ViewModelBase
     }
 
     // tanlangan customer ma'lumotlarini yuklash
-    partial void OnCustomerChanged(CustomerViewModel value)
+    partial void OnCustomerChanged(CustomerViewModel? value)
     {
-        if (customerId == value.Id)
+        if (customerId == value?.Id)
             return;
-        customerId = value.Id;
+        customerId = value!.Id;
         _ = LoadCustomerAsync();
     }
 

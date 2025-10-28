@@ -17,32 +17,12 @@ public class PaymentMappingRegister : IRegister
 
 
         // --- Payment ---
-        // --- Payment ---
         config.NewConfig<PaymentResponse, PaymentViewModel>()
-            .Map(dest => dest.Id, src => src.Id)
-            .Map(dest => dest.PaidAt, src => src.PaidAt.LocalDateTime)
-            // faqat Amount uchun to‘g‘rilash:
-            .Map(dest => dest.Amount, src =>
-                src.Amount != default(decimal) ? src.Amount : src.NetAmount)
-            .Map(dest => dest.ExchangeRate, src => src.ExchangeRate)
-            .Map(dest => dest.NetAmount, src => src.NetAmount)
-            .Map(dest => dest.Description, src => src.Description)
-            .Map(dest => dest.Currency, src => src.Currency)
-            .Map(dest => dest.CurrencyId, src => src.Currency.Id)
-            .Map(dest => dest.Customer, src => src.Customer)
-            .Map(dest => dest.CustomerId, src => src.Customer.Id)
-            .IgnoreNonMapped(true); // UI uchun faqat kerakli propertylar ishlaydi
+            .Map(dest => dest.PaidAt, src => src.PaidAt.LocalDateTime);
 
 
-        // --- PaymentViewModel -> PaymentRequest (yuborish uchun) ---
         config.NewConfig<PaymentViewModel, PaymentRequest>()
-            .Map(dest => dest.Id, src => src.Id)
-            .Map(dest => dest.PaidAt, src => src.PaidAt)
-            .Map(dest => dest.Amount, src => src.Amount)
-            .Map(dest => dest.ExchangeRate, src => src.ExchangeRate)
-            .Map(dest => dest.NetAmount, src => src.NetAmount)
-            .Map(dest => dest.Description, src => src.Description)
-            .Map(dest => dest.CurrencyId, src => src.CurrencyId)
-            .Map(dest => dest.CustomerId, src => src.CustomerId);
+            .Map(dest => dest.CurrencyId, src => src.Currency.Id)
+            .Map(dest => dest.CustomerId, src => src.Customer.Id);
     }
 }

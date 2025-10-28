@@ -10,4 +10,5 @@ public class CurrencyDto
     public bool IsDefault { get; set; }
     public bool IsActive { get; set; }
     public bool IsEditable { get; set; }
+    public bool IsCash { get; set; }
 }

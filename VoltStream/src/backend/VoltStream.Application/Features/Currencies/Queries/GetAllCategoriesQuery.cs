@@ -16,5 +16,6 @@ public class GetAllCurrenciesQueryHandler(
     public async Task<IReadOnlyCollection<CurrencyDto>> Handle(GetAllCurrenciesQuery request, CancellationToken cancellationToken)
         => mapper.Map<IReadOnlyCollection<CurrencyDto>>(await context.Currencies
             .Where(c => !c.IsDeleted)
+            .OrderBy(c => c.Position)
             .ToListAsync(cancellationToken));
 }

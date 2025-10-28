@@ -1,23 +1,23 @@
 ﻿namespace VoltStream.WPF.Commons.ViewModels;
 
-using ApiServices.Models.Responses;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using VoltStream.WPF.Commons.Messages;
 
 public partial class PaymentViewModel : ViewModelBase
 {
-    [ObservableProperty] private long id;
+    public long Id { get; set; }
+    public long CurrencyId { get; set; }
+    public long CustomerId { get; set; }
+
     [ObservableProperty] private DateTime paidAt = DateTime.Now; // to'langan sana
     [ObservableProperty] private decimal amount; // orginal kirim summa
     [ObservableProperty] private decimal exchangeRate; //dollar kurs yoki pul o'tkazish foizi
     [ObservableProperty] private decimal netAmount; // qarz summadan ochiraldigan summa
     [ObservableProperty] private decimal? discount; // chegirma
     [ObservableProperty] private string description = string.Empty;
-    [ObservableProperty] private long currencyId;
-    [ObservableProperty] private long customerId;
-    [ObservableProperty] private CurrencyResponse currency = default!;
-    [ObservableProperty] private CustomerResponse customer = default!;
+    [ObservableProperty] private CurrencyViewModel currency = default!;
+    [ObservableProperty] private CustomerViewModel customer = default!;
 
     // for UI
     [ObservableProperty] private decimal? incomeAmount;
@@ -30,15 +30,19 @@ public partial class PaymentViewModel : ViewModelBase
     [ObservableProperty] private bool isIncomeEnabled = true;
     [ObservableProperty] private bool isExpenseEnabled = true;
 
+    #region Property Changes
+
     partial void OnNetAmountChanged(decimal value)
     {
         Amount = value * ExchangeRate;
     }
+
     partial void OnExchangeRateChanged(decimal value)
     {
         ReCalculateIncome();
         ReCalculateExpense();
     }
+
     partial void OnIncomeAmountChanged(decimal? value)
     {
         ReCalculateIncome();
@@ -53,6 +57,7 @@ public partial class PaymentViewModel : ViewModelBase
             WeakReferenceMessenger.Default.Send(new FocusRequestMessage("Discription"));
         }
     }
+
     partial void OnExpenseAmountChanged(decimal? value)
     {
         ReCalculateExpense();
@@ -67,6 +72,14 @@ public partial class PaymentViewModel : ViewModelBase
         }
     }
 
+    partial void OnCurrencyChanged(CurrencyViewModel value)
+    {
+        ExchangeRate = value.ExchangeRate;
+    }
+
+    #endregion Property Changes
+
+    #region Private Helpers
 
     public void ReCalculateIncome()
     {
@@ -99,4 +112,6 @@ public partial class PaymentViewModel : ViewModelBase
             LastBalance = Balance;
         }
     }
+
+    #endregion Private Helpers
 }
