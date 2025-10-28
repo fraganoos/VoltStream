@@ -99,7 +99,7 @@
                                  GroupName="MenuGroup">
                         <StackPanel Orientation="Horizontal"
                                     HorizontalAlignment="Left">
-                            <fa:IconImage Icon="MoneyCheckDollar"
+                            <fa:IconImage Icon="MoneyBillWave"
                                           Style="{StaticResource menuButtonIcon}" />
                             <TextBlock Text="Oldi-berdi"
                                        Style="{StaticResource menuButtonText}" />
@@ -128,6 +128,19 @@
                             <fa:IconImage Icon="FileAlt"
                                           Style="{StaticResource menuButtonIcon}" />
                             <TextBlock Text="Sotuv tarixi"
+                                       Style="{StaticResource menuButtonText}" />
+                        </StackPanel>
+                    </RadioButton>
+
+                    <RadioButton Style="{DynamicResource menuButton}"
+                                 Tag="{DynamicResource color5}"
+                                 Command="{Binding ShowDebitorCreditorCommand}"
+                                 GroupName="MenuGroup">
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Left">
+                            <fa:IconImage Icon="BalanceScale"
+                                          Style="{StaticResource menuButtonIcon}" />
+                            <TextBlock Text="Debitor va Kreditor"
                                        Style="{StaticResource menuButtonText}" />
                         </StackPanel>
                     </RadioButton>
