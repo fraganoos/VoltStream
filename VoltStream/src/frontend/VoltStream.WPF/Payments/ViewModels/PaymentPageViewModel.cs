@@ -8,10 +8,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading.Tasks;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
 
@@ -59,7 +57,14 @@ partial class PaymentPageViewModel : ViewModelBase
     [RelayCommand]
     private async Task Submit()
     {
+        if (Customer is null)
+        {
+            Warning = "To'lov amalga oshirilayotgan shaxs tanlanishi shart";
+            return;
+        }
+
         var request = mapper.Map<PaymentRequest>(Payment);
+        request.CustomerId = Customer.Id;
 
         var response = await paymentApi.CreateAsync(request).Handle();
 
@@ -127,7 +132,7 @@ partial class PaymentPageViewModel : ViewModelBase
     // tanlangan customer ma'lumotlarini yuklash
     partial void OnCustomerChanged(CustomerViewModel? value)
     {
-        if (customerId == value?.Id)
+        if (customer is null || customerId == value?.Id)
             return;
         customerId = value!.Id;
         _ = LoadCustomerAsync();
