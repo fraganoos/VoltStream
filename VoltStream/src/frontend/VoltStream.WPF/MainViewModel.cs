@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
+using VoltStream.WPF.Debitors.Views;
 using VoltStream.WPF.Payments.Views;
 using VoltStream.WPF.Products.Views;
 using VoltStream.WPF.Sales.Views;
@@ -56,9 +57,17 @@ public partial class MainViewModel(IServiceProvider services) : ViewModelBase
     }
 
     [RelayCommand]
+    private void ShowDebitorCreditor()
+    {
+        CurrentChildView = services.GetRequiredService<DebitorCreditorPage>();
+        CurrentPageTitle = "Debitor va Kreditor";
+    }
+
+    [RelayCommand]
     private void ShowSettings()
     {
         CurrentChildView = services.GetRequiredService<SettingsPage>();
         CurrentPageTitle = "Sozlamalar";
     }
+
 }
