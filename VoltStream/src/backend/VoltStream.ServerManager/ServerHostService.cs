@@ -94,7 +94,7 @@ public class ServerHostService
 
     private async Task CheckHealthAsync(string scheme, int port)
     {
-        var url = $"{scheme}://localhost:{port}/scalar/v1";
+        var url = $"{scheme}://localhost:{port}/api/health";
         var sw = Stopwatch.StartNew();
 
         try
@@ -106,7 +106,7 @@ public class ServerHostService
                 TimeStamp: DateTime.UtcNow,
                 IpAddress: "127.0.0.1",
                 Method: "GET",
-                Path: "/scalar/v1",
+                Path: "/api/health",
                 UserAgent: "ServerMonitor",
                 StatusCode: (int)response.StatusCode,
                 IsSuccess: response.IsSuccessStatusCode,

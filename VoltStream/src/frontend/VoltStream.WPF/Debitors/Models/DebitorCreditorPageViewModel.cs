@@ -42,7 +42,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
     [ObservableProperty] private decimal finalKreditor;
     [ObservableProperty] private decimal finalAmount;
 
-    [ObservableProperty] private string? sign; 
+    [ObservableProperty] private string? sign;
     [ObservableProperty] private decimal amount;
 
     // Belgilar ro'yxati
