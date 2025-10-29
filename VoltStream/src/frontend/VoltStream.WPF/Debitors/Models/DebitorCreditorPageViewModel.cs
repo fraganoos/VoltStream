@@ -102,7 +102,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
 
         FinalDebitor = filtered.Sum(x => x.Debitor);
         FinalKreditor = filtered.Sum(x => x.Creditor);
-        FinalAmount = filtered.Sum(x => x.TotalBalance);
+        FinalAmount = filtered.Sum(x => x.TotalBalance)*(-1);
     }
     private async Task LoadDate()
     {
@@ -122,8 +122,8 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
                 return new DebitorCreditorItemViewModel
                 {
                     Customer = c.Name,
-                    Debitor = totalBalance > 0 ? totalBalance : 0,
-                    Creditor = totalBalance < 0 ? -totalBalance : 0,
+                    Debitor = totalBalance < 0 ? -totalBalance : 0,
+                    Creditor = totalBalance > 0 ? totalBalance : 0,
                     TotalBalance = totalBalance
                 };
             }).ToList();
@@ -134,7 +134,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
             // Yig'indilar
             FinalDebitor = items.Sum(x => x.Debitor);
             FinalKreditor = items.Sum(x => x.Creditor);
-            FinalAmount = items.Sum(x => x.TotalBalance); // + va - ning yig'indisi
+            FinalAmount = -items.Sum(x => x.TotalBalance); // + va - ning yig'indisi
         }
         else
         {
@@ -247,7 +247,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
             return;
         }
 
-        FinalAmount = FilteredDebitorCreditorItems.Sum(x => x.TotalBalance);
+        FinalAmount = -FilteredDebitorCreditorItems.Sum(x => x.TotalBalance);
 
         var fixedDoc = CreateFixedDocumentForPrint();
         var previewWindow = new Window
