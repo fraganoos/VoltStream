@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
+using VoltStream.WPF.Payments.PayDiscountWindow.Views; // Добавьте этот using в начало файла, если его нет
 
 partial class PaymentPageViewModel : ViewModelBase
 {
@@ -81,6 +82,12 @@ partial class PaymentPageViewModel : ViewModelBase
         else Error = response.Message ?? "Texnik xatolik!";
     }
 
+    [RelayCommand]
+    private void OpenDiscountsWindow()
+    {
+        var discountsWindow = new PayDiscountWindow(); // Исправлено создание экземпляра окна
+        discountsWindow.ShowDialog();
+    }
     #endregion Commands
 
     #region Load data
