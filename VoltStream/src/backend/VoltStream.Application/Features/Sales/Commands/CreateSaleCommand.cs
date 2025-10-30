@@ -99,7 +99,7 @@ public class CreateSaleCommandHandler(
                 throw new ConflictException($"Omborda faqat {residue.TotalLength} metr mahsulot bor");
 
             residue.RollCount -= item.RollCount;
-            residue.TotalLength -= item.TotalLength;
+            residue.TotalLength -= item.RollCount * item.LengthPerRoll;
 
             await HandleResidueAsync(item, warehouse, cancellationToken);
 
