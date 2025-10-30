@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
+using VoltStream.Domain.Enums;
 
 public record CreatePaymentCommand(
     DateTimeOffset PaidAt,
@@ -37,9 +38,23 @@ public class CreatePaymentCommandHandler(
                 .FirstOrDefaultAsync(c => c.Id == request.CurrencyId, cancellationToken)
                 ?? throw new NotFoundException(nameof(Currency), nameof(request.CurrencyId), request.CurrencyId);
 
-            var account = customer.Accounts
-                .FirstOrDefault(a => a.CurrencyId == request.CurrencyId)
-                ?? throw new ConflictException("Ushbu valyutada mijoz uchun hisob mavjud emas.");
+            var account = customer.Accounts.FirstOrDefault();
+
+            if (account is null)
+            {
+                var defaultCurrency = await context.Currencies.FirstOrDefaultAsync(c => c.IsDefault, cancellationToken: cancellationToken)
+                    ?? throw new NotFoundException("Birlamchi valyuta turi kiritilmagan");
+
+                account = new Account
+                {
+                    CustomerId = customer.Id,
+                    CurrencyId = defaultCurrency.Id,
+                };
+
+                context.Accounts.Add(account);
+                customer.Accounts.Add(account);
+            }
+
 
             var cash = currency.IsCash
                 ? await EnsureCashExists(currency.Id, cancellationToken)
@@ -102,7 +117,8 @@ public class CreatePaymentCommandHandler(
             Amount = request.Amount,
             CustomerId = customer.Id,
             Description = description + ". " + request.Description,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            OperationType = OperationType.Payment
         };
 
         return payment;

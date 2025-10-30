@@ -69,6 +69,7 @@ public partial class SalesPage : Page
 
 
         CurrencyType.SelectionChanged += CurrencyType_SelectionChanged;
+
     }
 
     private void CurrencyType_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -756,6 +757,7 @@ public partial class SalesPage : Page
         {
             CurrencyType.ItemsSource = response.Data;
             CurrencyType.SelectedValuePath = "Id";
+            CurrencyType.SelectedItem = response.Data.FirstOrDefault(c => c.IsDefault);
         }
     }
 

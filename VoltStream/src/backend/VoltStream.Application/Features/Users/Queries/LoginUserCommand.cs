@@ -5,7 +5,6 @@ using System.Security.Cryptography;
 using System.Text;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
-using VoltStream.Domain.Entities;
 
 public record LoginUserCommand(
     string Username,
@@ -17,10 +16,8 @@ public class LoginUserCommandHandler(IAppDbContext context)
     public async Task<bool> Handle(LoginUserCommand request, CancellationToken cancellationToken)
     {
         var user = await context.Users
-            .FirstOrDefaultAsync(u => u.Username == request.Username, cancellationToken);
-
-        if (user is null)
-            throw new NotFoundException(nameof(User), request.Username, request.Username);
+            .FirstOrDefaultAsync(u => u.Username == request.Username, cancellationToken)
+            ?? throw new NotFoundException("Login yoki parol xato!");
 
         // Hashni qayta hisoblash
         using var hmac = new HMACSHA512(user.PasswordSalt);
