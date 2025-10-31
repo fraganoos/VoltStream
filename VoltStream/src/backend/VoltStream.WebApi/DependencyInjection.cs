@@ -57,8 +57,6 @@ public static class DependencyInjection
             .AllowAnyHeader());
 
         app.UseAuthorization();
-
-        if (app.Environment.IsDevelopment())
-            app.ApplyMigrations();
+        app.ApplyMigrations();
     }
 }
