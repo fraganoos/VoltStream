@@ -39,6 +39,13 @@ public partial class SuppliesPage : Page
 
         cbxCategory.PreviewLostKeyboardFocus += CbxCategory_PreviewLostKeyboardFocus;
         cbxProduct.PreviewLostKeyboardFocus += CbxProduct_PreviewLostKeyboardFocus;
+        _ = LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _allCategories = await LoadCategoriesAsync();
+        cbxCategory.ItemsSource = _allCategories;
     }
 
     private void CbxProduct_LostFocus(object sender, RoutedEventArgs e)
@@ -48,7 +55,7 @@ public partial class SuppliesPage : Page
                     string.IsNullOrWhiteSpace(cbxCategory.Text) &&
                     cbxProduct.SelectedItem is not null)
         {
-            var categorytId = (cbxProduct.SelectedItem as ProductViewModel)!.CategoryId;
+            var categorytId = (cbxProduct.SelectedItem as ProductResponse)!.CategoryId;
             cbxCategory.SelectedItem = _allCategories.FirstOrDefault(a => a.Id == categorytId);
         }
     }
@@ -266,6 +273,7 @@ public partial class SuppliesPage : Page
                 tbxDiscountPercent.Clear();
 
                 await LoadSuppliesAsync();
+
             }
             else
             {
@@ -281,7 +289,7 @@ public partial class SuppliesPage : Page
         finally
         {
             addSupplyBtn.IsEnabled = true;
-            supplyDate.Focus();
+            cbxCategory.Focus();
         }
     }
 

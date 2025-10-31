@@ -282,6 +282,7 @@
                                 Margin="50,2,5,2"
                                 Content=" Discount "
                                 FontSize="12"
+                                Command="{Binding OpenDiscountsWindowCommand}"
                                 FontWeight="Bold" />
                     </Grid>
                 </Grid>

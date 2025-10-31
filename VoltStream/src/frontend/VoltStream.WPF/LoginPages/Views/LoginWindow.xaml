@@ -16,16 +16,10 @@
         Background="Transparent"
         AllowsTransparency="True">
 
-    <Window.Visibility>
-        <Binding Path="IsViewVisible" Mode="TwoWay" Converter="{StaticResource BooleanToVisibilityConverter}"/>
-    </Window.Visibility>
-
     <Border CornerRadius="12">
         <Border.Background>
             <ImageBrush ImageSource="/Commons/Source/Images/oramkabel.png"
-           Stretch="Uniform"/>
-
-
+                        Stretch="Uniform" />
         </Border.Background>
 
         <Border CornerRadius="10"                    

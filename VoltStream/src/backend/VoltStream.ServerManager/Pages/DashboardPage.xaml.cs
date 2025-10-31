@@ -62,13 +62,22 @@ public partial class DashboardPage : Page
         };
     }
 
+    private const int MaxLogCount = 500;
+
     private void AddLogToList(RequestLog log)
     {
-        LogsListBox.Items.Insert(0,
-            $"{(log.IsSuccess ? "⚡" : "❌")} {log.TimeStamp:HH:mm:ss} | " +
-            $"{log.Method} {log.Path} | {log.StatusCode} | " +
-            $"{log.ElapsedMs}ms");
+        if (log.Path == "/api/health")
+            return;
+
+        var logText = $"{(log.IsSuccess ? "⚡" : "❌")} {log.TimeStamp:HH:mm:ss} | " +
+                      $"{log.Method} {log.Path} | {log.StatusCode} | {log.ElapsedMs}ms";
+
+        if (LogsListBox.Items.Count >= MaxLogCount)
+            LogsListBox.Items.RemoveAt(LogsListBox.Items.Count - 1);
+
+        LogsListBox.Items.Insert(0, logText);
     }
+
 
     private async void StartButton_Click(object sender, RoutedEventArgs e)
         => await serverHost.StartAsync();

@@ -19,6 +19,5 @@ public class GetAllProductsByCategoryIdQueryHandler(
 {
     public async Task<IReadOnlyCollection<Product>> Handle(GetAllProductsByCategoryIdQuery request, CancellationToken cancellationToken)
         => mapper.Map<IReadOnlyCollection<Product>>
-        (await context.Products.Where(a =>
-        a.CategoryId == request.CategoryId).ToListAsync(cancellationToken));
+        (await context.Products.Where(a => a.CategoryId == request.CategoryId).ToListAsync(cancellationToken));
 }

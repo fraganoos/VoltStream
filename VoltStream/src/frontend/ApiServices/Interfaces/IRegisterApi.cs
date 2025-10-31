@@ -5,8 +5,8 @@ using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Refit;
 
-public interface ILoginApi
+public interface IRegisterApi
 {
-    [Post("/user/login")]
-    Task<Response<UserResponse>> LoginAsync([Body] LoginRequest request);
+    [Post("/user/register")]
+    Task<Response<UserResponse>> RegisterAsync(RegisterRequest request);
 }
