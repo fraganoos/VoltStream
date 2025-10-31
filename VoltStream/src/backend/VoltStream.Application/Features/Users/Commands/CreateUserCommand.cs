@@ -25,8 +25,6 @@ public class CreateUserCommandHandler(
         if (exitUser)
             throw new AlreadyExistException(nameof(User), nameof(request.Username), request.Username);
 
-
-        // Parolni hash qilish
         using var hmac = new HMACSHA512();
         var salt = hmac.Key;
         var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(request.Password));
