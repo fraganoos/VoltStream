@@ -11,7 +11,6 @@ public partial class LoginViewModel(ILoginApi loginApi) : ViewModelBase
 {
     [ObservableProperty] private string username = string.Empty;
     [ObservableProperty] private string password = string.Empty;
-    [ObservableProperty] private bool isViewVisible = true;
 
     public event Action? LoginSucceeded;
 
@@ -19,6 +18,7 @@ public partial class LoginViewModel(ILoginApi loginApi) : ViewModelBase
     private async Task Login()
     {
         LoginRequest credentials = new() { Username = Username, Password = Password };
+
         var res = await loginApi.LoginAsync(credentials)
             .Handle(loading => IsLoading = loading);
 

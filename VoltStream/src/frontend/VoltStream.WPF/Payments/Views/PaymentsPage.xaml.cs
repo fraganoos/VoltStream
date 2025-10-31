@@ -55,8 +55,8 @@ public partial class PaymentsPage : Page
                 var response = await vm.customersApi.CreateAsync(newCustomer).Handle();
                 if (response.IsSuccess)
                 {
-                    CustomerName.Text = newCustomer.Name;
                     await vm.LoadCustomersAsync();
+                    CustomerName.SelectedItem = vm.AvailableCustomers.FirstOrDefault(c => c.Id == response.Data);
                 }
                 else
                 {

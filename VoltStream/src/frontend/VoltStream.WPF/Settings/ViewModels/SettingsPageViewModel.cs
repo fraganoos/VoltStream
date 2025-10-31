@@ -7,9 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
 

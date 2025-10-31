@@ -5,10 +5,11 @@ using VoltStream.WPF.LoginPages.Models;
 
 public partial class LoginWindow : Window
 {
-    public LoginWindow()
+    public LoginWindow(LoginViewModel vm)
     {
         InitializeComponent();
         txtUser.Focus();
+        DataContext = vm;
     }
 
     private void BtnMinimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
