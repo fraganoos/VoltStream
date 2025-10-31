@@ -1,4 +1,5 @@
-﻿namespace VoltStream.Application.Features.Users.Queries;
+﻿namespace VoltStream.Application.Features.Users.Commands;
+
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -19,15 +20,12 @@ public class LoginUserCommandHandler(IAppDbContext context)
             .FirstOrDefaultAsync(u => u.Username == request.Username, cancellationToken)
             ?? throw new NotFoundException("Login yoki parol xato!");
 
-        // Hashni qayta hisoblash
         using var hmac = new HMACSHA512(user.PasswordSalt);
         var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(request.Password));
 
-        // Solishtirish
         if (!computedHash.SequenceEqual(user.PasswordHash))
             throw new UnauthorizedAccessException("Login yoki parol xato!");
 
         return true;
     }
 }
-
