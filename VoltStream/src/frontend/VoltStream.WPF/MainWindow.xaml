@@ -146,6 +146,19 @@
                     </RadioButton>
 
                     <RadioButton Style="{DynamicResource menuButton}"
+                                 Tag="{DynamicResource color10}"
+                                 Command="{Binding ShowDebitorCreditorCommand}"
+                                 GroupName="MenuGroup">
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Left">
+                            <fa:IconImage Icon="ArrowsRotate"
+                                          Style="{StaticResource menuButtonIcon}" />
+                            <TextBlock Text="Oborotka"
+                                       Style="{StaticResource menuButtonText}" />
+                        </StackPanel>
+                    </RadioButton>
+
+                    <RadioButton Style="{DynamicResource menuButton}"
                                  Tag="{DynamicResource color9}"
                                  Command="{Binding ShowSettingsCommand}"
                                  GroupName="MenuGroup">
@@ -157,6 +170,7 @@
                                        Style="{StaticResource menuButtonText}" />
                         </StackPanel>
                     </RadioButton>
+
                 </StackPanel>
 
                 <Grid Grid.Row="1"
