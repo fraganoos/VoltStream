@@ -41,6 +41,8 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
     [ObservableProperty] private decimal finalDebitor;
     [ObservableProperty] private decimal finalKreditor;
     [ObservableProperty] private decimal finalAmount;
+    [ObservableProperty] private decimal finalDiscount;
+
 
     [ObservableProperty] private string? sign;
     [ObservableProperty] private decimal amount;
@@ -73,36 +75,41 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
 
         var filtered = DebitorCreditorItems.ToList();
 
-        // 1. Mijoz bo'yicha filtr
+        // 1. Mijoz bo‘yicha filtr
         if (SelectedCustomer != null)
         {
             filtered = filtered.Where(x => x.Customer == SelectedCustomer.Name).ToList();
         }
 
-        // 2. Belgilar bo'yicha filtr — faqat to'ldirilgan ustunni hisobga ol
+        // 2. Belgilar bo‘yicha filtr — faqat to‘ldirilgan ustunni hisobga ol
         if (!string.IsNullOrEmpty(Sign) && Amount > 0)
         {
             filtered = Sign switch
             {
                 ">" => filtered.Where(x => (x.Debitor > 0 && x.Debitor > Amount) ||
-                                           (x.Creditor > 0 && x.Creditor > Amount)).ToList(),
+                                            (x.Creditor > 0 && x.Creditor > Amount)).ToList(),
                 ">=" => filtered.Where(x => (x.Debitor > 0 && x.Debitor >= Amount) ||
-                                           (x.Creditor > 0 && x.Creditor >= Amount)).ToList(),
+                                            (x.Creditor > 0 && x.Creditor >= Amount)).ToList(),
                 "=" => filtered.Where(x => x.Debitor == Amount || x.Creditor == Amount).ToList(),
                 "<" => filtered.Where(x => (x.Debitor > 0 && x.Debitor < Amount) ||
-                                           (x.Creditor > 0 && x.Creditor < Amount)).ToList(),
+                                            (x.Creditor > 0 && x.Creditor < Amount)).ToList(),
                 "<=" => filtered.Where(x => (x.Debitor > 0 && x.Debitor <= Amount) ||
-                                           (x.Creditor > 0 && x.Creditor <= Amount)).ToList(),
+                                            (x.Creditor > 0 && x.Creditor <= Amount)).ToList(),
                 "<>" => filtered.Where(x => x.Debitor != Amount && x.Creditor != Amount).ToList(),
                 _ => filtered
             };
         }
 
+        // 🔹 Filtrlangan ro‘yxatni yangilaymiz
         FilteredDebitorCreditorItems = new ObservableCollection<DebitorCreditorItemViewModel>(filtered);
 
+        // 🔹 Yakuniy qiymatlar
         FinalDebitor = filtered.Sum(x => x.Debitor);
         FinalKreditor = filtered.Sum(x => x.Creditor);
-        FinalAmount = filtered.Sum(x => x.TotalBalance);
+        FinalDiscount = filtered.Sum(x => x.Discount);
+
+        // 🔹 Umumiy balans formulasi
+        FinalAmount = FinalDebitor - FinalKreditor - FinalDiscount;
     }
     private async Task LoadDate()
     {
@@ -118,12 +125,17 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
 
             var items = response.Data.Select(c =>
             {
+                var discount = c.Accounts.First().Discount;
                 var totalBalance = c.Accounts.Sum(a => a.Balance);
+
                 return new DebitorCreditorItemViewModel
                 {
                     Customer = c.Name,
-                    Debitor = totalBalance > 0 ? totalBalance : 0,
-                    Creditor = totalBalance < 0 ? -totalBalance : 0,
+                    Phone = c.Phone,
+                    Address = c.Address,
+                    Discount = discount,
+                    Debitor = totalBalance < 0 ? -totalBalance : 0,
+                    Creditor = totalBalance > 0 ? totalBalance : 0,
                     TotalBalance = totalBalance
                 };
             }).ToList();
@@ -131,10 +143,13 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
             DebitorCreditorItems = new ObservableCollection<DebitorCreditorItemViewModel>(items);
             FilteredDebitorCreditorItems = new ObservableCollection<DebitorCreditorItemViewModel>(items);
 
-            // Yig'indilar
+            // 🔹 Yakuniy yig‘indilar
             FinalDebitor = items.Sum(x => x.Debitor);
             FinalKreditor = items.Sum(x => x.Creditor);
-            FinalAmount = items.Sum(x => x.TotalBalance); // + va - ning yig'indisi
+            FinalDiscount = items.Sum(x => x.Discount);
+
+            // 🔹 Umumiy balans formulasi
+            FinalAmount = FinalDebitor - FinalKreditor - FinalDiscount;
         }
         else
         {
@@ -170,25 +185,28 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
 
             if (dialog.ShowDialog() != true) return;
 
+            // hisob-kitoblarni shu yerda aniqlaymiz (Final* maydonlariga emas, lokal jamlarini ishlatamiz)
+            var sumDiscount = FilteredDebitorCreditorItems.Sum(x => x.Discount);
+            var sumDebitor = FilteredDebitorCreditorItems.Sum(x => x.Debitor);
+            var sumCreditor = FilteredDebitorCreditorItems.Sum(x => x.Creditor);
+            var umumiyBalans = sumDebitor - sumDiscount - sumCreditor;
+
             using (var workbook = new ClosedXML.Excel.XLWorkbook())
             {
-                var worksheet = workbook.Worksheets.Add("DebitorKreditor");
+                var ws = workbook.Worksheets.Add("DebitorKreditor");
 
-                // Sarlavha
-                worksheet.Cell(1, 1).Value = "DEBITOR VA KREDITORLAR HISOBOTI";
-                worksheet.Range("A1:D1").Merge();
-                worksheet.Cell(1, 1).Style.Font.Bold = true;
-                worksheet.Cell(1, 1).Style.Font.FontSize = 16;
-                worksheet.Cell(1, 1).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
-                worksheet.Row(1).Height = 30;
+                ws.Cell(1, 1).Value = "DEBITOR VA KREDITORLAR HISOBOTI";
+                ws.Range("A1:F1").Merge();
+                ws.Cell(1, 1).Style.Font.Bold = true;
+                ws.Cell(1, 1).Style.Font.FontSize = 16;
+                ws.Cell(1, 1).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
 
-                // Ustun nomlari
-                worksheet.Cell(3, 1).Value = "Mijoz";
-                worksheet.Cell(3, 2).Value = "Debitor";
-                worksheet.Cell(3, 3).Value = "Kreditor";
-                worksheet.Cell(3, 4).Value = "Umumiy balans";
+                // Header (Umumiy balans yo‘q)
+                string[] headers = new[] { "Mijoz", "Telefon", "Manzil", "Bonus", "Debitor", "Kreditor" };
+                for (int i = 0; i < headers.Length; i++)
+                    ws.Cell(3, i + 1).Value = headers[i];
 
-                var headerRange = worksheet.Range("A3:D3");
+                var headerRange = ws.Range("A3:F3");
                 headerRange.Style.Font.Bold = true;
                 headerRange.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
                 headerRange.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
@@ -196,38 +214,46 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
                 int row = 4;
                 foreach (var item in FilteredDebitorCreditorItems)
                 {
-                    worksheet.Cell(row, 1).Value = item.Customer;
-                    worksheet.Cell(row, 2).Value = item.Debitor;
-                    worksheet.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
-                    worksheet.Cell(row, 3).Value = item.Creditor;
-                    worksheet.Cell(row, 3).Style.NumberFormat.Format = "#,##0.00";
-                    worksheet.Cell(row, 4).Value = item.TotalBalance;
-                    worksheet.Cell(row, 4).Style.NumberFormat.Format = "#,##0.00";
+                    ws.Cell(row, 1).Value = item.Customer;
+                    ws.Cell(row, 2).Value = item.Phone;
+                    ws.Cell(row, 3).Value = item.Address;
+                    ws.Cell(row, 4).Value = item.Discount;
+                    ws.Cell(row, 5).Value = item.Debitor;
+                    ws.Cell(row, 6).Value = item.Creditor;
+
+                    // raqam formatlari
+                    for (int col = 4; col <= 6; col++)
+                        ws.Cell(row, col).Style.NumberFormat.Format = "#,##0.00";
+
                     row++;
                 }
 
-                // JAMI QATORI — O'Z USTUNINING TAGIDA
-                worksheet.Cell(row, 1).Value = "Jami:";
-                worksheet.Cell(row, 1).Style.Font.Bold = true;
-                worksheet.Cell(row, 1).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Right;
+                // ==== Jami qatori (oxirgi satr) ====
+                int jamiRow = row;
+                ws.Cell(jamiRow, 1).Value = "Jami:";
+                ws.Range(jamiRow, 1, jamiRow, 3).Merge();
+                ws.Cell(jamiRow, 1).Style.Font.Bold = true;
+                // Bonus | Debitor | Kreditor qiymatlari
+                ws.Cell(jamiRow, 4).Value = sumDiscount;
+                ws.Cell(jamiRow, 5).Value = sumDebitor;
+                ws.Cell(jamiRow, 6).Value = sumCreditor;
+                ws.Range(jamiRow, 4, jamiRow, 6).Style.Font.Bold = true;
+                ws.Range(jamiRow, 4, jamiRow, 6).Style.NumberFormat.Format = "#,##0.00";
 
-                worksheet.Cell(row, 2).Value = FinalDebitor;
-                worksheet.Cell(row, 2).Style.Font.Bold = true;
-                worksheet.Cell(row, 2).Style.NumberFormat.Format = "#,##0.00";
+                // ==== Umumiy balans qatori (alohida yangi qator) ====
+                int umumiyRow = jamiRow + 1;
+                ws.Cell(umumiyRow, 1).Value = "Umumiy balans:";
+                ws.Cell(umumiyRow, 1).Style.Font.Bold = true;
+                // merge A..E (soʻrovga mos holda) shunchaki sarlavhani chap tarafga kengaytiramiz
+                ws.Range(umumiyRow, 1, umumiyRow, 5).Merge();
+                ws.Cell(umumiyRow, 6).Value = umumiyBalans;
+                ws.Cell(umumiyRow, 6).Style.Font.Bold = true;
+                ws.Cell(umumiyRow, 6).Style.NumberFormat.Format = "#,##0.00";
+                ws.Cell(umumiyRow, 6).Style.Font.FontColor = umumiyBalans > 0
+                    ? ClosedXML.Excel.XLColor.Green
+                    : ClosedXML.Excel.XLColor.Red;
 
-                worksheet.Cell(row, 3).Value = FinalKreditor;
-                worksheet.Cell(row, 3).Style.Font.Bold = true;
-                worksheet.Cell(row, 3).Style.NumberFormat.Format = "#,##0.00";
-
-                worksheet.Cell(row, 4).Value = FinalAmount;
-                worksheet.Cell(row, 4).Style.Font.Bold = true;
-                worksheet.Cell(row, 4).Style.NumberFormat.Format = "#,##0.00";
-                worksheet.Cell(row, 4).Style.Font.FontColor = XLColor.DarkBlue;
-
-                // Chiziq
-                worksheet.Range(row, 1, row, 4).Style.Border.TopBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
-
-                worksheet.Columns().AdjustToContents();
+                ws.Columns().AdjustToContents();
                 workbook.SaveAs(dialog.FileName);
             }
 
@@ -238,6 +264,8 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
             MessageBox.Show($"Xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
+
+
     [RelayCommand]
     private void Preview()
     {
@@ -247,7 +275,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
             return;
         }
 
-        FinalAmount = FilteredDebitorCreditorItems.Sum(x => x.TotalBalance);
+        FinalAmount = -FilteredDebitorCreditorItems.Sum(x => x.TotalBalance);
 
         var fixedDoc = CreateFixedDocumentForPrint();
         var previewWindow = new Window
@@ -282,9 +310,9 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
 
     private FixedDocument CreateFixedDocumentForPrint()
     {
-        double pageWidth = 793.7;   // A4
+        double pageWidth = 793.7;
         double pageHeight = 1122.5;
-        double margin = 40;         // Chap va o'ngdan 40px
+        double margin = 40;
 
         var fixedDoc = new FixedDocument();
         fixedDoc.DocumentPaginator.PageSize = new Size(pageWidth, pageHeight);
@@ -295,12 +323,21 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
         int totalPages = (int)Math.Ceiling(items.Count / (double)maxRowsPerPage);
         int processedItems = 0;
 
-        // Kenglikni hisoblaymiz (marginlarni hisobga olib)
         double availableWidth = pageWidth - (2 * margin);
-        double col1Width = availableWidth * 0.40; // Mijoz — 40%
-        double col2Width = availableWidth * 0.20; // Debitor — 20%
-        double col3Width = availableWidth * 0.20; // Kreditor — 20%
-        double col4Width = availableWidth * 0.20; // Umumiy — 20%
+
+        // Ustun foizlari
+        double col1 = availableWidth * 0.20; // Mijoz
+        double col2 = availableWidth * 0.12; // Telefon
+        double col3 = availableWidth * 0.20; // Manzil
+        double col4 = availableWidth * 0.15; // Bonus
+        double col5 = availableWidth * 0.16; // Debitor
+        double col6 = availableWidth * 0.17; // Kreditor
+
+        // lokal jamlar
+        var sumDiscount = items.Sum(x => x.Discount);
+        var sumDebitor = items.Sum(x => x.Debitor);
+        var sumCreditor = items.Sum(x => x.Creditor);
+        var umumiyBalans = sumDebitor - sumDiscount - sumCreditor;
 
         while (processedItems < items.Count)
         {
@@ -308,17 +345,15 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
             var page = new FixedPage { Width = pageWidth, Height = pageHeight, Background = Brushes.White };
             var grid = new Grid { Margin = new Thickness(margin, 70, margin, 70) };
 
-            // === COLUMN DEFINITION — KENGlik BO'YICHA TO'LIQ TO'LDIRILADI ===
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(col1Width) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(col2Width) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(col3Width) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(col4Width) });
+            double[] widths = new[] { col1, col2, col3, col4, col5, col6 };
+            foreach (var w in widths)
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(w) });
 
-            int row = 0;
+            // header row
             grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            int row = 0;
 
-            // === HEADER ===
-            var headers = new[] { "Mijoz", "Debitor", "Kreditor", "Umumiy balans" };
+            string[] headers = new[] { "Mijoz", "Telefon", "Manzil", "Bonus", "Debitor", "Kreditor" };
             for (int i = 0; i < headers.Length; i++)
             {
                 var border = new Border
@@ -332,7 +367,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
                 {
                     Text = headers[i],
                     FontWeight = FontWeights.Bold,
-                    FontSize = 14,
+                    FontSize = 13,
                     TextAlignment = TextAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
                 };
@@ -342,19 +377,22 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
                 grid.Children.Add(border);
             }
 
-            // === MA'LUMOTLAR ===
+            // ma'lumotlar
             var pageItems = items.Skip(processedItems).Take(maxRowsPerPage).ToList();
             foreach (var item in pageItems)
             {
                 row++;
                 grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-                string[] values = [
-                    item.Customer,
-                item.Debitor > 0 ? item.Debitor.ToString("N2") : "",
-                item.Creditor > 0 ? item.Creditor.ToString("N2") : "",
-                item.TotalBalance.ToString("N2")
-                ];
+                string[] values = new[]
+                {
+                item.Customer ?? string.Empty,
+                item.Phone ?? string.Empty,
+                item.Address ?? string.Empty,
+                item.Discount.ToString("N2"),
+                (item.Debitor > 0 ? item.Debitor.ToString("N2") : ""),
+                (item.Creditor > 0 ? item.Creditor.ToString("N2") : "")
+            };
 
                 for (int i = 0; i < values.Length; i++)
                 {
@@ -367,8 +405,8 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
                     var text = new TextBlock
                     {
                         Text = values[i],
-                        FontSize = 14,
-                        TextAlignment = (i >= 1 ? TextAlignment.Right : TextAlignment.Left),
+                        FontSize = 13,
+                        TextAlignment = (i >= 3 ? TextAlignment.Right : TextAlignment.Left),
                         VerticalAlignment = VerticalAlignment.Center
                     };
                     border.Child = text;
@@ -380,43 +418,66 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
 
             processedItems += pageItems.Count;
 
-            // === JAMI — oxirgi sahifada ===
+            // === Oxirgi sahifa bo'lsa: Jami va Umumiy balans (alohida qatorda) ===
             if (processedItems >= items.Count)
             {
-                row += 2;
+                // kichik bo'sh joy
+                row++;
+                grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(8) });
+                // JAMI qatori
+                row++;
                 grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-                var totalLabel = new TextBlock
+                // "Jami:" label (A..C birlashtiriladi)
+                var jamiBorder = new Border
                 {
-                    Text = "Jami:",
-                    FontWeight = FontWeights.Bold,
-                    FontSize = 14,
-                    TextAlignment = TextAlignment.Left,
+                    BorderBrush = Brushes.Black,
+                    BorderThickness = new Thickness(0.5),
                     Padding = new Thickness(5),
-                    VerticalAlignment = VerticalAlignment.Center
+                    Child = new TextBlock
+                    {
+                        Text = "Jami:",
+                        FontWeight = FontWeights.Bold,
+                        FontSize = 14,
+                        VerticalAlignment = VerticalAlignment.Center
+                    }
                 };
-                Grid.SetRow(totalLabel, row);
-                Grid.SetColumn(totalLabel, 0);
-                grid.Children.Add(totalLabel);
+                Grid.SetRow(jamiBorder, row);
+                Grid.SetColumn(jamiBorder, 0);
+                Grid.SetColumnSpan(jamiBorder, 3);
+                grid.Children.Add(jamiBorder);
 
-                AddTotalCell(grid, row, 1, FinalDebitor);
-                AddTotalCell(grid, row, 2, FinalKreditor);
-                AddTotalCell(grid, row, 3, FinalAmount, true);
+                // Jami: Bonus | Debitor | Kreditor (to'g'ri ustunlarga)
+                AddTotalCell(grid, row, 3, sumDiscount);
+                AddTotalCell(grid, row, 4, sumDebitor);
+                AddTotalCell(grid, row, 5, sumCreditor);
 
-                // Chiziq
-                var line = new System.Windows.Shapes.Rectangle
+                // UMUMIY BALANS qatori (yangi qator)
+                row++;
+                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                var umumiyBorder = new Border
                 {
-                    Stroke = Brushes.Black,
-                    StrokeThickness = 1.5,
-                    Margin = new Thickness(0, -3, 0, 0)
+                    BorderBrush = Brushes.Black,
+                    BorderThickness = new Thickness(0.5),
+                    Padding = new Thickness(5),
+                    Child = new TextBlock
+                    {
+                        Text = "Umumiy balans:",
+                        FontWeight = FontWeights.Bold,
+                        FontSize = 14,
+                        VerticalAlignment = VerticalAlignment.Center
+                    }
                 };
-                Grid.SetRow(line, row - 1);
-                Grid.SetColumn(line, 0);
-                Grid.SetColumnSpan(line, 4);
-                grid.Children.Add(line);
+                Grid.SetRow(umumiyBorder, row);
+                Grid.SetColumn(umumiyBorder, 0);
+                Grid.SetColumnSpan(umumiyBorder, 5); // sapar mavqe uchun kengaytirildi
+                grid.Children.Add(umumiyBorder);
+
+                AddTotalCell(grid, row, 5, umumiyBalans, true);
             }
 
-            // === SARLAVHA ===
+            // Title va page number
             var title = new TextBlock
             {
                 Text = "DEBITOR VA KREDITORLAR HISOBOTI",
@@ -429,14 +490,12 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
             FixedPage.SetLeft(title, 50);
             page.Children.Add(title);
 
-            // === SAHIFA RAQAMI ===
             var pageNum = new TextBlock
             {
                 Text = $"Sahifa {pageNumber} / {totalPages}",
                 FontSize = 11,
                 FontStyle = FontStyles.Italic,
                 HorizontalAlignment = HorizontalAlignment.Right,
-                VerticalAlignment = VerticalAlignment.Bottom,
                 Margin = new Thickness(0, 0, 60, 20)
             };
             FixedPage.SetBottom(pageNum, 20);
@@ -453,7 +512,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
         return fixedDoc;
     }
 
-    // Helper
+    // Helper (siznikiga mos yozildi)
     private void AddTotalCell(Grid grid, int row, int col, decimal value, bool isFinal = false)
     {
         var cell = new Border
@@ -463,18 +522,24 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
             Background = isFinal ? Brushes.AliceBlue : Brushes.White,
             Padding = new Thickness(5)
         };
+
         var text = new TextBlock
         {
             Text = value.ToString("N2"),
             FontWeight = FontWeights.Bold,
             FontSize = 12,
             TextAlignment = TextAlignment.Right,
-            Foreground = isFinal ? Brushes.DarkBlue : Brushes.Black,
+            Foreground = isFinal
+                ? (value > 0 ? Brushes.Green : Brushes.Red)
+                : Brushes.Black,
             VerticalAlignment = VerticalAlignment.Center
         };
+
         cell.Child = text;
         Grid.SetRow(cell, row);
         Grid.SetColumn(cell, col);
         grid.Children.Add(cell);
     }
+
+    // Helper
 }
