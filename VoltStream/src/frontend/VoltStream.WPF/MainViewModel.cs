@@ -12,6 +12,7 @@ using VoltStream.WPF.Sales.Views;
 using VoltStream.WPF.Sales_history.Views;
 using VoltStream.WPF.Settings.Views;
 using VoltStream.WPF.Supplies.Views;
+using VoltStream.WPF.Turnovers.Views;
 
 public partial class MainViewModel(IServiceProvider services) : ViewModelBase
 {
@@ -61,6 +62,13 @@ public partial class MainViewModel(IServiceProvider services) : ViewModelBase
     {
         CurrentChildView = services.GetRequiredService<DebitorCreditorPage>();
         CurrentPageTitle = "Debitor va Kreditor";
+    }
+
+    [RelayCommand]
+    private void ShowTurnoversPage()
+    {
+        CurrentChildView = services.GetRequiredService<TurnoversPage>();
+        CurrentPageTitle = "Oborotka";
     }
 
     [RelayCommand]

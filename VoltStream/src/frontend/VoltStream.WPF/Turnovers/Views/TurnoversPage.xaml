@@ -75,7 +75,6 @@
                                            VerticalAlignment="Center"
                                            utils:EnterKeyTab.IsEnabled="True"
                                            FontSize="14"
-                                           LostFocus="beginDate_LostFocus"
                                            SelectedDate="{Binding BeginDate, Mode=TwoWay}" />
                     <TextBlock Grid.Column="1"
                                Width="25"
@@ -90,7 +89,6 @@
                                            VerticalAlignment="Center"
                                            utils:EnterKeyTab.IsEnabled="True"
                                            FontSize="14"
-                                           LostFocus="endDate_LostFocus"
                                            SelectedDate="{Binding EndDate, Mode=TwoWay}" />
                     <TextBlock Grid.Column="3"
                                Width="35"
@@ -184,23 +182,23 @@
         </Grid>
         <!--  📋 DataGrid  -->
         <DataGrid Grid.Row="1"
-            Margin="10,5,10,0"
-            AlternatingRowBackground="#F5F5F5"
-            AutoGenerateColumns="False"
-            CanUserAddRows="False"
-            CanUserDeleteRows="False"
-            FontSize="14"
-            HeadersVisibility="Column"
-            IsReadOnly="True"
-            ItemsSource="{Binding FilteredSaleItems, Mode=TwoWay}"
-            RowHeaderWidth="0"
-            SelectionMode="Single">
+                  Margin="10,5,10,0"
+                  AlternatingRowBackground="#F5F5F5"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  FontSize="14"
+                  HeadersVisibility="Column"
+                  IsReadOnly="True"
+                  ItemsSource="{Binding CustomerOperationsForDisplay, Mode=TwoWay}"
+                  RowHeaderWidth="0"
+                  SelectionMode="Single">
 
             <DataGrid.Columns>
                 <!--  🕓 Sana  -->
                 <DataGridTextColumn
                     Width="0.7*"
-                    Binding="{Binding OperationDate, StringFormat={}{0:dd.MM.yyyy}}"
+                    Binding="{Binding Date, StringFormat={}{0:dd.MM.yyyy}}"
                     Header="Sana">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -234,7 +232,7 @@
 
                 <DataGridTextColumn
                     Width="*"
-                    Binding="{Binding RollLength, StringFormat={}{0:N0}}"
+                    Binding="{Binding Debit, StringFormat={}{0:N0}}"
                     Header="Debit">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -257,7 +255,7 @@
 
                 <DataGridTextColumn
                     Width="*"
-                    Binding="{Binding Quantity, StringFormat={}{0:N0}}"
+                    Binding="{Binding Credit, StringFormat={}{0:N0}}"
                     Header="Kredit">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -279,8 +277,8 @@
                 </DataGridTextColumn>
 
                 <DataGridTextColumn
-                    Width="1.5*"
-                    Binding="{Binding Izoh}"
+                    Width="3*"
+                    Binding="{Binding Description}"
                     Header="Izoh">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">

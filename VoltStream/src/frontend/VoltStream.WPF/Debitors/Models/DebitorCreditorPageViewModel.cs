@@ -540,6 +540,4 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
         Grid.SetColumn(cell, col);
         grid.Children.Add(cell);
     }
-
-    // Helper
 }

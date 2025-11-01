@@ -29,8 +29,8 @@
             </Grid.ColumnDefinitions>
 
             <!--  🧾 Filtr bo‘limi  -->
-                    <!--  👤 Mijoz  -->
-            <Grid  Grid.Column="0">
+            <!--  👤 Mijoz  -->
+            <Grid Grid.Column="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
@@ -39,67 +39,77 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0"  Grid.Column="0"
-                        Margin="5,0"
-                        VerticalAlignment="Center"
-                        FontSize="13"
-                        Text="Mijoz" />
-                        <!--Foreground="{DynamicResource PrimaryTextColor}"-->
-                <ComboBox Grid.Row="0"  Grid.Column="1"
-                        x:Name="cbxCustomer"
-                          VerticalAlignment="Center"
-                        Margin="0"
-                        Padding="4,2"
-                        BorderBrush="#ccc"
-                        BorderThickness="1"
-                        DisplayMemberPath="Name"
-                        FontSize="14"
-                        IsEditable="True"
-                        ItemsSource="{Binding Customers}"
-                        SelectedItem="{Binding SelectedCustomer}" />
-                    <!--  📅 Sana oralig‘i  -->
-                <TextBlock Grid.Row="1"  Grid.Column="0"
-                            Margin="05,0"
-                            VerticalAlignment="Center"
-                            FontSize="13"
-                            Text="Xisobot davri" />
-                <Grid Grid.Row="1"  Grid.Column="1">
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="5,0"
+                    VerticalAlignment="Center"
+                    FontSize="13"
+                    Text="Mijoz" />
+                <!--  Foreground="{DynamicResource PrimaryTextColor}"  -->
+                <ComboBox
+                    x:Name="cbxCustomer"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="0"
+                    Padding="4,2"
+                    VerticalAlignment="Center"
+                    BorderBrush="#ccc"
+                    BorderThickness="1"
+                    DisplayMemberPath="Name"
+                    FontSize="14"
+                    IsEditable="True"
+                    ItemsSource="{Binding Customers}"
+                    SelectedItem="{Binding SelectedCustomer}" />
+                <!--  📅 Sana oralig‘i  -->
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="05,0"
+                    VerticalAlignment="Center"
+                    FontSize="13"
+                    Text="Xisobot davri" />
+                <Grid Grid.Row="1" Grid.Column="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <controls:UserCalendar Grid.Column="0"
-                            x:Name="beginDate"
-                            Width="110"
-                            Margin="0"
-                            VerticalAlignment="Center"
-                            utils:EnterKeyTab.IsEnabled="True"
-                            FontSize="14"
-                            LostFocus="beginDate_LostFocus"
-                            SelectedDate="{Binding BeginDate, Mode=TwoWay}" />
-                    <TextBlock Grid.Column="1"
-                            Width="25"
-                            Margin="2,0"
-                            VerticalAlignment="Center"
-                            FontSize="13"
-                            Text="dan" />
-                    <controls:UserCalendar Grid.Column="2"
-                            x:Name="endDate"
-                            Width="110"
-                            Margin="0"
-                            VerticalAlignment="Center"
-                            utils:EnterKeyTab.IsEnabled="True"
-                            FontSize="14"
-                            LostFocus="endDate_LostFocus"
-                            SelectedDate="{Binding EndDate, Mode=TwoWay}" />
-                    <TextBlock Grid.Column="3"
-                            Width="35"
-                            Margin="0"
-                            VerticalAlignment="Center"
-                            FontSize="13"
-                            Text="gacha" />
+                    <controls:UserCalendar
+                        x:Name="beginDate"
+                        Grid.Column="0"
+                        Width="110"
+                        Margin="0"
+                        VerticalAlignment="Center"
+                        utils:EnterKeyTab.IsEnabled="True"
+                        FontSize="14"
+                        LostFocus="beginDate_LostFocus"
+                        SelectedDate="{Binding BeginDate, Mode=TwoWay}" />
+                    <TextBlock
+                        Grid.Column="1"
+                        Width="25"
+                        Margin="2,0"
+                        VerticalAlignment="Center"
+                        FontSize="13"
+                        Text="dan" />
+                    <controls:UserCalendar
+                        x:Name="endDate"
+                        Grid.Column="2"
+                        Width="110"
+                        Margin="0"
+                        VerticalAlignment="Center"
+                        utils:EnterKeyTab.IsEnabled="True"
+                        FontSize="14"
+                        LostFocus="endDate_LostFocus"
+                        SelectedDate="{Binding EndDate, Mode=TwoWay}" />
+                    <TextBlock
+                        Grid.Column="3"
+                        Width="35"
+                        Margin="0"
+                        VerticalAlignment="Center"
+                        FontSize="13"
+                        Text="gacha" />
                 </Grid>
 
             </Grid>
@@ -113,37 +123,45 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <!--  🧩 Mahs8ulot turi  -->
-                <TextBlock Grid.Row="0"  Grid.Column="0"
-                        Margin="15,0,3,0"
-                        VerticalAlignment="Center"
-                        FontSize="13"
-                        Text="Mahsulot turi" />
-                <ComboBox Grid.Row="0"  Grid.Column="1"
-                        x:Name="cbxCategory"
-                        VerticalAlignment="Center"
-                        Width="180"
-                        Margin="0"
-                        DisplayMemberPath="Name"
-                        FontSize="14"
-                        IsEditable="True"
-                        ItemsSource="{Binding Categories}"
-                        SelectedItem="{Binding SelectedCategory}" />
-                <TextBlock Grid.Row="1"  Grid.Column="0"
-                           TextAlignment="Right"
-                        Margin="3,0"
-                        VerticalAlignment="Center"
-                        FontSize="13"
-                        Text="Nomi" />
-                <ComboBox Grid.Row="1"  Grid.Column="1"
-                        x:Name="cbxProductName"
-                        VerticalAlignment="Center"
-                        Width="180"
-                        Margin="2,0"
-                        DisplayMemberPath="Name"
-                        FontSize="14"
-                        IsEditable="True"
-                        ItemsSource="{Binding Products}"
-                        SelectedItem="{Binding SelectedProduct}" />
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="15,0,3,0"
+                    VerticalAlignment="Center"
+                    FontSize="13"
+                    Text="Mahsulot turi" />
+                <ComboBox
+                    x:Name="cbxCategory"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Width="180"
+                    Margin="0"
+                    VerticalAlignment="Center"
+                    DisplayMemberPath="Name"
+                    FontSize="14"
+                    IsEditable="True"
+                    ItemsSource="{Binding Categories}"
+                    SelectedItem="{Binding SelectedCategory}" />
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="3,0"
+                    VerticalAlignment="Center"
+                    FontSize="13"
+                    Text="Nomi"
+                    TextAlignment="Right" />
+                <ComboBox
+                    x:Name="cbxProductName"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Width="180"
+                    Margin="2,0"
+                    VerticalAlignment="Center"
+                    DisplayMemberPath="Name"
+                    FontSize="14"
+                    IsEditable="True"
+                    ItemsSource="{Binding Products}"
+                    SelectedItem="{Binding SelectedProduct}" />
             </Grid>
             <!--  🔘 Tugmalar  -->
             <Grid Grid.Column="2">
@@ -151,18 +169,20 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <Button Grid.Row="0"
-                    VerticalAlignment="Center"
+                <Button
+                    Grid.Row="0"
                     Margin="5"
                     Padding="10,3"
+                    VerticalAlignment="Center"
                     Command="{Binding PreviewCommand}"
                     Content="📄 Ko‘rish"
                     FontSize="13"
                     ToolTip="Chop etishdan oldin ma'lumotlarni ko‘rish (Print Preview)" />
-                <Button Grid.Row="1"
-                    VerticalAlignment="Center"
+                <Button
+                    Grid.Row="1"
                     Margin="5"
                     Padding="10,3"
+                    VerticalAlignment="Center"
                     Command="{Binding ClearFilterCommand}"
                     Content="🧹 Tozalash"
                     FontSize="13"
@@ -173,24 +193,26 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <Button Grid.Row="0"
-                    VerticalAlignment="Center"
+                <Button
+                    Grid.Row="0"
                     Margin="5"
                     Padding="10,3"
+                    VerticalAlignment="Center"
                     Command="{Binding PrintCommand}"
                     Content="🖨 Pechat"
                     FontSize="13"
                     ToolTip="Chiqarish (Printerga yuborish)" />
 
-                <Button Grid.Row="1"
-                    VerticalAlignment="Center"
+                <Button
+                    Grid.Row="1"
                     Margin="5"
                     Padding="10,3"
+                    VerticalAlignment="Center"
                     Command="{Binding ExportToExcelCommand}"
                     Content="📊 Excel"
                     FontSize="13"
                     ToolTip="Excel faylga eksport qilish" />
-                
+
             </Grid>
         </Grid>
         <!--  📋 DataGrid  -->
