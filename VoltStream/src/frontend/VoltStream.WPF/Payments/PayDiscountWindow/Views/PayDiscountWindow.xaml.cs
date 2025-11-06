@@ -7,8 +7,11 @@ using System.Windows;
 /// </summary>
 public partial class PayDiscountWindow : Window
 {
-    public PayDiscountWindow()
+    public PayDiscountWindow(long id, string name, decimal bonus)
     {
         InitializeComponent();
+        txtCustomer.Text = name;
+        AmauntDiscount.Text = bonus.ToString("N2");
+        DiscountSum.Focus();
     }
 }
