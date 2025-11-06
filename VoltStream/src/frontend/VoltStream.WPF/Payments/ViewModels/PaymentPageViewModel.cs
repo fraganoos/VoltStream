@@ -85,8 +85,9 @@ partial class PaymentPageViewModel : ViewModelBase
     [RelayCommand]
     private void OpenDiscountsWindow()
     {
-        var discountsWindow = new PayDiscountWindow(); // Исправлено создание экземпляра окна
+        var discountsWindow = new PayDiscountWindow(customerId, customer.Name, Payment.Discount.Value); // Исправлено создание экземпляра окна
         discountsWindow.ShowDialog();
+
     }
     #endregion Commands
 
