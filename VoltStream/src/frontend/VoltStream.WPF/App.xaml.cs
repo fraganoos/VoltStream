@@ -31,15 +31,15 @@ public partial class App : Application
         await host.StartAsync();
         Services = host.Services;
 
-        var loginWindow = Services.GetRequiredService<MainWindow>();
-        //var loginViewModel = (LoginViewModel)loginWindow.DataContext!;
+        var loginWindow = Services.GetRequiredService<LoginWindow>();
+        var loginViewModel = (LoginViewModel)loginWindow.DataContext!;
 
-        //loginViewModel.LoginSucceeded += () =>
-        //{
-        //    var mainWindow = Services.GetRequiredService<MainWindow>();
-        //    mainWindow.Show();
-        //    loginWindow.Close();
-        //};
+        loginViewModel.LoginSucceeded += () =>
+        {
+            var mainWindow = Services.GetRequiredService<MainWindow>();
+            mainWindow.Show();
+            loginWindow.Close();
+        };
 
         loginWindow.Show();
     }
