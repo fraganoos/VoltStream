@@ -9,7 +9,7 @@ public class ConnectionTester(IServiceProvider services)
     public async Task<bool> TestAsync()
     {
         var client = services.GetRequiredService<IHealthCheckApi>();
-        var response = await client.GetAsync().Handle();
+        var response = await client.CheckAsync().Handle();
         return response.IsSuccess;
     }
 }
