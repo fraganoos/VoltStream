@@ -78,7 +78,9 @@
                 Grid.Column="1"
                 Margin="3,5,0,6"
                 Padding="5,0"
-                Content="Σ" />
+                Content="Σ"
+                IsTabStop="False"
+                Click="Button_Click"/>
         </Grid>
 
 
@@ -96,7 +98,7 @@
             </Grid.ColumnDefinitions>
 
             <RadioButton
-                x:Name="txtBeginningSum"
+                x:Name="inCash"
                 Content="Naqd pulda"
                 Grid.Column="0"
                 Margin="0,5,3,5"
@@ -105,7 +107,7 @@
 
 
             <RadioButton
-                x:Name="txtBeginningSum2"
+                x:Name="reСalculation"
                 Grid.Column="1"
                 Content="Hisob-Kitob"
                 Margin="3,5,0,5"
@@ -134,9 +136,11 @@
             HorizontalAlignment="Right"
             Orientation="Horizontal">
             <Button
+                x:Name="SaveDiscount"
                 Width="100"
                 Margin="5"
-                Content="Saqlash" />
+                Content="Saqlash"
+                Click="SaveDiscount_Click"/>
             <Button
                 Width="100"
                 Margin="5"
