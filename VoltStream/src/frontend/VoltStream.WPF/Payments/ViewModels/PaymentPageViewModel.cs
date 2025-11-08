@@ -10,6 +10,7 @@ using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
 using VoltStream.WPF.Payments.PayDiscountWindow.Views; // Добавьте этот using в начало файла, если его нет
@@ -85,8 +86,32 @@ partial class PaymentPageViewModel : ViewModelBase
     [RelayCommand]
     private void OpenDiscountsWindow()
     {
-        var discountsWindow = new PayDiscountWindow(customerId, customer.Name, Payment.Discount.Value); // Исправлено создание экземпляра окна
-        discountsWindow.ShowDialog();
+        try { 
+            if (Customer is null)
+            {
+                Warning = "Mijoz tanlanishi shart!";
+                return;
+            }
+            if (Payment.Discount is null || Payment.Discount <= 0)
+            {
+                Warning = "Mijoz uchun mavjud chegirma yo'q!";
+                return;
+            }
+            var discountsWindow = new PayDiscountWindow(customerId, customer.Name, Payment.Discount.Value); // Исправлено создание экземпляра окна
+            if (discountsWindow.ShowDialog()== true)
+            {
+                dynamic? result = discountsWindow.ResultOfDiscount;
+                MessageBox.Show($"Tanlangan chegirma turi: {result.discountCash.ToString()}, \n"  +
+                    $"Chegirma summasi: {result.discountSum.ToString()}, \n" +
+                    $"Izox: {result.discountInfo}", "Ma'lumot", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Error = "Xatolik yuz berdi: " + ex.Message;
+            return;
+        }
 
     }
     #endregion Commands
