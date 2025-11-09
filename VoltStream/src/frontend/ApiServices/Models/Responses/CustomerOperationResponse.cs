@@ -11,4 +11,5 @@ public class CustomerOperationResponse
 
     public long AccountId { get; set; }
     public AccountResponse Account { get; set; } = default!;
+    public DateTimeOffset Date { get; set; }
 }

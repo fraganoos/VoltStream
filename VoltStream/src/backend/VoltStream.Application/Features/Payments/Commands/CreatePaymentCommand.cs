@@ -113,6 +113,7 @@ public class CreatePaymentCommandHandler(
 
         payment.CustomerOperation = new CustomerOperation
         {
+            Date = request.PaidAt.UtcDateTime,
             AccountId = account.Id,
             Amount = request.Amount,
             CustomerId = customer.Id,

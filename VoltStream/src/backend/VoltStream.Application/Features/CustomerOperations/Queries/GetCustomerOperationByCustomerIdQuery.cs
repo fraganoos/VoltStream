@@ -1,0 +1,100 @@
+﻿namespace VoltStream.Application.Features.CustomerOperations.Queries;
+
+using AutoMapper;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using VoltStream.Application.Commons.Interfaces;
+using VoltStream.Application.Features.CustomerOperations.DTOs;
+
+public record GetCustomerOperationByCustomerIdQuery(
+    long CustomerId,
+    DateTime? BeginDate,
+    DateTime? EndDate
+) : IRequest<CustomerOperationSummaryDto>;
+
+public class GetCustomerOperationByCustomerIdQueryHandler(
+    IAppDbContext _context,
+    IMapper _mapper)
+    : IRequestHandler<GetCustomerOperationByCustomerIdQuery, CustomerOperationSummaryDto>
+{
+     public async Task<CustomerOperationSummaryDto> Handle(
+        GetCustomerOperationByCustomerIdQuery request,
+        CancellationToken cancellationToken)
+    {
+        var beginDate = request.BeginDate.HasValue
+      ? DateTime.SpecifyKind(request.BeginDate.Value.Date, DateTimeKind.Utc)
+      : (DateTime?)null;
+
+        var endDate = request.EndDate.HasValue
+            ? DateTime.SpecifyKind(request.EndDate.Value.Date, DateTimeKind.Utc)
+            : (DateTime?)null;
+
+
+        // 🔹 Shu mijozning accountini olish
+        var account = await _context.Accounts
+            .FirstOrDefaultAsync(a => a.CustomerId == request.CustomerId, cancellationToken);
+
+        if (account == null)
+            throw new InvalidOperationException("Hisob topilmadi.");
+
+        var allOperations = _context.CustomerOperations
+            .Include(x => x.Account)
+            .Where(x => x.Account.CustomerId == request.CustomerId);
+
+        // 🔹 Boshlang‘ich balans = OpeningBalance + BeginDate gacha bo‘lgan operatsiyalar
+        decimal beginBalance = account.OpeningBalance;
+        decimal beforeBeginSum = 0;
+        if (beginDate.HasValue)
+        {
+            beforeBeginSum = await allOperations
+                .Where(x => x.Date != null && x.Date < beginDate.Value)
+                .SumAsync(x => x.Amount, cancellationToken);
+        }
+        beginBalance += beforeBeginSum;
+        decimal endBalance = account.OpeningBalance;
+
+        if (endDate.HasValue)
+        {
+            var beforeEndSum = await allOperations
+                .Where(x => x.Date <= endDate.Value)
+                .SumAsync(x => x.Amount, cancellationToken);
+
+            endBalance += beforeEndSum;
+        }
+
+        // 🔹 Sana oralig‘idagi operatsiyalar (BeginDate ≤ Date ≤ EndDate)
+        var filtered = allOperations.AsQueryable();
+
+        if (beginDate.HasValue)
+        {
+            var beginUtc = DateTime.SpecifyKind(beginDate.Value, DateTimeKind.Utc);
+            filtered = filtered.Where(x => x.Date >= beginUtc);
+        }
+
+        if (endDate.HasValue)
+        {
+            var endUtc = DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc);
+            filtered = filtered.Where(x => x.Date <= endUtc);
+        }
+
+        var operations = await filtered
+            .OrderBy(x => x.Date)
+            .ThenBy(x => x.Id)
+            .ToListAsync(cancellationToken);
+
+        var operationDtos = _mapper.Map<IReadOnlyCollection<CustomerOperationDto>>(operations);
+
+        // 🔹 Yakuniy javob
+        return new CustomerOperationSummaryDto
+        {
+            BeginBalance = beginBalance,
+            EndBalance = endBalance,
+            Operations = operationDtos
+        };
+    }
+}
+

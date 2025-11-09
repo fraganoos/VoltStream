@@ -1,15 +1,16 @@
-﻿<Window x:Class="VoltStream.WPF.Payments.PayDiscountWindow.Views.PayDiscountWindow"
- xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:viewModels="clr-namespace:VoltStream.WPF.Commons.ViewModels"
-        xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
-        mc:Ignorable="d"
-        WindowStartupLocation="CenterOwner"
-        ResizeMode="NoResize"
-        SizeToContent="WidthAndHeight"
-        Title="Yeg'ilgan Bonuslar taqsimoti">
+﻿<Window
+    x:Class="VoltStream.WPF.Payments.PayDiscountWindow.Views.PayDiscountWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
+    xmlns:viewModels="clr-namespace:VoltStream.WPF.Commons.ViewModels"
+    Title="Yeg'ilgan Bonuslar taqsimoti"
+    ResizeMode="NoResize"
+    SizeToContent="WidthAndHeight"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -50,10 +51,10 @@
             Grid.Row="1"
             Grid.Column="1"
             Margin="0,5"
-            IsEnabled="False"
-            utils:TextBoxTabBehavior.EnableTabOnKeys="True"
             utils:NumericTextBox.IsNumeric="True"
-            FontSize="14" />
+            utils:TextBoxTabBehavior.EnableTabOnKeys="True"
+            FontSize="14"
+            IsEnabled="False" />
 
         <!--  ishlatilgan bonus  -->
         <TextBlock
@@ -64,8 +65,8 @@
             Text="Foydalanish miqdori:" />
         <Grid Grid.Row="2" Grid.Column="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBox
                 x:Name="DiscountSum"
@@ -102,16 +103,17 @@
                 Content="Naqd pulda"
                 Grid.Column="0"
                 Margin="0,5,3,5"
+                Content="Naqd pulda"
                 FontSize="14"
-                Foreground="Red"/>
+                Foreground="Red" />
 
 
             <RadioButton
                 x:Name="reСalculation"
                 Grid.Column="1"
-                Content="Hisob-Kitob"
                 Margin="3,5,0,5"
-                FontSize="14"/>
+                Content="Hisob-Kitob"
+                FontSize="14" />
         </Grid>
         <!--  Описание  -->
         <TextBlock

@@ -13,5 +13,7 @@ public class GetAllPaymentsQueryHandler(
     IMapper mapper) : IRequestHandler<GetAllPaymentsQuery, IReadOnlyCollection<PaymentDto>>
 {
     public async Task<IReadOnlyCollection<PaymentDto>> Handle(GetAllPaymentsQuery request, CancellationToken cancellationToken)
-        => mapper.Map<IReadOnlyCollection<PaymentDto>>(await context.Payments.ToListAsync(cancellationToken));
+        => mapper.Map<IReadOnlyCollection<PaymentDto>>(await context.Payments
+            .Include(p => p.CustomerOperation)
+            .ToListAsync(cancellationToken));
 }
