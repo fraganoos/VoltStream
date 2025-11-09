@@ -3,7 +3,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
 using VoltStream.WPF.Commons.Enums;
 using VoltStream.WPF.Configurations;
 
@@ -11,7 +10,7 @@ public partial class ApiConnectionViewModel : ViewModelBase
 {
     [ObservableProperty] private string url = string.Empty;
     [ObservableProperty] private bool isConnected;
-    [ObservableProperty] private bool autoReconnectEnabled;
+    [ObservableProperty] private bool autoReconnectEnabled = true;
     [ObservableProperty] private bool showIndicator;
     [ObservableProperty] private bool checkUrlEnabled;
     [ObservableProperty] private bool isHttps;
@@ -25,19 +24,45 @@ public partial class ApiConnectionViewModel : ViewModelBase
     [RelayCommand]
     private async Task SaveConnectionSettings()
     {
-        var scheme = IsHttps ? "https" : "http";
-        var candidateUrl = $"{scheme}://{Host}:{Port}";
-
-        if (!Uri.TryCreate(candidateUrl, UriKind.Absolute, out var uri))
+        try
         {
-            Error = "Kiritilgan manzil yaroqsiz";
-            return;
+            Error = string.Empty;
+            Success = string.Empty;
+
+            var scheme = IsHttps ? "https" : "http";
+            var candidateUrl = $"{scheme}://{Host}:{Port}";
+
+            if (!Uri.TryCreate(candidateUrl, UriKind.Absolute, out var uri))
+            {
+                Error = "Kiritilgan manzil yaroqsiz";
+                return;
+            }
+
+            Url = uri.ToString();
+            Status = ConnectionStatus.Connecting;
+
+            IsConnected = await App.Services!
+                .GetRequiredService<ConnectionTester>()
+                .TestAsync();
+
+            Status = IsConnected
+                ? ConnectionStatus.Connected
+                : ConnectionStatus.Disconnected;
+
+            if (IsConnected)
+            {
+                Success = "✓ Sozlamalar saqlandi va server bilan aloqa o'rnatildi";
+            }
+            else
+            {
+                Error = "✗ Sozlamalar saqlandi, lekin server bilan bog'lanib bo'lmadi";
+            }
         }
-
-        (Url, Status) = (uri.ToString(), ConnectionStatus.Connecting);
-
-        IsConnected = await App.Services!.GetRequiredService<ConnectionTester>().TestAsync();
-        Status = IsConnected ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
+        catch (Exception ex)
+        {
+            Error = $"Xatolik: {ex.Message}";
+            Status = ConnectionStatus.Disconnected;
+        }
     }
 
     [RelayCommand]
@@ -49,18 +74,27 @@ public partial class ApiConnectionViewModel : ViewModelBase
     [RelayCommand]
     private void ToggleShowIndicator() => ShowIndicator = !ShowIndicator;
 
-
-    #endregion Command
+    #endregion Commands
 
     #region PropertyChanged
 
-    partial void OnCheckUrlEnabledChanged(bool value) => ShowIndicator = value ? true : false;
-    partial void OnAutoReconnectEnabledChanged(bool value) => UpdateStatus();
+    partial void OnCheckUrlEnabledChanged(bool value)
+    {
+        ShowIndicator = value;
+    }
+
+    partial void OnAutoReconnectEnabledChanged(bool value)
+    {
+        UpdateStatus();
+    }
 
     partial void OnIsConnectedChanged(bool value)
     {
-        if (value) Success = "Aloqa tiklandi";
-        else Warning = "Aloqa tiklanmadi";
+        if (value)
+            Success = "Aloqa tiklandi";
+        else
+            Warning = "Aloqa tiklanmadi";
+
         UpdateStatus();
     }
 
@@ -68,22 +102,24 @@ public partial class ApiConnectionViewModel : ViewModelBase
     {
         StatusText = Status switch
         {
-            ConnectionStatus.Connected => "Connected",
-            ConnectionStatus.Disconnected => "Disconnected",
-            ConnectionStatus.Connecting => "Connecting...",
+            ConnectionStatus.Connected => "Ulangan",
+            ConnectionStatus.Disconnected => "Uzilgan",
+            ConnectionStatus.Connecting => "Ulanmoqda...",
             _ => string.Empty
         };
+
+        OnPropertyChanged(nameof(StatusText));
     }
 
     partial void OnUrlChanged(string value)
     {
-        if (Uri.TryCreate(value, UriKind.Absolute, out var uri))
+        if (!string.IsNullOrWhiteSpace(value) &&
+            Uri.TryCreate(value, UriKind.Absolute, out var uri))
         {
             IsHttps = uri.Scheme == "https";
             Host = uri.Host;
             Port = uri.Port;
         }
-        else Error = "Kiritilgan manzil yaroqsiz";
     }
 
     #endregion PropertyChanged

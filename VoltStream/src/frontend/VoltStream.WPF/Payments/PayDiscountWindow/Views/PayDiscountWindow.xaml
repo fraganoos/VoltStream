@@ -31,15 +31,14 @@
             Margin="0,5"
             VerticalAlignment="Center"
             Text="Mijoz:" />
-        <ComboBox
-            x:Name="cbxCustomer"
+        <TextBox
+            x:Name="txtCustomer"
             Grid.Row="0"
             Grid.Column="1"
+            IsEnabled="False"
             Margin="0,5"
-            utils:ComboBoxQuickNavBehavior.EnableQuickNavigation="True"
-            FontSize="14"
-            IsEditable="True" />
-
+            utils:TextBoxTabBehavior.EnableTabOnKeys="True"
+            FontSize="14" />
         <!--  Yeg'ilgan discount  -->
         <TextBlock
             Grid.Row="1"
@@ -73,13 +72,16 @@
                 x:Name="DiscountSum"
                 Grid.Column="0"
                 Margin="0,5"
+                utils:NumericTextBox.IsNumeric="True"
                 utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                 FontSize="14" />
             <Button
                 Grid.Column="1"
                 Margin="3,5,0,6"
                 Padding="5,0"
-                Content="Σ" />
+                Content="Σ"
+                IsTabStop="False"
+                Click="Button_Click"/>
         </Grid>
 
 
@@ -97,7 +99,8 @@
             </Grid.ColumnDefinitions>
 
             <RadioButton
-                x:Name="txtBeginningSum"
+                x:Name="inCash"
+                Content="Naqd pulda"
                 Grid.Column="0"
                 Margin="0,5,3,5"
                 Content="Naqd pulda"
@@ -106,7 +109,7 @@
 
 
             <RadioButton
-                x:Name="txtBeginningSum2"
+                x:Name="reСalculation"
                 Grid.Column="1"
                 Margin="3,5,0,5"
                 Content="Hisob-Kitob"
@@ -135,9 +138,11 @@
             HorizontalAlignment="Right"
             Orientation="Horizontal">
             <Button
+                x:Name="SaveDiscount"
                 Width="100"
                 Margin="5"
-                Content="Saqlash" />
+                Content="Saqlash"
+                Click="SaveDiscount_Click"/>
             <Button
                 Width="100"
                 Margin="5"
