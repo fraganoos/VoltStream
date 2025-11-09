@@ -4,8 +4,10 @@ using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
+using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.CustomerOperations.DTOs;
+using VoltStream.Application.Features.Customers.DTOs;
 using VoltStream.Domain.Entities;
 
 public record GetCustomerOperationByIdQuery(long Id) : IRequest<CustomerOperationDto>;
@@ -22,3 +24,4 @@ public class GetCustomerOperationByIdQueryHandler(
             .FirstOrDefaultAsync(co => co.Id == request.Id, cancellationToken))
         ?? throw new NotFoundException(nameof(CustomerOperation), nameof(request.Id), request.Id);
 }
+

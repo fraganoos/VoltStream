@@ -10,6 +10,7 @@ using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Sales.DTOs;
 using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public record CreateSaleCommand(
     DateTimeOffset Date,
@@ -161,6 +162,7 @@ public class CreateSaleCommandHandler(
     {
         return new CustomerOperation
         {
+            Date = sale.Date,
             Amount = sale.Amount,
             Account = account,
             AccountId = account.Id,

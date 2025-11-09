@@ -3,19 +3,20 @@ using ApiServices.Extensions;
 using ApiServices.Interfaces;
 using ApiServices.Models.Responses;
 using ClosedXML.Excel;
-using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel; 
 using CommunityToolkit.Mvvm.Input;
-using DocumentFormat.OpenXml.Wordprocessing;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
+using PdfSharp.Drawing;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
-using WpfTextAlignment = System.Windows.TextAlignment;
-
+using System.Windows.Media.Imaging;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
 
@@ -46,13 +47,87 @@ public partial class TurnoversPageViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<CustomerResponse> customers = [];
     [ObservableProperty] private ObservableCollection<CustomerOperationViewModel> customerOperations = [];
     [ObservableProperty] private ObservableCollection<CustomerOperationForDisplayViewModel> customerOperationsForDisplay = [];
-    [ObservableProperty] private DateTime? beginDate = DateTime.Now.AddMonths(-1);
-    [ObservableProperty] private DateTime? endDate = DateTime.Now;
+    [ObservableProperty] private DateTime? beginDate;
+    [ObservableProperty] private DateTime? endDate;
+    [ObservableProperty] private decimal? beginBalance;
+    [ObservableProperty] private decimal? lastBalance;
+
+        
+    partial void OnSelectedCustomerChanged(CustomerResponse? value)
+    => _ = LoadCustomerOperationsForSelectedCustomerAsync();
+
+    partial void OnBeginDateChanged(DateTime? value)
+        => _ = LoadCustomerOperationsForSelectedCustomerAsync();
+
+    partial void OnEndDateChanged(DateTime? value)
+        => _ = LoadCustomerOperationsForSelectedCustomerAsync();
+
+    private async Task LoadCustomerOperationsForSelectedCustomerAsync()
+    {
+        if (SelectedCustomer == null)
+        {
+            CustomerOperationsForDisplay.Clear();
+            return;
+        }
+
+        try
+        {
+            var response = await customerOperationsApi.GetByCustomerId(
+                SelectedCustomer.Id,
+                BeginDate,
+                EndDate
+            );
+
+            if (!response.IsSuccess || response.Data is null)
+            {
+                CustomerOperationsForDisplay.Clear();
+                return;
+            }
+
+            // Backend dan kelgan operations -> display formatiga map
+            var displayList = new ObservableCollection<CustomerOperationForDisplayViewModel>();
+
+            foreach (var op in response.Data.Operations)
+            {
+                decimal debit = 0;
+                decimal credit = 0;
+
+                if (op.OperationType == OperationType.Payment)
+                {
+                    if (op.Amount < 0)
+                        debit = Math.Abs(op.Amount); // manfiy bo‘lsa — debet
+                    else
+                        credit = op.Amount; // musbat bo‘lsa — kredit
+                }
+                else if (op.OperationType == OperationType.Sale)
+                {
+                    debit = op.Amount; // sotuv — doim debet
+                }
+
+                displayList.Add(new CustomerOperationForDisplayViewModel
+                {
+                    Date = op.Date.LocalDateTime,
+                    Customer = SelectedCustomer.Name ?? "Noma’lum",
+                    Debit = debit,
+                    Credit = credit,
+                    Description = op.Description
+                });
+            }
+
+            BeginBalance = response.Data.BeginBalance;
+            LastBalance = response.Data.EndBalance;
+            allOperationsForDisplay = displayList;
+            ApplyFilter(); // agar qo‘shimcha client-side filter kerak bo‘lsa
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Operatsiyalar yuklanmadi: {ex.Message}");
+        }
+    }
 
     private async Task LoadInitialDataAsync()
     {
         await LoadCustomersAsync();
-        await LoadCustomerOperationsAsync();
     }
 
     private async Task LoadCustomersAsync()
@@ -69,64 +144,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         }
     }
 
-    private async Task LoadCustomerOperationsAsync()
-    {
-        try
-        {
-            var response = await customerOperationsApi.GetAll().Handle(isLoading => IsLoading = isLoading);
-            if (!response.IsSuccess || response.Data is null)
-                return;
-
-            CustomerOperations = mapper.Map<ObservableCollection<CustomerOperationViewModel>>(response.Data);
-            await BuildDisplayListAsync();
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Operatsiyalar yuklanmadi: {ex.Message}");
-        }
-    }
-
-    private async Task BuildDisplayListAsync()
-    {
-        var paymentsResponse = await paymentApi.GetAllAsync();
-        var salesResponse = await saleApi.GetAll();
-
-        var payments = paymentsResponse.Data ?? [];
-        var sales = salesResponse.Data ?? [];
-
-        var displayList = new ObservableCollection<CustomerOperationForDisplayViewModel>();
-
-        foreach (var op in CustomerOperations)
-        {
-            DateTime date = DateTime.MinValue;
-
-            if (op.OperationType == OperationType.Payment)
-                date = payments.FirstOrDefault(p => p.CustomerOperation?.Id == op.Id)?.PaidAt.DateTime ?? DateTime.MinValue;
-            else if (op.OperationType == OperationType.Sale)
-                date = sales.FirstOrDefault(s => s.CustomerOperation?.Id == op.Id)?.Date.DateTime ?? DateTime.MinValue;
-
-            var customer = Customers.FirstOrDefault(c => c.Id == op.Account.CustomerId);
-
-            var display = new CustomerOperationForDisplayViewModel
-            {
-                Date = date,
-                Customer = customer?.Name ?? "Noma’lum",
-                Debit = op.OperationType == OperationType.Sale ? op.Amount : 0,
-                Credit = op.OperationType == OperationType.Payment ? op.Amount : 0,
-                Description = op.Description
-            };
-
-            displayList.Add(display);
-        }
-
-        allOperationsForDisplay = new ObservableCollection<CustomerOperationForDisplayViewModel>(displayList);
-        ApplyFilter();
-    }
-
-    partial void OnSelectedCustomerChanged(CustomerResponse? value) => ApplyFilter();
-    partial void OnBeginDateChanged(DateTime? value) => ApplyFilter();
-    partial void OnEndDateChanged(DateTime? value) => ApplyFilter();
-
     private void ApplyFilter()
     {
         if (allOperationsForDisplay == null || allOperationsForDisplay.Count == 0)
@@ -134,18 +151,8 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
         var filtered = allOperationsForDisplay.AsEnumerable();
 
-        if (SelectedCustomer != null)
-            filtered = filtered.Where(x => x.Customer == SelectedCustomer.Name);
 
-        if (BeginDate.HasValue)
-            filtered = filtered.Where(x => x.Date >= BeginDate.Value);
-
-        if (EndDate.HasValue)
-            filtered = filtered.Where(x => x.Date <= EndDate.Value);
-
-        CustomerOperationsForDisplay = new ObservableCollection<CustomerOperationForDisplayViewModel>(
-            filtered.OrderByDescending(x => x.Date)
-        );
+        CustomerOperationsForDisplay = new ObservableCollection<CustomerOperationForDisplayViewModel>(filtered);
     }
 
     [RelayCommand]
@@ -154,7 +161,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
         SelectedCustomer = null;
         BeginDate = DateTime.Now.AddMonths(-1);
         EndDate = DateTime.Now;
-        CustomerOperationsForDisplay = new ObservableCollection<CustomerOperationForDisplayViewModel>(allOperationsForDisplay.OrderByDescending(x => x.Date));
+        CustomerOperationsForDisplay = new ObservableCollection<CustomerOperationForDisplayViewModel>(allOperationsForDisplay);
     }
 
     [RelayCommand]
@@ -179,29 +186,79 @@ public partial class TurnoversPageViewModel : ViewModelBase
             using (var workbook = new XLWorkbook())
             {
                 var ws = workbook.Worksheets.Add("Operatsiyalar");
-                ws.Cell(1, 1).Value = "Mijoz operatsiyalari ro'yxati";
-                ws.Range("A1:E1").Merge().Style
+
+                int row = 1;
+
+                // 🔹 Sarlavha
+                ws.Cell(row, 1).Value = "MIJOZ OPERATSIYALARI HISOBOTI";
+                ws.Range($"A{row}:E{row}").Merge().Style
                     .Font.SetBold()
                     .Font.SetFontSize(16)
                     .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+                row++;
 
+                // 🔹 Mijoz nomi
+                ws.Cell(row, 1).Value = $"Mijoz: {SelectedCustomer?.Name.ToUpper() ?? "Tanlanmagan"}";
+                ws.Range($"A{row}:E{row}").Merge().Style
+                    .Font.SetBold()
+                    .Font.SetFontSize(14)
+                    .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left);
+                row++;
+
+                // 🔹 Davr oralig‘i
+                ws.Cell(row, 1).Value = $"Davr oralig‘i: {BeginDate?.ToString("dd.MM.yyyy") ?? "-"} dan {EndDate?.ToString("dd.MM.yyyy") ?? "-"} gacha";
+                ws.Range($"A{row}:E{row}").Merge().Style
+                    .Font.SetBold()
+                    .Font.SetFontSize(14)
+                    .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left);
+                row += 2; // 1 bo‘sh qator qo‘shish
+
+                // 🔹 Header qatori
                 string[] headers = { "Sana", "Mijoz", "Debit", "Kredit", "Izoh" };
                 for (int i = 0; i < headers.Length; i++)
-                    ws.Cell(3, i + 1).Value = headers[i];
+                    ws.Cell(row, i + 1).Value = headers[i];
 
-                ws.Range("A3:E3").Style.Font.Bold = true;
-                int row = 4;
+                ws.Range($"A{row}:E{row}").Style.Font.Bold = true;
+                row++;
+
+                // 🔹 Boshlang‘ich balans
+                ws.Range($"A{row}:D{row}").Merge();
+                ws.Cell(row, 1).Value = "Boshlang‘ich qoldiq";
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                ws.Cell(row, 5).Value = BeginBalance?.ToString("N2") ?? "0.00";
+                ws.Cell(row, 5).Style.Font.Bold = true;
+                ws.Cell(row, 5).Style.Alignment.WrapText = true;
+                row++;
+
+                // 🔹 Har bir operation
                 foreach (var item in CustomerOperationsForDisplay)
                 {
                     ws.Cell(row, 1).Value = item.Date.ToString("dd.MM.yyyy");
                     ws.Cell(row, 2).Value = item.Customer;
                     ws.Cell(row, 3).Value = item.Debit;
                     ws.Cell(row, 4).Value = item.Credit;
-                    ws.Cell(row, 5).Value = item.Description;
+
+                    // 🔹 Description ; bo‘yicha ajratib yangi qator qo‘shish
+                    var formattedDescription = string.Join(Environment.NewLine,
+                        (item.Description ?? "").Split(';').Select(x => x.Trim()).Where(x => !string.IsNullOrEmpty(x)));
+
+                    ws.Cell(row, 5).Value = formattedDescription;
+                    ws.Cell(row, 5).Style.Alignment.WrapText = true;
+
                     row++;
                 }
 
+                // 🔹 Oxirgi balans
+                ws.Range($"A{row}:D{row}").Merge();
+                ws.Cell(row, 1).Value = "Oxirgi qoldiq";
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                ws.Cell(row, 5).Value = LastBalance?.ToString("N2") ?? "0.00";
+                ws.Cell(row, 5).Style.Font.Bold = true;
+                ws.Cell(row, 5).Style.Alignment.WrapText = true;
+
+                // 🔹 Kolonkalarni avtomatik kengaytirish
                 ws.Columns().AdjustToContents();
+
                 workbook.SaveAs(dialog.FileName);
             }
 
@@ -211,27 +268,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         {
             MessageBox.Show($"Xatolik: {ex.Message}");
         }
-    }
-
-    [RelayCommand]
-    private void Preview()
-    {
-        if (CustomerOperationsForDisplay == null || !CustomerOperationsForDisplay.Any())
-        {
-            MessageBox.Show("Ko‘rsatish uchun ma’lumot yo‘q.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
-
-        var doc = CreateFixedDocument();
-        var previewWindow = new Window
-        {
-            Title = "Operatsiyalar Preview",
-            Width = 900,
-            Height = 800,
-            Content = new DocumentViewer { Document = doc },
-            WindowStartupLocation = WindowStartupLocation.CenterScreen
-        };
-        previewWindow.ShowDialog();
     }
 
     [RelayCommand]
@@ -248,73 +284,324 @@ public partial class TurnoversPageViewModel : ViewModelBase
             dlg.PrintDocument(CreateFixedDocument().DocumentPaginator, "Operatsiyalar");
     }
 
+    [RelayCommand]
+    private void Preview()
+    {
+        if (CustomerOperationsForDisplay == null || !CustomerOperationsForDisplay.Any())
+        {
+            MessageBox.Show("Ko‘rsatish uchun ma’lumot yo‘q.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var doc = CreateFixedDocument();
+
+        // 🔹 DocumentViewer
+        var viewer = new DocumentViewer { Document = doc, Margin = new Thickness(10, 5, 5, 5) };
+
+        // 🔹 Toolbar
+        var toolbar = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Margin = new Thickness(5)
+        };
+
+        // 📄 PDF yaratish va Telegram orqali ulashish
+        var shareButton = new Button
+        {
+            Content = "📤 Telegram’da ulashish",
+            Margin = new Thickness(5, 0, 0, 0),
+            Padding = new Thickness(10, 5, 10, 5)
+        };
+        shareButton.Click += (s, e) =>
+        {
+            try
+            {
+                // 🔹 Fayl nomi: dd.MM.yyyy_HH.mm.ss.pdf
+                string fileName = $"MijozOperatsiyalari_{DateTime.Now:dd.MM.yyyy_HH.mm.ss}.pdf";
+                string pdfPath = Path.Combine(Path.GetTempPath(), fileName);
+
+                SaveFixedDocumentToPdf(doc, pdfPath);
+
+                if (!File.Exists(pdfPath))
+                {
+                    MessageBox.Show("PDF fayl yaratilmagan.", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                SharePdfFile(pdfPath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        };
+        toolbar.Children.Add(shareButton);
+
+        // 🔹 Layout
+        var layout = new DockPanel();
+        DockPanel.SetDock(toolbar, Dock.Top);
+        layout.Children.Add(toolbar);
+        layout.Children.Add(viewer);
+
+        var previewWindow = new Window
+        {
+            Title = "Operatsiyalar Preview",
+            Width = 900,
+            Height = 800,
+            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            Content = layout
+        };
+
+        previewWindow.ShowDialog();
+    }
+
+    private void SaveFixedDocumentToPdf(FixedDocument fixedDoc, string pdfPath)
+    {
+        try
+        {
+            using var document = new PdfSharp.Pdf.PdfDocument();
+
+            foreach (var pageContent in fixedDoc.Pages)
+            {
+                var fixedPage = pageContent.GetPageRoot(false);
+                if (fixedPage == null) continue;
+
+                fixedPage.Measure(new Size(fixedPage.Width, fixedPage.Height));
+                fixedPage.Arrange(new Rect(new Size(fixedPage.Width, fixedPage.Height)));
+                fixedPage.UpdateLayout();
+
+                var bmp = new RenderTargetBitmap((int)fixedPage.Width, (int)fixedPage.Height, 96, 96, PixelFormats.Pbgra32);
+                bmp.Render(fixedPage);
+
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(bmp));
+                using var ms = new MemoryStream();
+                encoder.Save(ms);
+                ms.Position = 0;
+
+                var pdfPage = document.AddPage();
+                pdfPage.Width = XUnit.FromPoint(fixedPage.Width);
+                pdfPage.Height = XUnit.FromPoint(fixedPage.Height);
+
+                using var gfx = XGraphics.FromPdfPage(pdfPage);
+                using var image = XImage.FromStream(ms);
+                gfx.DrawImage(image, 0, 0, pdfPage.Width, pdfPage.Height);
+            }
+
+            document.Save(pdfPath);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"PDF yaratishda xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void SharePdfFile(string pdfPath)
+    {
+        try
+        {
+            if (!File.Exists(pdfPath))
+            {
+                MessageBox.Show("Fayl topilmadi.", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // 🔹 Windows Share oynasini ochadi
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"/select,\"{pdfPath}\"",
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ulashishda xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
     private FixedDocument CreateFixedDocument()
     {
         var doc = new FixedDocument();
-        var page = new FixedPage { Width = 793.7, Height = 1122.5, Background = Brushes.White };
+        var page = new FixedPage
+        {
+            Width = 793.7,   // A4 eni (px)
+            Height = 1122.5, // A4 bo‘yi (px)
+            Background = Brushes.White
+        };
+
         var stack = new StackPanel { Margin = new Thickness(40) };
 
-        var title = new TextBlock
+        // 🔹 Sarlavha
+        stack.Children.Add(new TextBlock
         {
             Text = "MIJOZ OPERATSIYALARI HISOBOTI",
             FontSize = 18,
             FontWeight = FontWeights.Bold,
-            TextAlignment = System.Windows.TextAlignment.Center,
+            TextAlignment = TextAlignment.Center,
             Margin = new Thickness(0, 0, 0, 20)
-        };
-        stack.Children.Add(title);
+        });
 
-        var grid = new Grid();
-        string[] headers = { "Sana", "Mijoz", "Debit", "Kredit", "Izoh" };
-        for (int i = 0; i < headers.Length; i++)
+        // 🔹 Mijoz nomi
+        stack.Children.Add(new TextBlock
         {
-            grid.ColumnDefinitions.Add(new ColumnDefinition());
-            var txt = new TextBlock
-            {
-                Text = headers[i],
-                FontWeight = FontWeights.Bold,
-                TextAlignment = System.Windows.TextAlignment.Center,
-                Padding = new Thickness(5)
-            };
-            Grid.SetColumn(txt, i);
-            grid.Children.Add(txt);
-        }
+            Text = $"Mijoz: {SelectedCustomer?.Name.ToUpper() ?? "Tanlanmagan"}",
+            FontSize = 16,
+            FontWeight = FontWeights.Medium,
+            Margin = new Thickness(0, 0, 0, 5)
+        });
 
-        stack.Children.Add(grid);
+        // 🔹 Davr oralig‘i
+        stack.Children.Add(new TextBlock
+        {
+            Text = $"Davr oralig‘i: {BeginDate?.ToString("dd.MM.yyyy") ?? "-"} dan {EndDate?.ToString("dd.MM.yyyy") ?? "-"} gacha",
+            FontSize = 16,
+            FontWeight = FontWeights.Medium,
+            Margin = new Thickness(0, 0, 0, 20)
+        });
 
+        double[] colWidths = { 100, 160, 100, 100, 250 };
+
+        // 🔹 Header qatori
+        var headerGrid = CreateRow(colWidths, true, "Sana", "Mijoz", "Debit", "Kredit", "Izoh");
+        stack.Children.Add(headerGrid);
+
+        // 🔹 Boshlang‘ich balans
+        var beginGrid = CreateBalanceRow(colWidths, "Boshlang‘ich qoldiq", BeginBalance?.ToString("N2") ?? "0.00");
+        stack.Children.Add(beginGrid);
+
+        // 🔹 Har bir operation
         foreach (var item in CustomerOperationsForDisplay)
         {
-            var row = new Grid();
-            for (int i = 0; i < 5; i++)
-                row.ColumnDefinitions.Add(new ColumnDefinition());
-
-            AddCell(row, 0, item.Date.ToString("dd.MM.yyyy"));
-            AddCell(row, 1, item.Customer);
-            AddCell(row, 2, item.Debit.ToString("N0"), System.Windows.TextAlignment.Right);
-            AddCell(row, 3, item.Credit.ToString("N0"), System.Windows.TextAlignment.Right);
-            AddCell(row, 4, item.Description);
-
+            var row = CreateRow(colWidths, false,
+                item.Date.ToString("dd.MM.yyyy"),
+                item.Customer,
+                item.Debit == 0 ? "" : item.Debit.ToString("N2"),
+                item.Credit == 0 ? "" : item.Credit.ToString("N2"),
+                item.FormattedDescription
+            );
             stack.Children.Add(row);
         }
 
+        // 🔹 Oxirgi balans
+        var lastGrid = CreateBalanceRow(colWidths, "Oxirgi qoldiq", LastBalance?.ToString("N2") ?? "0.00");
+        stack.Children.Add(lastGrid);
 
         page.Children.Add(stack);
         var pc = new PageContent();
         ((IAddChild)pc).AddChild(page);
         doc.Pages.Add(pc);
+
         return doc;
     }
 
-    private void AddCell(Grid grid, int column, string text, System.Windows.TextAlignment align = System.Windows.TextAlignment.Left)
+    private Grid CreateRow(double[] colWidths, bool isHeader, params string[] cells)
     {
-        var tb = new TextBlock
+        var grid = new Grid { HorizontalAlignment = HorizontalAlignment.Stretch };
+
+        for (int i = 0; i < colWidths.Length; i++)
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(colWidths[i]) });
+
+        for (int i = 0; i < cells.Length; i++)
         {
-            Text = text,
-            TextAlignment = align,
-            Padding = new Thickness(5)
-        };
-        Grid.SetColumn(tb, column);
-        grid.Children.Add(tb);
+            var tb = new TextBlock
+            {
+                Text = cells[i],
+                Padding = new Thickness(5, 2, 5, 2),
+                TextAlignment = isHeader ? TextAlignment.Center : i switch
+                {
+                    0 => TextAlignment.Center,  // Sana
+                    1 => TextAlignment.Left,    // Mijoz
+                    2 or 3 => TextAlignment.Right, // Debit / Kredit
+                    _ => TextAlignment.Left
+                },
+                FontWeight = isHeader ? FontWeights.Bold : FontWeights.Normal,
+                FontSize = isHeader ? 13 : 12,
+                TextWrapping = TextWrapping.Wrap,
+                HorizontalAlignment = isHeader ? HorizontalAlignment.Center : HorizontalAlignment.Stretch
+            };
+
+            var border = new Border
+            {
+                BorderBrush = Brushes.Black,
+                BorderThickness = new Thickness(0.5, 0.5, i == cells.Length - 1 ? 0.5 : 0, 0.5),
+                Child = tb
+            };
+
+            Grid.SetColumn(border, i);
+            grid.Children.Add(border);
+        }
+
+        return grid;
     }
 
+    private Grid CreateBalanceRow(double[] colWidths, string label, string value)
+    {
+        var grid = new Grid { HorizontalAlignment = HorizontalAlignment.Stretch };
+
+        for (int i = 0; i < colWidths.Length; i++)
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(colWidths[i]) });
+
+        // 🔹 Label (4 ustunni birlashtirish)
+        var labelText = new TextBlock
+        {
+            Text = label,
+            Padding = new Thickness(5, 2, 5, 2),
+            FontWeight = FontWeights.Bold,
+            FontSize = 12,
+            Foreground = Brushes.Black,
+            TextAlignment = TextAlignment.Left
+        };
+
+        var labelBorder = new Border
+        {
+            BorderBrush = Brushes.Black,
+            BorderThickness = new Thickness(0.5),
+            Child = labelText
+        };
+
+        Grid.SetColumn(labelBorder, 0);
+        Grid.SetColumnSpan(labelBorder, 4);
+        grid.Children.Add(labelBorder);
+
+        // 🔹 Value (Izoh ustuni, ; bo‘yicha split)
+        var valueText = new TextBlock
+        {
+            Padding = new Thickness(5, 2, 5, 2),
+            FontWeight = FontWeights.Bold,
+            FontSize = 12,
+            Foreground = Brushes.Black,
+            TextAlignment = TextAlignment.Left,
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            var parts = value.Split(';')
+                             .Select(x => x.Trim())
+                             .Where(x => !string.IsNullOrEmpty(x))
+                             .ToList();
+
+            for (int i = 0; i < parts.Count; i++)
+            {
+                valueText.Inlines.Add(parts[i]);
+                if (i < parts.Count - 1)
+                    valueText.Inlines.Add(new LineBreak());
+            }
+        }
+
+        var valueBorder = new Border
+        {
+            BorderBrush = Brushes.Black,
+            BorderThickness = new Thickness(0.5),
+            Child = valueText
+        };
+
+        Grid.SetColumn(valueBorder, 4);
+        grid.Children.Add(valueBorder);
+
+        return grid;
+    }
 }
+

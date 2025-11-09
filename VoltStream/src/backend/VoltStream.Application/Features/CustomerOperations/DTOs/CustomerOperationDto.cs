@@ -9,7 +9,7 @@ public record CustomerOperationDto
     public decimal Amount { get; set; }
     public OperationType OperationType { get; set; }
     public string Description { get; set; } = string.Empty;
-
     public long AccountId { get; set; }
     public AccountDto Account { get; set; } = default!;
+    public DateTimeOffset Date { get; set; }
 }

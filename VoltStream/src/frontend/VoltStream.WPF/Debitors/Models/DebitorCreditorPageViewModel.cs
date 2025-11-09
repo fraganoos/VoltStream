@@ -2,17 +2,20 @@
 
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
-using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
+using PdfSharp.Drawing;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
 
@@ -265,34 +268,6 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
         }
     }
 
-
-    [RelayCommand]
-    private void Preview()
-    {
-        if (FilteredDebitorCreditorItems == null || !FilteredDebitorCreditorItems.Any())
-        {
-            MessageBox.Show("Ko‘rsatish uchun ma’lumot yo‘q.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
-
-        FinalAmount = -FilteredDebitorCreditorItems.Sum(x => x.TotalBalance);
-
-        var fixedDoc = CreateFixedDocumentForPrint();
-        var previewWindow = new Window
-        {
-            Title = "Debitor/Kreditor Preview",
-            Width = 900,
-            Height = 800,
-            WindowStartupLocation = WindowStartupLocation.CenterScreen,
-            Content = new DocumentViewer
-            {
-                Document = fixedDoc,
-                Margin = new Thickness(10, 5, 5, 5)
-            }
-        };
-        previewWindow.ShowDialog();
-    }
-
     [RelayCommand]
     private void Print()
     {
@@ -306,6 +281,155 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
         var dlg = new PrintDialog();
         if (dlg.ShowDialog() == true)
             dlg.PrintDocument(fixedDoc.DocumentPaginator, "Debitor va Kreditorlar");
+    }
+
+    [RelayCommand]
+    private void Preview()
+    {
+        if (FilteredDebitorCreditorItems == null || !FilteredDebitorCreditorItems.Any())
+        {
+            MessageBox.Show("Ko‘rsatish uchun ma’lumot yo‘q.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        FinalAmount = FinalDebitor - FinalKreditor - FinalDiscount;
+        var fixedDoc = CreateFixedDocumentForPrint();
+
+        // 🔹 DocumentViewer
+        var viewer = new DocumentViewer
+        {
+            Document = fixedDoc,
+            Margin = new Thickness(10, 5, 5, 5)
+        };
+
+        // 🔹 Toolbar
+        var toolbar = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Margin = new Thickness(5)
+        };
+
+
+        // 📄 PDF yaratish va Telegram orqali ulashish
+        var shareButton = new Button
+        {
+            Content = "📤 Telegram’da ulashish",
+            Margin = new Thickness(5, 0, 0, 0),
+            Padding = new Thickness(10, 5, 10, 5)
+        };
+        shareButton.Click += (s, e) =>
+        {
+            try
+            {
+                string pdfPath = Path.Combine(Path.GetTempPath(), $"DebitorKreditor_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
+                SaveFixedDocumentToPdf(fixedDoc, pdfPath);
+
+                if (!File.Exists(pdfPath))
+                {
+                    MessageBox.Show("PDF fayl yaratilmagan.", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // 🔹 Windows Share orqali ochish
+                SharePdfFile(pdfPath);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        };
+
+        //toolbar.Children.Add(printButton);
+        toolbar.Children.Add(shareButton);
+
+        // 🔹 Layout
+        var layout = new DockPanel();
+        DockPanel.SetDock(toolbar, Dock.Top);
+        layout.Children.Add(toolbar);
+        layout.Children.Add(viewer);
+
+        var previewWindow = new Window
+        {
+            Title = "Debitor/Kreditor Preview",
+            Width = 900,
+            Height = 800,
+            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            Content = layout
+        };
+
+        previewWindow.ShowDialog();
+    }
+
+    private void SaveFixedDocumentToPdf(FixedDocument fixedDoc, string pdfPath)
+    {
+        try
+        {
+            using var document = new PdfSharp.Pdf.PdfDocument();
+
+            foreach (var pageContent in fixedDoc.Pages)
+            {
+                var fixedPage = pageContent.GetPageRoot(false);
+                if (fixedPage == null)
+                    continue;
+
+                fixedPage.Measure(new Size(fixedPage.Width, fixedPage.Height));
+                fixedPage.Arrange(new Rect(new Size(fixedPage.Width, fixedPage.Height)));
+                fixedPage.UpdateLayout();
+
+                var bmp = new RenderTargetBitmap(
+                    (int)fixedPage.Width,
+                    (int)fixedPage.Height,
+                    96, 96,
+                    PixelFormats.Pbgra32);
+                bmp.Render(fixedPage);
+
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(bmp));
+                using var ms = new MemoryStream();
+                encoder.Save(ms);
+                ms.Position = 0;
+
+                var pdfPage = document.AddPage();
+                pdfPage.Width = XUnit.FromPoint(fixedPage.Width);
+                pdfPage.Height = XUnit.FromPoint(fixedPage.Height);
+
+                using var gfx = XGraphics.FromPdfPage(pdfPage);
+                using var image = XImage.FromStream(ms);
+                gfx.DrawImage(image, 0, 0, pdfPage.Width, pdfPage.Height);
+            }
+
+            document.Save(pdfPath);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"PDF yaratishda xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void SharePdfFile(string pdfPath)
+    {
+        try
+        {
+            if (!File.Exists(pdfPath))
+            {
+                MessageBox.Show("Fayl topilmadi.", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // 🔹 Windows share oynasini ochadi (Telegram, WhatsApp, Gmail va boshqalar)
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"/select,\"{pdfPath}\"",
+                UseShellExecute = true
+            });
+
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ulashishda xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private FixedDocument CreateFixedDocumentForPrint()
@@ -512,7 +636,6 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
         return fixedDoc;
     }
 
-    // Helper (siznikiga mos yozildi)
     private void AddTotalCell(Grid grid, int row, int col, decimal value, bool isFinal = false)
     {
         var cell = new Border

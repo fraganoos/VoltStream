@@ -26,7 +26,6 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!--  🧾 Filtr bo‘limi  -->
             <!--  👤 Mijoz  -->
             <Grid  Grid.Column="0">
                 <Grid.ColumnDefinitions>
@@ -69,13 +68,12 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <controls:UserCalendar Grid.Column="0"
-                                           x:Name="beginDate"
                                            Width="110"
                                            Margin="0"
                                            VerticalAlignment="Center"
                                            utils:EnterKeyTab.IsEnabled="True"
                                            FontSize="14"
-                                           SelectedDate="{Binding BeginDate, Mode=TwoWay}" />
+                                           SelectedDate="{Binding BeginDate, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock Grid.Column="1"
                                Width="25"
                                Margin="2,0"
@@ -83,13 +81,12 @@
                                FontSize="13"
                                Text="dan" />
                     <controls:UserCalendar Grid.Column="2"
-                                           x:Name="endDate"
                                            Width="110"
                                            Margin="0"
                                            VerticalAlignment="Center"
                                            utils:EnterKeyTab.IsEnabled="True"
                                            FontSize="14"
-                                           SelectedDate="{Binding EndDate, Mode=TwoWay}" />
+                                           SelectedDate="{Binding EndDate, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
                     <TextBlock Grid.Column="3"
                                Width="35"
                                Margin="0"
@@ -157,12 +154,16 @@
                     <TextBlock Text="Boshlang'ich qoldiq"
                                VerticalAlignment="Center"
                                FontSize="14"/>
-                    <TextBlock FontSize="14"
-                               Width="150"
+                    <TextBlock x:Name="beginBalance"
+                               FontSize="14"
+                               Width="200"
                                Height="25"
+                               Margin="10 0 0 0"
+                               FontWeight="Medium"
                                HorizontalAlignment="Right"
-                               VerticalAlignment="Center"
-                               Text=""/>
+                               VerticalAlignment="Bottom"
+                               Text="{Binding BeginBalance, StringFormat={}{0:N2}}"
+                               />
                 </StackPanel>
                 <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="5">
                     <TextBlock Text="Oxirgi qoldiq"
@@ -170,18 +171,22 @@
                                FontSize="14"
                                HorizontalAlignment="Left"
                                Width="120"/>
-                    <TextBlock FontSize="14"
-                               Width="150"
+                    <TextBlock x:Name="lastBalance"
+                               FontSize="14"
+                               Width="200"
                                Height="25"
+                               Margin="10 0 0 0"
+                               FontWeight="Medium"
                                HorizontalAlignment="Right"
-                               VerticalAlignment="Center"
-                               Text=""/>
+                               VerticalAlignment="Bottom"
+                               Text="{Binding LastBalance, StringFormat={}{0:N2}}"/>
                 </StackPanel>
             </Grid>
 
         </Grid>
         <!--  📋 DataGrid  -->
-        <DataGrid Grid.Row="1"
+        <DataGrid x:Name="MyDataGrid"
+                  Grid.Row="1"
                   Margin="10,5,10,0"
                   AlternatingRowBackground="#F5F5F5"
                   AutoGenerateColumns="False"
@@ -209,10 +214,12 @@
                     <DataGridTextColumn.HeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
 
+                <!--  👤 Mijoz -->
                 <DataGridTextColumn
                     Width="1.5*"
                     Binding="{Binding Customer}"
@@ -226,10 +233,12 @@
                     <DataGridTextColumn.HeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
 
+                <!--  💰 Debit -->
                 <DataGridTextColumn
                     Width="*"
                     Binding="{Binding Debit, StringFormat={}{0:N0}}"
@@ -240,19 +249,15 @@
                             <Setter Property="Padding" Value="5,0" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
-                    <DataGridTextColumn.EditingElementStyle>
-                        <Style TargetType="TextBox">
-                            <Setter Property="utils:NumericTextBox.IsNumeric" Value="True" />
-                            <Setter Property="TextAlignment" Value="Right" />
-                        </Style>
-                    </DataGridTextColumn.EditingElementStyle>
                     <DataGridTextColumn.HeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
 
+                <!--  💳 Kredit -->
                 <DataGridTextColumn
                     Width="*"
                     Binding="{Binding Credit, StringFormat={}{0:N0}}"
@@ -263,35 +268,32 @@
                             <Setter Property="Padding" Value="5,0" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
-                    <DataGridTextColumn.EditingElementStyle>
-                        <Style TargetType="TextBox">
-                            <Setter Property="utils:NumericTextBox.IsNumeric" Value="True" />
-                            <Setter Property="TextAlignment" Value="Right" />
-                        </Style>
-                    </DataGridTextColumn.EditingElementStyle>
                     <DataGridTextColumn.HeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
 
+                <!--  📝 Izoh (long text wrap + ; bo'yicha split) -->
                 <DataGridTextColumn
                     Width="3*"
-                    Binding="{Binding Description}"
+                    Binding="{Binding FormattedDescription}"
                     Header="Izoh">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="TextAlignment" Value="Left" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextWrapping" Value="Wrap" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.HeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
-
                 </DataGridTextColumn>
 
             </DataGrid.Columns>

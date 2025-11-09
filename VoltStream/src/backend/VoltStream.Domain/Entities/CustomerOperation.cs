@@ -1,5 +1,6 @@
 ﻿namespace VoltStream.Domain.Entities;
 
+using System;
 using VoltStream.Domain.Enums;
 
 public class CustomerOperation : Auditable
@@ -10,4 +11,5 @@ public class CustomerOperation : Auditable
     public long? CustomerId { get; set; }
     public long AccountId { get; set; }
     public Account Account { get; set; } = default!;
+    public DateTimeOffset Date { get; set; }
 }
