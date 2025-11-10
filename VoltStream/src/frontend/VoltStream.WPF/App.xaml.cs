@@ -9,8 +9,6 @@ using System.Windows;
 using System.Windows.Controls;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Configurations;
-using VoltStream.WPF.LoginPages.Models;
-using VoltStream.WPF.LoginPages.Views;
 
 public partial class App : Application
 {

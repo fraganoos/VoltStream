@@ -10,23 +10,25 @@ using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
-using VoltStream.WPF.Payments.PayDiscountWindow.Views; // Добавьте этот using в начало файла, если его нет
+using VoltStream.WPF.Payments.PayDiscountWindow.Views;
 
 partial class PaymentPageViewModel : ViewModelBase
 {
     public readonly ICustomersApi customersApi;
     public readonly ICurrenciesApi currenciesApi;
     public readonly IPaymentApi paymentApi;
+    public readonly IDiscountsApi discountsApi;
     public readonly IMapper mapper;
+
     public PaymentPageViewModel(IServiceProvider services)
     {
         customersApi = services.GetRequiredService<ICustomersApi>();
         currenciesApi = services.GetRequiredService<ICurrenciesApi>();
-        mapper = services.GetRequiredService<IMapper>();
         paymentApi = services.GetRequiredService<IPaymentApi>();
+        discountsApi = services.GetRequiredService<IDiscountsApi>();
+        mapper = services.GetRequiredService<IMapper>();
 
         Payment = new();
         Payment.PropertyChanged += Payment_PropertyChanged;
@@ -35,14 +37,12 @@ partial class PaymentPageViewModel : ViewModelBase
     }
 
     [ObservableProperty] private ObservableCollection<PaymentViewModel> historyPayments = [];
-
-
     [ObservableProperty] private ObservableCollection<PaymentViewModel> availablePayments = [];
     [ObservableProperty] private ObservableCollection<CurrencyViewModel> availableCurrencies = [];
     [ObservableProperty] private ObservableCollection<CustomerViewModel> availableCustomers = [];
-
     [ObservableProperty] private PaymentViewModel payment = new();
     [ObservableProperty] private CustomerViewModel? customer;
+
     private long customerId;
 
     private async void Payment_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -52,7 +52,6 @@ partial class PaymentPageViewModel : ViewModelBase
             await LoadDatagrid();
         }
     }
-
 
     #region Commands
 
@@ -68,7 +67,7 @@ partial class PaymentPageViewModel : ViewModelBase
         var request = mapper.Map<PaymentRequest>(Payment);
         request.CustomerId = Customer.Id;
 
-        var response = await paymentApi.CreateAsync(request).Handle();
+        var response = await paymentApi.CreateAsync(request).Handle(isLoading => IsLoading = isLoading);
 
         if (response.IsSuccess)
         {
@@ -84,36 +83,56 @@ partial class PaymentPageViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void OpenDiscountsWindow()
+    private async Task OpenDiscountsWindow()
     {
-        try { 
-            if (Customer is null)
-            {
-                Warning = "Mijoz tanlanishi shart!";
-                return;
-            }
-            if (Payment.Discount is null || Payment.Discount <= 0)
-            {
-                Warning = "Mijoz uchun mavjud chegirma yo'q!";
-                return;
-            }
-            var discountsWindow = new PayDiscountWindow(customerId, customer.Name, Payment.Discount.Value); // Исправлено создание экземпляра окна
-            if (discountsWindow.ShowDialog()== true)
-            {
-                dynamic? result = discountsWindow.ResultOfDiscount;
-                MessageBox.Show($"Tanlangan chegirma turi: {result.discountCash.ToString()}, \n"  +
-                    $"Chegirma summasi: {result.discountSum.ToString()}, \n" +
-                    $"Izox: {result.discountInfo}", "Ma'lumot", MessageBoxButton.OK, MessageBoxImage.Information);
-
-            }
-        }
-        catch (Exception ex)
+        if (Customer is null)
         {
-            Error = "Xatolik yuz berdi: " + ex.Message;
+            Warning = "Mijoz tanlanishi shart!";
             return;
         }
 
+        if (Payment.Discount is null || Payment.Discount <= 0)
+        {
+            Warning = "Mijoz uchun mavjud chegirma yo'q!";
+            return;
+        }
+
+        var discountsWindow = new PayDiscountWindow(customerId, Customer.Name, Payment.Discount.Value);
+
+        if (discountsWindow.ShowDialog() == true)
+        {
+            dynamic? result = discountsWindow.ResultOfDiscount;
+
+            var request = new ApplyDiscountRequest
+            {
+                CustomerId = customerId,
+                DiscountAmount = result!.discountSum,
+                IsCash = result.discountCash,
+                Description = result.discountInfo ?? string.Empty
+            };
+
+            var response = await discountsApi.ApplyAsync(request)
+                .Handle(isLoading => IsLoading = isLoading);
+
+            if (response.IsSuccess)
+            {
+                Success = "Chegirma muvaffaqiyatli qo'llandi!";
+                await LoadCustomerAsync();
+
+                Success = $"Chegirma muvaffaqiyatli qo'llandi!\n\n" +
+                    $"Turi: {(result.discountCash ? "Naqd to'lov (kassadan)" : "Hisobga qo'shildi")}\n" +
+                    $"Summa: {result.discountSum:N2}\n" +
+                    $"Izoh: {result.discountInfo}\n" +
+                    $"Operatsiya ID: {response.Data}";
+            }
+            else
+            {
+                Error = response.Message ?? "Chegirma qo'llashda xatolik!";
+            }
+        }
+
     }
+
     #endregion Commands
 
     #region Load data
@@ -135,20 +154,34 @@ partial class PaymentPageViewModel : ViewModelBase
                 ["paidAt"] = [date],
                 ["customer"] = ["include"],
                 ["currency"] = ["include"]
-
             }
         };
+
         var response = await paymentApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
+
         if (response.IsSuccess)
             HistoryPayments = mapper.Map<ObservableCollection<PaymentViewModel>>(response.Data);
         else
             Error = response.Message ?? "To'lovlarni olishda xatolik!";
     }
+
     private async Task LoadCurrenciesAsync()
     {
-        var response = await currenciesApi.GetAllAsync().Handle();
+        FilteringRequest request = new()
+        {
+            Filters = new()
+            {
+                ["isactive"] = ["true"]
+            }
+        };
+
+        var response = await currenciesApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
+
         if (response.IsSuccess)
+        {
             AvailableCurrencies = mapper.Map<ObservableCollection<CurrencyViewModel>>(response.Data);
+            Payment.Currency = AvailableCurrencies.FirstOrDefault(c => c.IsDefault)!;
+        }
         else
             Error = response.Message ?? "Valyuteni yuklashda xatolik!";
     }
@@ -156,17 +189,18 @@ partial class PaymentPageViewModel : ViewModelBase
     public async Task LoadCustomersAsync()
     {
         var response = await customersApi.GetAllAsync().Handle();
+
         if (response.IsSuccess)
             AvailableCustomers = mapper.Map<ObservableCollection<CustomerViewModel>>(response.Data);
         else
             Error = response.Message ?? "Valyuteni yuklashda xatolik!";
     }
 
-    // tanlangan customer ma'lumotlarini yuklash
     partial void OnCustomerChanged(CustomerViewModel? value)
     {
         if (customer is null || customerId == value?.Id)
             return;
+
         customerId = value!.Id;
         _ = LoadCustomerAsync();
     }
@@ -187,6 +221,7 @@ partial class PaymentPageViewModel : ViewModelBase
         if (response.IsSuccess)
         {
             Customer = mapper.Map<CustomerViewModel>(response.Data.FirstOrDefault() ?? new());
+
             if (Customer.Accounts is not null)
             {
                 foreach (var account in Customer.Accounts)

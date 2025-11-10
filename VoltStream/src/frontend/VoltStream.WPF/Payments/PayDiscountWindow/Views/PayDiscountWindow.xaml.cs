@@ -29,7 +29,7 @@ public partial class PayDiscountWindow : Window
 
     private void Button_Click(object sender, RoutedEventArgs e)
     {
-        DiscountSum.Text= AmauntDiscount.Text;
+        DiscountSum.Text = AmauntDiscount.Text;
         reСalculation.Focus();
     }
     private void SaveDiscount_Click(object sender, RoutedEventArgs e)

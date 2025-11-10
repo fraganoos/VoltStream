@@ -440,7 +440,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                     {
                         FilteredSaleItems.Add(new ProductItemViewModel
                         {
-                            OperationDate = sale.Date,
+                            OperationDate = sale.Date.LocalDateTime,
                             Category = item.Product.Category.Name,
                             Name = item.Product.Name,
                             RollLength = item.LengthPerRoll,

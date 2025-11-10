@@ -7,8 +7,8 @@ using System.Text.Json;
 public static class ApiExtensions
 {
     public static async Task<Response<T>> Handle<T>(
-    this Task<Response<T>> task,
-    Action<bool>? setLoading = null)
+        this Task<Response<T>> task,
+        Action<bool>? setLoading = null)
     {
         try
         {
@@ -19,9 +19,22 @@ public static class ApiExtensions
         {
             try
             {
-                var problem = JsonSerializer.Deserialize<Response<T>>(apiEx.Content ?? "");
-                if (problem is not null)
-                    return problem;
+                using var doc = JsonDocument.Parse(apiEx.Content ?? "{}");
+                var root = doc.RootElement;
+
+                var statusCode = root.TryGetProperty("statusCode", out var statusProp)
+                    ? statusProp.GetInt32()
+                    : (int)apiEx.StatusCode;
+
+                var message = root.TryGetProperty("message", out var messageProp)
+                    ? messageProp.GetString() ?? apiEx.Message
+                    : apiEx.Message;
+
+                return new Response<T>
+                {
+                    StatusCode = statusCode,
+                    Message = message
+                };
             }
             catch { }
 
