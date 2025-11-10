@@ -10,7 +10,6 @@ using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Sales.DTOs;
 using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public record CreateSaleCommand(
     DateTimeOffset Date,

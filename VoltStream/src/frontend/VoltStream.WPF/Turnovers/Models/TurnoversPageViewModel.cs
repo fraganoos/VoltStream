@@ -3,7 +3,7 @@ using ApiServices.Extensions;
 using ApiServices.Interfaces;
 using ApiServices.Models.Responses;
 using ClosedXML.Excel;
-using CommunityToolkit.Mvvm.ComponentModel; 
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,7 +52,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
     [ObservableProperty] private decimal? beginBalance;
     [ObservableProperty] private decimal? lastBalance;
 
-        
+
     partial void OnSelectedCustomerChanged(CustomerResponse? value)
     => _ = LoadCustomerOperationsForSelectedCustomerAsync();
 
