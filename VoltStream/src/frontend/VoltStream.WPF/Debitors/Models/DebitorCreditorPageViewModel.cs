@@ -51,7 +51,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
     [ObservableProperty] private decimal amount;
 
     // Belgilar ro'yxati
-    public List<string> Signs { get; } = new() { ">", ">=", "=", "<", "<=", "<>" };
+    public List<string> Signs { get; } = [">", ">=", "=", "<", "<=", "<>"];
 
     // LoadCustomers ichida filtrni ham to'ldir
     partial void OnDebitorCreditorItemsChanged(ObservableCollection<DebitorCreditorItemViewModel> value)
@@ -81,7 +81,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
         // 1. Mijoz bo‘yicha filtr
         if (SelectedCustomer != null)
         {
-            filtered = filtered.Where(x => x.Customer == SelectedCustomer.Name).ToList();
+            filtered = [.. filtered.Where(x => x.Customer == SelectedCustomer.Name)];
         }
 
         // 2. Belgilar bo‘yicha filtr — faqat to‘ldirilgan ustunni hisobga ol
@@ -89,16 +89,16 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
         {
             filtered = Sign switch
             {
-                ">" => filtered.Where(x => (x.Debitor > 0 && x.Debitor > Amount) ||
-                                            (x.Creditor > 0 && x.Creditor > Amount)).ToList(),
-                ">=" => filtered.Where(x => (x.Debitor > 0 && x.Debitor >= Amount) ||
-                                            (x.Creditor > 0 && x.Creditor >= Amount)).ToList(),
-                "=" => filtered.Where(x => x.Debitor == Amount || x.Creditor == Amount).ToList(),
-                "<" => filtered.Where(x => (x.Debitor > 0 && x.Debitor < Amount) ||
-                                            (x.Creditor > 0 && x.Creditor < Amount)).ToList(),
-                "<=" => filtered.Where(x => (x.Debitor > 0 && x.Debitor <= Amount) ||
-                                            (x.Creditor > 0 && x.Creditor <= Amount)).ToList(),
-                "<>" => filtered.Where(x => x.Debitor != Amount && x.Creditor != Amount).ToList(),
+                ">" => [.. filtered.Where(x => (x.Debitor > 0 && x.Debitor > Amount) ||
+                                            (x.Creditor > 0 && x.Creditor > Amount))],
+                ">=" => [.. filtered.Where(x => (x.Debitor > 0 && x.Debitor >= Amount) ||
+                                            (x.Creditor > 0 && x.Creditor >= Amount))],
+                "=" => [.. filtered.Where(x => x.Debitor == Amount || x.Creditor == Amount)],
+                "<" => [.. filtered.Where(x => (x.Debitor > 0 && x.Debitor < Amount) ||
+                                            (x.Creditor > 0 && x.Creditor < Amount))],
+                "<=" => [.. filtered.Where(x => (x.Debitor > 0 && x.Debitor <= Amount) ||
+                                            (x.Creditor > 0 && x.Creditor <= Amount))],
+                "<>" => [.. filtered.Where(x => x.Debitor != Amount && x.Creditor != Amount)],
                 _ => filtered
             };
         }
@@ -134,8 +134,8 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
                 return new DebitorCreditorItemViewModel
                 {
                     Customer = c.Name,
-                    Phone = c.Phone,
-                    Address = c.Address,
+                    Phone = c.Phone!,
+                    Address = c.Address!,
                     Discount = discount,
                     Debitor = totalBalance < 0 ? -totalBalance : 0,
                     Creditor = totalBalance > 0 ? totalBalance : 0,
@@ -361,7 +361,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
         previewWindow.ShowDialog();
     }
 
-    private void SaveFixedDocumentToPdf(FixedDocument fixedDoc, string pdfPath)
+    private static void SaveFixedDocumentToPdf(FixedDocument fixedDoc, string pdfPath)
     {
         try
         {
@@ -407,7 +407,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
         }
     }
 
-    private void SharePdfFile(string pdfPath)
+    private static void SharePdfFile(string pdfPath)
     {
         try
         {
@@ -636,7 +636,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
         return fixedDoc;
     }
 
-    private void AddTotalCell(Grid grid, int row, int col, decimal value, bool isFinal = false)
+    private static void AddTotalCell(Grid grid, int row, int col, decimal value, bool isFinal = false)
     {
         var cell = new Border
         {

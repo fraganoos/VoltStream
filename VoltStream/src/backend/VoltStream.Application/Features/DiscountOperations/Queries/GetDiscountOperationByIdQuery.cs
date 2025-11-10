@@ -18,7 +18,7 @@ public class GetDiscountOperationByIdQueryHandler(
     : IRequestHandler<GetDiscountOperationByIdQuery, DiscountOperationDto>
 {
     public async Task<DiscountOperationDto> Handle(GetDiscountOperationByIdQuery request, CancellationToken cancellationToken)
-        => mapper.Map<DiscountOperationDto>(await context.DiscountsOperations
+        => mapper.Map<DiscountOperationDto>(await context.DiscountOperations
             .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken))
         ?? throw new NotFoundException(nameof(DiscountOperation), nameof(request.Id), request.Id);
 }

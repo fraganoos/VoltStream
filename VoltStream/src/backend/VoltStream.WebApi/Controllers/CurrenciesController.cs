@@ -18,4 +18,8 @@ public class CurrenciesController
     [HttpPut("all")]
     public async Task<IActionResult> UpdateAll(List<CurrencyCommand> items)
         => Ok(new Response { Data = await Mediator.Send(new UpdateAllCurrenciesCommand(items)) });
+
+    [HttpPost("filter")]
+    public async Task<IActionResult> GetFiltered(CurrencyFilterQuery query)
+      => Ok(new Response { Data = await Mediator.Send(query) });
 }

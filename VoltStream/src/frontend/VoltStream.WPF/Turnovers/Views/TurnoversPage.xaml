@@ -8,7 +8,7 @@
       xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
       mc:Ignorable="d"
       d:DesignHeight="450" d:DesignWidth="900"
-      Title="TurnoversPage" Background="Azure">
+      Title="TurnoversPage">
 
     <Grid>
         <Grid.RowDefinitions>

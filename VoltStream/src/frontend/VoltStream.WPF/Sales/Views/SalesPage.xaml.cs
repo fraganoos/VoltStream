@@ -477,10 +477,12 @@ public partial class SalesPage : Page
             sale.ProductId = selectedProduct.Id;
         }
     }
+
     private void CbxProductName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
         ComboBoxHelper.BeforeUpdate(sender, e, "Maxsulot");
     }
+
     private async void CbxProductName_LostFocus(object sender, RoutedEventArgs e)
     {
         long? productId = null;
@@ -752,12 +754,21 @@ public partial class SalesPage : Page
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
         await LoadCategoryAsync();
-        var response = await currenciesApi.GetAllAsync().Handle();
+
+        FilteringRequest request = new()
+        {
+            Filters = new()
+            {
+                ["isdefault"] = ["true"]
+            }
+        };
+
+        var response = await currenciesApi.Filter(request).Handle();
         if (response.IsSuccess)
         {
             CurrencyType.ItemsSource = response.Data;
             CurrencyType.SelectedValuePath = "Id";
-            CurrencyType.SelectedItem = response.Data.FirstOrDefault(c => c.IsDefault);
+            CurrencyType.SelectedItem = response.Data.FirstOrDefault();
         }
     }
 

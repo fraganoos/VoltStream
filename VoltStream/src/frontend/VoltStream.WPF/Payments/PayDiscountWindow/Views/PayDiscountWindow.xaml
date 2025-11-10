@@ -103,7 +103,6 @@
                 Content="Naqd pulda"
                 Grid.Column="0"
                 Margin="0,5,3,5"
-                Content="Naqd pulda"
                 FontSize="14"
                 Foreground="Red" />
 
