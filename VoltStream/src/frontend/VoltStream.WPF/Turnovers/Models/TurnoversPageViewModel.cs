@@ -72,6 +72,20 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
         try
         {
+            if (BeginDate == null && EndDate == null)
+            {
+                BeginDate = DateTime.UtcNow.Date;
+                EndDate = DateTime.UtcNow.Date;
+            }
+            else if (BeginDate != null && EndDate == null)
+            {
+                EndDate = BeginDate;
+            }
+            else if (BeginDate == null && EndDate != null)
+            {
+                BeginDate = EndDate;
+            }
+
             var response = await customerOperationsApi.GetByCustomerId(
                 SelectedCustomer.Id,
                 BeginDate,
@@ -371,15 +385,35 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 fixedPage.Arrange(new Rect(new Size(fixedPage.Width, fixedPage.Height)));
                 fixedPage.UpdateLayout();
 
-                var bmp = new RenderTargetBitmap((int)fixedPage.Width, (int)fixedPage.Height, 96, 96, PixelFormats.Pbgra32);
-                bmp.Render(fixedPage);
+                // 🟢 Sifatni oshirish uchun yuqori DPI (600)
+                const int dpi = 600;
+                double scale = dpi / 96.0;
 
+                int pixelWidth = (int)(fixedPage.Width * scale);
+                int pixelHeight = (int)(fixedPage.Height * scale);
+
+                // 🟢 Yuqori sifatli RenderTargetBitmap
+                var bmp = new RenderTargetBitmap(pixelWidth, pixelHeight, dpi, dpi, PixelFormats.Pbgra32);
+
+                // 🟢 Skalani qo‘llash uchun vizualni transformatsiya qilamiz
+                var vb = new VisualBrush(fixedPage);
+                var dv = new DrawingVisual();
+                using (var dc = dv.RenderOpen())
+                {
+                    dc.PushTransform(new ScaleTransform(scale, scale));
+                    dc.DrawRectangle(vb, null, new Rect(new Point(0, 0), new Size(fixedPage.Width, fixedPage.Height)));
+                }
+
+                bmp.Render(dv);
+
+                // 🟢 PNG sifatini saqlaymiz
                 var encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(bmp));
                 using var ms = new MemoryStream();
                 encoder.Save(ms);
                 ms.Position = 0;
 
+                // 🟢 PDF sahifaga joylaymiz
                 var pdfPage = document.AddPage();
                 pdfPage.Width = XUnit.FromPoint(fixedPage.Width);
                 pdfPage.Height = XUnit.FromPoint(fixedPage.Height);
