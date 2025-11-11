@@ -4,13 +4,13 @@
     xmlns:converter="clr-namespace:VoltStream.WPF.Commons.Converters">
 
     <converter:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
-    <converter:StringIsNotEmptyConverter x:Key="StringIsNotEmptyConverter" />
-    <converter:UtcToUzbekistanTimeConverter x:Key="UtcToUzbekistanTimeConverter" />
-    <converter:ToStringConverter x:Key="ToStringConverter" />
+    <converter:StringIsNotEmptyConverter x:tringConverter" />
     <converter:StringToNullableDecimalConverter x:Key="StringToNullableDecimalConverter" />
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     <converter:EmptyToVisibleConverter x:Key="EmptyToVisibleConverter" />
     <converter:BalanceToColorConverter x:Key="BalanceToColorConverter" />
-    <converter:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
-    
+    <converter:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />Key="StringIsNotEmptyConverter" />
+    <converter:UtcToUzbekistanTimeConverter x:Key="UtcToUzbekistanTimeConverter" />
+    <converter:ToStringConverter x:Key="ToS
+
 </ResourceDictionary>
