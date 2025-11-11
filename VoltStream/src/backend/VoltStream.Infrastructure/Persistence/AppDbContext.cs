@@ -25,7 +25,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Supply> Supplies { get; set; }
     public DbSet<WarehouseStock> WarehouseStocks { get; set; }
     public DbSet<Warehouse> Warehouses { get; set; }
-    public DbSet<DiscountOperation> DiscountsOperations { get; set; }
+    public DbSet<DiscountOperation> DiscountOperations { get; set; }
     public DbSet<User> Users { get; set; }
 
     private IDbContextTransaction? currentTransaction;

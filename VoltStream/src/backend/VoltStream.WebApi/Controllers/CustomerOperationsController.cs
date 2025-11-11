@@ -22,7 +22,10 @@ public class CustomerOperationsController : BaseController
         [FromQuery] DateTime? beginDate = null,
         [FromQuery] DateTime? endDate = null)
     {
-        return Ok(new Response { Data = await Mediator.Send(
-            new GetCustomerOperationByCustomerIdQuery(customerId, beginDate, endDate)) });
+        return Ok(new Response
+        {
+            Data = await Mediator.Send(
+            new GetCustomerOperationByCustomerIdQuery(customerId, beginDate, endDate))
+        });
     }
 }

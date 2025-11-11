@@ -16,5 +16,5 @@ public class GetAllDiscountOperationsQueryHandler(
     : IRequestHandler<GetAllDiscountOperationsQuery, IReadOnlyCollection<DiscountOperationDto>>
 {
     public async Task<IReadOnlyCollection<DiscountOperationDto>> Handle(GetAllDiscountOperationsQuery request, CancellationToken cancellationToken)
-        => mapper.Map<IReadOnlyCollection<DiscountOperationDto>>(await context.DiscountsOperations.ToListAsync(cancellationToken));
+        => mapper.Map<IReadOnlyCollection<DiscountOperationDto>>(await context.DiscountOperations.ToListAsync(cancellationToken));
 }

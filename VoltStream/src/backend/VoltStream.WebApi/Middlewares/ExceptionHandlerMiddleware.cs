@@ -8,43 +8,32 @@ public class ExceptionHandlerMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context)
     {
-        int statusCode;
-        string message;
-
         try
         {
             await next(context);
         }
         catch (AppException ex)
         {
-            statusCode = (int)ex.StatusCode;
-            message = ex.Message;
-
-            context.Response.StatusCode = statusCode;
+            context.Response.StatusCode = (int)ex.StatusCode;
             context.Response.ContentType = "application/json";
 
             var errorResponse = new Response
             {
-                StatusCode = statusCode,
-                Message = message,
-                Data = ex.Data
+                StatusCode = (int)ex.StatusCode,
+                Message = ex.Message
             };
 
             await context.Response.WriteAsJsonAsync(errorResponse);
         }
         catch (Exception ex)
         {
-            statusCode = (int)HttpStatusCode.InternalServerError;
-            message = "Internal Server Error";
-
-            context.Response.StatusCode = statusCode;
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             context.Response.ContentType = "application/json";
 
             var errorResponse = new Response
             {
-                StatusCode = statusCode,
-                Message = message,
-                Data = new { error = ex.Message }
+                StatusCode = (int)HttpStatusCode.InternalServerError,
+                Message = ex.Message
             };
 
             await context.Response.WriteAsJsonAsync(errorResponse);

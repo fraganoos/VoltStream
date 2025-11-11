@@ -19,7 +19,7 @@ public interface IAppDbContext
     DbSet<Supply> Supplies { get; }
     DbSet<WarehouseStock> WarehouseStocks { get; }
     DbSet<Warehouse> Warehouses { get; }
-    DbSet<DiscountOperation> DiscountsOperations { get; }
+    DbSet<DiscountOperation> DiscountOperations { get; }
     DbSet<User> Users { get; }
     DbSet<Currency> Currencies { get; }
 

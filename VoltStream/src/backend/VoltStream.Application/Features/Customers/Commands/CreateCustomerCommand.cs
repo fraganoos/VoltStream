@@ -32,7 +32,11 @@ public class CreateCustomerComandHandler(
         if (isExist)
             throw new AlreadyExistException(nameof(Customer), nameof(request.Name), request.Name);
 
+        var currency = await context.Currencies.FirstOrDefaultAsync(c => c.IsDefault, cancellationToken)
+            ?? throw new NotFoundException(nameof(Currency), nameof(Currency.IsDefault), true);
+
         var customer = mapper.Map<Customer>(request);
+        customer.Accounts.First().Currency = currency;
         context.Customers.Add(customer);
 
         await context.SaveAsync(cancellationToken);

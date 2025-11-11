@@ -21,9 +21,9 @@ public class GetCustomerOperationByCustomerIdQueryHandler(
     IMapper _mapper)
     : IRequestHandler<GetCustomerOperationByCustomerIdQuery, CustomerOperationSummaryDto>
 {
-     public async Task<CustomerOperationSummaryDto> Handle(
-        GetCustomerOperationByCustomerIdQuery request,
-        CancellationToken cancellationToken)
+    public async Task<CustomerOperationSummaryDto> Handle(
+       GetCustomerOperationByCustomerIdQuery request,
+       CancellationToken cancellationToken)
     {
         var beginDate = request.BeginDate.HasValue
       ? DateTime.SpecifyKind(request.BeginDate.Value.Date, DateTimeKind.Utc)
