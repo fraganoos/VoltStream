@@ -72,6 +72,20 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
         try
         {
+            if (BeginDate == null && EndDate == null)
+            {
+                BeginDate = DateTime.UtcNow.Date;
+                EndDate = DateTime.UtcNow.Date;
+            }
+            else if (BeginDate != null && EndDate == null)
+            {
+                EndDate = BeginDate;
+            }
+            else if (BeginDate == null && EndDate != null)
+            {
+                BeginDate = EndDate;
+            }
+
             var response = await customerOperationsApi.GetByCustomerId(
                 SelectedCustomer.Id,
                 BeginDate,
@@ -307,6 +321,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
         };
 
         // 📄 PDF yaratish va Telegram orqali ulashish
+        // 🔹 PDF yaratish va Telegram orqali ulashish
         var shareButton = new Button
         {
             Content = "📤 Telegram’da ulashish",
@@ -321,7 +336,8 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 string fileName = $"MijozOperatsiyalari_{DateTime.Now:dd.MM.yyyy_HH.mm.ss}.pdf";
                 string pdfPath = Path.Combine(Path.GetTempPath(), fileName);
 
-                SaveFixedDocumentToPdf(doc, pdfPath);
+                // Telegram uchun — 96 DPI
+                SaveFixedDocumentToPdf(doc, pdfPath, 96);
 
                 if (!File.Exists(pdfPath))
                 {
@@ -336,6 +352,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 MessageBox.Show($"Xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         };
+
         toolbar.Children.Add(shareButton);
 
         // 🔹 Layout
@@ -356,7 +373,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
         previewWindow.ShowDialog();
     }
 
-    private void SaveFixedDocumentToPdf(FixedDocument fixedDoc, string pdfPath)
+    private void SaveFixedDocumentToPdf(FixedDocument fixedDoc, string pdfPath, int dpi)
     {
         try
         {
@@ -371,8 +388,21 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 fixedPage.Arrange(new Rect(new Size(fixedPage.Width, fixedPage.Height)));
                 fixedPage.UpdateLayout();
 
-                var bmp = new RenderTargetBitmap((int)fixedPage.Width, (int)fixedPage.Height, 96, 96, PixelFormats.Pbgra32);
-                bmp.Render(fixedPage);
+                double scale = dpi / 96.0;
+                int pixelWidth = (int)(fixedPage.Width * scale);
+                int pixelHeight = (int)(fixedPage.Height * scale);
+
+                var bmp = new RenderTargetBitmap(pixelWidth, pixelHeight, dpi, dpi, PixelFormats.Pbgra32);
+
+                var vb = new VisualBrush(fixedPage);
+                var dv = new DrawingVisual();
+                using (var dc = dv.RenderOpen())
+                {
+                    dc.PushTransform(new ScaleTransform(scale, scale));
+                    dc.DrawRectangle(vb, null, new Rect(new Point(0, 0), new Size(fixedPage.Width, fixedPage.Height)));
+                }
+
+                bmp.Render(dv);
 
                 var encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(bmp));
@@ -381,12 +411,25 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 ms.Position = 0;
 
                 var pdfPage = document.AddPage();
-                pdfPage.Width = XUnit.FromPoint(fixedPage.Width);
-                pdfPage.Height = XUnit.FromPoint(fixedPage.Height);
+                pdfPage.Width = XUnit.FromMillimeter(210);
+                pdfPage.Height = XUnit.FromMillimeter(297);
 
                 using var gfx = XGraphics.FromPdfPage(pdfPage);
                 using var image = XImage.FromStream(ms);
-                gfx.DrawImage(image, 0, 0, pdfPage.Width, pdfPage.Height);
+
+                double imgWidthPoints = image.PixelWidth * (72.0 / dpi);
+                double imgHeightPoints = image.PixelHeight * (72.0 / dpi);
+
+                double xRatio = pdfPage.Width / imgWidthPoints;
+                double yRatio = pdfPage.Height / imgHeightPoints;
+                double ratio = Math.Min(xRatio, yRatio);
+
+                double drawWidth = imgWidthPoints * ratio;
+                double drawHeight = imgHeightPoints * ratio;
+                double offsetX = (pdfPage.Width - drawWidth) / 2;
+                double offsetY = (pdfPage.Height - drawHeight) / 2;
+
+                gfx.DrawImage(image, offsetX, offsetY, drawWidth, drawHeight);
             }
 
             document.Save(pdfPath);
