@@ -102,6 +102,7 @@
                               FontSize="14"
                               IsReadOnly="True"
                               IsTabStop="False" 
+                              IsEnabled="False"
                               Margin="0 2 10 2" />
 
                     <Label Grid.Column="1"

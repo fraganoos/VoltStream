@@ -115,7 +115,7 @@ public partial class SalesPage : Page
                         OpeningBalance = customer.beginningSum,
                         Balance = customer.beginningSum,
                         Discount = 0,
-                        CurrencyId = 1
+                        CurrencyId = (long)CurrencyType.SelectedValue 
                     }]
                 };
 
@@ -776,7 +776,7 @@ public partial class SalesPage : Page
         cbxPerRollCount.Text = string.Empty;
         cbxPerRollCount.SelectedIndex = -1;
 
-        CurrencyType.Text = "So'm"; // hozircha faqat so'm bo'lgani uchun
+        //CurrencyType.Text = "So'm"; // hozircha faqat so'm bo'lgani uchun
 
         // TextBoxlarni tozalash
         txtRollCount.Text = string.Empty;
