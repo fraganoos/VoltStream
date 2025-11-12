@@ -321,6 +321,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
         };
 
         // 📄 PDF yaratish va Telegram orqali ulashish
+        // 🔹 PDF yaratish va Telegram orqali ulashish
         var shareButton = new Button
         {
             Content = "📤 Telegram’da ulashish",
@@ -335,7 +336,8 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 string fileName = $"MijozOperatsiyalari_{DateTime.Now:dd.MM.yyyy_HH.mm.ss}.pdf";
                 string pdfPath = Path.Combine(Path.GetTempPath(), fileName);
 
-                SaveFixedDocumentToPdf(doc, pdfPath);
+                // Telegram uchun — 96 DPI
+                SaveFixedDocumentToPdf(doc, pdfPath, 96);
 
                 if (!File.Exists(pdfPath))
                 {
@@ -350,6 +352,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 MessageBox.Show($"Xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         };
+
         toolbar.Children.Add(shareButton);
 
         // 🔹 Layout
@@ -370,7 +373,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
         previewWindow.ShowDialog();
     }
 
-    private void SaveFixedDocumentToPdf(FixedDocument fixedDoc, string pdfPath)
+    private void SaveFixedDocumentToPdf(FixedDocument fixedDoc, string pdfPath, int dpi)
     {
         try
         {
@@ -385,17 +388,12 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 fixedPage.Arrange(new Rect(new Size(fixedPage.Width, fixedPage.Height)));
                 fixedPage.UpdateLayout();
 
-                // 🟢 Sifatni oshirish uchun yuqori DPI (600)
-                const int dpi = 600;
                 double scale = dpi / 96.0;
-
                 int pixelWidth = (int)(fixedPage.Width * scale);
                 int pixelHeight = (int)(fixedPage.Height * scale);
 
-                // 🟢 Yuqori sifatli RenderTargetBitmap
                 var bmp = new RenderTargetBitmap(pixelWidth, pixelHeight, dpi, dpi, PixelFormats.Pbgra32);
 
-                // 🟢 Skalani qo‘llash uchun vizualni transformatsiya qilamiz
                 var vb = new VisualBrush(fixedPage);
                 var dv = new DrawingVisual();
                 using (var dc = dv.RenderOpen())
@@ -406,21 +404,32 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
                 bmp.Render(dv);
 
-                // 🟢 PNG sifatini saqlaymiz
                 var encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(bmp));
                 using var ms = new MemoryStream();
                 encoder.Save(ms);
                 ms.Position = 0;
 
-                // 🟢 PDF sahifaga joylaymiz
                 var pdfPage = document.AddPage();
-                pdfPage.Width = XUnit.FromPoint(fixedPage.Width);
-                pdfPage.Height = XUnit.FromPoint(fixedPage.Height);
+                pdfPage.Width = XUnit.FromMillimeter(210);
+                pdfPage.Height = XUnit.FromMillimeter(297);
 
                 using var gfx = XGraphics.FromPdfPage(pdfPage);
                 using var image = XImage.FromStream(ms);
-                gfx.DrawImage(image, 0, 0, pdfPage.Width, pdfPage.Height);
+
+                double imgWidthPoints = image.PixelWidth * (72.0 / dpi);
+                double imgHeightPoints = image.PixelHeight * (72.0 / dpi);
+
+                double xRatio = pdfPage.Width / imgWidthPoints;
+                double yRatio = pdfPage.Height / imgHeightPoints;
+                double ratio = Math.Min(xRatio, yRatio);
+
+                double drawWidth = imgWidthPoints * ratio;
+                double drawHeight = imgHeightPoints * ratio;
+                double offsetX = (pdfPage.Width - drawWidth) / 2;
+                double offsetY = (pdfPage.Height - drawHeight) / 2;
+
+                gfx.DrawImage(image, offsetX, offsetY, drawWidth, drawHeight);
             }
 
             document.Save(pdfPath);
