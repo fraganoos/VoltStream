@@ -320,8 +320,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
             Margin = new Thickness(5)
         };
 
-        // 📄 PDF yaratish va Telegram orqali ulashish
-        // 🔹 PDF yaratish va Telegram orqali ulashish
         var shareButton = new Button
         {
             Content = "📤 Telegram’da ulashish",
@@ -350,7 +348,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
                 string pdfPath = Path.Combine(valstreamFolder, fileName);
 
-                // Telegram uchun — 96 DPI
                 SaveFixedDocumentToPdf(doc, pdfPath, 96);
 
                 if (!File.Exists(pdfPath))
