@@ -8,7 +8,7 @@
       xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
       mc:Ignorable="d"
       d:DesignHeight="450" d:DesignWidth="900"
-      Title="TurnoversPage" Background="Azure">
+      Title="TurnoversPage">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -36,13 +36,13 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0"  Grid.Column="0"
+                <TextBlock Grid.Row="1"  Grid.Column="0"
                            Margin="5,0"
                            VerticalAlignment="Center"
                            FontSize="13"
                            Text="Mijoz" />
                 <!--Foreground="{DynamicResource PrimaryTextColor}"-->
-                <ComboBox Grid.Row="0"  Grid.Column="1"
+                <ComboBox Grid.Row="1"  Grid.Column="1"
                           x:Name="cbxCustomer"
                           VerticalAlignment="Center"
                           Margin="0"
@@ -55,12 +55,12 @@
                           ItemsSource="{Binding Customers}"
                           SelectedItem="{Binding SelectedCustomer}" />
                 <!--  📅 Sana oralig‘i  -->
-                <TextBlock Grid.Row="1"  Grid.Column="0"
+                <TextBlock Grid.Row="0"  Grid.Column="0"
                            Margin="05,0"
                            VerticalAlignment="Center"
                            FontSize="13"
                            Text="Xisobot davri" />
-                <Grid Grid.Row="1"  Grid.Column="1">
+                <Grid Grid.Row="0"  Grid.Column="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />

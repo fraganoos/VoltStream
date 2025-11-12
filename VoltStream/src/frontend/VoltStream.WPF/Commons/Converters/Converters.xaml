@@ -12,5 +12,5 @@
     <converter:EmptyToVisibleConverter x:Key="EmptyToVisibleConverter" />
     <converter:BalanceToColorConverter x:Key="BalanceToColorConverter" />
     <converter:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
-    
+
 </ResourceDictionary>

@@ -4,10 +4,8 @@ using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
-using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.CustomerOperations.DTOs;
-using VoltStream.Application.Features.Customers.DTOs;
 using VoltStream.Domain.Entities;
 
 public record GetCustomerOperationByIdQuery(long Id) : IRequest<CustomerOperationDto>;

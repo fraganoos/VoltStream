@@ -10,7 +10,9 @@ public class SaleMappingRegister : IRegister
     public void Register(TypeAdapterConfig config)
     {
         // Sale
-        config.NewConfig<SaleResponse, SaleViewModel>();
+        config.NewConfig<SaleResponse, SaleViewModel>()
+            .Map(dest => dest.Date, src => src.Date.LocalDateTime);
+
         config.NewConfig<SaleViewModel, SaleRequest>();
 
         // Sale Item

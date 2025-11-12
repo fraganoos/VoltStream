@@ -21,9 +21,9 @@ public class GetCustomerOperationByCustomerIdQueryHandler(
     IMapper _mapper)
     : IRequestHandler<GetCustomerOperationByCustomerIdQuery, CustomerOperationSummaryDto>
 {
-     public async Task<CustomerOperationSummaryDto> Handle(
-        GetCustomerOperationByCustomerIdQuery request,
-        CancellationToken cancellationToken)
+    public async Task<CustomerOperationSummaryDto> Handle(
+       GetCustomerOperationByCustomerIdQuery request,
+       CancellationToken cancellationToken)
     {
         var beginDate = request.BeginDate.HasValue
       ? DateTime.SpecifyKind(request.BeginDate.Value.Date, DateTimeKind.Utc)
@@ -59,8 +59,11 @@ public class GetCustomerOperationByCustomerIdQueryHandler(
 
         if (endDate.HasValue)
         {
+            // ⏰ Tugash sanasini 23:59:59.999 qilib olamiz
+            var adjustedEndDate = endDate.Value.Date.AddDays(1).AddTicks(-1);
+
             var beforeEndSum = await allOperations
-                .Where(x => x.Date <= endDate.Value)
+                .Where(x => x.Date <= adjustedEndDate)
                 .SumAsync(x => x.Amount, cancellationToken);
 
             endBalance += beforeEndSum;
@@ -71,13 +74,13 @@ public class GetCustomerOperationByCustomerIdQueryHandler(
 
         if (beginDate.HasValue)
         {
-            var beginUtc = DateTime.SpecifyKind(beginDate.Value, DateTimeKind.Utc);
+            var beginUtc = DateTime.SpecifyKind(beginDate.Value, DateTimeKind.Local).ToUniversalTime();
             filtered = filtered.Where(x => x.Date >= beginUtc);
         }
 
         if (endDate.HasValue)
         {
-            var endUtc = DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc);
+            var endUtc = DateTime.SpecifyKind(endDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
             filtered = filtered.Where(x => x.Date <= endUtc);
         }
 

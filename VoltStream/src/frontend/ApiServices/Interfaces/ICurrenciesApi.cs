@@ -26,4 +26,7 @@ public interface ICurrenciesApi
 
     [Get("/currencies")]
     Task<Response<List<CurrencyResponse>>> GetAllAsync();
+
+    [Post("/currencies/filter")]
+    Task<Response<List<CurrencyResponse>>> Filter(FilteringRequest request);
 }
