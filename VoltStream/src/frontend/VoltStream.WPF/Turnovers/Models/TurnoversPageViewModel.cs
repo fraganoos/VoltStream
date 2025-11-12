@@ -320,8 +320,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
             Margin = new Thickness(5)
         };
 
-        // 📄 PDF yaratish va Telegram orqali ulashish
-        // 🔹 PDF yaratish va Telegram orqali ulashish
         var shareButton = new Button
         {
             Content = "📤 Telegram’da ulashish",
@@ -332,11 +330,24 @@ public partial class TurnoversPageViewModel : ViewModelBase
         {
             try
             {
-                // 🔹 Fayl nomi: dd.MM.yyyy_HH.mm.ss.pdf
-                string fileName = $"MijozOperatsiyalari_{DateTime.Now:dd.MM.yyyy_HH.mm.ss}.pdf";
-                string pdfPath = Path.Combine(Path.GetTempPath(), fileName);
+                if (SelectedCustomer == null)
+                {
+                    MessageBox.Show("Mijoz tanlanmagan.", "Xato", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
 
-                // Telegram uchun — 96 DPI
+                string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                string valstreamFolder = Path.Combine(documentsPath, "Valstream");
+                if (!Directory.Exists(valstreamFolder))
+                    Directory.CreateDirectory(valstreamFolder);
+
+                string customerName = SelectedCustomer.Name.Replace(" ", "_");
+                string begin = BeginDate?.ToString("dd.MM.yyyy") ?? "-";
+                string end = EndDate?.ToString("dd.MM.yyyy") ?? "-";
+                string fileName = $"{customerName}_{begin}-{end}.pdf";
+
+                string pdfPath = Path.Combine(valstreamFolder, fileName);
+
                 SaveFixedDocumentToPdf(doc, pdfPath, 96);
 
                 if (!File.Exists(pdfPath))
