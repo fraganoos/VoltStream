@@ -61,7 +61,7 @@ public class ApplyDiscountCommandHandler(
 
             var discountOperation = new DiscountOperation
             {
-                Date = DateTimeOffset.UtcNow,
+                Date = DateTimeOffset.UtcNow.UtcDateTime,
                 Description = GenerateDescription(request, account.Currency),
                 IsApplied = true,
                 Amount = request.DiscountAmount,
