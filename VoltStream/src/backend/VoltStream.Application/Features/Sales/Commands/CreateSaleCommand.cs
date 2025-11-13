@@ -162,7 +162,7 @@ public class CreateSaleCommandHandler(
         return new CustomerOperation
         {
             Date = sale.Date,
-            Amount = sale.Amount,
+            Amount = -sale.Amount,
             Account = account,
             AccountId = account.Id,
             CustomerId = sale.CustomerId,

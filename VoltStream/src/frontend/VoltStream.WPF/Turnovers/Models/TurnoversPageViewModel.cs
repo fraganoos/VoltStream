@@ -115,17 +115,20 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 }
                 else if (op.OperationType == OperationType.Sale)
                 {
-                    debit = op.Amount; // sotuv — doim debet
+                    debit = Math.Abs(op.Amount); // sotuv — doim debet
                 }
-
-                displayList.Add(new CustomerOperationForDisplayViewModel
-                {
-                    Date = op.Date.LocalDateTime,
-                    Customer = SelectedCustomer.Name ?? "Noma’lum",
-                    Debit = debit,
-                    Credit = credit,
-                    Description = op.Description
-                });
+                else if (op.OperationType == OperationType.DiscountApplied)
+                { 
+                    credit = op.Amount; // chegirma — doim kredit
+                }
+                    displayList.Add(new CustomerOperationForDisplayViewModel
+                    {
+                        Date = op.Date.LocalDateTime,
+                        Customer = SelectedCustomer.Name ?? "Noma’lum",
+                        Debit = debit,
+                        Credit = credit,
+                        Description = op.Description
+                    });
             }
 
             BeginBalance = response.Data.BeginBalance;
@@ -388,6 +391,10 @@ public partial class TurnoversPageViewModel : ViewModelBase
     {
         try
         {
+            // 🟢 Fayl mavjud bo‘lsa — o‘chirib, yangisini yozamiz
+            if (File.Exists(pdfPath))
+                File.Delete(pdfPath);
+
             using var document = new PdfSharp.Pdf.PdfDocument();
 
             foreach (var pageContent in fixedDoc.Pages)
@@ -461,11 +468,19 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 return;
             }
 
-            // 🔹 Windows Share oynasini ochadi
+            // 🔹 Windows “Share” oynasini ochish uchun explorer share buyrug‘idan foydalanamiz
             Process.Start(new ProcessStartInfo
             {
                 FileName = "explorer.exe",
                 Arguments = $"/select,\"{pdfPath}\"",
+                UseShellExecute = true
+            });
+
+            // 🔹 Faylni Windows share orqali (masalan, Telegram, Email va hokazo) ulashish
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "ms-contact-share:",
+                Arguments = $"\"{pdfPath}\"",
                 UseShellExecute = true
             });
         }
