@@ -553,6 +553,22 @@ public partial class TurnoversPageViewModel : ViewModelBase
             stack.Children.Add(row);
         }
 
+        // 🔹 Jami Debit / Kredit
+        var totalDebit = CustomerOperationsForDisplay.Sum(x => x.Debit);
+        var totalCredit = CustomerOperationsForDisplay.Sum(x => x.Credit);
+
+        var totalGrid = CreateRow(
+            colWidths,
+            true,                        // header formatda bo‘lsin
+            "Jami",                     // birinchi katak
+            "",                         // mijoz bo‘sh
+            totalDebit.ToString("N2"),  // debit jami
+            totalCredit.ToString("N2"), // kredit jami
+            ""                          // izoh bo‘sh
+        );
+
+        stack.Children.Add(totalGrid);
+
         // 🔹 Oxirgi balans
         var lastGrid = CreateBalanceRow(colWidths, "Oxirgi qoldiq", LastBalance?.ToString("N2") ?? "0.00");
         stack.Children.Add(lastGrid);
