@@ -340,7 +340,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 }
 
                 string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                string valstreamFolder = Path.Combine(documentsPath, "Valstream");
+                string valstreamFolder = Path.Combine(documentsPath, "Volstream");
                 if (!Directory.Exists(valstreamFolder))
                     Directory.CreateDirectory(valstreamFolder);
 
@@ -530,10 +530,10 @@ public partial class TurnoversPageViewModel : ViewModelBase
             Margin = new Thickness(0, 0, 0, 20)
         });
 
-        double[] colWidths = { 100, 160, 100, 100, 250 };
+        double[] colWidths = { 100,  140, 140, 330 };
 
         // 🔹 Header qatori
-        var headerGrid = CreateRow(colWidths, true, "Sana", "Mijoz", "Debit", "Kredit", "Izoh");
+        var headerGrid = CreateRow(colWidths, true, "Sana", "Debit", "Kredit", "Izoh");
         stack.Children.Add(headerGrid);
 
         // 🔹 Boshlang‘ich balans
@@ -545,7 +545,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         {
             var row = CreateRow(colWidths, false,
                 item.Date.ToString("dd.MM.yyyy"),
-                item.Customer,
                 item.Debit == 0 ? "" : item.Debit.ToString("N2"),
                 item.Credit == 0 ? "" : item.Credit.ToString("N2"),
                 item.FormattedDescription
@@ -561,7 +560,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
             colWidths,
             true,                        // header formatda bo‘lsin
             "Jami",                     // birinchi katak
-            "",                         // mijoz bo‘sh
             totalDebit.ToString("N2"),  // debit jami
             totalCredit.ToString("N2"), // kredit jami
             ""                          // izoh bo‘sh
@@ -597,9 +595,8 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 TextAlignment = isHeader ? TextAlignment.Center : i switch
                 {
                     0 => TextAlignment.Center,  // Sana
-                    1 => TextAlignment.Left,    // Mijoz
-                    2 or 3 => TextAlignment.Right, // Debit / Kredit
-                    _ => TextAlignment.Left
+                    1 or 2 => TextAlignment.Right, // Debit / Kredit
+                    _ => TextAlignment.Left // Izoh
                 },
                 FontWeight = isHeader ? FontWeights.Bold : FontWeights.Normal,
                 FontSize = isHeader ? 13 : 12,
@@ -683,7 +680,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
             Child = valueText
         };
 
-        Grid.SetColumn(valueBorder, 4);
+        Grid.SetColumn(valueBorder, 3);
         grid.Children.Add(valueBorder);
 
         return grid;
