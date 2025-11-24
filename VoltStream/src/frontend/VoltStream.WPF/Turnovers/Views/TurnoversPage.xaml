@@ -240,25 +240,6 @@
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
 
-                <!--  👤 Mijoz  -->
-                <DataGridTextColumn
-                    Width="1.5*"
-                    Binding="{Binding Customer}"
-                    Header="Mijoz">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Left" />
-                            <Setter Property="Padding" Value="5,0" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                    <DataGridTextColumn.HeaderStyle>
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="HorizontalContentAlignment" Value="Center" />
-                            <Setter Property="VerticalContentAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.HeaderStyle>
-                </DataGridTextColumn>
-
                 <!--  💰 Debit  -->
                 <DataGridTextColumn
                     Width="*"
