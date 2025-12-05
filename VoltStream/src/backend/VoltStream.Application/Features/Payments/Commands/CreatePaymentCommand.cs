@@ -127,7 +127,7 @@ public class CreatePaymentCommandHandler(
 
     private static string GenerateDescription(CreatePaymentCommand request, Currency currency)
     {
-        var typeText = currency.IsCash ? "Naqd to‘lov" : "Naqd bo‘lmagan to‘lov";
-        return $"{typeText}: {request.NetAmount} {currency.Code}. Kurs: {request.ExchangeRate}";
+        var typeText = currency.IsCash ? "Naqd" : "O`tkazma";
+        return $"{typeText}: {currency.Code}. {request.NetAmount} x {request.ExchangeRate}";
     }
 }

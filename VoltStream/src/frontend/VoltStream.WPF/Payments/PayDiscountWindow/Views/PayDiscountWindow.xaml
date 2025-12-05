@@ -35,10 +35,10 @@
             x:Name="txtCustomer"
             Grid.Row="0"
             Grid.Column="1"
-            IsEnabled="False"
             Margin="0,5"
             utils:TextBoxTabBehavior.EnableTabOnKeys="True"
-            FontSize="14" />
+            FontSize="14"
+            IsEnabled="False" />
         <!--  Yeg'ilgan discount  -->
         <TextBlock
             Grid.Row="1"
@@ -79,9 +79,9 @@
                 Grid.Column="1"
                 Margin="3,5,0,6"
                 Padding="5,0"
+                Click="Button_Click"
                 Content="Σ"
-                IsTabStop="False"
-                Click="Button_Click"/>
+                IsTabStop="False" />
         </Grid>
 
 
@@ -100,9 +100,9 @@
 
             <RadioButton
                 x:Name="inCash"
-                Content="Naqd pulda"
                 Grid.Column="0"
                 Margin="0,5,3,5"
+                Content="Naqd pulda"
                 FontSize="14"
                 Foreground="Red" />
 
@@ -140,8 +140,8 @@
                 x:Name="SaveDiscount"
                 Width="100"
                 Margin="5"
-                Content="Saqlash"
-                Click="SaveDiscount_Click"/>
+                Click="SaveDiscount_Click"
+                Content="Saqlash" />
             <Button
                 Width="100"
                 Margin="5"

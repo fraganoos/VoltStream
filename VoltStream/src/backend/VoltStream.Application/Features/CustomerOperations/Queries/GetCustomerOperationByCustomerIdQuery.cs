@@ -33,6 +33,7 @@ public class GetCustomerOperationByCustomerIdQueryHandler(
             ? DateTime.SpecifyKind(request.EndDate.Value.Date, DateTimeKind.Utc)
             : (DateTime?)null;
 
+        var beginUtc = DateTime.SpecifyKind(beginDate!.Value, DateTimeKind.Local).ToUniversalTime();
 
         // 🔹 Shu mijozning accountini olish
         var account = await _context.Accounts
@@ -50,8 +51,9 @@ public class GetCustomerOperationByCustomerIdQueryHandler(
         decimal beforeBeginSum = 0;
         if (beginDate.HasValue)
         {
+
             beforeBeginSum = await allOperations
-                .Where(x => x.Date != null && x.Date < beginDate.Value)
+                .Where(x => x.Date != null && x.Date < beginUtc)
                 .SumAsync(x => x.Amount, cancellationToken);
         }
         beginBalance += beforeBeginSum;
@@ -74,7 +76,6 @@ public class GetCustomerOperationByCustomerIdQueryHandler(
 
         if (beginDate.HasValue)
         {
-            var beginUtc = DateTime.SpecifyKind(beginDate.Value, DateTimeKind.Local).ToUniversalTime();
             filtered = filtered.Where(x => x.Date >= beginUtc);
         }
 
@@ -100,4 +101,3 @@ public class GetCustomerOperationByCustomerIdQueryHandler(
         };
     }
 }
-

@@ -47,6 +47,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<CustomerResponse> customers = [];
     [ObservableProperty] private ObservableCollection<CustomerOperationViewModel> customerOperations = [];
     [ObservableProperty] private ObservableCollection<CustomerOperationForDisplayViewModel> customerOperationsForDisplay = [];
+    [ObservableProperty] private CustomerOperationForDisplayViewModel? selectedItem;
     [ObservableProperty] private DateTime? beginDate;
     [ObservableProperty] private DateTime? endDate;
     [ObservableProperty] private decimal? beginBalance;
@@ -115,17 +116,21 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 }
                 else if (op.OperationType == OperationType.Sale)
                 {
-                    debit = op.Amount; // sotuv — doim debet
+                    debit = Math.Abs(op.Amount); // sotuv — doim debet
                 }
-
-                displayList.Add(new CustomerOperationForDisplayViewModel
-                {
-                    Date = op.Date.LocalDateTime,
-                    Customer = SelectedCustomer.Name ?? "Noma’lum",
-                    Debit = debit,
-                    Credit = credit,
-                    Description = op.Description
-                });
+                else if (op.OperationType == OperationType.DiscountApplied)
+                { 
+                    credit = op.Amount; // chegirma — doim kredit
+                }
+                    displayList.Add(new CustomerOperationForDisplayViewModel
+                    {
+                        Id = op.Id,
+                        Date = op.Date.LocalDateTime,
+                        Customer = SelectedCustomer.Name ?? "Noma’lum",
+                        Debit = debit,
+                        Credit = credit,
+                        Description = op.Description
+                    });
             }
 
             BeginBalance = response.Data.BeginBalance;
@@ -168,6 +173,8 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
         CustomerOperationsForDisplay = new ObservableCollection<CustomerOperationForDisplayViewModel>(filtered);
     }
+
+
 
     [RelayCommand]
     private void ClearFilter()
@@ -320,8 +327,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
             Margin = new Thickness(5)
         };
 
-        // 📄 PDF yaratish va Telegram orqali ulashish
-        // 🔹 PDF yaratish va Telegram orqali ulashish
         var shareButton = new Button
         {
             Content = "📤 Telegram’da ulashish",
@@ -332,11 +337,24 @@ public partial class TurnoversPageViewModel : ViewModelBase
         {
             try
             {
-                // 🔹 Fayl nomi: dd.MM.yyyy_HH.mm.ss.pdf
-                string fileName = $"MijozOperatsiyalari_{DateTime.Now:dd.MM.yyyy_HH.mm.ss}.pdf";
-                string pdfPath = Path.Combine(Path.GetTempPath(), fileName);
+                if (SelectedCustomer == null)
+                {
+                    MessageBox.Show("Mijoz tanlanmagan.", "Xato", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
 
-                // Telegram uchun — 96 DPI
+                string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                string valstreamFolder = Path.Combine(documentsPath, "Volstream");
+                if (!Directory.Exists(valstreamFolder))
+                    Directory.CreateDirectory(valstreamFolder);
+
+                string customerName = SelectedCustomer.Name.Replace(" ", "_");
+                string begin = BeginDate?.ToString("dd.MM.yyyy") ?? "-";
+                string end = EndDate?.ToString("dd.MM.yyyy") ?? "-";
+                string fileName = $"{customerName}_{begin}-{end}.pdf";
+
+                string pdfPath = Path.Combine(valstreamFolder, fileName);
+
                 SaveFixedDocumentToPdf(doc, pdfPath, 96);
 
                 if (!File.Exists(pdfPath))
@@ -377,6 +395,10 @@ public partial class TurnoversPageViewModel : ViewModelBase
     {
         try
         {
+            // 🟢 Fayl mavjud bo‘lsa — o‘chirib, yangisini yozamiz
+            if (File.Exists(pdfPath))
+                File.Delete(pdfPath);
+
             using var document = new PdfSharp.Pdf.PdfDocument();
 
             foreach (var pageContent in fixedDoc.Pages)
@@ -450,11 +472,19 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 return;
             }
 
-            // 🔹 Windows Share oynasini ochadi
+            // 🔹 Windows “Share” oynasini ochish uchun explorer share buyrug‘idan foydalanamiz
             Process.Start(new ProcessStartInfo
             {
                 FileName = "explorer.exe",
                 Arguments = $"/select,\"{pdfPath}\"",
+                UseShellExecute = true
+            });
+
+            // 🔹 Faylni Windows share orqali (masalan, Telegram, Email va hokazo) ulashish
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "ms-contact-share:",
+                Arguments = $"\"{pdfPath}\"",
                 UseShellExecute = true
             });
         }
@@ -504,10 +534,10 @@ public partial class TurnoversPageViewModel : ViewModelBase
             Margin = new Thickness(0, 0, 0, 20)
         });
 
-        double[] colWidths = { 100, 160, 100, 100, 250 };
+        double[] colWidths = { 100,  140, 140, 330 };
 
         // 🔹 Header qatori
-        var headerGrid = CreateRow(colWidths, true, "Sana", "Mijoz", "Debit", "Kredit", "Izoh");
+        var headerGrid = CreateRow(colWidths, true, "Sana", "Debit", "Kredit", "Izoh");
         stack.Children.Add(headerGrid);
 
         // 🔹 Boshlang‘ich balans
@@ -519,13 +549,27 @@ public partial class TurnoversPageViewModel : ViewModelBase
         {
             var row = CreateRow(colWidths, false,
                 item.Date.ToString("dd.MM.yyyy"),
-                item.Customer,
                 item.Debit == 0 ? "" : item.Debit.ToString("N2"),
                 item.Credit == 0 ? "" : item.Credit.ToString("N2"),
                 item.FormattedDescription
             );
             stack.Children.Add(row);
         }
+
+        // 🔹 Jami Debit / Kredit
+        var totalDebit = CustomerOperationsForDisplay.Sum(x => x.Debit);
+        var totalCredit = CustomerOperationsForDisplay.Sum(x => x.Credit);
+
+        var totalGrid = CreateRow(
+            colWidths,
+            true,                        // header formatda bo‘lsin
+            "Jami",                     // birinchi katak
+            totalDebit.ToString("N2"),  // debit jami
+            totalCredit.ToString("N2"), // kredit jami
+            ""                          // izoh bo‘sh
+        );
+
+        stack.Children.Add(totalGrid);
 
         // 🔹 Oxirgi balans
         var lastGrid = CreateBalanceRow(colWidths, "Oxirgi qoldiq", LastBalance?.ToString("N2") ?? "0.00");
@@ -555,9 +599,8 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 TextAlignment = isHeader ? TextAlignment.Center : i switch
                 {
                     0 => TextAlignment.Center,  // Sana
-                    1 => TextAlignment.Left,    // Mijoz
-                    2 or 3 => TextAlignment.Right, // Debit / Kredit
-                    _ => TextAlignment.Left
+                    1 or 2 => TextAlignment.Right, // Debit / Kredit
+                    _ => TextAlignment.Left // Izoh
                 },
                 FontWeight = isHeader ? FontWeights.Bold : FontWeights.Normal,
                 FontSize = isHeader ? 13 : 12,
@@ -641,7 +684,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
             Child = valueText
         };
 
-        Grid.SetColumn(valueBorder, 4);
+        Grid.SetColumn(valueBorder, 3);
         grid.Children.Add(valueBorder);
 
         return grid;

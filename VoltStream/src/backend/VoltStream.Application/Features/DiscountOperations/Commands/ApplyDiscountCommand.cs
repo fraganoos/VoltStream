@@ -41,30 +41,14 @@ public class ApplyDiscountCommandHandler(
             if (account.Discount < request.DiscountAmount)
                 throw new ForbiddenException($"Yetarli chegirma yo'q. Mavjud: {account.Discount}, So'ralgan: {request.DiscountAmount}");
 
-            if (request.IsCash)
-            {
-                var cash = await context.Cashes
-                    .FirstOrDefaultAsync(c => c.CurrencyId == account.CurrencyId && c.IsActive, cancellationToken)
-                    ?? throw new NotFoundException("Faol kassa topilmadi");
-
-                if (cash.Balance < request.DiscountAmount)
-                    throw new ForbiddenException($"Kassada yetarli mablag' yo'q. Mavjud: {cash.Balance}, Kerak: {request.DiscountAmount}");
-
-                cash.Balance -= request.DiscountAmount;
-            }
-            else
-            {
-                account.Balance += request.DiscountAmount;
-            }
-
             account.Discount -= request.DiscountAmount;
 
             var discountOperation = new DiscountOperation
             {
-                Date = DateTimeOffset.UtcNow,
+                Date = DateTimeOffset.UtcNow.UtcDateTime,
                 Description = GenerateDescription(request, account.Currency),
                 IsApplied = true,
-                Amount = request.DiscountAmount,
+                Amount = request.DiscountAmount * -1,
                 CustomerId = customer.Id,
                 AccountId = account.Id,
                 CreatedAt = DateTime.UtcNow
@@ -78,12 +62,58 @@ public class ApplyDiscountCommandHandler(
                 AccountId = account.Id,
                 Amount = request.DiscountAmount,
                 CustomerId = customer.Id,
-                Description = discountOperation.Description,
+                Description = $"Chegirma hisobga olindi. {request.Description}",
                 CreatedAt = DateTime.UtcNow,
                 OperationType = OperationType.DiscountApplied
             };
 
             context.CustomerOperations.Add(customerOperation);
+
+            if (request.IsCash)
+            {
+                var cash = await context.Cashes
+                    .FirstOrDefaultAsync(c => c.CurrencyId == account.CurrencyId && c.IsActive, cancellationToken)
+                    ?? throw new NotFoundException("Faol kassa topilmadi");
+
+                if (cash.Balance < request.DiscountAmount)
+                    throw new ForbiddenException($"Kassada yetarli mablag' yo'q. Mavjud: {cash.Balance}, Kerak: {request.DiscountAmount}");
+
+                cash.Balance -= request.DiscountAmount;
+
+                var customerOperationCash = new CustomerOperation
+                {
+                    Date = DateTime.UtcNow,
+                    AccountId = account.Id,
+                    Amount = request.DiscountAmount*-1,
+                    CustomerId = customer.Id,
+                    Description = $"Chegirma naqd berildi. {request.Description}",
+                    CreatedAt = DateTime.UtcNow,
+                    OperationType = OperationType.Payment
+                };
+
+                context.CustomerOperations.Add(customerOperationCash);
+
+                var paymentOperation = new Payment
+                {
+                    Description = $"Chegirma naqd berildi. {request.Description}",
+                    Amount = request.DiscountAmount * -1,
+                    ExchangeRate = 1,
+                    NetAmount = request.DiscountAmount *-1,
+                    CurrencyId = account.CurrencyId,
+                    CustomerId = customer.Id,
+                    CustomerOperation = customerOperationCash,
+                    PaidAt = discountOperation.Date,
+                    Type = PaymentType.Cash,
+                    CreatedAt = DateTime.UtcNow,
+                    DiscountOperation = discountOperation
+                };
+                context.Payments.Add(paymentOperation);
+            }
+            else
+            {
+                account.Balance += request.DiscountAmount;
+            }
+
 
             await context.CommitTransactionAsync(cancellationToken);
             return discountOperation.Id;
@@ -97,7 +127,7 @@ public class ApplyDiscountCommandHandler(
 
     private static string GenerateDescription(ApplyDiscountCommand request, Currency currency)
     {
-        var typeText = request.IsCash ? "Naqd chegirma" : "Naqd bo'lmagan chegirma";
+        var typeText = request.IsCash ? "Chegirma naqd berildi" : "Chegirma hisobga olindi";
         var additionalInfo = string.IsNullOrEmpty(request.Description)
             ? ""
             : $". {request.Description}";
