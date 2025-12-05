@@ -2,6 +2,7 @@
 
 public class CustomerOperationForDisplayViewModel
 {
+    public long Id { get; set; }
     public DateTime Date { get; set; }
     public string Customer { get; set; } = string.Empty;
     public decimal Debit { get; set; }

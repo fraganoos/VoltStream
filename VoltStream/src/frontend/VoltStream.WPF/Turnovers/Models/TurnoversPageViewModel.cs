@@ -47,6 +47,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<CustomerResponse> customers = [];
     [ObservableProperty] private ObservableCollection<CustomerOperationViewModel> customerOperations = [];
     [ObservableProperty] private ObservableCollection<CustomerOperationForDisplayViewModel> customerOperationsForDisplay = [];
+    [ObservableProperty] private CustomerOperationForDisplayViewModel? selectedItem;
     [ObservableProperty] private DateTime? beginDate;
     [ObservableProperty] private DateTime? endDate;
     [ObservableProperty] private decimal? beginBalance;
@@ -123,6 +124,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 }
                     displayList.Add(new CustomerOperationForDisplayViewModel
                     {
+                        Id = op.Id,
                         Date = op.Date.LocalDateTime,
                         Customer = SelectedCustomer.Name ?? "Noma’lum",
                         Debit = debit,
@@ -171,6 +173,8 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
         CustomerOperationsForDisplay = new ObservableCollection<CustomerOperationForDisplayViewModel>(filtered);
     }
+
+
 
     [RelayCommand]
     private void ClearFilter()
