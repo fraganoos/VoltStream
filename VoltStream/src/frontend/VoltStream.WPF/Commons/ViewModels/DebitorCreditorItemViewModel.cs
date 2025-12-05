@@ -1,4 +1,5 @@
 ﻿namespace VoltStream.WPF.Commons.ViewModels;
+
 public class DebitorCreditorItemViewModel
 {
     public string Customer { get; set; } = string.Empty;

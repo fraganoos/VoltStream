@@ -9,5 +9,7 @@ public class CustomerOperationMappingProfile : Profile
     public CustomerOperationMappingProfile()
     {
         CreateMap<CustomerOperation, CustomerOperationDto>();
+        CreateMap<CustomerOperation, CustomerOperationForPaymentDto>();
+        CreateMap<CustomerOperation, CustomerOperationForSaleDto>();
     }
 }

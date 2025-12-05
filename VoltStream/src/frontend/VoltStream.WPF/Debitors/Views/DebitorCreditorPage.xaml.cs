@@ -1,4 +1,5 @@
 ﻿namespace VoltStream.WPF.Debitors.Views;
+
 using System.Windows.Controls;
 using VoltStream.WPF.Debitors.Models;
 

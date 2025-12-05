@@ -1,4 +1,5 @@
 ﻿namespace VoltStream.WPF.Settings.ViewModels;
+
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using VoltStream.WPF.Commons;

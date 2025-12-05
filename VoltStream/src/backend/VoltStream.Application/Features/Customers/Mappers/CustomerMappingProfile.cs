@@ -11,6 +11,7 @@ public class CustomerMappingProfile : Profile
     public CustomerMappingProfile()
     {
         CreateMap<Customer, CustomerDto>();
+        CreateMap<Customer, CustomerForOperationDto>();
 
         CreateMap<CreateCustomerCommand, Customer>()
             .ForMember(dest => dest.NormalizedName, opt =>

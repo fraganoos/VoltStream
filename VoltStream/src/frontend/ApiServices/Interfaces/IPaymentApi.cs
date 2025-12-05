@@ -14,7 +14,7 @@ public interface IPaymentApi
     Task<Response<bool>> UpdateAsync([Body] PaymentRequest request);
 
     [Delete("/payments​/{id}")]
-    Task<Response<bool>> DeleteAsync(long id);
+    Task<Response<bool>> Delete(long id);
 
     [Get("/payments/{id}")]
     Task<Response<PaymentResponse>> GetByIdAsync(long id);

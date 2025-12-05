@@ -6,7 +6,6 @@ using ApiServices.Models;
 using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -115,7 +114,7 @@ public partial class SalesPage : Page
                         OpeningBalance = customer.beginningSum,
                         Balance = customer.beginningSum,
                         Discount = 0,
-                        CurrencyId = (long)CurrencyType.SelectedValue 
+                        CurrencyId = (long)CurrencyType.SelectedValue
                     }]
                 };
 

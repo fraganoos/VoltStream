@@ -1,4 +1,5 @@
 ﻿namespace VoltStream.WPF.Commons.Utils;
+
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;

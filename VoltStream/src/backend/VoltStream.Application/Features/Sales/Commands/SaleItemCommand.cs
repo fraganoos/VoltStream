@@ -1,6 +1,6 @@
-﻿namespace VoltStream.Application.Features.Sales.DTOs;
+﻿namespace VoltStream.Application.Features.Sales.Commands;
 
-public record SaleItemCommandDto
+public record SaleItemCommand
 {
     public long Id { get; set; }
     public long SaleId { get; set; }

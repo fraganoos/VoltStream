@@ -84,7 +84,7 @@ public class ApplyDiscountCommandHandler(
                 {
                     Date = DateTime.UtcNow,
                     AccountId = account.Id,
-                    Amount = request.DiscountAmount*-1,
+                    Amount = request.DiscountAmount * -1,
                     CustomerId = customer.Id,
                     Description = $"Chegirma naqd berildi. {request.Description}",
                     CreatedAt = DateTime.UtcNow,
@@ -98,7 +98,7 @@ public class ApplyDiscountCommandHandler(
                     Description = $"Chegirma naqd berildi. {request.Description}",
                     Amount = request.DiscountAmount * -1,
                     ExchangeRate = 1,
-                    NetAmount = request.DiscountAmount *-1,
+                    NetAmount = request.DiscountAmount * -1,
                     CurrencyId = account.CurrencyId,
                     CustomerId = customer.Id,
                     CustomerOperation = customerOperationCash,

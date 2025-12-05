@@ -8,8 +8,11 @@ public class CustomerOperationResponse
     public decimal Amount { get; set; }
     public OperationType OperationType { get; set; }
     public string Description { get; set; } = string.Empty;
-
+    public long? CustomerId { get; set; }
     public long AccountId { get; set; }
     public AccountResponse Account { get; set; } = default!;
     public DateTimeOffset Date { get; set; }
+
+    public SaleResponse? Sale { get; set; }
+    public PaymentResponse? Payment { get; set; }
 }

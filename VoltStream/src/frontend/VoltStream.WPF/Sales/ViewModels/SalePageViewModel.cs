@@ -8,24 +8,20 @@ using CommunityToolkit.Mvvm.Input;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
 using VoltStream.WPF.Customer.ViewModels;
 
-public partial class SaleViewModel : ViewModelBase
+public partial class SalePageViewModel : ViewModelBase
 {
-    private readonly IServiceProvider services;
     private readonly IMapper mapper;
     private readonly ICurrenciesApi currenciesApi;
     private readonly ICustomersApi customersApi;
     private readonly ICategoriesApi categoriesApi;
     private readonly IWarehouseStocksApi stocksApi;
 
-    public SaleViewModel(IServiceProvider services)
+    public SalePageViewModel(IServiceProvider services)
     {
-        this.services = services;
         mapper = services.GetRequiredService<IMapper>();
         currenciesApi = services.GetRequiredService<ICurrenciesApi>();
         customersApi = services.GetRequiredService<ICustomersApi>();
@@ -37,9 +33,11 @@ public partial class SaleViewModel : ViewModelBase
 
     private async Task LoadPageAsync()
     {
-        await LoadCurrenciesAsync();
-        await LoadCategoryAndProductsAsync();
-        await LoadCustomersAsync();
+        await Task.WhenAll(
+            LoadCurrenciesAsync(),
+            LoadCategoryAndProductsAsync(),
+            LoadCustomersAsync()
+        );
     }
 
     [ObservableProperty] private long id;

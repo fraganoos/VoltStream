@@ -1,4 +1,5 @@
 ﻿namespace VoltStream.WPF.Turnovers.Views;
+
 using System.Windows.Controls;
 using VoltStream.WPF.Turnovers.Models;
 

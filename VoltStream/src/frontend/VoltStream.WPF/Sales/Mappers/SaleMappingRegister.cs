@@ -4,6 +4,7 @@ using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Mapster;
 using VoltStream.WPF.Sales.ViewModels;
+using VoltStream.WPF.Turnovers.Models;
 
 public class SaleMappingRegister : IRegister
 {
@@ -13,13 +14,14 @@ public class SaleMappingRegister : IRegister
         config.NewConfig<SaleResponse, SaleViewModel>()
             .Map(dest => dest.Date, src => src.Date.LocalDateTime);
 
-        config.NewConfig<SaleViewModel, SaleRequest>();
-
         // Sale Item
         config.NewConfig<SaleItemResponse, SaleItemViewModel>();
         config.NewConfig<SaleItemViewModel, SaleItemRequest>();
 
         // Warehouse stock
         config.NewConfig<WarehouseStockResponse, WarehouseStockViewModel>();
+
+        config.NewConfig<SaleResponse, SalePageViewModel>()
+            .Map(dest => dest.Date, src => src.Date.LocalDateTime);
     }
 }

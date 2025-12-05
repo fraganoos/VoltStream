@@ -23,11 +23,11 @@ public class SaleMappingProfile : Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore());
 
         // Entity -> DTO: Sale.Date maydoni allaqachon UTC bo'lgani uchun bevosita map qilamiz
-        CreateMap<Sale, SaleDto>()
-            .ForMember(dest => dest.Date,
-                opt => opt.MapFrom(src => src.Date.ToOffset(TimeSpan.Zero)));
+        CreateMap<Sale, SaleDto>();
+        CreateMap<Sale, SaleForCustomerOperationDto>();
+        CreateMap<Sale, SaleForDiscountOperationDto>();
 
         CreateMap<SaleItem, SaleItemDto>();
-        CreateMap<SaleItemCommandDto, SaleItem>();
+        CreateMap<SaleItemCommand, SaleItem>();
     }
 }
