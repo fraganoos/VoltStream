@@ -1,4 +1,4 @@
-﻿namespace VoltStream.WPF.Turnovers.Models;
+﻿namespace VoltStream.WPF.Payments.ViewModels;
 
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
@@ -33,7 +33,15 @@ public partial class PaymentEditViewModel : ViewModelBase
         customersApi = services.GetRequiredService<ICustomersApi>();
         currenciesApi = services.GetRequiredService<ICurrenciesApi>();
 
+        // Ma'lumotlarni to'g'ridan-to'g'ri o'zlashtiramiz
         Payment = mapper.Map<PaymentViewModel>(paymentData);
+
+        // Kirim yoki chiqimni aniqlash
+        if (Payment.Amount > 0)
+            Payment.IncomeAmount = Payment.NetAmount;
+        else if (Payment.Amount < 0)
+            Payment.ExpenseAmount = Math.Abs(Payment.NetAmount);
+
         Payment.PropertyChanged += Payment_PropertyChanged;
 
         _ = LoadPageAsync();
@@ -43,18 +51,13 @@ public partial class PaymentEditViewModel : ViewModelBase
     [ObservableProperty] private decimal? beginBalance;
     [ObservableProperty] private decimal? lastBalance;
 
-    [ObservableProperty] private ObservableCollection<PaymentViewModel> historyPayments = [];
     [ObservableProperty] private ObservableCollection<CustomerViewModel> customers = [];
     [ObservableProperty] private ObservableCollection<CurrencyViewModel> currencies = [];
 
     private async void Payment_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(Payment.PaidAt))
-        {
-            await LoadHistoryPayments();
-        }
-
-        if (e.PropertyName == nameof(Payment.Amount))
+        if (e.PropertyName == nameof(Payment.IncomeAmount) ||
+            e.PropertyName == nameof(Payment.ExpenseAmount))
         {
             CalculateLastBalance();
         }
@@ -62,19 +65,30 @@ public partial class PaymentEditViewModel : ViewModelBase
 
     private async Task LoadPageAsync()
     {
-        await LoadCustomersAsync();
-        await LoadCurrenciesAsync();
-        await LoadCustomerBalance();
-        await LoadHistoryPayments();
+        await Task.WhenAll(
+            LoadCustomersAsync(),
+            LoadCurrenciesAsync(),
+            LoadCustomerBalance()
+        );
     }
 
     private async Task LoadCustomersAsync()
     {
-        var response = await customersApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
+        var response = await customersApi.GetAllAsync()
+            .Handle(isLoading => IsLoading = isLoading);
+
         if (response.IsSuccess)
+        {
             Customers = mapper.Map<ObservableCollection<CustomerViewModel>>(response.Data!);
-        else
-            Error = response.Message ?? "Mijozlarni yuklashda xatolik!";
+
+            if (Payment.CustomerId > 0)
+            {
+                var currentCustomer = Customers.FirstOrDefault(c => c.Id == Payment.CustomerId);
+                if (currentCustomer is not null)
+                    Payment.Customer = currentCustomer;
+            }
+        }
+        else Error = response.Message ?? "Mijozlarni yuklashda xatolik!";
     }
 
     private async Task LoadCurrenciesAsync()
@@ -84,16 +98,27 @@ public partial class PaymentEditViewModel : ViewModelBase
             Filters = new() { ["isactive"] = ["true"] }
         };
 
-        var response = await currenciesApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
+        var response = await currenciesApi.Filter(request)
+            .Handle(isLoading => IsLoading = isLoading);
+
         if (response.IsSuccess)
+        {
             Currencies = mapper.Map<ObservableCollection<CurrencyViewModel>>(response.Data!);
-        else
-            Error = response.Message ?? "Valyutalarni yuklashda xatolik!";
+
+            // Joriy valyutani topib belgilaymiz
+            if (Payment.CurrencyId > 0)
+            {
+                var currentCurrency = Currencies.FirstOrDefault(c => c.Id == Payment.CurrencyId);
+                if (currentCurrency is not null)
+                    Payment.Currency = currentCurrency;
+            }
+        }
+        else Error = response.Message ?? "Valyutalarni yuklashda xatolik!";
     }
 
     private async Task LoadCustomerBalance()
     {
-        if (Payment.Customer == null) return;
+        if (Payment.Customer is null) return;
 
         FilteringRequest request = new()
         {
@@ -104,14 +129,16 @@ public partial class PaymentEditViewModel : ViewModelBase
             }
         };
 
-        var response = await customersApi.Filter(request).Handle();
-        if (response.IsSuccess && response.Data.Any())
+        var response = await customersApi.Filter(request)
+            .Handle(isLoading => IsLoading = isLoading);
+
+        if (response.IsSuccess)
         {
             var customer = response.Data.First();
-            if (customer.Accounts != null)
+            if (customer.Accounts is not null)
             {
                 var uzsAccount = customer.Accounts.FirstOrDefault(a => a.Currency?.Code == "UZS");
-                if (uzsAccount != null)
+                if (uzsAccount is not null)
                 {
                     BeginBalance = uzsAccount.Balance;
                     CalculateLastBalance();
@@ -120,36 +147,15 @@ public partial class PaymentEditViewModel : ViewModelBase
         }
     }
 
-    private async Task LoadHistoryPayments()
-    {
-        string date = Payment.PaidAt.ToString("dd.MM.yyyy");
-        FilteringRequest request = new()
-        {
-            Filters = new()
-            {
-                ["paidAt"] = [date],
-                ["customer"] = ["include"],
-                ["currency"] = ["include"]
-            }
-        };
-
-        var response = await paymentApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
-        if (response.IsSuccess)
-            HistoryPayments = mapper.Map<ObservableCollection<PaymentViewModel>>(response.Data);
-        else
-            Error = response.Message ?? "To'lovlar tarixini yuklashda xatolik!";
-    }
-
     private void CalculateLastBalance()
     {
-        if (BeginBalance.HasValue)
             LastBalance = BeginBalance + Payment.Amount;
     }
 
     [RelayCommand]
     private async Task Save()
     {
-        if (Payment.Customer == null)
+        if (Payment.Customer is null)
         {
             Warning = "Mijoz tanlanmagan!";
             return;
@@ -177,7 +183,7 @@ public partial class PaymentEditViewModel : ViewModelBase
                 Id = Payment.Id,
                 CustomerId = Payment.Customer.Id,
                 CurrencyId = Payment.Currency?.Id ?? 0,
-                ExchangeRate = Payment.Currency!.ExchangeRate,
+                ExchangeRate = Payment.ExchangeRate,
                 Amount = Payment.Amount,
                 PaidAt = Payment.PaidAt,
                 Description = Payment.Description

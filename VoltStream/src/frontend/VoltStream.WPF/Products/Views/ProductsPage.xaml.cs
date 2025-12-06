@@ -9,13 +9,13 @@ using VoltStream.WPF.Products.Models;
 /// </summary>
 public partial class ProductsPage : Page
 {
-    private ProductViewModel vm;
+    private ProductPageViewModel vm;
     private readonly IServiceProvider services;
     public ProductsPage(IServiceProvider services)
     {
         InitializeComponent();
         this.services = services;
-        vm = new ProductViewModel(services);
+        vm = new ProductPageViewModel(services);
         DataContext = vm;
     }
 

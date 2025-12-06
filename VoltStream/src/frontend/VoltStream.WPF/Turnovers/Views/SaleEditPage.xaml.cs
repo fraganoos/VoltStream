@@ -1,10 +1,10 @@
 ﻿namespace VoltStream.WPF.Sales.Views;
 
-using ApiServices.Models.Responses;
-using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Extensions.DependencyInjection;
 using VoltStream.WPF.Sales.ViewModels;
+using ApiServices.Models.Responses;
 
 public partial class SaleEditPage : Page
 {

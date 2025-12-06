@@ -1,10 +1,10 @@
 ﻿namespace VoltStream.WPF.Payments.Views;
 
-using ApiServices.Models.Responses;
-using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using System.Windows.Controls;
-using VoltStream.WPF.Turnovers.Models;
+using Microsoft.Extensions.DependencyInjection;
+using VoltStream.WPF.Payments.ViewModels;
+using ApiServices.Models.Responses;
 
 public partial class PaymentEditPage : Page
 {

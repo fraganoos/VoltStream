@@ -35,13 +35,24 @@ public partial class SaleEditViewModel : ViewModelBase
         currenciesApi = services.GetRequiredService<ICurrenciesApi>();
         categoriesApi = services.GetRequiredService<ICategoriesApi>();
 
-        Sale = mapper.Map<SaleViewModel>(saleData);
+        // Ma'lumotlarni to'g'ridan-to'g'ri o'zlashtiramiz
+        Sale = new SaleViewModel
+        {
+            Id = saleData.Id,
+            Date = saleData.Date,
+            CustomerId = saleData.CustomerId,
+            CurrencyId = saleData.CurrencyId,
+            Description = saleData.Description,
+            Customer = mapper.Map<CustomerViewModel>(saleData.Customer),
+            Currency = mapper.Map<CurrencyViewModel>(saleData.Currency),
+            Items = mapper.Map<ObservableCollection<SaleItemViewModel>>(saleData.Items)
+        };
 
         _ = LoadPageAsync();
         CalculateTotals();
     }
 
-    [ObservableProperty] private SaleViewModel sale;
+    [ObservableProperty] private SaleViewModel sale = new();
     [ObservableProperty] private SaleItemViewModel currentItem = new();
     [ObservableProperty] private decimal totalSum;
     [ObservableProperty] private decimal totalDiscount;
@@ -65,7 +76,17 @@ public partial class SaleEditViewModel : ViewModelBase
     {
         var response = await customersApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
         if (response.IsSuccess)
+        {
             Customers = mapper.Map<ObservableCollection<CustomerViewModel>>(response.Data!);
+
+            // Joriy mijozni topib belgilaymiz
+            if (Sale.CustomerId > 0)
+            {
+                var currentCustomer = Customers.FirstOrDefault(c => c.Id == Sale.CustomerId);
+                if (currentCustomer is not null)
+                    Sale.Customer = currentCustomer;
+            }
+        }
         else
             Error = response.Message ?? "Mijozlarni yuklashda xatolik!";
     }
@@ -79,7 +100,17 @@ public partial class SaleEditViewModel : ViewModelBase
 
         var response = await currenciesApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
         if (response.IsSuccess)
+        {
             Currencies = mapper.Map<ObservableCollection<CurrencyViewModel>>(response.Data!);
+
+            // Joriy valyutani topib belgilaymiz
+            if (Sale.CurrencyId > 0)
+            {
+                var currentCurrency = Currencies.FirstOrDefault(c => c.Id == Sale.CurrencyId);
+                if (currentCurrency is not null)
+                    Sale.Currency = currentCurrency;
+            }
+        }
         else
             Error = response.Message ?? "Valyutalarni yuklashda xatolik!";
     }
@@ -115,10 +146,10 @@ public partial class SaleEditViewModel : ViewModelBase
         if (response.IsSuccess && response.Data.Any())
         {
             var customer = response.Data.First();
-            if (customer.Accounts != null)
+            if (customer.Accounts is not null)
             {
                 var uzsAccount = customer.Accounts.FirstOrDefault(a => a.Currency?.Code == "UZS");
-                if (uzsAccount != null)
+                if (uzsAccount is not null)
                 {
                     BeginBalance = uzsAccount.Balance;
                     LastBalance = BeginBalance + FinalSum;
