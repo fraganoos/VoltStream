@@ -166,7 +166,7 @@ public partial class SalesPage : Page
                     }
                 };
 
-                var response = await customersApi.Filter(request).Handle();
+                var response = await customersApi.FilterAsync(request).Handle();
                 if (response.IsSuccess)
                 {
                     var customer = response.Data!.First();

@@ -2,6 +2,7 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Turnovers.Models;
 
 public partial class SaleItemViewModel : ViewModelBase
 {
@@ -17,6 +18,6 @@ public partial class SaleItemViewModel : ViewModelBase
     [ObservableProperty] private decimal? totalAmount;
     [ObservableProperty] private decimal? finalAmount;
 
-    [ObservableProperty] private SalePageViewModel sale;
+    [ObservableProperty] private SaleViewModel sale = new();
     [ObservableProperty] private ProductViewModel product = new();
 }

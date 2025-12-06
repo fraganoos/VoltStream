@@ -189,7 +189,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
                     break;
 
                 case OperationType.Payment:
-                    response = await paymentApi.Delete(operation.Id)
+                    response = await paymentApi.DeleteAsync(operation.Id)
                         .Handle(isLoading => IsLoading = isLoading);
                     break;
 

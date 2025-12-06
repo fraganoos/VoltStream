@@ -63,18 +63,6 @@ public partial class CustomerViewModel : ViewModelBase
         }
     }
 
-    private void SubscribeAccountEvents(ObservableCollection<AccountViewModel> list)
-    {
-        foreach (var acc in list)
-            acc.PropertyChanged += Account_PropertyChanged;
-    }
-
-    private void UnsubscribeAccountEvents(ObservableCollection<AccountViewModel> list)
-    {
-        foreach (var acc in list)
-            acc.PropertyChanged -= Account_PropertyChanged;
-    }
-
     private void RecalculateBalance()
     {
         Balance = Accounts.Sum(a => a.Balance * a.Currency.ExchangeRate);

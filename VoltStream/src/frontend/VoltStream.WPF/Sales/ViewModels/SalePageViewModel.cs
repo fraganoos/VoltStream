@@ -114,7 +114,7 @@ public partial class SalePageViewModel : ViewModelBase
             }
         };
 
-        var response = await customersApi.Filter(request).Handle();
+        var response = await customersApi.FilterAsync(request).Handle();
         if (response.IsSuccess)
         {
             Customers = new(mapper.Map<ObservableCollection<CustomerViewModel>>(response.Data!));

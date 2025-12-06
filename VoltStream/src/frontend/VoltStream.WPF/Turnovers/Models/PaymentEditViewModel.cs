@@ -17,7 +17,6 @@ using VoltStream.WPF.Commons.ViewModels;
 
 public partial class PaymentEditViewModel : ViewModelBase
 {
-    private readonly IServiceProvider services;
     private readonly IMapper mapper;
     private readonly IPaymentApi paymentApi;
     private readonly ICustomersApi customersApi;
@@ -27,16 +26,13 @@ public partial class PaymentEditViewModel : ViewModelBase
 
     public PaymentEditViewModel(IServiceProvider services, PaymentResponse paymentData)
     {
-        this.services = services;
         mapper = services.GetRequiredService<IMapper>();
         paymentApi = services.GetRequiredService<IPaymentApi>();
         customersApi = services.GetRequiredService<ICustomersApi>();
         currenciesApi = services.GetRequiredService<ICurrenciesApi>();
 
-        // Ma'lumotlarni to'g'ridan-to'g'ri o'zlashtiramiz
         Payment = mapper.Map<PaymentViewModel>(paymentData);
 
-        // Kirim yoki chiqimni aniqlash
         if (Payment.Amount > 0)
             Payment.IncomeAmount = Payment.NetAmount;
         else if (Payment.Amount < 0)
@@ -54,6 +50,9 @@ public partial class PaymentEditViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<CustomerViewModel> customers = [];
     [ObservableProperty] private ObservableCollection<CurrencyViewModel> currencies = [];
 
+
+    #region Property Changes
+
     private async void Payment_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(Payment.IncomeAmount) ||
@@ -62,6 +61,10 @@ public partial class PaymentEditViewModel : ViewModelBase
             CalculateLastBalance();
         }
     }
+
+    #endregion Property Changes
+
+    #region Load Data
 
     private async Task LoadPageAsync()
     {
@@ -105,7 +108,6 @@ public partial class PaymentEditViewModel : ViewModelBase
         {
             Currencies = mapper.Map<ObservableCollection<CurrencyViewModel>>(response.Data!);
 
-            // Joriy valyutani topib belgilaymiz
             if (Payment.CurrencyId > 0)
             {
                 var currentCurrency = Currencies.FirstOrDefault(c => c.Id == Payment.CurrencyId);
@@ -129,7 +131,7 @@ public partial class PaymentEditViewModel : ViewModelBase
             }
         };
 
-        var response = await customersApi.Filter(request)
+        var response = await customersApi.FilterAsync(request)
             .Handle(isLoading => IsLoading = isLoading);
 
         if (response.IsSuccess)
@@ -147,10 +149,9 @@ public partial class PaymentEditViewModel : ViewModelBase
         }
     }
 
-    private void CalculateLastBalance()
-    {
-            LastBalance = BeginBalance + Payment.Amount;
-    }
+    #endregion Load Data
+
+    #region Commands
 
     [RelayCommand]
     private async Task Save()
@@ -178,16 +179,7 @@ public partial class PaymentEditViewModel : ViewModelBase
 
         try
         {
-            var request = new PaymentRequest
-            {
-                Id = Payment.Id,
-                CustomerId = Payment.Customer.Id,
-                CurrencyId = Payment.Currency?.Id ?? 0,
-                ExchangeRate = Payment.ExchangeRate,
-                Amount = Payment.Amount,
-                PaidAt = Payment.PaidAt,
-                Description = Payment.Description
-            };
+            var request = mapper.Map<PaymentRequest>(Payment);
 
             var response = await paymentApi.UpdateAsync(request)
                 .Handle(isLoading => IsLoading = isLoading);
@@ -197,10 +189,7 @@ public partial class PaymentEditViewModel : ViewModelBase
                 Success = "To'lov muvaffaqiyatli yangilandi!";
                 CloseRequested?.Invoke(this, true);
             }
-            else
-            {
-                Error = response.Message ?? "To'lovni yangilashda xatolik!";
-            }
+            else Error = response.Message ?? "To'lovni yangilashda xatolik!";
         }
         catch (Exception ex)
         {
@@ -220,4 +209,15 @@ public partial class PaymentEditViewModel : ViewModelBase
         if (result == MessageBoxResult.Yes)
             CloseRequested?.Invoke(this, false);
     }
+
+    #endregion Commands
+
+    #region Private Helpers
+
+    private void CalculateLastBalance()
+    {
+        LastBalance = BeginBalance + Payment.Amount;
+    }
+
+    #endregion Private Helpers
 }

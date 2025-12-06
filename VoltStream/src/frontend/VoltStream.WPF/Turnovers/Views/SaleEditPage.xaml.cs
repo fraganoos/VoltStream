@@ -1,10 +1,11 @@
 ﻿namespace VoltStream.WPF.Sales.Views;
 
+using ApiServices.Models.Responses;
+using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Extensions.DependencyInjection;
+using System.Windows.Input;
 using VoltStream.WPF.Sales.ViewModels;
-using ApiServices.Models.Responses;
 
 public partial class SaleEditPage : Page
 {
@@ -13,19 +14,34 @@ public partial class SaleEditPage : Page
     public SaleEditPage(IServiceProvider services, SaleResponse saleData)
     {
         InitializeComponent();
-
         viewModel = ActivatorUtilities.CreateInstance<SaleEditViewModel>(services, saleData);
         DataContext = viewModel;
 
-        // Window'ni yopish uchun event handler
         viewModel.CloseRequested += (s, e) =>
         {
             var window = Window.GetWindow(this);
-            if (window != null)
+            if (window is not null)
             {
                 window.DialogResult = e;
                 window.Close();
             }
         };
+    }
+
+    private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (dataGrid.SelectedItem is SaleItemViewModel item)
+        {
+            viewModel.EditItemCommand.Execute(item);
+        }
+    }
+
+    private void DataGrid_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Delete && dataGrid.SelectedItem is SaleItemViewModel item)
+        {
+            viewModel.DeleteItemCommand.Execute(item);
+            e.Handled = true;
+        }
     }
 }

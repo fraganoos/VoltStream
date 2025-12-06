@@ -4,11 +4,11 @@ using VoltStream.Domain.Enums;
 
 public class Payment : Auditable
 {
-    public DateTimeOffset PaidAt { get; set; } // to'langan sana
+    public DateTimeOffset PaidAt { get; set; }
     public PaymentType Type { get; set; }
-    public decimal Amount { get; set; } // orginal kirim summa
-    public decimal ExchangeRate { get; set; } //dollar kurs yoki pul o'tkazish foizi
-    public decimal NetAmount { get; set; } // qarz summadan ochiraldigan summa
+    public decimal Amount { get; set; }
+    public decimal ExchangeRate { get; set; }
+    public decimal NetAmount { get; set; }
     public string Description { get; set; } = string.Empty;
 
     public long CurrencyId { get; set; }

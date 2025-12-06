@@ -26,5 +26,5 @@ public interface ICustomersApi
     Task<Response<List<CustomerResponse>>> GetAllAsync();
 
     [Post("/customers/filter")]
-    Task<Response<List<CustomerResponse>>> Filter(FilteringRequest request);
+    Task<Response<List<CustomerResponse>>> FilterAsync(FilteringRequest request);
 }
