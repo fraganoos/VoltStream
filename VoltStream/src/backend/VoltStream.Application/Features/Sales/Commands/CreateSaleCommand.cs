@@ -7,7 +7,6 @@ using System.Text;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
-using VoltStream.Application.Features.Sales.DTOs;
 using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
 
@@ -21,7 +20,7 @@ public record CreateSaleCommand(
     bool IsApplied,
     decimal Discount,
     string Description,
-    List<SaleItemCommandDto> Items)
+    List<SaleItemCommand> Items)
     : IRequest<long>;
 
 public class CreateSaleCommandHandler(
@@ -84,7 +83,7 @@ public class CreateSaleCommandHandler(
     }
 
     private async Task ProcessSaleItemsAsync(
-        List<SaleItemCommandDto> saleItems,
+        List<SaleItemCommand> saleItems,
         Warehouse warehouse,
         StringBuilder descriptionBuilder,
         CancellationToken cancellationToken)
@@ -110,7 +109,7 @@ public class CreateSaleCommandHandler(
         }
     }
 
-    private async Task HandleResidueAsync(SaleItemCommandDto item, Warehouse warehouse, CancellationToken cancellationToken)
+    private async Task HandleResidueAsync(SaleItemCommand item, Warehouse warehouse, CancellationToken cancellationToken)
     {
         if (item.LengthPerRoll * item.RollCount != item.TotalLength)
         {

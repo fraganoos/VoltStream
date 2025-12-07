@@ -2,11 +2,11 @@
 
 public class Sale : Auditable
 {
-    public DateTimeOffset Date { get; set; } // operation kuni
-    public int RollCount { get; set; } // jami rulonlar soni
-    public decimal Length { get; set; } // jami metr
-    public decimal Amount { get; set; } // jami summa
-    public decimal Discount { get; set; } // chegirma
+    public DateTimeOffset Date { get; set; }
+    public int RollCount { get; set; }
+    public decimal Length { get; set; }
+    public decimal Amount { get; set; }
+    public decimal Discount { get; set; }
     public string Description { get; set; } = string.Empty;
 
     public long CurrencyId { get; set; }

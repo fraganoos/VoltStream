@@ -10,4 +10,7 @@ public class DiscountOperationResponse
 
     public long CustomerId { get; set; }
     public long SaleId { get; set; }
+
+    public SaleResponse? Sale { get; set; }
+    public PaymentResponse? Payment { get; set; }
 }

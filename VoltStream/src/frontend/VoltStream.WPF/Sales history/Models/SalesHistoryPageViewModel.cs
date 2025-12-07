@@ -42,8 +42,8 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<ProductItemViewModel> filteredSaleItems = [];
 
     [ObservableProperty] private decimal? finalAmount;
-    [ObservableProperty] private DateTime? beginDate;
-    [ObservableProperty] private DateTime? endDate;
+    [ObservableProperty] private DateTime beginDate = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+    [ObservableProperty] private DateTime endDate = DateTime.Today;
 
     // --- Boshlang‘ich ma’lumotlarni yuklash
     private async Task LoadInitialDataAsync()
@@ -390,42 +390,15 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     {
         try
         {
-            // 🗓️ Bugungi sana (zaxira sifatida)
-            string today = DateTime.Now.ToString("dd.MM.yyyy");
-
-            // 🧭 Sana oralig‘ini aniqlaymiz
-            string? begin = BeginDate?.ToString("dd.MM.yyyy");
-            string? end = EndDate?.ToString("dd.MM.yyyy");
-
             FilteringRequest request = new()
             {
                 Filters = new()
                 {
                     ["Items"] = ["include:Product.Category"],
-                    ["Customer"] = ["include"]
+                    ["Customer"] = ["include"],
+                    ["date"] = [$">={BeginDate}", $"<{EndDate.AddDays(1)}"]
                 }
             };
-
-            // 🔍 Agar foydalanuvchi sana tanlamagan bo‘lsa — bugungi sana
-            if (BeginDate == null && EndDate == null)
-            {
-                request.Filters["Date"] = [today];
-            }
-            else if (BeginDate != null && EndDate == null)
-            {
-                // faqat boshlanish sanasi bor — o‘sha kundan boshlab
-                request.Filters["Date"] = [$">={begin}"];
-            }
-            else if (BeginDate == null && EndDate != null)
-            {
-                // faqat tugash sanasi bor — o‘sha kungacha
-                request.Filters["Date"] = [$"<={end}"];
-            }
-            else
-            {
-                // Ikkalasi ham bor — oralig‘i bo‘yicha
-                request.Filters["Date"] = [$">={begin}", $"<={end}"];
-            }
 
             var srvc = services.GetRequiredService<ISaleApi>();
             var response = await srvc.Filtering(request).Handle();

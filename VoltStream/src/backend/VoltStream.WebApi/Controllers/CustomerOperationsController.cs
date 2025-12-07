@@ -17,7 +17,7 @@ public class CustomerOperationsController : BaseController
       => Ok(new Response { Data = await Mediator.Send(query) });
 
 
-    [HttpGet("{customerId}")]
+    [HttpGet("by-customer-id/{customerId}")]
     public async Task<IActionResult> GetByCustomerId(long customerId,
         [FromQuery] DateTime? beginDate = null,
         [FromQuery] DateTime? endDate = null)
@@ -28,4 +28,8 @@ public class CustomerOperationsController : BaseController
             new GetCustomerOperationByCustomerIdQuery(customerId, beginDate, endDate))
         });
     }
+
+    [HttpGet("{Id}")]
+    public async Task<IActionResult> GetById(long Id)
+        => Ok(new Response { Data = await Mediator.Send(new GetCustomerOperationByIdQuery(Id)) });
 }

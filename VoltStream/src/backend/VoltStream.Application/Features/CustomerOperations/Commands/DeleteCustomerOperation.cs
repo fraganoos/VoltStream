@@ -6,7 +6,7 @@ using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Enums;
 
 public record DeleteCustomerOperation(long Id) : IRequest<bool>;
-public class DeleteCustomerOperationHandler(IAppDbContext context) 
+public class DeleteCustomerOperationHandler(IAppDbContext context)
     : IRequestHandler<DeleteCustomerOperation, bool>
 {
     public async Task<bool> Handle(DeleteCustomerOperation request, CancellationToken cancellationToken)

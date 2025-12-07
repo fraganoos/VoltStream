@@ -18,11 +18,11 @@ using System.Windows.Markup;
 using System.Windows.Media;
 using VoltStream.WPF.Commons;
 
-public partial class ProductViewModel : ViewModelBase
+public partial class ProductPageViewModel : ViewModelBase
 {
     private readonly IServiceProvider services;
 
-    public ProductViewModel(IServiceProvider services)
+    public ProductPageViewModel(IServiceProvider services)
     {
         this.services = services;
         _ = LoadInitialDataAsync();
@@ -32,8 +32,8 @@ public partial class ProductViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<CategoryResponse> categories = [];
 
     [ObservableProperty] private ProductResponse? selectedProduct;
-    [ObservableProperty] private ObservableCollection<ProductResponse> allProducts = []; // Barcha mahsulotlar
-    [ObservableProperty] private ObservableCollection<ProductResponse> products = []; // ComboBox uchun filtrlangan productlar
+    [ObservableProperty] private ObservableCollection<ProductResponse> allProducts = [];
+    [ObservableProperty] private ObservableCollection<ProductResponse> products = [];
 
     [ObservableProperty] private ObservableCollection<ProductItemViewModel> productItems = [];
     [ObservableProperty] private ObservableCollection<ProductItemViewModel> filteredProductItems = [];
@@ -43,9 +43,12 @@ public partial class ProductViewModel : ViewModelBase
     // --- Boshlang‘ich ma’lumotlarni yuklash
     private async Task LoadInitialDataAsync()
     {
-        await LoadCategoriesAsync();
-        await LoadProductsAsync();
-        await LoadWarehouseItemsAsync();
+        await Task.WhenAll(
+            LoadCategoriesAsync(),
+            LoadProductsAsync(),
+            LoadWarehouseItemsAsync()
+        );
+
         ApplyFilter();
     }
 

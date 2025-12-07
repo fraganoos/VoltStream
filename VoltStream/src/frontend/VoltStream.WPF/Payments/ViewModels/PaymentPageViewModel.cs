@@ -157,7 +157,7 @@ partial class PaymentPageViewModel : ViewModelBase
             }
         };
 
-        var response = await paymentApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
+        var response = await paymentApi.FilterAsync(request).Handle(isLoading => IsLoading = isLoading);
 
         if (response.IsSuccess)
             HistoryPayments = mapper.Map<ObservableCollection<PaymentViewModel>>(response.Data);
@@ -216,7 +216,7 @@ partial class PaymentPageViewModel : ViewModelBase
             }
         };
 
-        var response = await customersApi.Filter(request).Handle();
+        var response = await customersApi.FilterAsync(request).Handle();
 
         if (response.IsSuccess)
         {

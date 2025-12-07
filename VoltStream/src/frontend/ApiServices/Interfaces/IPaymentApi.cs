@@ -23,5 +23,5 @@ public interface IPaymentApi
     Task<Response<List<PaymentResponse>>> GetAllAsync();
 
     [Post("/payments/filter")]
-    Task<Response<List<PaymentResponse>>> Filter(FilteringRequest request);
+    Task<Response<List<PaymentResponse>>> FilterAsync(FilteringRequest request);
 }

@@ -1,4 +1,4 @@
-﻿namespace VoltStream.Application.Features.DiscountOperations.DTOs;
+﻿namespace VoltStream.Application.Features.DiscountOperations.Commands;
 
 public record DiscountOperationCommandDto
 {
