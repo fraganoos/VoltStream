@@ -2,10 +2,10 @@
 
 using ApiServices.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using VoltStream.WPF.Sales.ViewModels;
+using VoltStream.WPF.Turnovers.Models;
 
 public partial class SaleEditPage : Page
 {
@@ -16,16 +16,6 @@ public partial class SaleEditPage : Page
         InitializeComponent();
         viewModel = ActivatorUtilities.CreateInstance<SaleEditViewModel>(services, saleData);
         DataContext = viewModel;
-
-        viewModel.CloseRequested += (s, e) =>
-        {
-            var window = Window.GetWindow(this);
-            if (window is not null)
-            {
-                window.DialogResult = e;
-                window.Close();
-            }
-        };
     }
 
     private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)

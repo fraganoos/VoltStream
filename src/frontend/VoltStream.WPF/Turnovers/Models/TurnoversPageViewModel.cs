@@ -8,6 +8,7 @@ using ApiServices.Models.Responses;
 using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using PdfSharp.Drawing;
@@ -21,6 +22,8 @@ using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Commons.Messages;
+using VoltStream.WPF.Commons.Services;
 using VoltStream.WPF.Commons.ViewModels;
 using VoltStream.WPF.Payments.Views;
 using VoltStream.WPF.Sales.Views;
@@ -33,17 +36,27 @@ public partial class TurnoversPageViewModel : ViewModelBase
     private readonly ISaleApi saleApi;
     private readonly IMapper mapper;
     private readonly IServiceProvider services;
+    private readonly INavigationService navigationService;
 
     private ObservableCollection<CustomerOperationForDisplayViewModel> allOperationsForDisplay = [];
 
-    public TurnoversPageViewModel(IServiceProvider services)
+    public TurnoversPageViewModel(IServiceProvider services, INavigationService navigationService)
     {
         this.services = services;
+        this.navigationService = navigationService;
         customersApi = services.GetRequiredService<ICustomersApi>();
         customerOperationsApi = services.GetRequiredService<ICustomerOperationsApi>();
         paymentApi = services.GetRequiredService<IPaymentApi>();
         saleApi = services.GetRequiredService<ISaleApi>();
         mapper = services.GetRequiredService<IMapper>();
+
+        WeakReferenceMessenger.Default.Register<EntityUpdatedMessage<string>>(this, (r, m) =>
+        {
+            if (m.Value == "OperationUpdated")
+            {
+                _ = LoadCustomerOperationsForSelectedCustomerAsync();
+            }
+        });
 
         _ = LoadInitialDataAsync();
     }
@@ -484,20 +497,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
             return;
         }
 
-        var editWindow = new Window
-        {
-            Title = "Savdoni tahrirlash",
-            Width = 1200,
-            Height = 700,
-            WindowStartupLocation = WindowStartupLocation.CenterScreen,
-            Content = new SaleEditPage(services, saleResponse.Data.Sale!)
-        };
-
-        if (editWindow.ShowDialog() == true)
-        {
-            Success = "Savdo muvaffaqiyatli yangilandi!";
-            await LoadCustomerOperationsForSelectedCustomerAsync();
-        }
+        navigationService.Navigate(new SaleEditPage(services, saleResponse.Data.Sale!));
     }
 
     private async Task OpenPaymentEditPage(long operationId)
@@ -511,20 +511,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
             return;
         }
 
-        var editWindow = new Window
-        {
-            Title = "To'lovni tahrirlash",
-            Width = 950,
-            Height = 600,
-            WindowStartupLocation = WindowStartupLocation.CenterScreen,
-            Content = new PaymentEditPage(services, response.Data.Payment!)
-        };
-
-        if (editWindow.ShowDialog() == true)
-        {
-            Success = "To'lov muvaffaqiyatli yangilandi!";
-            await LoadCustomerOperationsForSelectedCustomerAsync();
-        }
+        navigationService.Navigate(new PaymentEditPage(services, response.Data.Payment!));
     }
 
     #endregion Private Helpers

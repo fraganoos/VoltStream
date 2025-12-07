@@ -2,7 +2,6 @@
 
 using ApiServices.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
-using System.Windows;
 using System.Windows.Controls;
 using VoltStream.WPF.Payments.ViewModels;
 
@@ -16,16 +15,5 @@ public partial class PaymentEditPage : Page
 
         viewModel = ActivatorUtilities.CreateInstance<PaymentEditViewModel>(services, paymentData);
         DataContext = viewModel;
-
-        // Window'ni yopish uchun event handler
-        viewModel.CloseRequested += (s, e) =>
-        {
-            var window = Window.GetWindow(this);
-            if (window != null)
-            {
-                window.DialogResult = e;
-                window.Close();
-            }
-        };
     }
 }

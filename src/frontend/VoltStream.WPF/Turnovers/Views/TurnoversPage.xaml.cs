@@ -1,5 +1,6 @@
 ﻿namespace VoltStream.WPF.Turnovers.Views;
 
+using Microsoft.Extensions.DependencyInjection;
 using System.Windows.Controls;
 using VoltStream.WPF.Turnovers.Models;
 
@@ -9,12 +10,9 @@ using VoltStream.WPF.Turnovers.Models;
 /// </summary>
 public partial class TurnoversPage : Page
 {
-    private readonly IServiceProvider serviceProvider;
-
-    public TurnoversPage(IServiceProvider serviceProvider)
+    public TurnoversPage()
     {
         InitializeComponent();
-        this.serviceProvider = serviceProvider;
-        DataContext = new TurnoversPageViewModel(serviceProvider);
+        DataContext = App.Services!.GetRequiredService<TurnoversPageViewModel>();
     }
 }
