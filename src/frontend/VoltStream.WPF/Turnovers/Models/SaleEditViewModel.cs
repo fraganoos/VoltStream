@@ -1,4 +1,4 @@
-﻿namespace VoltStream.WPF.Sales.ViewModels;
+﻿namespace VoltStream.WPF.Turnovers.Models;
 
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
@@ -7,6 +7,7 @@ using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
@@ -14,8 +15,10 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Commons.Messages;
+using VoltStream.WPF.Commons.Services;
 using VoltStream.WPF.Commons.ViewModels;
-using VoltStream.WPF.Turnovers.Models;
+using VoltStream.WPF.Sales.ViewModels;
 
 public partial class SaleEditViewModel : ViewModelBase
 {
@@ -26,11 +29,10 @@ public partial class SaleEditViewModel : ViewModelBase
     private readonly ICategoriesApi categoriesApi;
     private readonly IProductsApi productsApi;
     private readonly IWarehouseStocksApi warehouseStocksApi;
+    private readonly INavigationService navigationService;
 
     private SaleItemViewModel? originalItem;
     private int originalItemIndex = -1;
-
-    public event EventHandler<bool>? CloseRequested;
 
     public SaleEditViewModel(IServiceProvider services, SaleResponse saleData)
     {
@@ -41,6 +43,7 @@ public partial class SaleEditViewModel : ViewModelBase
         categoriesApi = services.GetRequiredService<ICategoriesApi>();
         productsApi = services.GetRequiredService<IProductsApi>();
         warehouseStocksApi = services.GetRequiredService<IWarehouseStocksApi>();
+        navigationService = services.GetRequiredService<INavigationService>();
 
         Sale = mapper.Map<SaleViewModel>(saleData);
 
@@ -60,17 +63,21 @@ public partial class SaleEditViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<CustomerViewModel> customers = [];
     [ObservableProperty] private ObservableCollection<CurrencyViewModel> currencies = [];
     [ObservableProperty] private ObservableCollection<CategoryViewModel> categories = [];
-    [ObservableProperty] private ObservableCollection<ProductViewModel> products = [];
+    [ObservableProperty] private ObservableCollection<Sales.ViewModels.ProductViewModel> products = [];
     [ObservableProperty] private ObservableCollection<WarehouseStockViewModel> warehouseStocks = [];
 
     [ObservableProperty] private CustomerViewModel? selectedCustomer;
     [ObservableProperty] private CurrencyViewModel? selectedCurrency;
     [ObservableProperty] private CategoryViewModel? selectedCategory;
-    [ObservableProperty] private ProductViewModel? selectedProduct;
+    [ObservableProperty] private Sales.ViewModels.ProductViewModel? selectedProduct;
     [ObservableProperty] private WarehouseStockViewModel? selectedWarehouseStock;
 
     [ObservableProperty] private decimal beginBalance;
     [ObservableProperty] private decimal lastBalance;
+
+    [ObservableProperty] private decimal totalSum;
+    [ObservableProperty] private decimal totalDiscount;
+    [ObservableProperty] private decimal finalSum;
 
     private async Task LoadPageAsync()
     {
@@ -143,7 +150,7 @@ public partial class SaleEditViewModel : ViewModelBase
             .Handle(isLoading => IsLoading = isLoading);
 
         if (response.IsSuccess)
-            Products = mapper.Map<ObservableCollection<ProductViewModel>>(response.Data!);
+            Products = mapper.Map<ObservableCollection<Sales.ViewModels.ProductViewModel>>(response.Data!);
         else
             Error = response.Message ?? "Maxsulotlarni yuklashda xatolik!";
     }
@@ -180,15 +187,17 @@ public partial class SaleEditViewModel : ViewModelBase
         }
     }
 
+    private bool _suppressLoading;
+
     partial void OnSelectedCategoryChanged(CategoryViewModel? value)
     {
-        if (value is not null)
+        if (value is not null && !_suppressLoading)
             _ = LoadProducts();
     }
 
-    partial void OnSelectedProductChanged(ProductViewModel? value)
+    partial void OnSelectedProductChanged(Sales.ViewModels.ProductViewModel? value)
     {
-        if (value is not null)
+        if (value is not null && !_suppressLoading)
         {
             if (value.Category is not null)
                 SelectedCategory = Categories.FirstOrDefault(c => c.Id == value.Category.Id);
@@ -263,12 +272,12 @@ public partial class SaleEditViewModel : ViewModelBase
         }
 
         CurrentItem.ProductId = SelectedProduct.Id;
-        CurrentItem.Product = new ProductViewModel
+        CurrentItem.Product = new Sales.ViewModels.ProductViewModel
         {
             Id = SelectedProduct.Id,
             Name = SelectedProduct.Name,
             CategoryId = SelectedProduct.CategoryId,
-            Category = SelectedProduct.Category != null ? new CategoryViewModel
+            Category = SelectedProduct.Category is not null ? new CategoryViewModel
             {
                 Id = SelectedProduct.Category.Id,
                 Name = SelectedProduct.Category.Name
@@ -291,7 +300,7 @@ public partial class SaleEditViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void EditItem(SaleItemViewModel? item)
+    private async Task EditItem(SaleItemViewModel? item)
     {
         if (item is null) return;
 
@@ -317,21 +326,29 @@ public partial class SaleEditViewModel : ViewModelBase
         IsEditing = true;
         Sale.Items.RemoveAt(originalItemIndex);
 
-        if (item.Product?.Category is not null)
+        _suppressLoading = true;
+        try
         {
-            SelectedCategory = Categories.FirstOrDefault(c => c.Id == item.Product.Category.Id);
-            _ = LoadProducts();
-        }
+            if (item.Product?.Category is not null)
+            {
+                SelectedCategory = Categories.FirstOrDefault(c => c.Id == item.Product.Category.Id);
+                await LoadProducts();
+            }
 
-        if (item.Product is not null)
-        {
-            SelectedProduct = Products.FirstOrDefault(p => p.Id == item.ProductId);
-            _ = LoadWarehouseStocks();
-        }
+            if (item.Product is not null)
+            {
+                SelectedProduct = Products.FirstOrDefault(p => p.Id == item.ProductId);
+                await LoadWarehouseStocks();
+            }
 
-        if (item.LengthPerRoll.HasValue)
+            if (item.LengthPerRoll.HasValue)
+            {
+                SelectedWarehouseStock = WarehouseStocks.FirstOrDefault(w => w.LengthPerRoll == item.LengthPerRoll.Value);
+            }
+        }
+        finally
         {
-            SelectedWarehouseStock = WarehouseStocks.FirstOrDefault(w => w.LengthPerRoll == item.LengthPerRoll.Value);
+            _suppressLoading = false;
         }
     }
 
@@ -396,19 +413,7 @@ public partial class SaleEditViewModel : ViewModelBase
             Description = Sale.Description,
             Length = Sale.Length,
             RollCount = Sale.RollCount,
-            Items = Sale.Items.Select(item => new SaleItemRequest
-            {
-                Id = item.Id,
-                ProductId = item.ProductId,
-                RollCount = item.RollCount ?? 0,
-                LengthPerRoll = item.LengthPerRoll ?? 0,
-                TotalLength = item.TotalLength ?? 0,
-                UnitPrice = item.UnitPrice ?? 0,
-                DiscountRate = item.DiscountRate ?? 0,
-                DiscountAmount = item.DiscountAmount ?? 0,
-                TotalAmount = item.TotalAmount ?? 0,
-                FinalAmount = item.FinalAmount ?? 0
-            }).ToList()
+            Items = mapper.Map<List<SaleItemRequest>>(Sale.Items)
         };
 
         var response = await saleApi.Update(request)
@@ -417,7 +422,8 @@ public partial class SaleEditViewModel : ViewModelBase
         if (response.IsSuccess)
         {
             Success = "Savdo muvaffaqiyatli yangilandi!";
-            CloseRequested?.Invoke(this, true);
+            WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage<string>("OperationUpdated"));
+            navigationService.GoBack();
         }
         else
         {
@@ -435,18 +441,18 @@ public partial class SaleEditViewModel : ViewModelBase
             MessageBoxImage.Question);
 
         if (result == MessageBoxResult.Yes)
-            CloseRequested?.Invoke(this, false);
+            navigationService.GoBack();
     }
 
     private void SaleItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        if (e.NewItems != null)
+        if (e.NewItems is not null)
         {
             foreach (SaleItemViewModel item in e.NewItems)
                 SubscribeToItemChanges(item);
         }
 
-        if (e.OldItems != null)
+        if (e.OldItems is not null)
         {
             foreach (SaleItemViewModel item in e.OldItems)
                 UnsubscribeFromItemChanges(item);
@@ -476,15 +482,22 @@ public partial class SaleEditViewModel : ViewModelBase
         {
             Sale.Amount = 0;
             Sale.Discount = 0;
+            TotalSum = 0;
+            TotalDiscount = 0;
+            FinalSum = 0;
         }
         else
         {
-            var totalAmount = Sale.Items.Sum(x => x.TotalAmount ?? 0);
-            var totalDiscount = Sale.Items.Sum(x => x.DiscountAmount ?? 0);
+            var grossAmount = Sale.Items.Sum(x => x.TotalAmount ?? 0);
+            var discountAmount = Sale.Items.Sum(x => x.DiscountAmount ?? 0);
 
-            Sale.Amount = totalAmount - totalDiscount;
-            Sale.Discount = totalDiscount;
-            Sale.RollCount = (int)Sale.Items.Sum(x => x.RollCount ?? 0);
+            TotalSum = grossAmount;
+            TotalDiscount = discountAmount;
+            FinalSum = grossAmount - discountAmount;
+
+            Sale.Amount = FinalSum;
+            Sale.Discount = TotalDiscount;
+            Sale.RollCount = Sale.Items.Sum(x => x.RollCount ?? 0);
             Sale.Length = Sale.Items.Sum(x => x.TotalLength ?? 0);
         }
 

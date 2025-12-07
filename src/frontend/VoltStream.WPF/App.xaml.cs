@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Commons.Services;
 using VoltStream.WPF.Configurations;
 using VoltStream.WPF.LoginPages.Models;
 using VoltStream.WPF.LoginPages.Views;
@@ -80,6 +81,7 @@ public partial class App : Application
     {
         services.AddSingleton<DiscoveryClient>();
         services.AddHostedService<ConnectionMonitor>();
+        services.AddSingleton<INavigationService, NavigationService>();
         ApiService.ConfigureServices(services);
     }
 }

@@ -7,12 +7,15 @@ using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Commons.Messages;
+using VoltStream.WPF.Commons.Services;
 using VoltStream.WPF.Commons.ViewModels;
 
 public partial class PaymentEditViewModel : ViewModelBase
@@ -21,8 +24,7 @@ public partial class PaymentEditViewModel : ViewModelBase
     private readonly IPaymentApi paymentApi;
     private readonly ICustomersApi customersApi;
     private readonly ICurrenciesApi currenciesApi;
-
-    public event EventHandler<bool>? CloseRequested;
+    private readonly INavigationService navigationService;
 
     public PaymentEditViewModel(IServiceProvider services, PaymentResponse paymentData)
     {
@@ -30,6 +32,7 @@ public partial class PaymentEditViewModel : ViewModelBase
         paymentApi = services.GetRequiredService<IPaymentApi>();
         customersApi = services.GetRequiredService<ICustomersApi>();
         currenciesApi = services.GetRequiredService<ICurrenciesApi>();
+        navigationService = services.GetRequiredService<INavigationService>();
 
         Payment = mapper.Map<PaymentViewModel>(paymentData);
 
@@ -187,7 +190,8 @@ public partial class PaymentEditViewModel : ViewModelBase
             if (response.IsSuccess)
             {
                 Success = "To'lov muvaffaqiyatli yangilandi!";
-                CloseRequested?.Invoke(this, true);
+                WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage<string>("OperationUpdated"));
+                navigationService.GoBack();
             }
             else Error = response.Message ?? "To'lovni yangilashda xatolik!";
         }
@@ -207,7 +211,7 @@ public partial class PaymentEditViewModel : ViewModelBase
             MessageBoxImage.Question);
 
         if (result == MessageBoxResult.Yes)
-            CloseRequested?.Invoke(this, false);
+            navigationService.GoBack();
     }
 
     #endregion Commands
