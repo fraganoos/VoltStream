@@ -420,3 +420,4 @@ FodyWeavers.xsd
 /VoltStream/src/backend/VoltStream.Infrastructure/Persistence/Migrations
 /VoltStream/src/backend/VoltStream.Infrastructure/Migrations
 /VoltStream/src/backend/VoltStream.ServerManager/appsettings.json
+/src/backend/VoltStream.Infrastructure/Persistence/Migrations
