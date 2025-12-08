@@ -21,6 +21,7 @@ public partial class SaleViewModel : ViewModelBase
     [ObservableProperty] private decimal amount;
     [ObservableProperty] private decimal discount;
     [ObservableProperty] private string description = string.Empty;
+    [ObservableProperty] private bool isDiscountApplied;
     [ObservableProperty] private CustomerOperationViewModel customerOperation = new();
     [ObservableProperty] private DiscountOperationViewModel discountOperation = new();
     [ObservableProperty] private CurrencyViewModel currency = new();

@@ -655,7 +655,7 @@ public partial class SalesPage : Page
             finalSum = sale.FinalSum!.Value;
             totalSum = sale.TotalSum!.Value;
             totalDiscount = sale.TotalDiscount!.Value;
-            if (sale.CheckedDiscount)
+            if (sale.IsDiscountApplied)
             {
                 finalSum = totalSum - totalDiscount;
                 sale.FinalSum = finalSum;
@@ -707,7 +707,7 @@ public partial class SalesPage : Page
             CurrencyId = sale.CurrencyId,
             Length = (decimal)sale.SaleItems.Sum(si => si.Quantity)!,
             RollCount = (int)sale.SaleItems.Sum(si => si.RollCount)!,
-            IsApplied = sale.CheckedDiscount,
+            IsDiscountApplied = sale.IsDiscountApplied,
             Items = [.. sale.SaleItems.Select(i => new SaleItemRequest
             {
                 ProductId = i.ProductId,
@@ -718,7 +718,7 @@ public partial class SalesPage : Page
                 TotalAmount = i.Sum ?? 0,
                 DiscountRate = i.PerDiscount ?? 0,
                 DiscountAmount = i.Discount ?? 0,
-                FinalAmount = sale.CheckedDiscount ? (i.FinalSumProduct ?? 0) : (i.Sum ?? 0)
+                FinalAmount = sale.IsDiscountApplied ? (i.FinalSumProduct ?? 0) : (i.Sum ?? 0)
             })]
         };
 

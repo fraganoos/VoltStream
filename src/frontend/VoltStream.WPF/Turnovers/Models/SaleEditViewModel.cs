@@ -55,6 +55,7 @@ public partial class SaleEditViewModel : ViewModelBase
         }
 
         _ = LoadPageAsync();
+        RecalculateTotals();
     }
 
     [ObservableProperty] private SaleViewModel sale = new();
@@ -103,7 +104,22 @@ public partial class SaleEditViewModel : ViewModelBase
             .Handle(isLoading => IsLoading = isLoading);
 
         if (response.IsSuccess)
+        {
             Customers = mapper.Map<ObservableCollection<CustomerViewModel>>(response.Data!);
+
+            var account = Customers.FirstOrDefault(c => c.Id == Sale.CustomerId)?
+                .Accounts.FirstOrDefault(a => a.CurrencyId == Sale.CurrencyId);
+
+            if (account is not null)
+            {
+                account.Balance += Sale.Amount;
+
+                if(Sale.IsDiscountApplied)
+                    account.Balance += Sale.Discount;
+                else
+                    account.Discount += Sale.Discount;
+            }
+        }
         else
             Error = response.Message ?? "Mijozlarni yuklashda xatolik!";
     }
@@ -216,13 +232,13 @@ public partial class SaleEditViewModel : ViewModelBase
         }
     }
 
-    partial void OnCurrentItemChanged(SaleItemViewModel? oldValue, SaleItemViewModel? value)
+    partial void OnCurrentItemChanged(SaleItemViewModel? oldValue, SaleItemViewModel newValue)
     {
         if (oldValue is not null)
             oldValue.PropertyChanged -= CurrentItem_PropertyChanged;
 
-        if (value is not null)
-            value.PropertyChanged += CurrentItem_PropertyChanged;
+        if (newValue is not null)
+            newValue.PropertyChanged += CurrentItem_PropertyChanged;
     }
 
     private void CurrentItem_PropertyChanged(object? sender, PropertyChangedEventArgs e)

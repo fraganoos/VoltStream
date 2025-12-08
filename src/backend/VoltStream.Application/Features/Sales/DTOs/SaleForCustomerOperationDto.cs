@@ -1,11 +1,10 @@
 ﻿namespace VoltStream.Application.Features.Sales.DTOs;
 
 using VoltStream.Application.Features.Currencies.DTOs;
-using VoltStream.Application.Features.CustomerOperations.DTOs;
 using VoltStream.Application.Features.Customers.DTOs;
 using VoltStream.Application.Features.DiscountOperations.DTOs;
 
-public record SaleDto
+public record SaleForCustomerOperationDto
 {
     public long Id { get; set; }
     public DateTimeOffset Date { get; set; }
@@ -16,9 +15,6 @@ public record SaleDto
     public string Description { get; set; } = string.Empty;
     public bool IsDiscountApplied { get; set; }
 
-    public long CustomerOperationId { get; set; }
-    public CustomerOperationForSaleDto CustomerOperation { get; set; } = default!;
-
     public long DiscountOperationId { get; set; }
     public DiscountOperationForSaleDto DiscountOperation { get; set; } = default!;
 
@@ -26,7 +22,7 @@ public record SaleDto
     public CurrencyDto Currency { get; set; } = default!;
 
     public long CustomerId { get; set; }
-    public CustomerDto Customer { get; set; } = default!;
+    public CustomerForOperationDto Customer { get; set; } = default!;
 
     public ICollection<SaleItemDto> Items { get; set; } = default!;
 }

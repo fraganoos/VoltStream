@@ -17,7 +17,7 @@ public record CreateSaleCommand(
     int RollCount,
     decimal Length,
     decimal Amount,
-    bool IsApplied,
+    bool IsDiscountApplied,
     decimal Discount,
     string Description,
     List<SaleItemCommand> Items)
@@ -46,8 +46,15 @@ public class CreateSaleCommandHandler(
             {
                 var account = customer.Accounts.FirstOrDefault(a => a.CurrencyId == request.CurrencyId);
 
-                UpdateAccountBalance(account, sale.Amount, sale.Discount, request.IsApplied);
-                sale.CustomerOperation = CreateCustomerOperation(sale, account, request.Description, descriptionBuilder, request.IsApplied);
+                if (account is null)
+                    customer.Accounts.Add(account = new()
+                    {
+                        CurrencyId = request.CurrencyId,
+                        OpeningBalance = sale.Amount
+                    });
+
+                UpdateAccountBalance(account, sale.Amount, sale.Discount, request.IsDiscountApplied);
+                sale.CustomerOperation = CreateCustomerOperation(sale, account, request.Description, descriptionBuilder, request.IsDiscountApplied);
                 sale.DiscountOperation = CreateDiscountOperation(request, account, descriptionBuilder);
             }
 
@@ -149,7 +156,7 @@ public class CreateSaleCommandHandler(
         {
             Date = request.Date.ToOffset(TimeSpan.Zero),
             Amount = request.Discount,
-            IsApplied = request.IsApplied,
+            IsApplied = request.IsDiscountApplied,
             CustomerId = account.CustomerId,
             Description = $"Chegirma savdo uchun: {description}",
             Account = account

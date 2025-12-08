@@ -488,6 +488,9 @@ namespace VoltStream.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsDiscountApplied")
+                        .HasColumnType("boolean");
+
                     b.Property<decimal>("Length")
                         .HasColumnType("numeric");
 
