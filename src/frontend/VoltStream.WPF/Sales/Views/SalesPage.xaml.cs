@@ -121,6 +121,7 @@ public partial class SalesPage : Page
                 {
                     await LoadCustomerByIdAsync(response.Data);
                     CustomerName.Text = newCustomer.Name;
+                    await LoadCurrencyAsync();
                 }
                 else
                 {
@@ -425,7 +426,6 @@ public partial class SalesPage : Page
     {
         if (cbxPerRollCount.SelectedItem is WarehouseStockResponse selectedWarehouseItem)
         {
-            // Rulon tanlanganda, uning narxi, chegirmasi o'zgartiramiz
             txtPrice.Text = selectedWarehouseItem.UnitPrice.ToString();
             txtPerDiscount.Text = selectedWarehouseItem.DiscountRate.ToString();
             sale.WarehouseCountRoll = selectedWarehouseItem.RollCount;
@@ -437,7 +437,6 @@ public partial class SalesPage : Page
     private async void CbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
     {
         await LoadCategoryAsync();
-        //cbxCategoryName.IsDropDownOpen = true;
     }
     private void CbxCategoryName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
@@ -487,11 +486,10 @@ public partial class SalesPage : Page
         ComboBoxHelper.BeforeUpdate(sender, e, "Rulon uzunlugi");
     }
 
-    private async Task LoadCategoryAsync() // Загрузка категорий
+    private async Task LoadCategoryAsync()
     {
         try
         {
-            // Сохраняем текущее выбранное значение
             var selectedValue = cbxCategoryName.SelectedValue;
 
             var response = await categoriesApi.GetAllAsync().Handle();
@@ -502,13 +500,11 @@ public partial class SalesPage : Page
                 cbxCategoryName.DisplayMemberPath = "Name";
                 cbxCategoryName.SelectedValuePath = "Id";
 
-                // Восстанавливаем выбранное значение
                 if (selectedValue is not null)
                     cbxCategoryName.SelectedValue = selectedValue;
             }
             else
             {
-                // Проверяем на null, чтобы избежать CS8602
                 var errorMsg = response.Message ?? "Unknown error";
                 MessageBox.Show("Error fetching categories: " + errorMsg);
             }
@@ -743,7 +739,11 @@ public partial class SalesPage : Page
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
         await LoadCategoryAsync();
+        await LoadCurrencyAsync();
+    }
 
+    private async Task LoadCurrencyAsync()
+    {
         FilteringRequest request = new()
         {
             Filters = new()
@@ -753,6 +753,7 @@ public partial class SalesPage : Page
         };
 
         var response = await currenciesApi.Filter(request).Handle();
+
         if (response.IsSuccess)
         {
             CurrencyType.ItemsSource = response.Data;
@@ -775,8 +776,6 @@ public partial class SalesPage : Page
 
         cbxPerRollCount.Text = string.Empty;
         cbxPerRollCount.SelectedIndex = -1;
-
-        //CurrencyType.Text = "So'm"; // hozircha faqat so'm bo'lgani uchun
 
         // TextBoxlarni tozalash
         txtRollCount.Text = string.Empty;
