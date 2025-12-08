@@ -10,7 +10,7 @@ public record SaleRequest
     public decimal Length { get; set; }
     public decimal Amount { get; set; }
     public long? CustomerOperationId { get; set; }
-    public bool IsApplied { get; set; }
+    public bool IsDiscountApplied { get; set; }
     public decimal? Discount { get; set; }
     public string Description { get; set; } = string.Empty;
     public List<SaleItemRequest> Items { get; set; } = default!;

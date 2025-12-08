@@ -416,7 +416,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-/VoltStream/src/backend/VoltStream.WebApi/appsettings.Development.json
-/VoltStream/src/backend/VoltStream.Infrastructure/Persistence/Migrations
-/VoltStream/src/backend/VoltStream.Infrastructure/Migrations
-/VoltStream/src/backend/VoltStream.ServerManager/appsettings.json
+/src/backend/VoltStream.WebApi/appsettings.Development.json
+/src/backend/VoltStream.Infrastructure/Persistence/Migrations
+/src/backend/VoltStream.Infrastructure/Migrations
+/src/backend/VoltStream.ServerManager/appsettings.json

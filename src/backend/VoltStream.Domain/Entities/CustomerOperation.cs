@@ -16,6 +16,7 @@ public class CustomerOperation : Auditable
 
     [JsonIgnore]
     public Sale? Sale { get; set; }
+
     [JsonIgnore]
     public Payment? Payment { get; set; }
 }

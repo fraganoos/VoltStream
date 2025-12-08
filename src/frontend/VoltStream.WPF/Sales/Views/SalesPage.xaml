@@ -165,7 +165,7 @@
                                 utils:EnterKeyTab.IsEnabled="True"
                                 Click="CheckedDiscount_Click"
                                 FontSize="12"
-                                IsChecked="{Binding CheckedDiscount}" />
+                                IsChecked="{Binding IsDiscountApplied}" />
                         </Border>
                     </Grid>
                     <Label

@@ -209,6 +209,7 @@
                                  CaretBrush="LightGray"
                                  BorderBrush="DarkGray"
                                  BorderThickness="0,0,0,2"
+                                PreviewKeyDown="TbxPassword_PreviewKeyDown"
                                  Height="28"
                                  VerticalContentAlignment="Center"
                                  Margin="0,5,0,0"

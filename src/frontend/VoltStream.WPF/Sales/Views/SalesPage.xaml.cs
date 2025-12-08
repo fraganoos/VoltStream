@@ -113,23 +113,21 @@ public partial class SalesPage : Page
                     {
                         OpeningBalance = customer.beginningSum,
                         Balance = customer.beginningSum,
-                        Discount = 0,
-                        //CurrencyId = (long)CurrencyType.SelectedValue
                     }]
                 };
 
                 var response = await customersApi.CreateAsync(newCustomer).Handle();
                 if (response.IsSuccess)
                 {
+                    await LoadCustomerByIdAsync(response.Data);
                     CustomerName.Text = newCustomer.Name;
-                    await LoadCustomerNameAsync();
+                    await LoadCurrencyAsync();
                 }
                 else
                 {
                     e.Handled = true;
                     MessageBox.Show($"Xatolik yuz berdi. {response.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-                // тут можете сохранить customer в БД или список
             }
             else { e.Handled = true; }
         }
@@ -181,12 +179,6 @@ public partial class SalesPage : Page
                     sale.Error = errorMsg;
                 }
             }
-            else
-            {
-                // Если customerId не задан, очищаем поля
-                //sale.CustomerId = null;
-                //sale.CustomerName = string.Empty;
-            }
         }
         catch (Exception ex)
         {
@@ -231,13 +223,12 @@ public partial class SalesPage : Page
                 CustomerName.ItemsSource = customers;
                 CustomerName.DisplayMemberPath = "Name";
                 CustomerName.SelectedValuePath = "Id";
-                // Восстанавливаем выбранное значение
+
                 if (selectedValue is not null)
                     CustomerName.SelectedValue = selectedValue;
             }
             else
             {
-                // Проверяем на null, чтобы избежать CS8602
                 var errorMsg = response.Message ?? "Unknown error";
                 MessageBox.Show("Error fetching customers: " + errorMsg);
             }
@@ -260,7 +251,7 @@ public partial class SalesPage : Page
                 txtPerDiscount.Text = null;
                 txtDiscount.Text = null;
                 txtFinalSumProduct.Text = null;
-                e.Handled = true; // Fokusni saqlab qolish
+                e.Handled = true;
                 return;
             }
             decimal discount = sum - finalSum;
@@ -287,7 +278,7 @@ public partial class SalesPage : Page
                 txtPerDiscount.Text = null;
                 txtDiscount.Text = null;
                 txtFinalSumProduct.Text = null;
-                e.Handled = true; // Fokusni saqlab qolish
+                e.Handled = true;
                 return;
             }
             decimal perDiscount = (discount / sum * 100);
@@ -314,7 +305,7 @@ public partial class SalesPage : Page
                 txtPerDiscount.Text = null;
                 txtDiscount.Text = null;
                 txtFinalSumProduct.Text = null;
-                e.Handled = true; // Fokusni saqlab qolish
+                e.Handled = true;
                 return;
             }
             CalcFinalSumProduct(sender);
@@ -435,7 +426,6 @@ public partial class SalesPage : Page
     {
         if (cbxPerRollCount.SelectedItem is WarehouseStockResponse selectedWarehouseItem)
         {
-            // Rulon tanlanganda, uning narxi, chegirmasi o'zgartiramiz
             txtPrice.Text = selectedWarehouseItem.UnitPrice.ToString();
             txtPerDiscount.Text = selectedWarehouseItem.DiscountRate.ToString();
             sale.WarehouseCountRoll = selectedWarehouseItem.RollCount;
@@ -447,7 +437,6 @@ public partial class SalesPage : Page
     private async void CbxCategoryName_GotFocus(object sender, RoutedEventArgs e)
     {
         await LoadCategoryAsync();
-        //cbxCategoryName.IsDropDownOpen = true;
     }
     private void CbxCategoryName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
@@ -497,11 +486,10 @@ public partial class SalesPage : Page
         ComboBoxHelper.BeforeUpdate(sender, e, "Rulon uzunlugi");
     }
 
-    private async Task LoadCategoryAsync() // Загрузка категорий
+    private async Task LoadCategoryAsync()
     {
         try
         {
-            // Сохраняем текущее выбранное значение
             var selectedValue = cbxCategoryName.SelectedValue;
 
             var response = await categoriesApi.GetAllAsync().Handle();
@@ -512,13 +500,11 @@ public partial class SalesPage : Page
                 cbxCategoryName.DisplayMemberPath = "Name";
                 cbxCategoryName.SelectedValuePath = "Id";
 
-                // Восстанавливаем выбранное значение
                 if (selectedValue is not null)
                     cbxCategoryName.SelectedValue = selectedValue;
             }
             else
             {
-                // Проверяем на null, чтобы избежать CS8602
                 var errorMsg = response.Message ?? "Unknown error";
                 MessageBox.Show("Error fetching categories: " + errorMsg);
             }
@@ -665,7 +651,7 @@ public partial class SalesPage : Page
             finalSum = sale.FinalSum!.Value;
             totalSum = sale.TotalSum!.Value;
             totalDiscount = sale.TotalDiscount!.Value;
-            if (sale.CheckedDiscount)
+            if (sale.IsDiscountApplied)
             {
                 finalSum = totalSum - totalDiscount;
                 sale.FinalSum = finalSum;
@@ -717,7 +703,7 @@ public partial class SalesPage : Page
             CurrencyId = sale.CurrencyId,
             Length = (decimal)sale.SaleItems.Sum(si => si.Quantity)!,
             RollCount = (int)sale.SaleItems.Sum(si => si.RollCount)!,
-            IsApplied = sale.CheckedDiscount,
+            IsDiscountApplied = sale.IsDiscountApplied,
             Items = [.. sale.SaleItems.Select(i => new SaleItemRequest
             {
                 ProductId = i.ProductId,
@@ -728,7 +714,7 @@ public partial class SalesPage : Page
                 TotalAmount = i.Sum ?? 0,
                 DiscountRate = i.PerDiscount ?? 0,
                 DiscountAmount = i.Discount ?? 0,
-                FinalAmount = sale.CheckedDiscount ? (i.FinalSumProduct ?? 0) : (i.Sum ?? 0)
+                FinalAmount = sale.IsDiscountApplied ? (i.FinalSumProduct ?? 0) : (i.Sum ?? 0)
             })]
         };
 
@@ -753,7 +739,11 @@ public partial class SalesPage : Page
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
         await LoadCategoryAsync();
+        await LoadCurrencyAsync();
+    }
 
+    private async Task LoadCurrencyAsync()
+    {
         FilteringRequest request = new()
         {
             Filters = new()
@@ -763,6 +753,7 @@ public partial class SalesPage : Page
         };
 
         var response = await currenciesApi.Filter(request).Handle();
+
         if (response.IsSuccess)
         {
             CurrencyType.ItemsSource = response.Data;
@@ -785,8 +776,6 @@ public partial class SalesPage : Page
 
         cbxPerRollCount.Text = string.Empty;
         cbxPerRollCount.SelectedIndex = -1;
-
-        //CurrencyType.Text = "So'm"; // hozircha faqat so'm bo'lgani uchun
 
         // TextBoxlarni tozalash
         txtRollCount.Text = string.Empty;

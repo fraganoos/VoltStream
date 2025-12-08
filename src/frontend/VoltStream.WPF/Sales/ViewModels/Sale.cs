@@ -15,7 +15,7 @@ public partial class Sale : ViewModelBase
     [ObservableProperty] private long? customerId;
     [ObservableProperty] private string customerName = string.Empty;
     [ObservableProperty] private long currencyId;
-    [ObservableProperty] private bool checkedDiscount = false;
+    [ObservableProperty] private bool isDiscountApplied = false;
     [ObservableProperty] private string description = string.Empty;
     [ObservableProperty] private string categoryName = string.Empty;
     [ObservableProperty] private long categoryId;
@@ -52,7 +52,7 @@ public partial class Sale : ViewModelBase
         RecalculateTotals();
     }
 
-    partial void OnCheckedDiscountChanged(bool value) => RecalculateTotals();
+    partial void OnIsDiscountAppliedChanged(bool value) => RecalculateTotals();
 
     private void RecalculateTotals()
     {
@@ -67,7 +67,7 @@ public partial class Sale : ViewModelBase
         TotalSum = SaleItems.Sum(x => x.Sum ?? 0);
         TotalDiscount = SaleItems.Sum(x => x.Discount ?? 0);
 
-        if (CheckedDiscount)
+        if (IsDiscountApplied)
             FinalSum = TotalSum - TotalDiscount;
         else
             FinalSum = TotalSum;
