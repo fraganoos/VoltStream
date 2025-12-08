@@ -26,7 +26,7 @@ public partial class LoginViewModel(
     public event Action? LoginSucceeded;
 
     [RelayCommand]
-    private async Task Login()
+    public async Task Login()
     {
         try
         {

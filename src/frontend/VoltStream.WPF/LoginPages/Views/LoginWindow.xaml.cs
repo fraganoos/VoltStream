@@ -1,6 +1,8 @@
 ﻿namespace VoltStream.WPF.LoginPages.Views;
 
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using VoltStream.WPF.LoginPages.Models;
 
 public partial class LoginWindow : Window
@@ -19,5 +21,11 @@ public partial class LoginWindow : Window
     {
         if (DataContext is LoginViewModel vm)
             vm.Password = tbxPassword.Password;
+    }
+
+    private async void TbxPassword_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter && DataContext is LoginViewModel vm)
+            await vm.Login();
     }
 }

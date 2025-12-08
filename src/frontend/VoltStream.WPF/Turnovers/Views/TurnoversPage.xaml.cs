@@ -14,5 +14,7 @@ public partial class TurnoversPage : Page
     {
         InitializeComponent();
         DataContext = App.Services!.GetRequiredService<TurnoversPageViewModel>();
+
+        cbxCustomer.Focus();
     }
 }

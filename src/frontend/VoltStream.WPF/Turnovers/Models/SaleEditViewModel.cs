@@ -286,7 +286,7 @@ public partial class SaleEditViewModel : ViewModelBase
 
         if (IsEditing && originalItem is not null)
         {
-            Sale.Items[originalItemIndex] = CurrentItem;
+            Sale.Items.Insert(originalItemIndex, CurrentItem);
             originalItem = null;
             originalItemIndex = -1;
             IsEditing = false;

@@ -113,23 +113,20 @@ public partial class SalesPage : Page
                     {
                         OpeningBalance = customer.beginningSum,
                         Balance = customer.beginningSum,
-                        Discount = 0,
-                        //CurrencyId = (long)CurrencyType.SelectedValue
                     }]
                 };
 
                 var response = await customersApi.CreateAsync(newCustomer).Handle();
                 if (response.IsSuccess)
                 {
+                    await LoadCustomerByIdAsync(response.Data);
                     CustomerName.Text = newCustomer.Name;
-                    await LoadCustomerNameAsync();
                 }
                 else
                 {
                     e.Handled = true;
                     MessageBox.Show($"Xatolik yuz berdi. {response.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-                // тут можете сохранить customer в БД или список
             }
             else { e.Handled = true; }
         }
@@ -181,12 +178,6 @@ public partial class SalesPage : Page
                     sale.Error = errorMsg;
                 }
             }
-            else
-            {
-                // Если customerId не задан, очищаем поля
-                //sale.CustomerId = null;
-                //sale.CustomerName = string.Empty;
-            }
         }
         catch (Exception ex)
         {
@@ -231,13 +222,12 @@ public partial class SalesPage : Page
                 CustomerName.ItemsSource = customers;
                 CustomerName.DisplayMemberPath = "Name";
                 CustomerName.SelectedValuePath = "Id";
-                // Восстанавливаем выбранное значение
+
                 if (selectedValue is not null)
                     CustomerName.SelectedValue = selectedValue;
             }
             else
             {
-                // Проверяем на null, чтобы избежать CS8602
                 var errorMsg = response.Message ?? "Unknown error";
                 MessageBox.Show("Error fetching customers: " + errorMsg);
             }
@@ -260,7 +250,7 @@ public partial class SalesPage : Page
                 txtPerDiscount.Text = null;
                 txtDiscount.Text = null;
                 txtFinalSumProduct.Text = null;
-                e.Handled = true; // Fokusni saqlab qolish
+                e.Handled = true;
                 return;
             }
             decimal discount = sum - finalSum;
@@ -287,7 +277,7 @@ public partial class SalesPage : Page
                 txtPerDiscount.Text = null;
                 txtDiscount.Text = null;
                 txtFinalSumProduct.Text = null;
-                e.Handled = true; // Fokusni saqlab qolish
+                e.Handled = true;
                 return;
             }
             decimal perDiscount = (discount / sum * 100);
@@ -314,7 +304,7 @@ public partial class SalesPage : Page
                 txtPerDiscount.Text = null;
                 txtDiscount.Text = null;
                 txtFinalSumProduct.Text = null;
-                e.Handled = true; // Fokusni saqlab qolish
+                e.Handled = true;
                 return;
             }
             CalcFinalSumProduct(sender);
