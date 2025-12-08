@@ -25,6 +25,16 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string currentPageTitle = "Bosh sahifa";
     [ObservableProperty] private bool isSidebarCollapsed = false;
 
+    private readonly NamozTimeService _service = new();
+
+    [ObservableProperty] private string bomdod;
+    [ObservableProperty] private string quyosh;
+    [ObservableProperty] private string peshin;
+    [ObservableProperty] private string asr;
+    [ObservableProperty] private string shom;
+    [ObservableProperty] private string xufton;
+    [ObservableProperty] private string dateLabel;
+    
     public MainViewModel(IServiceProvider services, INavigationService navigationService)
     {
         _services = services;
@@ -40,6 +50,20 @@ public partial class MainViewModel : ViewModelBase
 
         // Set initial view
         _navigationService.Navigate(_services.GetRequiredService<SalesPage>());
+    }
+
+    public async Task LoadNamozTimesAsync()
+    {
+        var data = await _service.GetTodayAsync();
+        if (data == null) return;
+
+        Bomdod = data.Bomdod;
+        Quyosh = data.Quyosh;
+        Peshin = data.Peshin;
+        Asr = data.Asr;
+        Shom = data.Shom;
+        Xufton = data.Xufton;
+        DateLabel = data.Date;
     }
 
     private void NavigationService_PropertyChanged(object? sender, PropertyChangedEventArgs e)
