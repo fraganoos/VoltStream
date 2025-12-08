@@ -20,6 +20,7 @@ public partial class MainWindow : Window
         vm = serviceProvider.GetRequiredService<MainViewModel>();
         DataContext = vm;
         NotificationService.Init(this);
+        Loaded += async (_, _) => await vm.LoadNamozTimesAsync();
     }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
