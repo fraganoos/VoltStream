@@ -174,17 +174,17 @@
             </Grid>
 
             <!--  Header va content  -->
-            <Grid Grid.Column="1">
+            <Grid Grid.Column="1" >
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <Grid Grid.Row="0">
+				<Grid Grid.Row="0" Background="#0A003A">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="200" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Row="0" Grid.Column="0" Background="#0A003A">
+                    <Border Grid.Row="0" Grid.Column="0">
                         <TextBlock
                             Margin="20,0,0,0"
                             VerticalAlignment="Center"
@@ -193,7 +193,7 @@
                             Text="{Binding CurrentPageTitle}"
                             Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     </Border>
-                    <Grid Grid.Row="0" Grid.Column="1" Background="#0A003A">
+                    <Grid Grid.Row="0" Grid.Column="1">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" >
                             <TextBlock Text="{Binding DateLabel}" FontWeight="Bold" 
                                        Margin="5,10" Foreground="#E0E1F1"/>

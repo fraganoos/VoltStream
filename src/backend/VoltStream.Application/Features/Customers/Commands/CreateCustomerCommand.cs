@@ -3,8 +3,6 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
-using System.Threading.Tasks;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
@@ -31,9 +29,7 @@ public class CreateCustomerComandHandler(
 
         if (isExist)
             throw new AlreadyExistException(nameof(Customer), nameof(request.Name), request.Name);
-
-        var currency = await context.Currencies.FirstOrDefaultAsync(c => c.IsDefault, cancellationToken)
-            ?? throw new NotFoundException(nameof(Currency), nameof(Currency.IsDefault), true);
+        Currency currency = await GetCurrencyAsync(cancellationToken);
 
         var customer = mapper.Map<Customer>(request);
         customer.Accounts.First().Currency = currency;
@@ -41,5 +37,26 @@ public class CreateCustomerComandHandler(
 
         await context.SaveAsync(cancellationToken);
         return customer.Id;
+    }
+
+    private async Task<Currency> GetCurrencyAsync(CancellationToken cancellationToken)
+    {
+        var currency = await context.Currencies.FirstOrDefaultAsync(c => c.IsDefault, cancellationToken);
+        if (currency is null)
+            context.Currencies.Add(currency = new()
+            {
+                Code = "UZS",
+                IsActive = true,
+                IsDefault = true,
+                Position = 1,
+                ExchangeRate = 1,
+                IsCash = true,
+                IsEditable = false,
+                Name = "So'm",
+                NormalizedName = "So'm".ToNormalized(),
+                Symbol = "so'm",
+            });
+
+        return currency;
     }
 }

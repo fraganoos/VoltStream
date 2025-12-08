@@ -114,7 +114,7 @@ public partial class SalesPage : Page
                         OpeningBalance = customer.beginningSum,
                         Balance = customer.beginningSum,
                         Discount = 0,
-                        CurrencyId = (long)CurrencyType.SelectedValue
+                        //CurrencyId = (long)CurrencyType.SelectedValue
                     }]
                 };
 
