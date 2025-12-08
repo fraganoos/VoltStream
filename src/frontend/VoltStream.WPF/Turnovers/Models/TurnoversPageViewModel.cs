@@ -655,7 +655,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
             Margin = new Thickness(0, 0, 0, 20)
         });
 
-        double[] colWidths = { 100, 140, 140, 330 };
+        double[] colWidths = { 75, 110, 110, 415 };
 
         var headerGrid = CreateRow(colWidths, true, "Sana", "Debit", "Kredit", "Izoh");
         stack.Children.Add(headerGrid);

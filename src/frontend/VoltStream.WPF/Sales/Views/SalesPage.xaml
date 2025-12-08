@@ -176,7 +176,7 @@
                         Content="To'lashga:"
                         FontSize="14" />
                     <TextBox
-                        x:Name="finalSumm"
+                        x:Name="FinalSumm"
                         Grid.Column="2"
                         Margin="0,2"
                         HorizontalAlignment="Stretch"

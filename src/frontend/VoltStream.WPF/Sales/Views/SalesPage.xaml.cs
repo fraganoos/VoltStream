@@ -725,9 +725,10 @@ public partial class SalesPage : Page
                 LengthPerRoll = i.PerRollCount ?? 0,
                 TotalLength = i.Quantity ?? 0,
                 UnitPrice = i.Price ?? 0,
+                TotalAmount = i.Sum ?? 0,
                 DiscountRate = i.PerDiscount ?? 0,
                 DiscountAmount = i.Discount ?? 0,
-                TotalAmount = i.FinalSumProduct ?? 0
+                FinalAmount = sale.CheckedDiscount ? (i.FinalSumProduct ?? 0) : (i.Sum ?? 0)
             })]
         };
 
@@ -796,7 +797,7 @@ public partial class SalesPage : Page
         txtDiscount.Text = string.Empty;
         txtFinalSumProduct.Text = string.Empty;
         txtTotalDiscount.Text = string.Empty;
-        finalSumm.Text = string.Empty;
+        FinalSumm.Text = string.Empty;
         TotalSum.Text = string.Empty;
         noteTextBox.Text = string.Empty;
         beginBalans.Text = string.Empty;
@@ -809,6 +810,7 @@ public partial class SalesPage : Page
 
         sale.SaleItems.Clear();
         dataGrid.ItemsSource = sale.SaleItems;
+        DataContext = sale;
     }
 
     private void supplyDate_LostFocus(object sender, RoutedEventArgs e)
