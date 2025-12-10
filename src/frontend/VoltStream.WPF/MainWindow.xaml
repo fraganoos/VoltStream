@@ -7,8 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:VoltStream.WPF"
     Title="Volt Stream"
-    Width="1600"
-    Height="900"
+    Width="1300"
+    Height="700"
     Loaded="MainWindow_Loaded"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
