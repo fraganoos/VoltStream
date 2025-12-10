@@ -52,5 +52,7 @@
     <Resource Include="Commons\Source\Images\oramkabel.png" />
     <Resource Include="Commons\Source\Images\user-icon.png" />
     <Resource Include="Commons\Source\Images\LogoVolt.png" />
+    <Resource Include="Commons\Source\Images\1234.jpg" />
+    <Resource Include="Commons\Source\Images\123.gif" />
   </ItemGroup>
 </Project>
