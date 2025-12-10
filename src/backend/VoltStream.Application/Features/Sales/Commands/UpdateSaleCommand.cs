@@ -40,13 +40,11 @@ public class UpdateSaleCommandHandler(
             var customer = await GetCustomerWithAccountAsync(request.CustomerId, request.CurrencyId, cancellationToken);
             var account = customer.Accounts.First(a => a.CurrencyId == request.CurrencyId);
 
-            // 1. Eski savdoni revert qilish
             await RevertOldSaleAsync(sale, warehouse, account, cancellationToken);
 
-            // 2. Yangilangan savdoni apply qilish
             await ApplyUpdatedSaleAsync(request, sale, warehouse, account, mapper, cancellationToken);
 
-            return true;
+            return await context.CommitTransactionAsync(cancellationToken);
         }
         catch
         {
@@ -171,8 +169,6 @@ public class UpdateSaleCommandHandler(
         sale.DiscountOperation.Amount = request.Discount;
         sale.DiscountOperation.IsApplied = request.IsApplied;
         sale.DiscountOperation.Description = $"Chegirma savdo uchun: {descriptionBuilder}";
-
-        await context.CommitTransactionAsync(cancellationToken);
     }
 
     private async Task ProcessSaleItemAsync(SaleItem item, Warehouse warehouse, StringBuilder descriptionBuilder, CancellationToken cancellationToken)

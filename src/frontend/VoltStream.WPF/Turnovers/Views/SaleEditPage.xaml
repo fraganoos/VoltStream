@@ -52,7 +52,7 @@
                     VerticalAlignment="Center"
                     utils:EnterKeyTab.IsEnabled="True"
                     FontSize="14"
-                    SelectedDate="{Binding OperationDate}" />
+                    SelectedDate="{Binding Sale.Date}" />
 
 				<ComboBox
                     Grid.Row="1"
@@ -133,7 +133,7 @@
                     Grid.Column="1"
                     Margin="0,2"
                     FontSize="14"
-                    Text="{Binding Description}" />
+                    Text="{Binding Sale.Description}" />
 			</Grid>
 
 			<Grid Grid.Column="2">
@@ -217,6 +217,7 @@
                 DisplayMemberPath="Name"
                 ItemsSource="{Binding Categories}"
                 SelectedItem="{Binding SelectedCategory}"
+                Text="{Binding CategorySearchText, UpdateSourceTrigger=LostFocus}"
                 utils:ComboBoxQuickNavBehavior.EnableQuickNavigation="True" />
 
 			<TextBlock Grid.Column="1" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=cbxProductName}" Text="Maxsulot nomi" />
@@ -229,6 +230,7 @@
                 DisplayMemberPath="Name"
                 ItemsSource="{Binding Products}"
                 SelectedItem="{Binding SelectedProduct}"
+                Text="{Binding ProductSearchText, UpdateSourceTrigger=LostFocus}"
                 utils:ComboBoxQuickNavBehavior.EnableQuickNavigation="True" />
 
 			<TextBlock Grid.Column="2" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=cbxPerRollCount}" Text="Rulon metr" />
@@ -236,11 +238,12 @@
                 x:Name="cbxPerRollCount" 
                 Grid.Column="2" 
                 Margin="2,3" 
-                FontSize="14" 
+                FontSize="14"
                 IsEditable="True"
                 DisplayMemberPath="LengthPerRoll"
                 ItemsSource="{Binding WarehouseStocks}"
                 SelectedItem="{Binding SelectedWarehouseStock}"
+                Text="{Binding WarehouseStockSearchText, UpdateSourceTrigger=LostFocus}"
                 utils:ComboBoxQuickNavBehavior.EnableQuickNavigation="True" />
 
 			<TextBlock Grid.Column="3" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtRollCount}" Text="Rulon soni" />
@@ -249,7 +252,7 @@
                 Grid.Column="3" 
                 Margin="1,3" 
                 FontSize="14"
-    Validation.ErrorTemplate="{x:Null}" 
+                Validation.ErrorTemplate="{x:Null}" 
                 utils:NumericTextBox.DecimalDigits="0"
                 utils:NumericTextBox.IsNumeric="True"
                 Text="{Binding CurrentItem.RollCount, UpdateSourceTrigger=PropertyChanged}" />
@@ -292,7 +295,7 @@
                 FontSize="14"
                 Validation.ErrorTemplate="{x:Null}" 
                 utils:NumericTextBox.IsNumeric="True"
-                Text="{Binding CurrentItem.DiscountRate, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding CurrentItem.DiscountRate}" />
 
 			<TextBlock Grid.Column="8" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtDiscount}" Text="Chegirma summasi" />
 			<TextBox 
@@ -323,7 +326,7 @@
 					<Style TargetType="Button">
 						<Setter Property="Content" Value="Qo'shish" />
 						<Style.Triggers>
-							<DataTrigger Binding="{Binding IsEditMode}" Value="True">
+							<DataTrigger Binding="{Binding IsEditing}" Value="True">
 								<Setter Property="Content" Value="Yangilash" />
 							</DataTrigger>
 						</Style.Triggers>
@@ -367,16 +370,16 @@
 					<DataGridTextColumn Width="1.5*" MinWidth="120" Binding="{Binding Product.Category.Name}" Header="Maxsulot turi" />
 					<DataGridTextColumn Width="1.8*" MinWidth="120" Binding="{Binding Product.Name}" Header="Maxsulot nomi" />
 					<DataGridTextColumn Width="*" 
-                    Binding="{Binding LengthPerRoll}" 
-                    ElementStyle="{StaticResource RightAlignedText}" 
-                    Header="Rulon metr" />
+                        Binding="{Binding LengthPerRoll}" 
+                        ElementStyle="{StaticResource RightAlignedText}" 
+                        Header="Rulon metr" />
 					<DataGridTextColumn Width="*" Binding="{Binding RollCount}" ElementStyle="{StaticResource RightAlignedText}" Header="Rulon soni" />
-					<DataGridTextColumn Width="*" Binding="{Binding TotalLength , Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Jami metr" />
-					<DataGridTextColumn Width="*" Binding="{Binding UnitPrice , Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Narxi" />
-					<DataGridTextColumn Width="*" Binding="{Binding TotalAmount , Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Jami summa" />
-					<DataGridTextColumn Width="*" Binding="{Binding DiscountRate , Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Chegirma%" />
-					<DataGridTextColumn Width="*" Binding="{Binding DiscountAmount , Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Chegirma summasi" />
-					<DataGridTextColumn Width="*" Binding="{Binding FinalAmount , Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Umumiy summa" />
+					<DataGridTextColumn Width="*" Binding="{Binding TotalLength, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Jami metr" />
+					<DataGridTextColumn Width="*" Binding="{Binding UnitPrice, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Narxi" />
+					<DataGridTextColumn Width="*" Binding="{Binding TotalAmount, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Jami summa" />
+					<DataGridTextColumn Width="*" Binding="{Binding DiscountRate, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Chegirma%" />
+					<DataGridTextColumn Width="*" Binding="{Binding DiscountAmount, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Chegirma summasi" />
+					<DataGridTextColumn Width="*" Binding="{Binding FinalAmount, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Umumiy summa" />
 				</DataGrid.Columns>
 			</DataGrid>
 

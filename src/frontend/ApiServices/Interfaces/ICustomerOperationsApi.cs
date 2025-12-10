@@ -6,6 +6,9 @@ using Refit;
 
 public interface ICustomerOperationsApi
 {
+    [Delete("/customer-operations/{id}")]
+    Task<Response<bool>> Delete(long id);
+
     [Get("/customer-operations")]
     Task<Response<List<CustomerOperationResponse>>> GetAll();
 
