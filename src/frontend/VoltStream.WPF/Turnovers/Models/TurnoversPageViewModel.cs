@@ -267,7 +267,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         }
     }
 
-
     [RelayCommand]
     private void ClearFilter()
     {
@@ -621,84 +620,153 @@ public partial class TurnoversPageViewModel : ViewModelBase
     private FixedDocument CreateFixedDocument()
     {
         var doc = new FixedDocument();
-        var page = new FixedPage
-        {
-            Width = 793.7,
-            Height = 1122.5,
-            Background = Brushes.White
-        };
+        const double pageWidth = 793.7; // A4 (96 DPI)
+        const double pageHeight = 1122.5;
+        const double margin = 40;
+        var operations = CustomerOperationsForDisplay.ToList();
 
-        var stack = new StackPanel { Margin = new Thickness(40) };
+        const int rowsPerPage = 38;
+        const int firstPageRowReduction = 2;
+        const int moveToSecondPage = 7; // 2-sahifaga ko‘chiriladigan oxirgi qatorlar soni
 
-        stack.Children.Add(new TextBlock
-        {
-            Text = "MIJOZ OPERATSIYALARI HISOBOTI",
-            FontSize = 18,
-            FontWeight = FontWeights.Bold,
-            TextAlignment = TextAlignment.Center,
-            Margin = new Thickness(0, 0, 0, 20)
-        });
+        // Birinchi sahifada ko‘rsatiladigan operatsiyalar soni (header + boshlang‘ich qoldiq + oxirgi 10 tani olib tashlaymiz)
+        int firstPageOperationsCount = rowsPerPage - firstPageRowReduction - 1 - moveToSecondPage; // -1 = boshlang‘ich qoldiq qatori
 
-        stack.Children.Add(new TextBlock
-        {
-            Text = $"Mijoz: {SelectedCustomer?.Name.ToUpper() ?? "Tanlanmagan"}",
-            FontSize = 16,
-            FontWeight = FontWeights.Medium,
-            Margin = new Thickness(0, 0, 0, 5)
-        });
-
-        stack.Children.Add(new TextBlock
-        {
-            Text = $"Davr oralig'i: {BeginDate.ToString("dd.MM.yyyy") ?? "-"} dan {EndDate.ToString("dd.MM.yyyy") ?? "-"} gacha",
-            FontSize = 16,
-            FontWeight = FontWeights.Medium,
-            Margin = new Thickness(0, 0, 0, 20)
-        });
+        int totalPages = operations.Count <= firstPageOperationsCount + moveToSecondPage
+            ? 1
+            : (int)Math.Ceiling((operations.Count - firstPageOperationsCount - moveToSecondPage) / (double)rowsPerPage) + 1;
 
         double[] colWidths = { 75, 110, 110, 415 };
+        int globalRowIndex = 0;
 
-        var headerGrid = CreateRow(colWidths, true, "Sana", "Debit", "Kredit", "Izoh");
-        stack.Children.Add(headerGrid);
-
-        var beginGrid = CreateBalanceRow(colWidths, "Boshlang'ich qoldiq", BeginBalance?.ToString("N2") ?? "0.00");
-        stack.Children.Add(beginGrid);
-
-        foreach (var item in CustomerOperationsForDisplay)
+        for (int pageIndex = 0; pageIndex < totalPages; pageIndex++)
         {
-            var row = CreateRow(colWidths, false,
-                item.Date.ToString("dd.MM.yyyy"),
-                item.Debit == 0 ? "" : item.Debit.ToString("N2"),
-                item.Credit == 0 ? "" : item.Credit.ToString("N2"),
-                item.FormattedDescription
-            );
-            stack.Children.Add(row);
+            var page = new FixedPage
+            {
+                Width = pageWidth,
+                Height = pageHeight,
+                Background = Brushes.White
+            };
+            var mainGrid = new Grid();
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            // ================= HEADER =================
+            var headerPanel = new StackPanel
+            {
+                Margin = new Thickness(margin, 30, margin, 20)
+            };
+            headerPanel.Children.Add(new TextBlock
+            {
+                Text = "MIJOZ OPERATSIYALARI HISOBOTI",
+                FontSize = 20,
+                FontWeight = FontWeights.ExtraBold,
+                TextAlignment = TextAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 15)
+            });
+            headerPanel.Children.Add(new TextBlock
+            {
+                Text = $"Mijoz: {SelectedCustomer?.Name.ToUpper() ?? "Tanlanmagan"}",
+                FontSize = 16,
+                FontWeight = FontWeights.Medium
+            });
+            headerPanel.Children.Add(new TextBlock
+            {
+                Text = $"Davr oralig‘i: {BeginDate:dd.MM.yyyy} — {EndDate:dd.MM.yyyy} | Sahifa {pageIndex + 1} / {totalPages}",
+                FontSize = 16,
+                FontWeight = FontWeights.Medium,
+                Margin = new Thickness(0, 0, 0, 5)
+            });
+            Grid.SetRow(headerPanel, 0);
+            mainGrid.Children.Add(headerPanel);
+
+            // ================= TABLE =================
+            var scrollViewer = new ScrollViewer
+            {
+                VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
+                Margin = new Thickness(margin, 0, margin, 0)
+            };
+            var stack = new StackPanel();
+
+            // Sarlavha qatori
+            stack.Children.Add(CreateRow(colWidths, true, "Sana", "Debit", "Kredit", "Izoh"));
+
+            bool isFirstPage = pageIndex == 0;
+            bool isLastPage = pageIndex == totalPages - 1;
+
+            // Birinchi sahifada boshlang‘ich qoldiq
+            if (isFirstPage)
+            {
+                stack.Children.Add(CreateBalanceRow(colWidths, "Boshlang‘ich qoldiq", BeginBalance?.ToString("N2") ?? "0.00"));
+            }
+
+            int rowsThisPage;
+            if (isFirstPage)
+            {
+                rowsThisPage = firstPageOperationsCount;
+            }
+            else if (isLastPage && operations.Count - globalRowIndex < rowsPerPage)
+            {
+                rowsThisPage = operations.Count - globalRowIndex + moveToSecondPage; // oxirgi 10 ta + qolganlari
+            }
+            else
+            {
+                rowsThisPage = rowsPerPage;
+            }
+
+            // Operatsiyalarni qo‘shish
+            int startIndex = globalRowIndex;
+            if (isFirstPage)
+            {
+                // Birinchi sahifa: faqat boshidan emas, oxiridan 10 tani tashlab
+                for (int i = 0; i < rowsThisPage && globalRowIndex < operations.Count - moveToSecondPage; i++)
+                {
+                    var op = operations[globalRowIndex++];
+                    stack.Children.Add(CreateRow(colWidths, false,
+                        op.Date.ToString("dd.MM.yyyy"),
+                        op.Debit == 0 ? "" : op.Debit.ToString("N2"),
+                        op.Credit == 0 ? "" : op.Credit.ToString("N2"),
+                        op.FormattedDescription));
+                }
+            }
+            else
+            {
+                // 2 va undan keyingi sahifalar
+                for (int i = 0; i < rowsThisPage && globalRowIndex < operations.Count; i++)
+                {
+                    var op = operations[globalRowIndex++];
+                    stack.Children.Add(CreateRow(colWidths, false,
+                        op.Date.ToString("dd.MM.yyyy"),
+                        op.Debit == 0 ? "" : op.Debit.ToString("N2"),
+                        op.Credit == 0 ? "" : op.Credit.ToString("N2"),
+                        op.FormattedDescription));
+                }
+            }
+
+            // Oxirgi sahifada jami va oxirgi qoldiq
+            if (isLastPage)
+            {
+                decimal totalDebit = operations.Sum(x => x.Debit);
+                decimal totalCredit = operations.Sum(x => x.Credit);
+
+                stack.Children.Add(CreateRow(colWidths, true, "Jami", totalDebit.ToString("N2"), totalCredit.ToString("N2"), ""));
+                stack.Children.Add(CreateBalanceRow(colWidths, "Oxirgi qoldiq", LastBalance?.ToString("N2") ?? "0.00"));
+            }
+
+            scrollViewer.Content = stack;
+            Grid.SetRow(scrollViewer, 1);
+            mainGrid.Children.Add(scrollViewer);
+
+
+            page.Children.Add(mainGrid);
+            var pageContent = new PageContent();
+            ((IAddChild)pageContent).AddChild(page);
+            doc.Pages.Add(pageContent);
         }
-
-        var totalDebit = CustomerOperationsForDisplay.Sum(x => x.Debit);
-        var totalCredit = CustomerOperationsForDisplay.Sum(x => x.Credit);
-
-        var totalGrid = CreateRow(
-            colWidths,
-            true,
-            "Jami",
-            totalDebit.ToString("N2"),
-            totalCredit.ToString("N2"),
-            ""
-        );
-
-        stack.Children.Add(totalGrid);
-
-        var lastGrid = CreateBalanceRow(colWidths, "Oxirgi qoldiq", LastBalance?.ToString("N2") ?? "0.00");
-        stack.Children.Add(lastGrid);
-
-        page.Children.Add(stack);
-        var pc = new PageContent();
-        ((IAddChild)pc).AddChild(page);
-        doc.Pages.Add(pc);
 
         return doc;
     }
-
     private Grid CreateRow(double[] colWidths, bool isHeader, params string[] cells)
     {
         var grid = new Grid { HorizontalAlignment = HorizontalAlignment.Stretch };

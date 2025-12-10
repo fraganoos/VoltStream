@@ -7,8 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:VoltStream.WPF"
     Title="Volt Stream"
-    Width="1300"
-    Height="700"
+    Width="1600"
+    Height="900"
     Loaded="MainWindow_Loaded"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
@@ -45,6 +45,7 @@
 
                     <!--  Menyu  -->
                     <RadioButton
+                        Command="{Binding ShowDashboardViewCommand}"
                         GroupName="MenuGroup"
                         Style="{DynamicResource menuButton}"
                         Tag="{DynamicResource color1}">
@@ -221,7 +222,7 @@
                             Orientation="Vertical" />
                 
                 <Frame Grid.Row="1"
-                        Margin="10"
+                        Margin="5"
                         Content="{Binding CurrentChildView}"
                         NavigationUIVisibility="Hidden" />
             </Grid>
