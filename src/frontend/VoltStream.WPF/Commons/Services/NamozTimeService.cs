@@ -74,7 +74,7 @@ public class NamozData
     public string Quyosh { get; set; }
     public string Peshin { get; set; }
     public string Asr { get; set; }
-    public string Shom { get; set; } 
-    public string Xufton { get; set; } 
+    public string Shom { get; set; }
+    public string Xufton { get; set; }
 }
 

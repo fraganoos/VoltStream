@@ -9,7 +9,7 @@ public class Sale : Auditable
     public decimal Discount { get; set; }
     public string Description { get; set; } = string.Empty;
     public bool IsDiscountApplied { get; set; }
-    
+
     public long CurrencyId { get; set; }
     public Currency Currency { get; set; } = default!;
 

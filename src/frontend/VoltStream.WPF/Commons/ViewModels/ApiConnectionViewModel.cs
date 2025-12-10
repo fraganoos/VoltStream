@@ -30,7 +30,7 @@ public partial class ApiConnectionViewModel : ViewModelBase
             Success = string.Empty;
 
             var scheme = IsHttps ? "https" : "http";
-            var candidateUrl = $"{scheme}://{Host}:{Port}";
+            var candidateUrl = $"{scheme}://{Host}:{Port}/";
 
             if (!Uri.TryCreate(candidateUrl, UriKind.Absolute, out var uri))
             {

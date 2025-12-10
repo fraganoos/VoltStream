@@ -248,11 +248,12 @@
                 <Border BorderBrush="Gray"
                         BorderThickness="1"
                         Margin="10">
-                    <Label Content="Mahsulot haqida ma'lumotlar"
+                    <Label Content="Mahsulot haqida ma'lumotlar.."
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            FontSize="16"
-                           FontWeight="Bold" />
+                           FontWeight="Thin"
+                           Foreground="LightGray"/>
                 </Border>
             </Grid>
         </Grid>

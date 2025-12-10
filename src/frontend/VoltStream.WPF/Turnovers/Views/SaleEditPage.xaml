@@ -87,7 +87,8 @@
                         VerticalAlignment="Top"
                         FontSize="14"
                         IsReadOnly="True"
-                        Text="{Binding TotalSum, StringFormat=N2}" />
+                        utils:NumericTextBox.IsNumeric="True"
+                        Text="{Binding TotalSum}" />
 				</Grid>
 
 				<Grid Grid.Row="3" Grid.Column="1">
@@ -102,7 +103,8 @@
                         Margin="0,2,0,2"
                         FontSize="14"
                         IsReadOnly="True"
-                        Text="{Binding TotalDiscount, StringFormat=N2}" />
+                        utils:NumericTextBox.IsNumeric="True"
+                        Text="{Binding Sale.Discount}" />
 
 					<Border
                         Grid.Column="1"
@@ -113,7 +115,7 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             FontSize="12"
-                            IsChecked="{Binding CheckedDiscount}" />
+                            IsChecked="{Binding Sale.IsDiscountApplied}" />
 					</Border>
 
 					<Label Grid.Column="3" Content="To'lashga:" FontSize="14" HorizontalAlignment="Right" VerticalAlignment="Center" />
@@ -122,7 +124,8 @@
                         Margin="0,2"
                         FontSize="14"
                         IsReadOnly="True"
-                        Text="{Binding FinalSum, StringFormat=N2}" />
+                        utils:NumericTextBox.IsNumeric="True"
+                        Text="{Binding Sale.Amount}" />
 				</Grid>
 
 				<TextBox
@@ -156,7 +159,9 @@
                         BorderThickness="0"
                         FontSize="12"
                         IsReadOnly="True"
-                        Text="{Binding BeginBalance, StringFormat=N2}" />
+                        utils:NumericTextBox.IsNumeric="True"
+                        VerticalContentAlignment="Center"
+                        Text="{Binding BeginBalance}" />
 
 					<TextBlock Grid.Row="2" Text="Natija:" VerticalAlignment="Center" />
 					<TextBox
@@ -167,7 +172,9 @@
                         BorderThickness="0"
                         FontSize="12"
                         IsReadOnly="True"
-                        Text="{Binding LastBalance, StringFormat=N2}" />
+                        utils:NumericTextBox.IsNumeric="True"
+                        VerticalContentAlignment="Center"
+                        Text="{Binding LastBalance}" />
 
 					<TextBlock Grid.Row="3" Text="Telefon:" VerticalAlignment="Center" />
 					<TextBox
@@ -177,6 +184,8 @@
                         BorderThickness="0"
                         FontSize="12"
                         IsReadOnly="True"
+                        HorizontalContentAlignment="Right"
+                        VerticalContentAlignment="Center"
                         Text="{Binding SelectedCustomer.Phone}" />
 				</Grid>
 			</Grid>
@@ -240,6 +249,7 @@
                 Grid.Column="3" 
                 Margin="1,3" 
                 FontSize="14"
+    Validation.ErrorTemplate="{x:Null}" 
                 utils:NumericTextBox.DecimalDigits="0"
                 utils:NumericTextBox.IsNumeric="True"
                 Text="{Binding CurrentItem.RollCount, UpdateSourceTrigger=PropertyChanged}" />
@@ -250,8 +260,9 @@
                 Grid.Column="4" 
                 Margin="1,3" 
                 FontSize="14"
+                Validation.ErrorTemplate="{x:Null}" 
                 utils:NumericTextBox.IsNumeric="True"
-                Text="{Binding CurrentItem.TotalLength, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding CurrentItem.TotalLength}" />
 
 			<TextBlock Grid.Column="5" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtPrice}" Text="Narxi" />
 			<TextBox 
@@ -259,17 +270,19 @@
                 Grid.Column="5" 
                 Margin="1,3" 
                 FontSize="14"
+                Validation.ErrorTemplate="{x:Null}" 
                 utils:NumericTextBox.IsNumeric="True"
-                Text="{Binding CurrentItem.UnitPrice, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding CurrentItem.UnitPrice, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Column="6" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtSum}" Text="Jami summa" />
 			<TextBox 
                 x:Name="txtSum" 
                 Grid.Column="6" 
                 Margin="1,3" 
+                Validation.ErrorTemplate="{x:Null}" 
                 FontSize="14"
                 utils:NumericTextBox.IsNumeric="True"
-                Text="{Binding CurrentItem.TotalAmount, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding CurrentItem.TotalAmount}" />
 
 			<TextBlock Grid.Column="7" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtPerDiscount}" Text="Chegirma%" />
 			<TextBox 
@@ -277,8 +290,9 @@
                 Grid.Column="7" 
                 Margin="1,3" 
                 FontSize="14"
+                Validation.ErrorTemplate="{x:Null}" 
                 utils:NumericTextBox.IsNumeric="True"
-                Text="{Binding CurrentItem.DiscountRate, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding CurrentItem.DiscountRate, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Column="8" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtDiscount}" Text="Chegirma summasi" />
 			<TextBox 
@@ -286,17 +300,19 @@
                 Grid.Column="8" 
                 Margin="1,3" 
                 FontSize="14"
+                Validation.ErrorTemplate="{x:Null}" 
                 utils:NumericTextBox.IsNumeric="True"
-                Text="{Binding CurrentItem.DiscountAmount, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding CurrentItem.DiscountAmount}" />
 
 			<TextBlock Grid.Column="9" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtFinalSumProduct}" Text="Umumiy summa" />
 			<TextBox 
                 x:Name="txtFinalSumProduct" 
                 Grid.Column="9" 
                 Margin="1,3" 
+                Validation.ErrorTemplate="{x:Null}" 
                 FontSize="14"
                 utils:NumericTextBox.IsNumeric="True"
-                Text="{Binding CurrentItem.FinalAmount, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" />
+                Text="{Binding CurrentItem.FinalAmount}" />
 
 			<Button 
                 Grid.Column="10" 
@@ -321,7 +337,7 @@
                 FontSize="14"
                 Content="Bekor qilish"
                 Command="{Binding CancelEditCommand}"
-                Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}" />
 		</Grid>
 
 		<!-- Pastki qism - jadval va tugmalar -->
@@ -335,12 +351,12 @@
                 x:Name="dataGrid"
                 AutoGenerateColumns="False"
                 CanUserAddRows="False"
-                CanUserDeleteRows="False"
+                CanUserDeleteRows="True"
                 FontSize="14"
+                IsReadOnly="True"
                 ItemsSource="{Binding Sale.Items}"
                 SelectionMode="Single"
-                MouseDoubleClick="DataGrid_MouseDoubleClick"
-                KeyDown="DataGrid_KeyDown">
+                MouseDoubleClick="DataGrid_MouseDoubleClick">
 				<DataGrid.Resources>
 					<Style x:Key="RightAlignedText" TargetType="TextBlock">
 						<Setter Property="HorizontalAlignment" Value="Right" />
@@ -350,14 +366,17 @@
 				<DataGrid.Columns>
 					<DataGridTextColumn Width="1.5*" MinWidth="120" Binding="{Binding Product.Category.Name}" Header="Maxsulot turi" />
 					<DataGridTextColumn Width="1.8*" MinWidth="120" Binding="{Binding Product.Name}" Header="Maxsulot nomi" />
-					<DataGridTextColumn Width="*" Binding="{Binding LengthPerRoll, StringFormat=N2}" ElementStyle="{StaticResource RightAlignedText}" Header="Rulon metr" />
+					<DataGridTextColumn Width="*" 
+                    Binding="{Binding LengthPerRoll}" 
+                    ElementStyle="{StaticResource RightAlignedText}" 
+                    Header="Rulon metr" />
 					<DataGridTextColumn Width="*" Binding="{Binding RollCount}" ElementStyle="{StaticResource RightAlignedText}" Header="Rulon soni" />
-					<DataGridTextColumn Width="*" Binding="{Binding TotalLength, StringFormat=N2}" ElementStyle="{StaticResource RightAlignedText}" Header="Jami metr" />
-					<DataGridTextColumn Width="*" Binding="{Binding UnitPrice, StringFormat=N2}" ElementStyle="{StaticResource RightAlignedText}" Header="Narxi" />
-					<DataGridTextColumn Width="*" Binding="{Binding TotalAmount, StringFormat=N2}" ElementStyle="{StaticResource RightAlignedText}" Header="Jami summa" />
-					<DataGridTextColumn Width="*" Binding="{Binding DiscountRate, StringFormat=N2}" ElementStyle="{StaticResource RightAlignedText}" Header="Chegirma%" />
-					<DataGridTextColumn Width="*" Binding="{Binding DiscountAmount, StringFormat=N2}" ElementStyle="{StaticResource RightAlignedText}" Header="Chegirma summasi" />
-					<DataGridTextColumn Width="*" Binding="{Binding FinalAmount, StringFormat=N2}" ElementStyle="{StaticResource RightAlignedText}" Header="Umumiy summa" />
+					<DataGridTextColumn Width="*" Binding="{Binding TotalLength , Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Jami metr" />
+					<DataGridTextColumn Width="*" Binding="{Binding UnitPrice , Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Narxi" />
+					<DataGridTextColumn Width="*" Binding="{Binding TotalAmount , Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Jami summa" />
+					<DataGridTextColumn Width="*" Binding="{Binding DiscountRate , Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Chegirma%" />
+					<DataGridTextColumn Width="*" Binding="{Binding DiscountAmount , Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Chegirma summasi" />
+					<DataGridTextColumn Width="*" Binding="{Binding FinalAmount , Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Umumiy summa" />
 				</DataGrid.Columns>
 			</DataGrid>
 

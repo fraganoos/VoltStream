@@ -113,7 +113,7 @@ public class CreateSaleCommandHandler(
                 ?? throw new NotFoundException(nameof(Product), nameof(item.Id), item.ProductId);
 
             descriptionBuilder.Append($"{product.Name} - {item.TotalLength} m. X " +
-                $"{Math.Round(item.FinalAmount/item.TotalLength, 2).ToString("N2")} = " +
+                $"{Math.Round(item.FinalAmount / item.TotalLength, 2).ToString("N2")} = " +
                 $"{item.FinalAmount.ToString("N2")}");
             if (item.FinalAmount == item.TotalAmount && item.DiscountAmount != 0)
             {
@@ -170,7 +170,7 @@ public class CreateSaleCommandHandler(
             account.Discount += discount;
     }
 
-    private static CustomerOperation CreateCustomerOperation(Sale sale, Account account, 
+    private static CustomerOperation CreateCustomerOperation(Sale sale, Account account,
                    string description, StringBuilder descriptionBuilder, bool isApplied)
     {
         if (description.Trim().Length > 0) description = description + ". ";
