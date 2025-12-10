@@ -11,7 +11,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using VoltStream.WPF.Commons;
@@ -33,6 +32,8 @@ public partial class SaleEditViewModel : ViewModelBase
 
     private SaleItemViewModel? originalItem;
     private int originalItemIndex = -1;
+    private bool _isCalculating = false;
+    private bool _suppressLoading = false;
 
     public SaleEditViewModel(IServiceProvider services, SaleResponse saleData)
     {
@@ -46,13 +47,8 @@ public partial class SaleEditViewModel : ViewModelBase
         navigationService = services.GetRequiredService<INavigationService>();
 
         Sale = mapper.Map<SaleViewModel>(saleData);
-
-        Sale.Items.CollectionChanged += SaleItems_CollectionChanged;
-
-        foreach (var item in Sale.Items)
-        {
-            SubscribeToItemChanges(item);
-        }
+        Sale.PropertyChanged += SalePropertyChanged;
+        CurrentItem.PropertyChanged += CurrentItem_PropertyChanged;
 
         _ = LoadPageAsync();
         RecalculateTotals();
@@ -77,8 +73,8 @@ public partial class SaleEditViewModel : ViewModelBase
     [ObservableProperty] private decimal lastBalance;
 
     [ObservableProperty] private decimal totalSum;
-    [ObservableProperty] private decimal totalDiscount;
-    [ObservableProperty] private decimal finalSum;
+
+    #region Load Data
 
     private async Task LoadPageAsync()
     {
@@ -114,10 +110,11 @@ public partial class SaleEditViewModel : ViewModelBase
             {
                 account.Balance += Sale.Amount;
 
-                if(Sale.IsDiscountApplied)
+                if (!Sale.IsDiscountApplied)
+                {
+                    account.Discount -= Sale.Discount;
                     account.Balance += Sale.Discount;
-                else
-                    account.Discount += Sale.Discount;
+                }
             }
         }
         else
@@ -151,6 +148,10 @@ public partial class SaleEditViewModel : ViewModelBase
             Error = response.Message ?? "Kategoriyalarni yuklashda xatolik!";
     }
 
+    #endregion Load Data
+
+    #region Commands
+
     [RelayCommand]
     private async Task LoadProducts()
     {
@@ -183,93 +184,6 @@ public partial class SaleEditViewModel : ViewModelBase
             WarehouseStocks = mapper.Map<ObservableCollection<WarehouseStockViewModel>>(response.Data!);
         else
             Error = response.Message ?? "Ombor ma'lumotlarini yuklashda xatolik!";
-    }
-
-    partial void OnSelectedCustomerChanged(CustomerViewModel? value)
-    {
-        if (value is not null)
-        {
-            Sale.CustomerId = value.Id;
-            UpdateCustomerBalance();
-        }
-    }
-
-    partial void OnSelectedCurrencyChanged(CurrencyViewModel? value)
-    {
-        if (value is not null)
-        {
-            Sale.CurrencyId = value.Id;
-            UpdateCustomerBalance();
-        }
-    }
-
-    private bool _suppressLoading;
-
-    partial void OnSelectedCategoryChanged(CategoryViewModel? value)
-    {
-        if (value is not null && !_suppressLoading)
-            _ = LoadProducts();
-    }
-
-    partial void OnSelectedProductChanged(Sales.ViewModels.ProductViewModel? value)
-    {
-        if (value is not null && !_suppressLoading)
-        {
-            if (value.Category is not null)
-                SelectedCategory = Categories.FirstOrDefault(c => c.Id == value.Category.Id);
-
-            _ = LoadWarehouseStocks();
-        }
-    }
-
-    partial void OnSelectedWarehouseStockChanged(WarehouseStockViewModel? value)
-    {
-        if (value is not null)
-        {
-            CurrentItem.LengthPerRoll = value.LengthPerRoll;
-            CurrentItem.UnitPrice = value.UnitPrice;
-            CurrentItem.DiscountRate = value.DiscountRate;
-        }
-    }
-
-    partial void OnCurrentItemChanged(SaleItemViewModel? oldValue, SaleItemViewModel newValue)
-    {
-        if (oldValue is not null)
-            oldValue.PropertyChanged -= CurrentItem_PropertyChanged;
-
-        if (newValue is not null)
-            newValue.PropertyChanged += CurrentItem_PropertyChanged;
-    }
-
-    private void CurrentItem_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (sender is not SaleItemViewModel item) return;
-
-        switch (e.PropertyName)
-        {
-            case nameof(SaleItemViewModel.RollCount):
-            case nameof(SaleItemViewModel.LengthPerRoll):
-                if (item.RollCount.HasValue && item.LengthPerRoll.HasValue)
-                    item.TotalLength = item.RollCount.Value * item.LengthPerRoll.Value;
-                break;
-
-            case nameof(SaleItemViewModel.TotalLength):
-            case nameof(SaleItemViewModel.UnitPrice):
-                if (item.TotalLength.HasValue && item.UnitPrice.HasValue)
-                    item.TotalAmount = item.TotalLength.Value * item.UnitPrice.Value;
-                break;
-
-            case nameof(SaleItemViewModel.TotalAmount):
-            case nameof(SaleItemViewModel.DiscountRate):
-                if (item.TotalAmount.HasValue && item.DiscountRate.HasValue)
-                    item.DiscountAmount = item.TotalAmount.Value * (item.DiscountRate.Value / 100);
-                break;
-
-            case nameof(SaleItemViewModel.DiscountAmount):
-                if (item.TotalAmount.HasValue && item.DiscountAmount.HasValue)
-                    item.FinalAmount = item.TotalAmount.Value - item.DiscountAmount.Value;
-                break;
-        }
     }
 
     [RelayCommand]
@@ -312,11 +226,12 @@ public partial class SaleEditViewModel : ViewModelBase
             Sale.Items.Insert(0, CurrentItem);
         }
 
+        RecalculateSaleTotals();
         ClearCurrentItem();
     }
 
     [RelayCommand]
-    private async Task EditItem(SaleItemViewModel? item)
+    public async Task EditItem(SaleItemViewModel? item)
     {
         if (item is null) return;
 
@@ -341,6 +256,7 @@ public partial class SaleEditViewModel : ViewModelBase
 
         IsEditing = true;
         Sale.Items.RemoveAt(originalItemIndex);
+        RecalculateSaleTotals();
 
         _suppressLoading = true;
         try
@@ -377,6 +293,7 @@ public partial class SaleEditViewModel : ViewModelBase
             originalItem = null;
             originalItemIndex = -1;
             IsEditing = false;
+            RecalculateSaleTotals();
             ClearCurrentItem();
         }
     }
@@ -393,7 +310,10 @@ public partial class SaleEditViewModel : ViewModelBase
             MessageBoxImage.Question);
 
         if (result == MessageBoxResult.Yes)
+        {
             Sale.Items.Remove(item);
+            RecalculateSaleTotals();
+        }
     }
 
     [RelayCommand]
@@ -460,47 +380,307 @@ public partial class SaleEditViewModel : ViewModelBase
             navigationService.GoBack();
     }
 
-    private void SaleItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    #endregion Commands
+
+    #region Event Handlers
+
+    partial void OnSelectedCustomerChanged(CustomerViewModel? value)
     {
-        if (e.NewItems is not null)
+        if (value is not null)
         {
-            foreach (SaleItemViewModel item in e.NewItems)
-                SubscribeToItemChanges(item);
+            Sale.CustomerId = value.Id;
+            UpdateCustomerBalance();
+        }
+    }
+
+    partial void OnSelectedCurrencyChanged(CurrencyViewModel? value)
+    {
+        if (value is not null)
+        {
+            Sale.CurrencyId = value.Id;
+            UpdateCustomerBalance();
+        }
+    }
+
+    partial void OnSelectedCategoryChanged(CategoryViewModel? value)
+    {
+        if (value is not null && !_suppressLoading)
+            _ = LoadProducts();
+    }
+
+    partial void OnSelectedProductChanged(Sales.ViewModels.ProductViewModel? value)
+    {
+        if (value is not null && !_suppressLoading)
+        {
+            if (value.Category is not null)
+                SelectedCategory = Categories.FirstOrDefault(c => c.Id == value.Category.Id);
+
+            _ = LoadWarehouseStocks();
+        }
+    }
+
+    partial void OnSelectedWarehouseStockChanged(WarehouseStockViewModel? value)
+    {
+        if (value is not null)
+        {
+            _isCalculating = true;
+            CurrentItem.LengthPerRoll = value.LengthPerRoll;
+            CurrentItem.UnitPrice = value.UnitPrice;
+            CurrentItem.DiscountRate = value.DiscountRate;
+            _isCalculating = false;
+
+            // Trigger recalculation
+            CalculateFromRollCount();
+        }
+    }
+
+    partial void OnCurrentItemChanged(SaleItemViewModel? oldValue, SaleItemViewModel newValue)
+    {
+        if (oldValue is not null)
+            oldValue.PropertyChanged -= CurrentItem_PropertyChanged;
+
+        if (newValue is not null)
+            newValue.PropertyChanged += CurrentItem_PropertyChanged;
+    }
+
+    private void CurrentItem_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (_isCalculating || sender is not SaleItemViewModel item) return;
+
+        _isCalculating = true;
+        try
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(SaleItemViewModel.RollCount):
+                    CalculateFromRollCount();
+                    break;
+
+                case nameof(SaleItemViewModel.TotalLength):
+                    CalculateFromTotalLength();
+                    break;
+
+                case nameof(SaleItemViewModel.UnitPrice):
+                    CalculateFromUnitPrice();
+                    break;
+
+                case nameof(SaleItemViewModel.TotalAmount):
+                    CalculateFromTotalAmount();
+                    break;
+
+                case nameof(SaleItemViewModel.DiscountRate):
+                    CalculateFromDiscountRate();
+                    break;
+
+                case nameof(SaleItemViewModel.DiscountAmount):
+                    CalculateFromDiscountAmount();
+                    break;
+
+                case nameof(SaleItemViewModel.FinalAmount):
+                    CalculateFromFinalAmount();
+                    break;
+            }
+        }
+        finally
+        {
+            _isCalculating = false;
+        }
+    }
+
+    private void SalePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(SaleViewModel.IsDiscountApplied))
+        {
+            RecalculateSaleTotals();
+        }
+    }
+
+    #endregion Event Handlers
+
+    #region Calculation Methods
+
+    private void CalculateFromRollCount()
+    {
+        if (!CurrentItem.RollCount.HasValue || !CurrentItem.LengthPerRoll.HasValue)
+            return;
+
+        CurrentItem.TotalLength = CurrentItem.RollCount.Value * CurrentItem.LengthPerRoll.Value;
+
+        if (CurrentItem.UnitPrice.HasValue)
+        {
+            CurrentItem.TotalAmount = CurrentItem.TotalLength.Value * CurrentItem.UnitPrice.Value;
+
+            if (CurrentItem.DiscountRate.HasValue)
+            {
+                CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value * (CurrentItem.DiscountRate.Value / 100);
+                CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value - CurrentItem.DiscountAmount.Value;
+            }
+        }
+    }
+
+    private async void CalculateFromTotalLength()
+    {
+        if (!CurrentItem.TotalLength.HasValue || !CurrentItem.LengthPerRoll.HasValue)
+            return;
+
+        // Check warehouse stock
+        var selectedStock = SelectedWarehouseStock;
+        if (selectedStock != null)
+        {
+            if (CurrentItem.TotalLength.Value > selectedStock.TotalLength)
+            {
+                Warning = $"Omborda yetarli mahsulot yo'q! Mavjud: {selectedStock.TotalLength:N2} metr";
+                return;
+            }
+
+            // Check if there's a remainder
+            decimal remainder = CurrentItem.TotalLength.Value % CurrentItem.LengthPerRoll.Value;
+            if (remainder > 0)
+            {
+                var result = MessageBox.Show(
+                    $"Kiritilgan uzunlik qoldiqli ({remainder:N2} metr). Qoldiq o'lchamida yangi rulon omborga qo'shilsinmi?",
+                    "Tasdiqlash",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    // TODO: Add new roll to warehouse with remainder length
+                    // await AddRollToWarehouse(remainder);
+                }
+            }
         }
 
-        if (e.OldItems is not null)
+        // Calculate roll count
+        if (CurrentItem.LengthPerRoll.Value > 0)
         {
-            foreach (SaleItemViewModel item in e.OldItems)
-                UnsubscribeFromItemChanges(item);
+            CurrentItem.RollCount = (int)(CurrentItem.TotalLength.Value / CurrentItem.LengthPerRoll.Value);
         }
 
-        RecalculateTotals();
+        // Calculate amounts
+        if (CurrentItem.UnitPrice.HasValue)
+        {
+            CurrentItem.TotalAmount = CurrentItem.TotalLength.Value * CurrentItem.UnitPrice.Value;
+
+            if (CurrentItem.DiscountRate.HasValue)
+            {
+                CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value * (CurrentItem.DiscountRate.Value / 100);
+                CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value - CurrentItem.DiscountAmount.Value;
+            }
+        }
     }
 
-    private void SubscribeToItemChanges(SaleItemViewModel item)
+    private void CalculateFromUnitPrice()
     {
-        item.PropertyChanged += Item_PropertyChanged;
+        if (!CurrentItem.UnitPrice.HasValue || !CurrentItem.TotalLength.HasValue)
+            return;
+
+        CurrentItem.TotalAmount = CurrentItem.TotalLength.Value * CurrentItem.UnitPrice.Value;
+
+        if (CurrentItem.DiscountRate.HasValue)
+        {
+            CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value * (CurrentItem.DiscountRate.Value / 100);
+            CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value - CurrentItem.DiscountAmount.Value;
+        }
     }
 
-    private void UnsubscribeFromItemChanges(SaleItemViewModel item)
+    private void CalculateFromTotalAmount()
     {
-        item.PropertyChanged -= Item_PropertyChanged;
+        if (!CurrentItem.TotalAmount.HasValue || !CurrentItem.TotalLength.HasValue)
+            return;
+
+        // Recalculate unit price
+        if (CurrentItem.TotalLength.Value > 0)
+        {
+            CurrentItem.UnitPrice = CurrentItem.TotalAmount.Value / CurrentItem.TotalLength.Value;
+        }
+
+        // Recalculate discount
+        if (CurrentItem.DiscountRate.HasValue)
+        {
+            CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value * (CurrentItem.DiscountRate.Value / 100);
+            CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value - CurrentItem.DiscountAmount.Value;
+        }
     }
 
-    private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void CalculateFromDiscountRate()
     {
-        RecalculateTotals();
+        if (!CurrentItem.DiscountRate.HasValue || !CurrentItem.TotalAmount.HasValue)
+            return;
+
+        // Ensure discount rate doesn't exceed 100%
+        if (CurrentItem.DiscountRate.Value > 100)
+        {
+            CurrentItem.DiscountRate = 100;
+            Warning = "Chegirma 100% dan oshishi mumkin emas!";
+        }
+
+        CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value * (CurrentItem.DiscountRate.Value / 100);
+        CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value - CurrentItem.DiscountAmount.Value;
     }
 
-    private void RecalculateTotals()
+    private void CalculateFromDiscountAmount()
+    {
+        if (!CurrentItem.DiscountAmount.HasValue || !CurrentItem.TotalAmount.HasValue)
+            return;
+
+        // Ensure discount doesn't exceed total amount
+        if (CurrentItem.DiscountAmount.Value > CurrentItem.TotalAmount.Value)
+        {
+            CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value;
+            Warning = "Chegirma summasi jami summadan oshishi mumkin emas!";
+        }
+
+        // Calculate discount rate
+        if (CurrentItem.TotalAmount.Value > 0)
+        {
+            CurrentItem.DiscountRate = (CurrentItem.DiscountAmount.Value / CurrentItem.TotalAmount.Value) * 100;
+        }
+
+        CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value - CurrentItem.DiscountAmount.Value;
+    }
+
+    private void CalculateFromFinalAmount()
+    {
+        if (!CurrentItem.FinalAmount.HasValue || !CurrentItem.TotalAmount.HasValue)
+            return;
+
+        // Calculate discount amount
+        CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value - CurrentItem.FinalAmount.Value;
+
+        // Ensure discount is not negative
+        if (CurrentItem.DiscountAmount.Value < 0)
+        {
+            CurrentItem.DiscountAmount = 0;
+            CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value;
+            Warning = "Umumiy summa jami summadan katta bo'lishi mumkin emas!";
+        }
+
+        // Calculate discount rate
+        if (CurrentItem.TotalAmount.Value > 0)
+        {
+            CurrentItem.DiscountRate = (CurrentItem.DiscountAmount.Value / CurrentItem.TotalAmount.Value) * 100;
+
+            // Ensure discount rate doesn't exceed 100%
+            if (CurrentItem.DiscountRate.Value > 100)
+            {
+                CurrentItem.DiscountRate = 100;
+                CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value;
+                CurrentItem.FinalAmount = 0;
+                Warning = "Chegirma 100% dan oshishi mumkin emas!";
+            }
+        }
+    }
+
+    private void RecalculateSaleTotals()
     {
         if (Sale.Items.Count == 0)
         {
             Sale.Amount = 0;
             Sale.Discount = 0;
             TotalSum = 0;
-            TotalDiscount = 0;
-            FinalSum = 0;
+            Sale.Discount = 0;
+            Sale.Amount = 0;
         }
         else
         {
@@ -508,17 +688,27 @@ public partial class SaleEditViewModel : ViewModelBase
             var discountAmount = Sale.Items.Sum(x => x.DiscountAmount ?? 0);
 
             TotalSum = grossAmount;
-            TotalDiscount = discountAmount;
-            FinalSum = grossAmount - discountAmount;
+            Sale.Discount = discountAmount;
 
-            Sale.Amount = FinalSum;
-            Sale.Discount = TotalDiscount;
+            Sale.Amount = grossAmount;
+            if (Sale.IsDiscountApplied)
+                Sale.Amount -= discountAmount;
+
             Sale.RollCount = Sale.Items.Sum(x => x.RollCount ?? 0);
             Sale.Length = Sale.Items.Sum(x => x.TotalLength ?? 0);
         }
 
         UpdateCustomerBalance();
     }
+
+    private void RecalculateTotals()
+    {
+        RecalculateSaleTotals();
+    }
+
+    #endregion Calculation Methods
+
+    #region Helpers
 
     private void UpdateCustomerBalance()
     {
@@ -552,4 +742,24 @@ public partial class SaleEditViewModel : ViewModelBase
         SelectedProduct = null;
         SelectedWarehouseStock = null;
     }
+
+    #endregion Helpers
+}
+
+public partial class SaleItemForEntryRow : ViewModelBase
+{
+    public long Id { get; set; }
+    public long SaleId { get; set; }
+    public long ProductId { get; set; }
+    [ObservableProperty] private string rollCount = string.Empty;
+    [ObservableProperty] private string lengthPerRoll = string.Empty;
+    [ObservableProperty] private string totalLength = string.Empty;
+    [ObservableProperty] private string unitPrice = string.Empty;
+    [ObservableProperty] private string discountRate = string.Empty;
+    [ObservableProperty] private string discountAmount = string.Empty;
+    [ObservableProperty] private string totalAmount = string.Empty;
+    [ObservableProperty] private string finalAmount = string.Empty;
+
+    [ObservableProperty] private SaleViewModel sale = new();
+    [ObservableProperty] private Commons.ViewModels.ProductViewModel product = new();
 }

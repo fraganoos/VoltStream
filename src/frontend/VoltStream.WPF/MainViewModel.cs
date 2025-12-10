@@ -35,7 +35,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string shom;
     [ObservableProperty] private string xufton;
     [ObservableProperty] private string dateLabel;
-    
+
     public MainViewModel(IServiceProvider services, INavigationService navigationService)
     {
         _services = services;

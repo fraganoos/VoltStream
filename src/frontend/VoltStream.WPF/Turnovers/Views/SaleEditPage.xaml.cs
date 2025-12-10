@@ -18,20 +18,11 @@ public partial class SaleEditPage : Page
         DataContext = viewModel;
     }
 
-    private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    private async void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (dataGrid.SelectedItem is SaleItemViewModel item)
         {
-            viewModel.EditItemCommand.Execute(item);
-        }
-    }
-
-    private void DataGrid_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Delete && dataGrid.SelectedItem is SaleItemViewModel item)
-        {
-            viewModel.DeleteItemCommand.Execute(item);
-            e.Handled = true;
+            await viewModel.EditItem(item);
         }
     }
 }

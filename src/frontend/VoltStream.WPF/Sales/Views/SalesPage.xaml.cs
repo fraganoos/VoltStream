@@ -121,6 +121,7 @@ public partial class SalesPage : Page
                 {
                     await LoadCustomerByIdAsync(response.Data);
                     CustomerName.Text = newCustomer.Name;
+                    sale.CustomerId = response.Data;
                     await LoadCurrencyAsync();
                 }
                 else
@@ -582,7 +583,6 @@ public partial class SalesPage : Page
                 cbxPerRollCount.ItemsSource = warehouseItems;
                 cbxPerRollCount.DisplayMemberPath = "LengthPerRoll";
                 cbxPerRollCount.SelectedValuePath = "LengthPerRoll";
-                // Восстанавливаем выбранное значение
                 if (selectedValue is not null)
                     cbxPerRollCount.SelectedValue = selectedValue;
             }
@@ -631,7 +631,6 @@ public partial class SalesPage : Page
         txtPerDiscount.Clear();
         txtDiscount.Clear();
         txtFinalSumProduct.Clear();
-        //MessageBox.Show(sale.FinalSum.ToString());
         cbxCategoryName.Focus();
         sale.NewQuantity = 0;
         sale.WarehouseCountRoll = 0;

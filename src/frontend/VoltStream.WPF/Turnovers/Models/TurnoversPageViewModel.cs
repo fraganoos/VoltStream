@@ -93,17 +93,17 @@ public partial class TurnoversPageViewModel : ViewModelBase
             CustomerOperationsForDisplay.Clear();
             return;
         }
+
         var response = await customerOperationsApi.GetByCustomerId(
             SelectedCustomer.Id,
             BeginDate,
             EndDate
         );
 
+        CustomerOperationsForDisplay.Clear();
+
         if (!response.IsSuccess)
-        {
-            CustomerOperationsForDisplay.Clear();
             return;
-        }
 
         var displayList = new ObservableCollection<CustomerOperationForDisplayViewModel>();
 
