@@ -2,78 +2,118 @@
 
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
+using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
+using System.Linq;
 
-public record DeleteCustomerOperation(long Id) : IRequest<bool>;
-public class DeleteCustomerOperationHandler(IAppDbContext context)
-    : IRequestHandler<DeleteCustomerOperation, bool>
+public record DeleteCustomerOperationCommand(long CustomerOperationId) : IRequest<bool>;
+
+public class DeleteCustomerOperationCommandHandler(
+    IAppDbContext context)
+    : IRequestHandler<DeleteCustomerOperationCommand, bool>
 {
-    public async Task<bool> Handle(DeleteCustomerOperation request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(DeleteCustomerOperationCommand request, CancellationToken cancellationToken)
     {
-        var operationId = request.Id;
-
-        // CustomerOperation ni OperationType bilan birga yuklaymiz
-        var customerOp = await context.CustomerOperations
-            .FirstOrDefaultAsync(co => co.Id == operationId, cancellationToken);
-
-        if (customerOp == null)
-            return false;
-
-        using var transaction = await context.BeginTransactionAsync(cancellationToken);
+        await context.BeginTransactionAsync(cancellationToken);
 
         try
         {
-            // OperationType ga qarab to‘g‘ri jadvaldan o‘chiramiz
-            switch (customerOp.OperationType)
+            var customerOperation = await context.CustomerOperations
+                .Include(co => co.Account)
+                .Include(co => co.Sale)
+                    .ThenInclude(s => s.Items)
+                .Include(co => co.Payment)
+                    .ThenInclude(p => p.Currency)
+                .FirstOrDefaultAsync(co => co.Id == request.CustomerOperationId, cancellationToken)
+                ?? throw new NotFoundException(nameof(CustomerOperation), nameof(request.CustomerOperationId), request.CustomerOperationId);
+
+            var account = customerOperation.Account
+                ?? throw new NotFoundException("Operatsiya bog'langan hisob topilmadi.");
+
+            switch (customerOperation.OperationType)
             {
-                case OperationType.Sale:
-                    // Sale ni topib o‘chiramiz
-                    var sale = await context.Sales
-                        .Include(s => s.Items) // agar SaleItem lar bo‘lsa
-                        .FirstOrDefaultAsync(s => s.CustomerOperationId == operationId, cancellationToken);
-
-                    if (sale != null)
-                    {
-                        context.SaleItems.RemoveRange(sale.Items);
-                        context.Sales.Remove(sale);
-                    }
-                    break;
-
                 case OperationType.Payment:
-                    var payment = await context.Payments
-                        .FirstOrDefaultAsync(p => p.CustomerOperationId == operationId, cancellationToken);
-
-                    if (payment != null)
-                        context.Payments.Remove(payment);
+                    await RevertPaymentAsync(customerOperation, account, cancellationToken);
                     break;
-
-                case OperationType.DiscountApplied:
-                    var discount = await context.DiscountOperations
-                        .FirstOrDefaultAsync(d => d.AccountId == operationId, cancellationToken);
-
-                    if (discount != null)
-                        context.DiscountOperations.Remove(discount);
+                case OperationType.Sale:
+                    await RevertSaleAsync(customerOperation, account, cancellationToken);
                     break;
-
-                // Agar yangi tur qo‘shilsa — shu yerga qo‘shiladi
                 default:
-                    // Hech narsa topilmasa — faqat CustomerOperation o‘chadi
-                    break;
+                    throw new ConflictException($"Operatsiya turi {customerOperation.OperationType}ni qaytarish qo'llab-quvvatlanmaydi.");
             }
 
-            // Har doim CustomerOperation o‘chadi
-            context.CustomerOperations.Remove(customerOp);
+            context.CustomerOperations.Remove(customerOperation);
 
-            await context.SaveAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-
-            return true;
+            return await context.CommitTransactionAsync(cancellationToken);
         }
-        catch (Exception)
+        catch
         {
-            await transaction.RollbackAsync(cancellationToken);
-            return false;
+            await context.RollbackTransactionAsync(cancellationToken);
+            throw;
+        }
+    }
+
+    private async Task RevertPaymentAsync(CustomerOperation co, Account account, CancellationToken cancellationToken)
+    {
+        var payment = co.Payment
+            ?? throw new NotFoundException("Bog'langan to'lov yozuvi topilmadi.");
+
+        account.Balance -= co.Amount;
+
+        if (payment.Currency.IsCash)
+        {
+            var cash = await context.Cashes
+                .FirstOrDefaultAsync(c => c.CurrencyId == payment.CurrencyId, cancellationToken)
+                ?? throw new NotFoundException("Kassa yozuvi topilmadi.");
+
+            cash.Balance -= co.Amount;
+        }
+    }
+
+    private async Task RevertSaleAsync(CustomerOperation co, Account account, CancellationToken cancellationToken)
+    {
+        var sale = co.Sale
+            ?? throw new NotFoundException("Bog'langan savdo yozuvi topilmadi.");
+
+        account.Balance += sale.Amount;
+
+        if (!sale.IsDiscountApplied)
+            account.Discount -= sale.Discount;
+
+        var warehouse = await context.Warehouses
+            .Include(w => w.Stocks)
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException(nameof(Warehouse));
+
+        foreach (var item in sale.Items)
+        {
+            var existStock = warehouse.Stocks
+                .FirstOrDefault(r => r.ProductId == item.ProductId && r.LengthPerRoll == item.LengthPerRoll);
+
+            if (existStock is not null)
+            {
+                existStock.RollCount += item.RollCount;
+                existStock.TotalLength += item.RollCount * item.LengthPerRoll;
+            }
+
+            var residue = item.LengthPerRoll * item.RollCount - item.TotalLength;
+
+            if (residue > 0)
+            {
+                var residueStock = warehouse.Stocks
+                    .FirstOrDefault(i => i.ProductId == item.ProductId && i.LengthPerRoll == residue);
+
+                if (residueStock is not null)
+                {
+                    residueStock.RollCount -= 1;
+                    residueStock.TotalLength -= residue;
+
+                    if (residueStock.RollCount <= 0)
+                        context.WarehouseStocks.Remove(residueStock);
+                }
+            }
         }
     }
 }

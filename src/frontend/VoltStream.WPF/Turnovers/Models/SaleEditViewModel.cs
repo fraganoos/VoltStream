@@ -32,8 +32,10 @@ public partial class SaleEditViewModel : ViewModelBase
 
     private SaleItemViewModel? originalItem;
     private int originalItemIndex = -1;
-    private bool _isCalculating = false;
-    private bool _suppressLoading = false;
+    private bool isCalculating = false;
+    private bool suppressLoading = false;
+    private decimal? previousTotalLength = null;
+    private int? previousRollCount = null;
 
     public SaleEditViewModel(IServiceProvider services, SaleResponse saleData)
     {
@@ -47,31 +49,30 @@ public partial class SaleEditViewModel : ViewModelBase
         navigationService = services.GetRequiredService<INavigationService>();
 
         Sale = mapper.Map<SaleViewModel>(saleData);
-        Sale.PropertyChanged += SalePropertyChanged;
-        CurrentItem.PropertyChanged += CurrentItem_PropertyChanged;
+        Sale.PropertyChanged += OnSalePropertyChanged;
+        CurrentItem.PropertyChanged += OnCurrentItemPropertyChanged;
 
         _ = LoadPageAsync();
-        RecalculateTotals();
+        RecalculateSaleTotals();
     }
 
     [ObservableProperty] private SaleViewModel sale = new();
     [ObservableProperty] private SaleItemViewModel currentItem = new();
-
     [ObservableProperty] private ObservableCollection<CustomerViewModel> customers = [];
     [ObservableProperty] private ObservableCollection<CurrencyViewModel> currencies = [];
     [ObservableProperty] private ObservableCollection<CategoryViewModel> categories = [];
     [ObservableProperty] private ObservableCollection<Sales.ViewModels.ProductViewModel> products = [];
     [ObservableProperty] private ObservableCollection<WarehouseStockViewModel> warehouseStocks = [];
-
     [ObservableProperty] private CustomerViewModel? selectedCustomer;
     [ObservableProperty] private CurrencyViewModel? selectedCurrency;
     [ObservableProperty] private CategoryViewModel? selectedCategory;
     [ObservableProperty] private Sales.ViewModels.ProductViewModel? selectedProduct;
     [ObservableProperty] private WarehouseStockViewModel? selectedWarehouseStock;
-
+    [ObservableProperty] private string categorySearchText = string.Empty;
+    [ObservableProperty] private string productSearchText = string.Empty;
+    [ObservableProperty] private string warehouseStockSearchText = string.Empty;
     [ObservableProperty] private decimal beginBalance;
     [ObservableProperty] private decimal lastBalance;
-
     [ObservableProperty] private decimal totalSum;
 
     #region Load Data
@@ -82,7 +83,7 @@ public partial class SaleEditViewModel : ViewModelBase
             LoadCustomersAsync(),
             LoadCurrenciesAsync(),
             LoadCategoriesAsync(),
-            LoadProducts()
+            LoadProductsAsync()
         );
 
         SelectedCustomer = Customers.FirstOrDefault(c => c.Id == Sale.CustomerId);
@@ -91,7 +92,7 @@ public partial class SaleEditViewModel : ViewModelBase
 
     private async Task LoadCustomersAsync()
     {
-        FilteringRequest request = new()
+        var request = new FilteringRequest
         {
             Filters = new() { ["accounts"] = ["include:currency"] }
         };
@@ -102,28 +103,31 @@ public partial class SaleEditViewModel : ViewModelBase
         if (response.IsSuccess)
         {
             Customers = mapper.Map<ObservableCollection<CustomerViewModel>>(response.Data!);
-
-            var account = Customers.FirstOrDefault(c => c.Id == Sale.CustomerId)?
-                .Accounts.FirstOrDefault(a => a.CurrencyId == Sale.CurrencyId);
-
-            if (account is not null)
-            {
-                account.Balance += Sale.Amount;
-
-                if (!Sale.IsDiscountApplied)
-                {
-                    account.Discount -= Sale.Discount;
-                    account.Balance += Sale.Discount;
-                }
-            }
+            RestoreOriginalCustomerBalance();
         }
         else
             Error = response.Message ?? "Mijozlarni yuklashda xatolik!";
     }
 
+    private void RestoreOriginalCustomerBalance()
+    {
+        var account = Customers.FirstOrDefault(c => c.Id == Sale.CustomerId)?
+            .Accounts.FirstOrDefault(a => a.CurrencyId == Sale.CurrencyId);
+
+        if (account is not null)
+        {
+            account.Balance += Sale.Amount;
+            if (!Sale.IsDiscountApplied)
+            {
+                account.Discount -= Sale.Discount;
+                account.Balance += Sale.Discount;
+            }
+        }
+    }
+
     private async Task LoadCurrenciesAsync()
     {
-        FilteringRequest request = new()
+        var request = new FilteringRequest
         {
             Filters = new() { ["isactive"] = ["true"] }
         };
@@ -148,14 +152,9 @@ public partial class SaleEditViewModel : ViewModelBase
             Error = response.Message ?? "Kategoriyalarni yuklashda xatolik!";
     }
 
-    #endregion Load Data
-
-    #region Commands
-
-    [RelayCommand]
-    private async Task LoadProducts()
+    private async Task LoadProductsAsync()
     {
-        FilteringRequest request = new()
+        var request = new FilteringRequest
         {
             Filters = new() { ["category"] = ["include"] }
         };
@@ -172,8 +171,7 @@ public partial class SaleEditViewModel : ViewModelBase
             Error = response.Message ?? "Maxsulotlarni yuklashda xatolik!";
     }
 
-    [RelayCommand]
-    private async Task LoadWarehouseStocks()
+    private async Task LoadWarehouseStocksAsync()
     {
         if (SelectedProduct?.Id <= 0) return;
 
@@ -186,40 +184,22 @@ public partial class SaleEditViewModel : ViewModelBase
             Error = response.Message ?? "Ombor ma'lumotlarini yuklashda xatolik!";
     }
 
+    #endregion
+
+    #region Commands
+
     [RelayCommand]
     private void Add()
     {
-        if (SelectedProduct is null)
-        {
-            Warning = "Maxsulot tanlanmagan!";
-            return;
-        }
+        if (!ValidateCurrentItem()) return;
 
-        if (!CurrentItem.TotalLength.HasValue || CurrentItem.TotalLength.Value <= 0)
-        {
-            Warning = "Miqdor kiritilmagan!";
-            return;
-        }
-
-        CurrentItem.ProductId = SelectedProduct.Id;
-        CurrentItem.Product = new Sales.ViewModels.ProductViewModel
-        {
-            Id = SelectedProduct.Id,
-            Name = SelectedProduct.Name,
-            CategoryId = SelectedProduct.CategoryId,
-            Category = SelectedProduct.Category is not null ? new CategoryViewModel
-            {
-                Id = SelectedProduct.Category.Id,
-                Name = SelectedProduct.Category.Name
-            } : new CategoryViewModel()
-        };
+        CurrentItem.ProductId = SelectedProduct!.Id;
+        CurrentItem.Product = MapProduct(SelectedProduct);
 
         if (IsEditing && originalItem is not null)
         {
             Sale.Items.Insert(originalItemIndex, CurrentItem);
-            originalItem = null;
-            originalItemIndex = -1;
-            IsEditing = false;
+            ResetEditMode();
         }
         else
         {
@@ -237,51 +217,17 @@ public partial class SaleEditViewModel : ViewModelBase
 
         originalItemIndex = Sale.Items.IndexOf(item);
         originalItem = item;
-
-        CurrentItem = new SaleItemViewModel
-        {
-            Id = item.Id,
-            SaleId = item.SaleId,
-            ProductId = item.ProductId,
-            RollCount = item.RollCount,
-            LengthPerRoll = item.LengthPerRoll,
-            TotalLength = item.TotalLength,
-            UnitPrice = item.UnitPrice,
-            DiscountRate = item.DiscountRate,
-            DiscountAmount = item.DiscountAmount,
-            TotalAmount = item.TotalAmount,
-            FinalAmount = item.FinalAmount,
-            Product = item.Product
-        };
-
+        CurrentItem = CloneItem(item);
         IsEditing = true;
+
         Sale.Items.RemoveAt(originalItemIndex);
         RecalculateSaleTotals();
 
-        _suppressLoading = true;
-        try
-        {
-            if (item.Product?.Category is not null)
-            {
-                SelectedCategory = Categories.FirstOrDefault(c => c.Id == item.Product.Category.Id);
-                await LoadProducts();
-            }
+        await LoadItemRelatedDataAsync(item);
 
-            if (item.Product is not null)
-            {
-                SelectedProduct = Products.FirstOrDefault(p => p.Id == item.ProductId);
-                await LoadWarehouseStocks();
-            }
-
-            if (item.LengthPerRoll.HasValue)
-            {
-                SelectedWarehouseStock = WarehouseStocks.FirstOrDefault(w => w.LengthPerRoll == item.LengthPerRoll.Value);
-            }
-        }
-        finally
-        {
-            _suppressLoading = false;
-        }
+        // Set initial previous values
+        previousTotalLength = CurrentItem.TotalLength;
+        previousRollCount = CurrentItem.RollCount;
     }
 
     [RelayCommand]
@@ -290,9 +236,7 @@ public partial class SaleEditViewModel : ViewModelBase
         if (IsEditing && originalItem is not null)
         {
             Sale.Items.Insert(originalItemIndex, originalItem);
-            originalItem = null;
-            originalItemIndex = -1;
-            IsEditing = false;
+            ResetEditMode();
             RecalculateSaleTotals();
             ClearCurrentItem();
         }
@@ -303,13 +247,7 @@ public partial class SaleEditViewModel : ViewModelBase
     {
         if (item is null) return;
 
-        var result = MessageBox.Show(
-            "Bu maxsulotni o'chirishni xohlaysizmi?",
-            "Tasdiqlash",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
-
-        if (result == MessageBoxResult.Yes)
+        if (ShowConfirmation("Bu maxsulotni o'chirishni xohlaysizmi?"))
         {
             Sale.Items.Remove(item);
             RecalculateSaleTotals();
@@ -319,25 +257,8 @@ public partial class SaleEditViewModel : ViewModelBase
     [RelayCommand]
     private async Task Save()
     {
-        if (Sale.CustomerId <= 0)
-        {
-            Warning = "Mijoz tanlanmagan!";
-            return;
-        }
-
-        if (Sale.Items.Count == 0)
-        {
-            Warning = "Savdo itemlari mavjud emas!";
-            return;
-        }
-
-        var result = MessageBox.Show(
-            "O'zgarishlarni saqlashni xohlaysizmi?",
-            "Tasdiqlash",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
-
-        if (result != MessageBoxResult.Yes) return;
+        if (!ValidateSale()) return;
+        if (!ShowConfirmation("O'zgarishlarni saqlashni xohlaysizmi?")) return;
 
         var request = new SaleRequest
         {
@@ -370,17 +291,11 @@ public partial class SaleEditViewModel : ViewModelBase
     [RelayCommand]
     private void Cancel()
     {
-        var result = MessageBox.Show(
-            "O'zgarishlar saqlanmaydi. Chiqishni xohlaysizmi?",
-            "Tasdiqlash",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
-
-        if (result == MessageBoxResult.Yes)
+        if (ShowConfirmation("O'zgarishlar saqlanmaydi. Chiqishni xohlaysizmi?"))
             navigationService.GoBack();
     }
 
-    #endregion Commands
+    #endregion
 
     #region Event Handlers
 
@@ -402,213 +317,234 @@ public partial class SaleEditViewModel : ViewModelBase
         }
     }
 
-    partial void OnSelectedCategoryChanged(CategoryViewModel? value)
-    {
-        if (value is not null && !_suppressLoading)
-            _ = LoadProducts();
-    }
-
     partial void OnSelectedProductChanged(Sales.ViewModels.ProductViewModel? value)
     {
-        if (value is not null && !_suppressLoading)
-        {
-            if (value.Category is not null)
-                SelectedCategory = Categories.FirstOrDefault(c => c.Id == value.Category.Id);
+        if (isCalculating) return;
 
-            _ = LoadWarehouseStocks();
+        ExecuteWithCalculationLock(() =>
+        {
+            if (value is not null)
+            {
+                SelectedCategory = Categories.FirstOrDefault(c => c.Id == value.Category?.Id);
+                ProductSearchText = value.Name;
+                _ = LoadWarehouseStocksAsync();
+            }
+            else
+            {
+                ProductSearchText = string.Empty;
+            }
+        });
+    }
+
+    partial void OnSelectedCategoryChanged(CategoryViewModel? value)
+    {
+        if (isCalculating) return;
+
+        if (value is not null)
+        {
+            ExecuteWithCalculationLock(() =>
+            {
+                CategorySearchText = value.Name;
+                if (!suppressLoading)
+                    _ = LoadProductsAsync();
+            });
+        }
+        else
+        {
+            CategorySearchText = string.Empty;
         }
     }
 
-    partial void OnSelectedWarehouseStockChanged(WarehouseStockViewModel? value)
+    partial void OnSelectedWarehouseStockChanging(WarehouseStockViewModel? value)
     {
-        if (value is not null)
+        if (value is null) return;
+
+        ExecuteWithCalculationLock(() =>
         {
-            _isCalculating = true;
             CurrentItem.LengthPerRoll = value.LengthPerRoll;
             CurrentItem.UnitPrice = value.UnitPrice;
             CurrentItem.DiscountRate = value.DiscountRate;
-            _isCalculating = false;
+            WarehouseStockSearchText = value.LengthPerRoll.ToString();
+        });
 
-            // Trigger recalculation
-            CalculateFromRollCount();
+        CalculateFromRollCount();
+    }
+
+    partial void OnCategorySearchTextChanged(string value) =>
+        UpdateSearchSelection(value, Categories, c => c.Name, v => CategorySearchText = v, v => SelectedCategory = v);
+
+    partial void OnProductSearchTextChanged(string value) =>
+        UpdateSearchSelection(value, Products, p => p.Name, v => ProductSearchText = v, v => SelectedProduct = v);
+
+    partial void OnWarehouseStockSearchTextChanged(string value)
+    {
+        if (isCalculating) return;
+
+        if (!decimal.TryParse(value, out decimal enteredLength))
+        {
+            SelectedWarehouseStock = null;
+            WarehouseStockSearchText = string.Empty;
+            return;
         }
+
+        var exactMatch = WarehouseStocks.FirstOrDefault(s => s.LengthPerRoll == enteredLength);
+        if (exactMatch is not null)
+        {
+            SelectedWarehouseStock = exactMatch;
+            return;
+        }
+
+        var nearest = WarehouseStocks
+            .OrderBy(s => Math.Abs(s.LengthPerRoll - enteredLength))
+            .FirstOrDefault();
+
+        SelectedWarehouseStock = nearest;
+        if (SelectedWarehouseStock is null)
+            WarehouseStockSearchText = string.Empty;
     }
 
     partial void OnCurrentItemChanged(SaleItemViewModel? oldValue, SaleItemViewModel newValue)
     {
         if (oldValue is not null)
-            oldValue.PropertyChanged -= CurrentItem_PropertyChanged;
+            oldValue.PropertyChanged -= OnCurrentItemPropertyChanged;
 
         if (newValue is not null)
-            newValue.PropertyChanged += CurrentItem_PropertyChanged;
+        {
+            newValue.PropertyChanged += OnCurrentItemPropertyChanged;
+            previousTotalLength = newValue.TotalLength;
+            previousRollCount = newValue.RollCount;
+        }
     }
 
-    private void CurrentItem_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnCurrentItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (_isCalculating || sender is not SaleItemViewModel item) return;
+        if (isCalculating || sender is not SaleItemViewModel) return;
 
-        _isCalculating = true;
-        try
+        ExecuteWithCalculationLock(() =>
         {
             switch (e.PropertyName)
             {
                 case nameof(SaleItemViewModel.RollCount):
                     CalculateFromRollCount();
                     break;
-
                 case nameof(SaleItemViewModel.TotalLength):
                     CalculateFromTotalLength();
                     break;
-
                 case nameof(SaleItemViewModel.UnitPrice):
                     CalculateFromUnitPrice();
                     break;
-
                 case nameof(SaleItemViewModel.TotalAmount):
                     CalculateFromTotalAmount();
                     break;
-
                 case nameof(SaleItemViewModel.DiscountRate):
                     CalculateFromDiscountRate();
                     break;
-
                 case nameof(SaleItemViewModel.DiscountAmount):
                     CalculateFromDiscountAmount();
                     break;
-
                 case nameof(SaleItemViewModel.FinalAmount):
                     CalculateFromFinalAmount();
                     break;
             }
-        }
-        finally
-        {
-            _isCalculating = false;
-        }
+        });
     }
 
-    private void SalePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnSalePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(SaleViewModel.IsDiscountApplied))
-        {
             RecalculateSaleTotals();
-        }
     }
 
-    #endregion Event Handlers
+    #endregion
 
     #region Calculation Methods
 
     private void CalculateFromRollCount()
     {
-        if (!CurrentItem.RollCount.HasValue || !CurrentItem.LengthPerRoll.HasValue)
-            return;
+        if (!CurrentItem.RollCount.HasValue || !CurrentItem.LengthPerRoll.HasValue) return;
 
-        CurrentItem.TotalLength = CurrentItem.RollCount.Value * CurrentItem.LengthPerRoll.Value;
+        var newTotalLength = CurrentItem.RollCount.Value * CurrentItem.LengthPerRoll.Value;
 
-        if (CurrentItem.UnitPrice.HasValue)
+        // Check warehouse availability before updating
+        if (!CheckWarehouseAvailabilityForLength(newTotalLength, CurrentItem.RollCount.Value))
         {
-            CurrentItem.TotalAmount = CurrentItem.TotalLength.Value * CurrentItem.UnitPrice.Value;
-
-            if (CurrentItem.DiscountRate.HasValue)
-            {
-                CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value * (CurrentItem.DiscountRate.Value / 100);
-                CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value - CurrentItem.DiscountAmount.Value;
-            }
+            // Restore previous value
+            isCalculating = true;
+            CurrentItem.RollCount = previousRollCount;
+            isCalculating = false;
+            return;
         }
+
+        CurrentItem.TotalLength = newTotalLength;
+        previousTotalLength = newTotalLength;
+        previousRollCount = CurrentItem.RollCount;
+
+        CalculateTotalAndDiscounts();
     }
 
-    private async void CalculateFromTotalLength()
+    private void CalculateFromTotalLength()
     {
-        if (!CurrentItem.TotalLength.HasValue || !CurrentItem.LengthPerRoll.HasValue)
-            return;
+        if (!CurrentItem.TotalLength.HasValue || !CurrentItem.LengthPerRoll.HasValue) return;
 
-        // Check warehouse stock
-        var selectedStock = SelectedWarehouseStock;
-        if (selectedStock != null)
+        var newTotalLength = CurrentItem.TotalLength.Value;
+        var newRollCount = CurrentItem.LengthPerRoll.Value > 0
+            ? (int)Math.Ceiling(newTotalLength / CurrentItem.LengthPerRoll.Value)
+            : 0;
+
+        // Check warehouse availability
+        if (!CheckWarehouseAvailabilityForLength(newTotalLength, newRollCount))
         {
-            if (CurrentItem.TotalLength.Value > selectedStock.TotalLength)
-            {
-                Warning = $"Omborda yetarli mahsulot yo'q! Mavjud: {selectedStock.TotalLength:N2} metr";
-                return;
-            }
-
-            // Check if there's a remainder
-            decimal remainder = CurrentItem.TotalLength.Value % CurrentItem.LengthPerRoll.Value;
-            if (remainder > 0)
-            {
-                var result = MessageBox.Show(
-                    $"Kiritilgan uzunlik qoldiqli ({remainder:N2} metr). Qoldiq o'lchamida yangi rulon omborga qo'shilsinmi?",
-                    "Tasdiqlash",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    // TODO: Add new roll to warehouse with remainder length
-                    // await AddRollToWarehouse(remainder);
-                }
-            }
+            // Restore previous value
+            isCalculating = true;
+            CurrentItem.TotalLength = previousTotalLength;
+            isCalculating = false;
+            return;
         }
 
-        // Calculate roll count
+        var remainder = newTotalLength % CurrentItem.LengthPerRoll.Value;
+        if (remainder > 0 && !ConfirmRemainder(remainder))
+        {
+            // Restore previous value
+            isCalculating = true;
+            CurrentItem.TotalLength = previousTotalLength;
+            isCalculating = false;
+            return;
+        }
+
         if (CurrentItem.LengthPerRoll.Value > 0)
         {
-            CurrentItem.RollCount = (int)(CurrentItem.TotalLength.Value / CurrentItem.LengthPerRoll.Value);
+            var fullRolls = (int)(newTotalLength / CurrentItem.LengthPerRoll.Value);
+            CurrentItem.RollCount = fullRolls + (remainder > 0 ? 1 : 0);
         }
 
-        // Calculate amounts
-        if (CurrentItem.UnitPrice.HasValue)
-        {
-            CurrentItem.TotalAmount = CurrentItem.TotalLength.Value * CurrentItem.UnitPrice.Value;
+        previousTotalLength = newTotalLength;
+        previousRollCount = CurrentItem.RollCount;
 
-            if (CurrentItem.DiscountRate.HasValue)
-            {
-                CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value * (CurrentItem.DiscountRate.Value / 100);
-                CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value - CurrentItem.DiscountAmount.Value;
-            }
-        }
+        CalculateTotalAndDiscounts();
     }
 
     private void CalculateFromUnitPrice()
     {
-        if (!CurrentItem.UnitPrice.HasValue || !CurrentItem.TotalLength.HasValue)
-            return;
+        if (!CurrentItem.UnitPrice.HasValue || !CurrentItem.TotalLength.HasValue) return;
 
         CurrentItem.TotalAmount = CurrentItem.TotalLength.Value * CurrentItem.UnitPrice.Value;
-
-        if (CurrentItem.DiscountRate.HasValue)
-        {
-            CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value * (CurrentItem.DiscountRate.Value / 100);
-            CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value - CurrentItem.DiscountAmount.Value;
-        }
+        CalculateDiscounts();
     }
 
     private void CalculateFromTotalAmount()
     {
-        if (!CurrentItem.TotalAmount.HasValue || !CurrentItem.TotalLength.HasValue)
-            return;
+        if (!CurrentItem.TotalAmount.HasValue || !CurrentItem.TotalLength.HasValue) return;
 
-        // Recalculate unit price
         if (CurrentItem.TotalLength.Value > 0)
-        {
             CurrentItem.UnitPrice = CurrentItem.TotalAmount.Value / CurrentItem.TotalLength.Value;
-        }
 
-        // Recalculate discount
-        if (CurrentItem.DiscountRate.HasValue)
-        {
-            CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value * (CurrentItem.DiscountRate.Value / 100);
-            CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value - CurrentItem.DiscountAmount.Value;
-        }
+        CalculateDiscounts();
     }
 
     private void CalculateFromDiscountRate()
     {
-        if (!CurrentItem.DiscountRate.HasValue || !CurrentItem.TotalAmount.HasValue)
-            return;
+        if (!CurrentItem.DiscountRate.HasValue || !CurrentItem.TotalAmount.HasValue) return;
 
-        // Ensure discount rate doesn't exceed 100%
         if (CurrentItem.DiscountRate.Value > 100)
         {
             CurrentItem.DiscountRate = 100;
@@ -621,47 +557,38 @@ public partial class SaleEditViewModel : ViewModelBase
 
     private void CalculateFromDiscountAmount()
     {
-        if (!CurrentItem.DiscountAmount.HasValue || !CurrentItem.TotalAmount.HasValue)
-            return;
+        if (!CurrentItem.DiscountAmount.HasValue || !CurrentItem.TotalAmount.HasValue) return;
 
-        // Ensure discount doesn't exceed total amount
         if (CurrentItem.DiscountAmount.Value > CurrentItem.TotalAmount.Value)
         {
             CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value;
             Warning = "Chegirma summasi jami summadan oshishi mumkin emas!";
         }
 
-        // Calculate discount rate
         if (CurrentItem.TotalAmount.Value > 0)
-        {
             CurrentItem.DiscountRate = (CurrentItem.DiscountAmount.Value / CurrentItem.TotalAmount.Value) * 100;
-        }
 
         CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value - CurrentItem.DiscountAmount.Value;
     }
 
     private void CalculateFromFinalAmount()
     {
-        if (!CurrentItem.FinalAmount.HasValue || !CurrentItem.TotalAmount.HasValue)
-            return;
+        if (!CurrentItem.FinalAmount.HasValue || !CurrentItem.TotalAmount.HasValue) return;
 
-        // Calculate discount amount
         CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value - CurrentItem.FinalAmount.Value;
 
-        // Ensure discount is not negative
         if (CurrentItem.DiscountAmount.Value < 0)
         {
             CurrentItem.DiscountAmount = 0;
             CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value;
             Warning = "Umumiy summa jami summadan katta bo'lishi mumkin emas!";
+            return;
         }
 
-        // Calculate discount rate
         if (CurrentItem.TotalAmount.Value > 0)
         {
             CurrentItem.DiscountRate = (CurrentItem.DiscountAmount.Value / CurrentItem.TotalAmount.Value) * 100;
 
-            // Ensure discount rate doesn't exceed 100%
             if (CurrentItem.DiscountRate.Value > 100)
             {
                 CurrentItem.DiscountRate = 100;
@@ -672,15 +599,30 @@ public partial class SaleEditViewModel : ViewModelBase
         }
     }
 
+    private void CalculateTotalAndDiscounts()
+    {
+        if (CurrentItem.UnitPrice.HasValue && CurrentItem.TotalLength.HasValue)
+        {
+            CurrentItem.TotalAmount = CurrentItem.TotalLength.Value * CurrentItem.UnitPrice.Value;
+            CalculateDiscounts();
+        }
+    }
+
+    private void CalculateDiscounts()
+    {
+        if (CurrentItem.DiscountRate.HasValue && CurrentItem.TotalAmount.HasValue)
+        {
+            CurrentItem.DiscountAmount = CurrentItem.TotalAmount.Value * (CurrentItem.DiscountRate.Value / 100);
+            CurrentItem.FinalAmount = CurrentItem.TotalAmount.Value - CurrentItem.DiscountAmount.Value;
+        }
+    }
+
     private void RecalculateSaleTotals()
     {
         if (Sale.Items.Count == 0)
         {
-            Sale.Amount = 0;
-            Sale.Discount = 0;
-            TotalSum = 0;
-            Sale.Discount = 0;
-            Sale.Amount = 0;
+            Sale.Amount = Sale.Discount = TotalSum = Sale.RollCount = 0;
+            Sale.Length = 0;
         }
         else
         {
@@ -689,11 +631,7 @@ public partial class SaleEditViewModel : ViewModelBase
 
             TotalSum = grossAmount;
             Sale.Discount = discountAmount;
-
-            Sale.Amount = grossAmount;
-            if (Sale.IsDiscountApplied)
-                Sale.Amount -= discountAmount;
-
+            Sale.Amount = Sale.IsDiscountApplied ? grossAmount - discountAmount : grossAmount;
             Sale.RollCount = Sale.Items.Sum(x => x.RollCount ?? 0);
             Sale.Length = Sale.Items.Sum(x => x.TotalLength ?? 0);
         }
@@ -701,38 +639,86 @@ public partial class SaleEditViewModel : ViewModelBase
         UpdateCustomerBalance();
     }
 
-    private void RecalculateTotals()
-    {
-        RecalculateSaleTotals();
-    }
-
-    #endregion Calculation Methods
+    #endregion
 
     #region Helpers
 
+    private bool CheckWarehouseAvailabilityForLength(decimal requestedLength, int requestedRolls)
+    {
+        var selectedStock = SelectedWarehouseStock;
+        if (selectedStock is null || !CurrentItem.LengthPerRoll.HasValue) return true;
+
+        var totalRollsInWarehouse = (int)(selectedStock.TotalLength / selectedStock.LengthPerRoll);
+
+        // Check if enough rolls are available
+        if (requestedRolls > totalRollsInWarehouse)
+        {
+            var result = MessageBox.Show(
+                $"Omborda {SelectedProduct?.Name}-dan {totalRollsInWarehouse} rulon qolgan.{Environment.NewLine}Davom ettirishga rozimisiz?",
+                "Savdo",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question,
+                MessageBoxResult.No);
+
+            return result == MessageBoxResult.Yes;
+        }
+
+        // Check if enough total length is available
+        if (requestedLength > selectedStock.TotalLength)
+        {
+            var result = MessageBox.Show(
+                $"Omborda {SelectedProduct?.Name}-ning {selectedStock.LengthPerRoll}-metrligidan {selectedStock.TotalLength:N2} metr qolgan.{Environment.NewLine}Davom ettirishga rozimisiz?",
+                "Savdo",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question,
+                MessageBoxResult.No);
+
+            return result == MessageBoxResult.Yes;
+        }
+
+        return true;
+    }
+
+    private bool ConfirmRemainder(decimal remainder)
+    {
+        if (!CurrentItem.LengthPerRoll.HasValue) return true;
+
+        var newRollLength = CurrentItem.LengthPerRoll.Value - remainder;
+
+        var result = MessageBox.Show(
+            $"Siz {SelectedProduct?.Name}-ning {CurrentItem.LengthPerRoll.Value}-metrlik rulonidan " +
+            $"{CurrentItem.TotalLength!.Value:N2} metr tanladingiz, shunda bitta rulondan {remainder:N2} metr " +
+            $"kesilib omborga bitta {newRollLength:N2} metrlik rulon qo'shiladi.{Environment.NewLine}" +
+            "Davom ettirishga rozimisiz?",
+            "Savdo",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question,
+            MessageBoxResult.No);
+
+        return result == MessageBoxResult.Yes;
+    }
+
     private void UpdateCustomerBalance()
     {
-        if (SelectedCustomer is not null && SelectedCurrency is not null)
+        if (SelectedCustomer is null || SelectedCurrency is null)
         {
-            var account = SelectedCustomer.Accounts.FirstOrDefault(a => a.CurrencyId == SelectedCurrency.Id);
+            BeginBalance = LastBalance = 0;
+            return;
+        }
 
-            if (account is not null)
-            {
-                BeginBalance = account.Balance;
-                LastBalance = BeginBalance - Sale.Amount;
-            }
-            else
-            {
-                var rate = SelectedCurrency.ExchangeRate > 0 ? SelectedCurrency.ExchangeRate : 1;
-                BeginBalance = SelectedCustomer.Balance / rate;
-                LastBalance = BeginBalance - Sale.Amount;
-            }
+        var account = SelectedCustomer.Accounts.FirstOrDefault(a => a.CurrencyId == SelectedCurrency.Id);
+
+        if (account is not null)
+        {
+            BeginBalance = account.Balance;
         }
         else
         {
-            BeginBalance = 0;
-            LastBalance = 0;
+            var rate = SelectedCurrency.ExchangeRate > 0 ? SelectedCurrency.ExchangeRate : 1;
+            BeginBalance = SelectedCustomer.Balance / rate;
         }
+
+        LastBalance = BeginBalance - Sale.Amount;
     }
 
     private void ClearCurrentItem()
@@ -741,25 +727,146 @@ public partial class SaleEditViewModel : ViewModelBase
         SelectedCategory = null;
         SelectedProduct = null;
         SelectedWarehouseStock = null;
+        CategorySearchText = ProductSearchText = WarehouseStockSearchText = string.Empty;
+        previousTotalLength = null;
+        previousRollCount = null;
     }
 
-    #endregion Helpers
-}
+    private bool ValidateCurrentItem()
+    {
+        if (SelectedProduct is null)
+        {
+            Warning = "Maxsulot tanlanmagan!";
+            return false;
+        }
 
-public partial class SaleItemForEntryRow : ViewModelBase
-{
-    public long Id { get; set; }
-    public long SaleId { get; set; }
-    public long ProductId { get; set; }
-    [ObservableProperty] private string rollCount = string.Empty;
-    [ObservableProperty] private string lengthPerRoll = string.Empty;
-    [ObservableProperty] private string totalLength = string.Empty;
-    [ObservableProperty] private string unitPrice = string.Empty;
-    [ObservableProperty] private string discountRate = string.Empty;
-    [ObservableProperty] private string discountAmount = string.Empty;
-    [ObservableProperty] private string totalAmount = string.Empty;
-    [ObservableProperty] private string finalAmount = string.Empty;
+        if (!CurrentItem.TotalLength.HasValue || CurrentItem.TotalLength.Value <= 0)
+        {
+            Warning = "Miqdor kiritilmagan!";
+            return false;
+        }
 
-    [ObservableProperty] private SaleViewModel sale = new();
-    [ObservableProperty] private Commons.ViewModels.ProductViewModel product = new();
+        return true;
+    }
+
+    private bool ValidateSale()
+    {
+        if (Sale.CustomerId <= 0)
+        {
+            Warning = "Mijoz tanlanmagan!";
+            return false;
+        }
+
+        if (Sale.Items.Count == 0)
+        {
+            Warning = "Savdo itemlari mavjud emas!";
+            return false;
+        }
+
+        return true;
+    }
+
+    private void ResetEditMode()
+    {
+        originalItem = null;
+        originalItemIndex = -1;
+        IsEditing = false;
+    }
+
+    private SaleItemViewModel CloneItem(SaleItemViewModel item) => new()
+    {
+        Id = item.Id,
+        SaleId = item.SaleId,
+        ProductId = item.ProductId,
+        RollCount = item.RollCount,
+        LengthPerRoll = item.LengthPerRoll,
+        TotalLength = item.TotalLength,
+        UnitPrice = item.UnitPrice,
+        DiscountRate = item.DiscountRate,
+        DiscountAmount = item.DiscountAmount,
+        TotalAmount = item.TotalAmount,
+        FinalAmount = item.FinalAmount,
+        Product = item.Product
+    };
+
+    private Sales.ViewModels.ProductViewModel MapProduct(Sales.ViewModels.ProductViewModel source) => new()
+    {
+        Id = source.Id,
+        Name = source.Name,
+        CategoryId = source.CategoryId,
+        Category = source.Category is not null ? new CategoryViewModel
+        {
+            Id = source.Category.Id,
+            Name = source.Category.Name
+        } : new CategoryViewModel()
+    };
+
+    private async Task LoadItemRelatedDataAsync(SaleItemViewModel item)
+    {
+        suppressLoading = true;
+        try
+        {
+            if (item.Product?.Category is not null)
+            {
+                SelectedCategory = Categories.FirstOrDefault(c => c.Id == item.Product.Category.Id);
+                await LoadProductsAsync();
+            }
+
+            if (item.Product is not null)
+            {
+                SelectedProduct = Products.FirstOrDefault(p => p.Id == item.ProductId);
+                await LoadWarehouseStocksAsync();
+            }
+
+            if (item.LengthPerRoll.HasValue)
+            {
+                SelectedWarehouseStock = WarehouseStocks.FirstOrDefault(w => w.LengthPerRoll == item.LengthPerRoll.Value);
+            }
+        }
+        finally
+        {
+            suppressLoading = false;
+        }
+    }
+
+    private void UpdateSearchSelection<T>(
+        string searchText,
+        ObservableCollection<T> collection,
+        Func<T, string> nameSelector,
+        Action<string> setSearchText,
+        Action<T?> setSelected) where T : class
+    {
+        if (isCalculating) return;
+
+        T? matched = null;
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            matched = collection.FirstOrDefault(item =>
+                nameSelector(item).Trim().Equals(searchText.Trim(), StringComparison.OrdinalIgnoreCase));
+
+            matched ??= collection.FirstOrDefault(item =>
+                nameSelector(item).Trim().StartsWith(searchText.Trim(), StringComparison.OrdinalIgnoreCase));
+        }
+
+        setSelected(matched ?? collection.FirstOrDefault());
+
+        var selected = matched ?? collection.FirstOrDefault();
+        if (selected is not null && !string.Equals(nameSelector(selected), searchText, StringComparison.OrdinalIgnoreCase))
+            setSearchText(nameSelector(selected));
+        else if (selected is null)
+            setSearchText(string.Empty);
+    }
+
+    private void ExecuteWithCalculationLock(Action action)
+    {
+        isCalculating = true;
+        try { action(); }
+        finally { isCalculating = false; }
+    }
+
+    private bool ShowConfirmation(string message) =>
+        MessageBox.Show(message, "Tasdiqlash", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+
+    #endregion 
 }

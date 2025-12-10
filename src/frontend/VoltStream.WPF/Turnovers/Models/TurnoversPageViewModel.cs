@@ -187,48 +187,18 @@ public partial class TurnoversPageViewModel : ViewModelBase
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
 
-        if (result != MessageBoxResult.Yes)
+        if (result == MessageBoxResult.No)
             return;
 
-        try
+        var response = await customerOperationsApi.Delete(operation.Id)
+            .Handle(isLoading => IsLoading = isLoading);
+
+        if (response.IsSuccess)
         {
-            Response<bool> response;
-
-            switch (operation.OperationType)
-            {
-                case OperationType.Sale:
-                    response = await saleApi.Delete(operation.Id)
-                        .Handle(isLoading => IsLoading = isLoading);
-                    break;
-
-                case OperationType.Payment:
-                    response = await paymentApi.DeleteAsync(operation.Id)
-                        .Handle(isLoading => IsLoading = isLoading);
-                    break;
-
-                case OperationType.DiscountApplied:
-                    Warning = "Chegirmani to'g'ridan-to'g'ri o'chirib bo'lmaydi!";
-                    return;
-
-                default:
-                    Warning = "Noma'lum operatsiya turi!";
-                    return;
-            }
-
-            if (response.IsSuccess)
-            {
-                Success = "Operatsiya muvaffaqiyatli o'chirildi!";
-                await LoadCustomerOperationsForSelectedCustomerAsync();
-            }
-            else
-            {
-                Error = response.Message ?? "Operatsiyani o'chirishda xatolik!";
-            }
+            CustomerOperationsForDisplay.Remove(operation);
+            Success = "Operatsiya muvaffaqiyatli o'chirildi.";
         }
-        catch (Exception ex)
-        {
-            Error = $"Xatolik: {ex.Message}";
-        }
+        else Error = response.Message ?? "Operatsiyani o'chirishda xatolik yuz berdi.";
     }
 
     [RelayCommand]
