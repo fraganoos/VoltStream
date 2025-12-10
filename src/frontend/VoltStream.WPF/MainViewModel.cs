@@ -6,6 +6,7 @@ using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.Services;
 using VoltStream.WPF.Commons.ViewModels;
 using VoltStream.WPF.Debitors.Views;
+using VoltStream.WPF.Home.Views;
 using VoltStream.WPF.Payments.Views;
 using VoltStream.WPF.Products.Views;
 using VoltStream.WPF.Sales.Views;
@@ -49,7 +50,7 @@ public partial class MainViewModel : ViewModelBase
         }
 
         // Set initial view
-        _navigationService.Navigate(_services.GetRequiredService<SalesPage>());
+        _navigationService.Navigate(_services.GetRequiredService<DashboardPage>());
     }
 
     public async Task LoadNamozTimesAsync()
@@ -76,6 +77,12 @@ public partial class MainViewModel : ViewModelBase
 
 
 
+    [RelayCommand]
+    private void ShowDashboardView()
+    {
+        _navigationService.Navigate(_services.GetRequiredService<DashboardPage>());
+        CurrentPageTitle = "Bosh sahifa";
+    }
     [RelayCommand]
     private void ShowSalesView()
     {
