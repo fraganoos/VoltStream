@@ -3,7 +3,6 @@
 using ApiServices.Enums;
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
-using ApiServices.Models;
 using ApiServices.Models.Responses;
 using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -32,8 +31,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
 {
     private readonly ICustomersApi customersApi;
     private readonly ICustomerOperationsApi customerOperationsApi;
-    private readonly IPaymentApi paymentApi;
-    private readonly ISaleApi saleApi;
     private readonly IMapper mapper;
     private readonly IServiceProvider services;
     private readonly INavigationService navigationService;
@@ -46,8 +43,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         this.navigationService = navigationService;
         customersApi = services.GetRequiredService<ICustomersApi>();
         customerOperationsApi = services.GetRequiredService<ICustomerOperationsApi>();
-        paymentApi = services.GetRequiredService<IPaymentApi>();
-        saleApi = services.GetRequiredService<ISaleApi>();
         mapper = services.GetRequiredService<IMapper>();
 
         WeakReferenceMessenger.Default.Register<EntityUpdatedMessage<string>>(this, (r, m) =>
