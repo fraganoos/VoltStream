@@ -262,6 +262,7 @@ public partial class SaleEditViewModel : ViewModelBase
 
         var request = new SaleRequest
         {
+            Id = Sale.Id,
             Date = Sale.Date,
             CustomerId = Sale.CustomerId,
             CurrencyId = Sale.CurrencyId,
@@ -270,6 +271,7 @@ public partial class SaleEditViewModel : ViewModelBase
             Description = Sale.Description,
             Length = Sale.Length,
             RollCount = Sale.RollCount,
+            IsDiscountApplied = Sale.IsDiscountApplied,
             Items = mapper.Map<List<SaleItemRequest>>(Sale.Items)
         };
 
@@ -282,10 +284,7 @@ public partial class SaleEditViewModel : ViewModelBase
             WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage<string>("OperationUpdated"));
             navigationService.GoBack();
         }
-        else
-        {
-            Error = response.Message ?? "Savdoni yangilashda xatolik!";
-        }
+        else Error = response.Message ?? "Savdoni yangilashda xatolik!";
     }
 
     [RelayCommand]
