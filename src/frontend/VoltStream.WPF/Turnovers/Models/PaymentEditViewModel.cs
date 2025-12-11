@@ -177,29 +177,22 @@ public partial class PaymentEditViewModel : ViewModelBase
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
 
-        if (result != MessageBoxResult.Yes)
+        if (result == MessageBoxResult.No)
             return;
 
-        try
-        {
-            var request = mapper.Map<PaymentRequest>(Payment);
+        var request = mapper.Map<PaymentRequest>(Payment);
 
-            var response = await paymentApi.UpdateAsync(request)
-                .Handle(isLoading => IsLoading = isLoading);
+        var response = await paymentApi.UpdateAsync(request)
+            .Handle(isLoading => IsLoading = isLoading);
 
-            if (response.IsSuccess)
-            {
-                Success = "To'lov muvaffaqiyatli yangilandi!";
-                WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage<string>("OperationUpdated"));
-                navigationService.GoBack();
-            }
-            else Error = response.Message ?? "To'lovni yangilashda xatolik!";
-        }
-        catch (Exception ex)
+        if (response.IsSuccess)
         {
-            Error = $"Xatolik: {ex.Message}";
+            Success = "To'lov muvaffaqiyatli yangilandi!";
+            WeakReferenceMessenger.Default.Send(new EntityUpdatedMessage<string>("OperationUpdated"));
+            navigationService.GoBack();
         }
-    }
+        else Error = response.Message ?? "To'lovni yangilashda xatolik!";
+}
 
     [RelayCommand]
     private void Cancel()

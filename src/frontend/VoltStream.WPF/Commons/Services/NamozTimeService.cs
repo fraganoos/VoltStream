@@ -19,7 +19,7 @@ public class NamozTimeService
 
         string today = DateTime.Now.ToString("dd.MM.yyyy");
         var todayRecord = data.PeriodTable.FirstOrDefault(d => d.Date == today)
-                          ?? data.PeriodTable.FirstOrDefault();
+                          ?? data.PeriodTable.LastOrDefault();
 
         if (todayRecord is null)
             return null;
@@ -47,8 +47,10 @@ public class NamozTimeService
             if (DateTime.TryParseExact(lastDateStr, "dd.MM.yyyy", null,
                 System.Globalization.DateTimeStyles.None, out var lastDate))
             {
+                lastDate = lastDate.AddDays(-15); // Refresh 15 days before the end of the month
                 if (lastDate < DateTime.Now.Date)
-                    return await DownloadFromApiAsync();
+                    if (await DownloadFromApiAsync()==null)
+                        return data;
             }
 
             return data;
@@ -59,11 +61,19 @@ public class NamozTimeService
 
     private async Task<NamozApiResponse?> DownloadFromApiAsync()
     {
-        using var client = new HttpClient();
-        var response = await client.GetStringAsync(ApiUrl);
+        try
+        {
+            using var client = new HttpClient();
+            var response = await client.GetStringAsync(ApiUrl);
 
-        await File.WriteAllTextAsync(CachePath, response);
-        return JsonSerializer.Deserialize<NamozApiResponse>(response);
+            await File.WriteAllTextAsync(CachePath, response);
+            return JsonSerializer.Deserialize<NamozApiResponse>(response);
+        }
+        catch (Exception)
+        {
+            // Если API недоступен, просто возвращаем null, не выбрасываем исключение
+            return null;
+        }
     }
 }
 

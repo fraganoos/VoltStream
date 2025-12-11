@@ -3,7 +3,6 @@
 using ApiServices.Enums;
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
-using ApiServices.Models;
 using ApiServices.Models.Responses;
 using ClosedXML.Excel;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -32,8 +31,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
 {
     private readonly ICustomersApi customersApi;
     private readonly ICustomerOperationsApi customerOperationsApi;
-    private readonly IPaymentApi paymentApi;
-    private readonly ISaleApi saleApi;
     private readonly IMapper mapper;
     private readonly IServiceProvider services;
     private readonly INavigationService navigationService;
@@ -46,8 +43,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         this.navigationService = navigationService;
         customersApi = services.GetRequiredService<ICustomersApi>();
         customerOperationsApi = services.GetRequiredService<ICustomerOperationsApi>();
-        paymentApi = services.GetRequiredService<IPaymentApi>();
-        saleApi = services.GetRequiredService<ISaleApi>();
         mapper = services.GetRequiredService<IMapper>();
 
         WeakReferenceMessenger.Default.Register<EntityUpdatedMessage<string>>(this, (r, m) =>
@@ -187,48 +182,18 @@ public partial class TurnoversPageViewModel : ViewModelBase
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
 
-        if (result != MessageBoxResult.Yes)
+        if (result == MessageBoxResult.No)
             return;
 
-        try
+        var response = await customerOperationsApi.Delete(operation.Id)
+            .Handle(isLoading => IsLoading = isLoading);
+
+        if (response.IsSuccess)
         {
-            Response<bool> response;
-
-            switch (operation.OperationType)
-            {
-                case OperationType.Sale:
-                    response = await saleApi.Delete(operation.Id)
-                        .Handle(isLoading => IsLoading = isLoading);
-                    break;
-
-                case OperationType.Payment:
-                    response = await paymentApi.DeleteAsync(operation.Id)
-                        .Handle(isLoading => IsLoading = isLoading);
-                    break;
-
-                case OperationType.DiscountApplied:
-                    Warning = "Chegirmani to'g'ridan-to'g'ri o'chirib bo'lmaydi!";
-                    return;
-
-                default:
-                    Warning = "Noma'lum operatsiya turi!";
-                    return;
-            }
-
-            if (response.IsSuccess)
-            {
-                Success = "Operatsiya muvaffaqiyatli o'chirildi!";
-                await LoadCustomerOperationsForSelectedCustomerAsync();
-            }
-            else
-            {
-                Error = response.Message ?? "Operatsiyani o'chirishda xatolik!";
-            }
+            CustomerOperationsForDisplay.Remove(operation);
+            Success = "Operatsiya muvaffaqiyatli o'chirildi.";
         }
-        catch (Exception ex)
-        {
-            Error = $"Xatolik: {ex.Message}";
-        }
+        else Error = response.Message ?? "Operatsiyani o'chirishda xatolik yuz berdi.";
     }
 
     [RelayCommand]
