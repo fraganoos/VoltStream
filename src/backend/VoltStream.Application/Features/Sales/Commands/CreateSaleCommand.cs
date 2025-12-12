@@ -118,7 +118,9 @@ public class CreateSaleCommandHandler(
             {
                 descriptionBuilder.Append($" [ch: {item.DiscountAmount:N2}]");
             }
-            descriptionBuilder.Append(";\n");
+
+            if (saleItems.IndexOf(item) < saleItems.Count - 1)
+                descriptionBuilder.Append(";\n");
         }
     }
 

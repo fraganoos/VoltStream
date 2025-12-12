@@ -188,7 +188,7 @@
                                        AlignmentX="Left"/>
                         </TextBox.Background>
                     </TextBox>
-                    <TextBlock Text="user - admin" HorizontalAlignment="Center"
+                    <TextBlock HorizontalAlignment="Center"
                              Foreground="Azure"
                              FontStyle="Italic">
                         
@@ -223,7 +223,7 @@
                     </PasswordBox>
 
 
-                    <TextBlock Text="parol-123" HorizontalAlignment="Center"
+                    <TextBlock HorizontalAlignment="Center"
                              Foreground="Azure"
                              FontStyle="Italic">
                     </TextBlock>
