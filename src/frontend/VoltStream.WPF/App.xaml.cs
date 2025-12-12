@@ -4,7 +4,6 @@ using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Globalization;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,21 +21,6 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-
-        var custom = (CultureInfo)CultureInfo.InvariantCulture.Clone();
-        custom.NumberFormat.NumberGroupSeparator = " ";
-        custom.NumberFormat.NumberDecimalSeparator = ".";
-        custom.NumberFormat.NumberGroupSizes = [3];
-
-        custom.NumberFormat.CurrencyGroupSeparator = " ";
-        custom.NumberFormat.CurrencyDecimalSeparator = ".";
-        custom.NumberFormat.PercentGroupSeparator = " ";
-        custom.NumberFormat.PercentDecimalSeparator = ".";
-
-        CultureInfo.DefaultThreadCurrentCulture = custom;
-        CultureInfo.DefaultThreadCurrentUICulture = custom;
-        Thread.CurrentThread.CurrentCulture = custom;
-        Thread.CurrentThread.CurrentUICulture = custom;
 
         host = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>

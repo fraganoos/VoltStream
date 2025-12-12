@@ -18,6 +18,7 @@ public partial class SaleEditPage : Page
         InitializeComponent();
         viewModel = ActivatorUtilities.CreateInstance<SaleEditViewModel>(services, saleData);
         DataContext = viewModel;
+        btnAdd.Click += AddButton_Click;
 
         FocusNavigator.AttachEnterNavigation(
             [
@@ -42,7 +43,6 @@ public partial class SaleEditPage : Page
                 btnAdd,
                 btnCancel
             ]);
-        btnAdd.Click += AddButton_Click;
     }
 
     private void AddButton_Click(object sender, RoutedEventArgs e)
