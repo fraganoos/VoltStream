@@ -23,8 +23,11 @@ public static class FocusNavigator
 
                 if (e.Key == Key.Enter || e.Key == Key.Tab)
                 {
+                    var sd = control as Button;
+
                     if (control is Button btn && e.Key == Key.Enter && !shift)
                     {
+                        btn.Command?.Execute(btn.CommandParameter);
                         btn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                         e.Handled = true;
                         return;

@@ -466,6 +466,8 @@
                     FontSize="14"
                     ItemsSource="{Binding SaleItems}"
                     SelectionMode="Single"
+                    HeadersVisibility="Column, Row"
+                    utils:DataGridRowNumbering.IsEnabled="True"
                     SelectionUnit="FullRow">
                     <DataGrid.Resources>
                         <Style x:Key="RightAlignedText" TargetType="TextBlock">

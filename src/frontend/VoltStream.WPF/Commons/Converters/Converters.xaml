@@ -13,5 +13,6 @@
     <converter:BalanceToColorConverter x:Key="BalanceToColorConverter" />
 	<converter:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
 	<converter:BoolToTextConverter x:Key="BoolToTextConverter" />
+	<converter:InverseBoolToBoolConverter x:Key="InverseBoolToBoolConverter" />
 
 </ResourceDictionary>
