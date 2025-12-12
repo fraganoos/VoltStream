@@ -6,13 +6,15 @@ using ApiServices.Models;
 using ApiServices.Models.Requests;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Commons.Messages; // OpenDialogMessage<T> ni o'z ichiga oladi
 using VoltStream.WPF.Commons.ViewModels;
-using VoltStream.WPF.Payments.PayDiscountWindow.Views;
+using VoltStream.WPF.Payments.PayDiscountWindow.Modela;
 
 partial class PaymentPageViewModel : ViewModelBase
 {
@@ -83,55 +85,58 @@ partial class PaymentPageViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task OpenDiscountsWindow()
+    private Task OpenDiscountsWindow()
     {
         if (Customer is null)
         {
             Warning = "Mijoz tanlanishi shart!";
-            return;
+            return Task.CompletedTask;
         }
 
         if (Payment.Discount is null || Payment.Discount <= 0)
         {
             Warning = "Mijoz uchun mavjud chegirma yo'q!";
-            return;
+            return Task.CompletedTask;
         }
 
-        var discountsWindow = new PayDiscountWindow(customerId, Customer.Name, Payment.Discount.Value);
+        var discountData = new PayDiscountData(customerId, Customer.Name, Payment.Discount.Value, Payment.PaidAt);
 
-        if (discountsWindow.ShowDialog() == true)
+        WeakReferenceMessenger.Default.Send(new OpenDialogMessage<PayDiscountData> { ViewModelData = discountData });
+
+        return Task.CompletedTask;
+    }
+
+    public async Task ApplyDiscountResultAsync(dynamic? result)
+    {
+        if (result is null) return;
+
+        var request = new ApplyDiscountRequest
         {
-            dynamic? result = discountsWindow.ResultOfDiscount;
+            Date = Payment.PaidAt,
+            CustomerId = customerId,
+            DiscountAmount = result!.discountSum,
+            IsCash = result.discountCash,
+            Description = result.discountInfo ?? string.Empty
+        };
 
-            var request = new ApplyDiscountRequest
-            {
-                Date = Payment.PaidAt,
-                CustomerId = customerId,
-                DiscountAmount = result!.discountSum,
-                IsCash = result.discountCash,
-                Description = result.discountInfo ?? string.Empty
-            };
+        var response = await discountsApi.ApplyAsync(request)
+            .Handle(isLoading => IsLoading = isLoading);
 
-            var response = await discountsApi.ApplyAsync(request)
-                .Handle(isLoading => IsLoading = isLoading);
+        if (response.IsSuccess)
+        {
+            Success = "Chegirma muvaffaqiyatli qo'llandi!";
+            await LoadCustomerAsync();
 
-            if (response.IsSuccess)
-            {
-                Success = "Chegirma muvaffaqiyatli qo'llandi!";
-                await LoadCustomerAsync();
-
-                Success = $"Chegirma muvaffaqiyatli qo'llandi!\n\n" +
-                    $"Turi: {(result.discountCash ? "Naqd to'lov (kassadan)" : "Hisobga qo'shildi")}\n" +
-                    $"Summa: {result.discountSum:N2}\n" +
-                    $"Izoh: {result.discountInfo}\n" +
-                    $"Operatsiya ID: {response.Data}";
-            }
-            else
-            {
-                Error = response.Message ?? "Chegirma qo'llashda xatolik!";
-            }
+            Success = $"Chegirma muvaffaqiyatli qo'llandi!\n\n" +
+                $"Turi: {(result.discountCash ? "Naqd to'lov (kassadan)" : "Hisobga qo'shildi")}\n" +
+                $"Summa: {result.discountSum:N2}\n" +
+                $"Izoh: {result.discountInfo}\n" +
+                $"Operatsiya ID: {response.Data}";
         }
-
+        else
+        {
+            Error = response.Message ?? "Chegirma qo'llashda xatolik!";
+        }
     }
 
     #endregion Commands
