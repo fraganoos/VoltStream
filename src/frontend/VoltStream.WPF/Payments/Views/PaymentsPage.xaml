@@ -297,8 +297,9 @@
                   CanUserAddRows="False"
                   IsReadOnly="True"
                   SelectionMode="Single"
-                  HeadersVisibility="Column"
                   Margin="5"
+                    HeadersVisibility="Column, Row"
+                    utils:DataGridRowNumbering.IsEnabled="True"
                   AlternatingRowBackground="#F9F9F9"
                   GridLinesVisibility="Horizontal"
                   FontSize="14">

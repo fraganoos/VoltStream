@@ -358,6 +358,8 @@
                 FontSize="14"
                 IsReadOnly="True"
                 ItemsSource="{Binding Sale.Items}"
+                    HeadersVisibility="Column, Row"
+                    utils:DataGridRowNumbering.IsEnabled="True"
                 SelectionMode="Single"
                 MouseDoubleClick="DataGrid_MouseDoubleClick">
 				<DataGrid.Resources>
