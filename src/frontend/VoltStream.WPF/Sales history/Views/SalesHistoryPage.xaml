@@ -228,7 +228,6 @@
             utils:DataGridRowNumbering.IsEnabled="True"
             IsReadOnly="True"
             ItemsSource="{Binding FilteredSaleItems, Mode=TwoWay}"
-            RowHeaderWidth="0"
             SelectionMode="Single">
 
             <DataGrid.Columns>
