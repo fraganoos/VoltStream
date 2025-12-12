@@ -44,7 +44,7 @@ public static class ApiService
                     .ConfigureHttpClient((provider, client) =>
                     {
                         var state = provider.GetRequiredService<ApiConnectionViewModel>();
-                        client.BaseAddress = new Uri(state.Url + "api/");
+                        client.BaseAddress = new Uri(state.Url + "api");
                     });
             });
 
