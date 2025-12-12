@@ -105,6 +105,7 @@ partial class PaymentPageViewModel : ViewModelBase
 
             var request = new ApplyDiscountRequest
             {
+                Date = Payment.PaidAt,
                 CustomerId = customerId,
                 DiscountAmount = result!.discountSum,
                 IsCash = result.discountCash,

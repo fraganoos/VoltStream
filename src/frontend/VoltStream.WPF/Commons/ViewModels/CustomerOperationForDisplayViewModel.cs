@@ -19,6 +19,10 @@ public partial class CustomerOperationForDisplayViewModel : ObservableObject
     [ObservableProperty] private OperationType operationType;
     [ObservableProperty] private AccountViewModel account = new();
 
+    public bool CanEdit => OperationType == OperationType.Sale;
+
+    public bool IsEditable { get; set; }
+
     [ObservableProperty] private Sale sale;
     [ObservableProperty] private PaymentViewModel payment;
 
@@ -34,5 +38,11 @@ public partial class CustomerOperationForDisplayViewModel : ObservableObject
                     .Select(x => x.Trim())
                     .Where(x => !string.IsNullOrEmpty(x)));
         }
+    }
+
+    partial void OnOperationTypeChanged(OperationType oldValue, OperationType newValue)
+    {
+
+        IsEditable = newValue == OperationType.Sale;
     }
 }

@@ -9,7 +9,7 @@ public interface IPaymentApi
 {
     [Post("/payments")]
     Task<Response<long>> CreateAsync([Body] PaymentRequest request);
-    
+
     [Put("/payments")]
     Task<Response<bool>> UpdateAsync([Body] PaymentRequest request);
 

@@ -9,7 +9,7 @@
       Title="DashboardPage">
 
     <Grid>
-        <Image Source="/Commons/Source/Images/Dashboard-Graph.png" 
+        <Image Source="/Commons/Source/Images/dashboard.jpg" 
                Stretch="Fill" Opacity="1"/>
     </Grid>
 </Page>

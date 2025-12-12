@@ -6,7 +6,6 @@ using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
-using System.Linq;
 
 public record DeleteCustomerOperationCommand(long CustomerOperationId) : IRequest<bool>;
 
@@ -39,6 +38,9 @@ public class DeleteCustomerOperationCommandHandler(
                     break;
                 case OperationType.Sale:
                     await RevertSaleAsync(customerOperation, account, cancellationToken);
+                    break;
+                case OperationType.Discount:
+                    await RevertDiscountAppliedAsync(customerOperation, account, cancellationToken);
                     break;
                 default:
                     throw new ConflictException($"Operatsiya turi {customerOperation.OperationType}ni qaytarish qo'llab-quvvatlanmaydi.");
@@ -115,5 +117,20 @@ public class DeleteCustomerOperationCommandHandler(
                 }
             }
         }
+    }
+
+    private async Task RevertDiscountAppliedAsync(CustomerOperation co, Account account, CancellationToken cancellationToken)
+    {
+        account.Discount += co.Amount;
+
+        var specificDiscountOperation = await context.DiscountOperations
+            .FirstOrDefaultAsync(d => d.CustomerId == co.CustomerId && d.Amount == co.Amount * -1 && d.Date == co.Date, cancellationToken);
+
+        if (specificDiscountOperation is not null)
+        {
+            context.DiscountOperations.Remove(specificDiscountOperation);
+        }
+
+        account.Balance -= co.Amount;
     }
 }

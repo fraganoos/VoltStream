@@ -1,18 +1,20 @@
 ﻿namespace VoltStream.Domain.Entities;
 
-using System;
 using System.Text.Json.Serialization;
 using VoltStream.Domain.Enums;
 
 public class CustomerOperation : Auditable
 {
+    public DateTimeOffset Date { get; set; }
     public decimal Amount { get; set; }
+    public decimal Discount { get; set; }
     public OperationType OperationType { get; set; }
     public string Description { get; set; } = string.Empty;
     public long? CustomerId { get; set; }
+    public long? CashId { get; set; }
+
     public long AccountId { get; set; }
     public Account Account { get; set; } = default!;
-    public DateTimeOffset Date { get; set; }
 
     [JsonIgnore]
     public Sale? Sale { get; set; }

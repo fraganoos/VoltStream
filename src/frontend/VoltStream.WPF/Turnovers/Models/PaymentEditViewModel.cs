@@ -192,7 +192,7 @@ public partial class PaymentEditViewModel : ViewModelBase
             navigationService.GoBack();
         }
         else Error = response.Message ?? "To'lovni yangilashda xatolik!";
-}
+    }
 
     [RelayCommand]
     private void Cancel()

@@ -118,7 +118,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
             {
                 debit = Math.Abs(op.Amount);
             }
-            else if (op.OperationType == OperationType.DiscountApplied)
+            else if (op.OperationType == OperationType.Discount)
             {
                 credit = op.Amount;
             }
@@ -217,7 +217,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
                     await OpenPaymentEditPage(operation.Id);
                     break;
 
-                case OperationType.DiscountApplied:
+                case OperationType.Discount:
                     Warning = "Chegirmani tahrirlash mumkin emas!";
                     break;
 
