@@ -482,9 +482,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
     #region PDF Export and Share
 
-    // const double rowHeight = 25; ni ishlatishda davom etamiz
-    // const double margin = 40; ni ishlatishda davom etamiz
-
     private FixedDocument CreateFixedDocument()
     {
         var doc = new FixedDocument();
@@ -614,7 +611,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         return doc;
     }
 
-
     private double AddHeaderContent(StackPanel container, int pageNumber)
     {
         // HEADER
@@ -667,7 +663,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         return Math.Max(25, actualHeight); // Eng kamida 25 piksel bo'lishi kerak
     }
 
-
     private void AddOperationRow(Grid grid, CustomerOperationForDisplayViewModel op, double approxSingleRowHeight)
     {
         int row = grid.RowDefinitions.Count;
@@ -689,7 +684,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         AddSimpleCell(grid, row, 3, op.Description ?? op.FormattedDescription ?? "", TextAlignment.Left, FontWeights.Normal, 12, new Thickness(0.5, 0.5, 0.5, 0.5));
     }
 
-    // Yordamchi funksiya: oddiy hujayra yaratish
     private void AddSimpleCell(Grid grid, int row, int column, string value, TextAlignment align, FontWeight weight, double size, Thickness borderThickness)
     {
         var tb = new TextBlock
@@ -714,9 +708,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         Grid.SetColumn(border, column);
         grid.Children.Add(border);
     }
-
-    // Qolgan Yordamchi Funksiyalar (AddRowHeader, AddBalanceRow, AddRowTotal)
-    // Bu funksiyalar sizning talabingizga moslashtirilgan.
 
     private void AddRowHeader(Grid grid, string date, string debit, string credit, string description, double height)
     {
@@ -819,127 +810,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         // Kredit
         AddSimpleCell(grid, row, 2, totalCredit, TextAlignment.Right, FontWeights.Bold, 12, new Thickness(0.5, 0.5, 0, 0.5));
     }
-    // Izoh matnini WPF rendering xususiyatiga ko'ra satrlarga bo'luvchi yordamchi funksiya
-    private List<string> SplitTextByWidth(string text, double columnWidth, double fontSize)
-    {
-        var textBlock = new TextBlock
-        {
-            Text = text,
-            Width = columnWidth,
-            TextWrapping = TextWrapping.Wrap,
-            FontSize = fontSize
-        };
-
-        // TextBlock'ni o'lchash
-        textBlock.Measure(new Size(columnWidth, double.MaxValue));
-        textBlock.Arrange(new Rect(0, 0, columnWidth, textBlock.DesiredSize.Height));
-
-        // Matnni Visual-ga yozmasdan turib satr-satr olish WPF da juda murakkab.
-        // Quyidagi yechim matnni to'liq oladi va uni List<string> ichiga qo'yadi.
-        // Hozirgi kodingizda har bir satrni ajratish murakkab, shuning uchun bu qism
-        // har bir matnni bitta satr deb hisoblaydi, ammo uning satr sonini hisoblaydi (avvalgi kodda qilganimiz kabi).
-        // Sizning `maxRowsInTable` hisobingiz to'g'ri ishlashi uchun, SplitTextByWidth
-        // har bir Izoh matni uchun necha satr talab qilinishini qaytarishi kerak.
-
-        // Matnning o'zi:
-        return new List<string> { text };
-    }
-
-
-    // ------------------------------------------------------------------------------------------------
-    // Yordamchi hujayra yaratish funksiyasi (Sana, Debit, Kredit uchun RowSpan qo'llaydi)
-    // ------------------------------------------------------------------------------------------------
-
-    private void AddCellWithRowSpan(Grid grid, int row, int column, string value, int rowSpan, TextAlignment align, FontWeight weight, double size, bool isHeader)
-    {
-        var tb = new TextBlock
-        {
-            Text = value,
-            Padding = new Thickness(5, 2, 5, 2),
-            FontSize = size,
-            FontWeight = weight,
-            TextAlignment = align,
-            TextWrapping = TextWrapping.Wrap,
-            HorizontalAlignment = HorizontalAlignment.Stretch
-        };
-
-        var border = new Border
-        {
-            BorderBrush = Brushes.Black,
-            // Headerda barcha qirralar to'liq, kontentda faqat chap va past
-            BorderThickness = new Thickness(0.5, 0.5, column == 3 ? 0.5 : 0, 0.5),
-            Child = tb
-        };
-
-        Grid.SetRow(border, row);
-        Grid.SetColumn(border, column);
-        if (rowSpan > 1)
-            Grid.SetRowSpan(border, rowSpan);
-
-        grid.Children.Add(border);
-    }
-
-    // ------------------------------------------------------------------------------------------------
-    // 4.1. Sarlavha satri
-    // ------------------------------------------------------------------------------------------------
-
-
-    // ------------------------------------------------------------------------------------------------
-    // 4.2. Operatsiya segmentini qo'shish (asosiy satr va davomiylik satri)
-    // ------------------------------------------------------------------------------------------------
-
-    private void AddSegmentRow(Grid grid, int rowSpan, bool isFirstSegment, PaginatedOperation data, double rowHeight)
-    {
-        int startRow = grid.RowDefinitions.Count;
-
-        // RowSpan qadar satrlarni Gridga qo'shish
-        for (int i = 0; i < rowSpan; i++)
-            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(rowHeight) });
-
-        if (isFirstSegment)
-        {
-            // Sana, Debit, Kredit (RowSpan bilan birlashtiriladi)
-            AddCellWithRowSpan(grid, startRow, 0, data.Date.ToString("dd.MM.yyyy"), rowSpan, TextAlignment.Center, FontWeights.Normal, 12, false);
-            AddCellWithRowSpan(grid, startRow, 1, data.Debit == 0 ? "" : data.Debit.ToString("N2"), rowSpan, TextAlignment.Right, FontWeights.Normal, 12, false);
-            AddCellWithRowSpan(grid, startRow, 2, data.Credit == 0 ? "" : data.Credit.ToString("N2"), rowSpan, TextAlignment.Right, FontWeights.Normal, 12, false);
-        }
-
-        // Izoh uchun TextBlock - Faqat Izohning tegishli qismi ko'rsatiladi
-        string descriptionPart = data.Description; // Sizning SplitTextByWidth funksiyangiz matnni bo'lmasa, bu to'liq matn bo'ladi
-
-        // Izoh matnini to'liq ko'rsatish
-        var descriptionTb = new TextBlock
-        {
-            Text = descriptionPart,
-            Padding = new Thickness(5, 2, 5, 2),
-            FontSize = 12,
-            FontWeight = FontWeights.Normal,
-            TextAlignment = TextAlignment.Left,
-            TextWrapping = TextWrapping.Wrap,
-            HorizontalAlignment = HorizontalAlignment.Stretch
-        };
-
-        // Izoh ustuni barcha satrlarni (RowSpan) egallaydi
-        var descriptionBorder = new Border
-        {
-            BorderBrush = Brushes.Black,
-            BorderThickness = new Thickness(0.5),
-            Child = descriptionTb
-        };
-
-        Grid.SetRow(descriptionBorder, startRow);
-        Grid.SetColumn(descriptionBorder, 3);
-        Grid.SetRowSpan(descriptionBorder, rowSpan); // Birlashgan satrlar soni
-        grid.Children.Add(descriptionBorder);
-
-        // Izohning to'g'ri sahifalanishi uchun, descriptionTb ichidagi matn faqat shu
-        // segmentga tegishli qismi bo'lishi kerak. Bu yerda sizning `SplitTextByWidth`
-        // funksiyangizning satrlarni bo'lish natijasi kerak bo'ladi.
-    }
-
-    // ------------------------------------------------------------------------------------------------
-    // 4.3. Boshlang'ich/Oxirgi Qoldiq satri
-    // ------------------------------------------------------------------------------------------------
 
     public class PaginatedOperation
     {
