@@ -362,7 +362,10 @@ public partial class SaleEditViewModel : ViewModelBase
         {
             CurrentItem.LengthPerRoll = value.LengthPerRoll;
             CurrentItem.UnitPrice = value.UnitPrice;
-            CurrentItem.DiscountRate = value.DiscountRate;
+            if (!IsEditing)
+            {
+                CurrentItem.DiscountRate = value.DiscountRate;
+            }
             WarehouseStockSearchText = value.LengthPerRoll.ToString();
         });
 

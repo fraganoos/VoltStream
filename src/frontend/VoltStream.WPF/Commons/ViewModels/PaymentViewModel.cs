@@ -10,11 +10,11 @@ public partial class PaymentViewModel : ViewModelBase
     public long CurrencyId { get; set; }
     public long CustomerId { get; set; }
 
-    [ObservableProperty] private DateTime paidAt = DateTime.Now; // to'langan sana
-    [ObservableProperty] private decimal amount; // orginal kirim summa
-    [ObservableProperty] private decimal exchangeRate; //dollar kurs yoki pul o'tkazish foizi
-    [ObservableProperty] private decimal netAmount; // qarz summadan ochiraldigan summa
-    [ObservableProperty] private decimal? discount; // chegirma
+    [ObservableProperty] private DateTime paidAt = DateTime.Now;
+    [ObservableProperty] private decimal amount;
+    [ObservableProperty] private decimal exchangeRate;
+    [ObservableProperty] private decimal netAmount;
+    [ObservableProperty] private decimal? discount;
     [ObservableProperty] private string description = string.Empty;
     [ObservableProperty] private CurrencyViewModel currency = default!;
     [ObservableProperty] private CustomerViewModel customer = default!;

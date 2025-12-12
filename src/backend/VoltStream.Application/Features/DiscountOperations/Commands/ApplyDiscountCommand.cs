@@ -1,6 +1,5 @@
 ﻿namespace VoltStream.Application.Features.DiscountOperations.Commands;
 
-using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
@@ -9,6 +8,7 @@ using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
 
 public record ApplyDiscountCommand(
+    DateTimeOffset Date,
     long CustomerId,
     decimal DiscountAmount,
     bool IsCash,
@@ -16,8 +16,7 @@ public record ApplyDiscountCommand(
     : IRequest<long>;
 
 public class ApplyDiscountCommandHandler(
-    IAppDbContext context,
-    IMapper mapper)
+    IAppDbContext context)
     : IRequestHandler<ApplyDiscountCommand, long>
 {
     public async Task<long> Handle(ApplyDiscountCommand request, CancellationToken cancellationToken)
@@ -45,7 +44,7 @@ public class ApplyDiscountCommandHandler(
 
             var discountOperation = new DiscountOperation
             {
-                Date = DateTimeOffset.UtcNow.UtcDateTime,
+                Date = request.Date.ToUniversalTime(),
                 Description = GenerateDescription(request, account.Currency),
                 IsApplied = true,
                 Amount = request.DiscountAmount * -1,
@@ -58,13 +57,12 @@ public class ApplyDiscountCommandHandler(
 
             var customerOperation = new CustomerOperation
             {
-                Date = DateTime.UtcNow,
+                Date = discountOperation.Date,
                 AccountId = account.Id,
                 Amount = request.DiscountAmount,
                 CustomerId = customer.Id,
                 Description = $"Chegirma hisobga olindi. {request.Description}",
-                CreatedAt = DateTime.UtcNow,
-                OperationType = OperationType.DiscountApplied
+                OperationType = OperationType.Discount
             };
 
             context.CustomerOperations.Add(customerOperation);
@@ -82,12 +80,11 @@ public class ApplyDiscountCommandHandler(
 
                 var customerOperationCash = new CustomerOperation
                 {
-                    Date = DateTime.UtcNow,
+                    Date = request.Date.ToUniversalTime(),
                     AccountId = account.Id,
                     Amount = request.DiscountAmount * -1,
                     CustomerId = customer.Id,
                     Description = $"Chegirma naqd berildi. {request.Description}",
-                    CreatedAt = DateTime.UtcNow,
                     OperationType = OperationType.Payment
                 };
 
@@ -104,7 +101,6 @@ public class ApplyDiscountCommandHandler(
                     CustomerOperation = customerOperationCash,
                     PaidAt = discountOperation.Date,
                     Type = PaymentType.Cash,
-                    CreatedAt = DateTime.UtcNow,
                     DiscountOperation = discountOperation
                 };
                 context.Payments.Add(paymentOperation);

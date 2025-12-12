@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using VoltStream.Application.Commons.Exceptions;
+using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
@@ -32,6 +33,7 @@ public class CreateUserCommandHandler(
         var user = new User
         {
             Username = request.Username,
+            NormalizedUsername = request.Username.ToNormalized(),
             PasswordHash = hash,
             PasswordSalt = salt
         };

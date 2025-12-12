@@ -44,7 +44,7 @@
 				<Label Grid.Row="3" Content="Chegirma:" FontSize="14" VerticalAlignment="Center" Margin="5,0,0,0" />
 				<Label Grid.Row="4" Content="Izox:" FontSize="14" VerticalAlignment="Center" Margin="5,0,0,0" />
 
-				<controls:UserCalendar 
+				<controls:UserCalendar  x:Name="calendar"
                     Grid.Column="1"
                     Width="150"
                     Margin="0,0,10,0"
@@ -54,7 +54,7 @@
                     FontSize="14"
                     SelectedDate="{Binding Sale.Date}" />
 
-				<ComboBox
+				<ComboBox x:Name="cbxCustomer"
                     Grid.Row="1"
                     Grid.Column="1"
                     Margin="0,2"
@@ -71,7 +71,7 @@
 						<ColumnDefinition Width="90" />
 						<ColumnDefinition Width="*" />
 					</Grid.ColumnDefinitions>
-					<ComboBox
+					<ComboBox x:Name="cbxCurrency"
                         Margin="0,2,10,2"
                         DisplayMemberPath="Name"
                         FontSize="14"
@@ -80,7 +80,7 @@
                         SelectedItem="{Binding SelectedCurrency}" />
 
 					<Label Grid.Column="1" Content="Jami summa:" FontSize="14" HorizontalAlignment="Right" VerticalAlignment="Center" />
-					<TextBox
+					<TextBox x:Name="txtSaleTotalAmount"
                         Grid.Column="2"
                         Height="25"
                         Margin="0,2"
@@ -99,19 +99,19 @@
 						<ColumnDefinition Width="90" />
 						<ColumnDefinition Width="*" />
 					</Grid.ColumnDefinitions>
-					<TextBox
+					<TextBox x:Name="txtSaleTotalDiscount"
                         Margin="0,2,0,2"
                         FontSize="14"
                         IsReadOnly="True"
                         utils:NumericTextBox.IsNumeric="True"
-                        Text="{Binding Sale.Discount}" />
+                        Text="{Binding Sale.Discount}"/>
 
 					<Border
                         Grid.Column="1"
                         Margin="2,2,0,2"
                         BorderBrush="#888"
                         BorderThickness="0.5">
-						<CheckBox
+						<CheckBox x:Name="chkIsDiscountApplied"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             FontSize="12"
@@ -119,7 +119,7 @@
 					</Border>
 
 					<Label Grid.Column="3" Content="To'lashga:" FontSize="14" HorizontalAlignment="Right" VerticalAlignment="Center" />
-					<TextBox
+					<TextBox x:Name="txtSaleAmount"
                         Grid.Column="4"
                         Margin="0,2"
                         FontSize="14"
@@ -128,7 +128,7 @@
                         Text="{Binding Sale.Amount}" />
 				</Grid>
 
-				<TextBox
+				<TextBox x:Name="txtSaleDescription"
                     Grid.Row="4"
                     Grid.Column="1"
                     Margin="0,2"
@@ -208,9 +208,9 @@
 				<ColumnDefinition Width="Auto" />
 			</Grid.ColumnDefinitions>
 
-			<TextBlock Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=cbxCategoryName}" Text="Maxsulot turi" />
+			<TextBlock Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=cbxCategory}" Text="Maxsulot turi" />
 			<ComboBox 
-                x:Name="cbxCategoryName" 
+                x:Name="cbxCategory" 
                 Margin="1,3" 
                 FontSize="14" 
                 IsEditable="True"
@@ -220,9 +220,9 @@
                 Text="{Binding CategorySearchText, UpdateSourceTrigger=LostFocus}"
                 utils:ComboBoxQuickNavBehavior.EnableQuickNavigation="True" />
 
-			<TextBlock Grid.Column="1" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=cbxProductName}" Text="Maxsulot nomi" />
+			<TextBlock Grid.Column="1" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=cbxProduct}" Text="Maxsulot nomi" />
 			<ComboBox 
-                x:Name="cbxProductName" 
+                x:Name="cbxProduct" 
                 Grid.Column="1" 
                 Margin="1,3" 
                 FontSize="14" 
@@ -233,9 +233,9 @@
                 Text="{Binding ProductSearchText, UpdateSourceTrigger=LostFocus}"
                 utils:ComboBoxQuickNavBehavior.EnableQuickNavigation="True" />
 
-			<TextBlock Grid.Column="2" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=cbxPerRollCount}" Text="Rulon metr" />
+			<TextBlock Grid.Column="2" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=cbxLengthPerRoll}" Text="Rulon metr" />
 			<ComboBox 
-                x:Name="cbxPerRollCount" 
+                x:Name="cbxLengthPerRoll" 
                 Grid.Column="2" 
                 Margin="2,3" 
                 FontSize="14"
@@ -257,9 +257,9 @@
                 utils:NumericTextBox.IsNumeric="True"
                 Text="{Binding CurrentItem.RollCount, UpdateSourceTrigger=PropertyChanged}" />
 
-			<TextBlock Grid.Column="4" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtQuantity}" Text="Jami metr" />
+			<TextBlock Grid.Column="4" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtTotalLength}" Text="Jami metr" />
 			<TextBox 
-                x:Name="txtQuantity" 
+                x:Name="txtTotalLength" 
                 Grid.Column="4" 
                 Margin="1,3" 
                 FontSize="14"
@@ -267,9 +267,9 @@
                 utils:NumericTextBox.IsNumeric="True"
                 Text="{Binding CurrentItem.TotalLength}" />
 
-			<TextBlock Grid.Column="5" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtPrice}" Text="Narxi" />
+			<TextBlock Grid.Column="5" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtUnitPrice}" Text="Narxi" />
 			<TextBox 
-                x:Name="txtPrice" 
+                x:Name="txtUnitPrice" 
                 Grid.Column="5" 
                 Margin="1,3" 
                 FontSize="14"
@@ -277,9 +277,9 @@
                 utils:NumericTextBox.IsNumeric="True"
                 Text="{Binding CurrentItem.UnitPrice, UpdateSourceTrigger=PropertyChanged}" />
 
-			<TextBlock Grid.Column="6" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtSum}" Text="Jami summa" />
+			<TextBlock Grid.Column="6" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtTotalAmount}" Text="Jami summa" />
 			<TextBox 
-                x:Name="txtSum" 
+                x:Name="txtTotalAmount" 
                 Grid.Column="6" 
                 Margin="1,3" 
                 Validation.ErrorTemplate="{x:Null}" 
@@ -287,9 +287,9 @@
                 utils:NumericTextBox.IsNumeric="True"
                 Text="{Binding CurrentItem.TotalAmount}" />
 
-			<TextBlock Grid.Column="7" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtPerDiscount}" Text="Chegirma%" />
+			<TextBlock Grid.Column="7" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtDiscountRate}" Text="Chegirma%" />
 			<TextBox 
-                x:Name="txtPerDiscount" 
+                x:Name="txtDiscountRate" 
                 Grid.Column="7" 
                 Margin="1,3" 
                 FontSize="14"
@@ -297,19 +297,19 @@
                 utils:NumericTextBox.IsNumeric="True"
                 Text="{Binding CurrentItem.DiscountRate}" />
 
-			<TextBlock Grid.Column="8" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtDiscount}" Text="Chegirma summasi" />
+			<TextBlock Grid.Column="8" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtDiscountAmount}" Text="Chegirma summasi" />
 			<TextBox 
-                x:Name="txtDiscount" 
+                x:Name="txtDiscountAmount" 
                 Grid.Column="8" 
                 Margin="1,3" 
                 FontSize="14"
-                Validation.ErrorTemplate="{x:Null}" 
+                Validation.ErrorTemplate="{x:Null}"
                 utils:NumericTextBox.IsNumeric="True"
                 Text="{Binding CurrentItem.DiscountAmount}" />
 
-			<TextBlock Grid.Column="9" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtFinalSumProduct}" Text="Umumiy summa" />
+			<TextBlock Grid.Column="9" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtFinalAmount}" Text="Umumiy summa" />
 			<TextBox 
-                x:Name="txtFinalSumProduct" 
+                x:Name="txtFinalAmount" 
                 Grid.Column="9" 
                 Margin="1,3" 
                 Validation.ErrorTemplate="{x:Null}" 
@@ -317,7 +317,7 @@
                 utils:NumericTextBox.IsNumeric="True"
                 Text="{Binding CurrentItem.FinalAmount}" />
 
-			<Button 
+			<Button  x:Name="btnAdd"
                 Grid.Column="10" 
                 Margin="4,3" 
                 FontSize="14" 
@@ -334,7 +334,7 @@
 				</Button.Style>
 			</Button>
 
-			<Button 
+			<Button x:Name="btnCancel"
                 Grid.Column="11" 
                 Margin="4,3" 
                 FontSize="14"

@@ -232,7 +232,8 @@ public partial class SuppliesPage : Page
                 return;
             }
 
-            if (!decimal.TryParse(tbxDiscountPercent.Text, out decimal discountPercent) || discountPercent < 0)
+            var value = string.IsNullOrEmpty(tbxDiscountPercent.Text) ? "0" : tbxDiscountPercent.Text;
+            if (!decimal.TryParse(value, out decimal discountPercent) || discountPercent < 0)
             {
                 MessageBox.Show("Chegirma foizi noto‘g‘ri kiritilgan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
                 tbxDiscountPercent.Focus();

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
 using VoltStream.Application.Commons.Exceptions;
+using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 
 public record LoginUserCommand(
@@ -17,7 +18,7 @@ public class LoginUserCommandHandler(IAppDbContext context)
     public async Task<bool> Handle(LoginUserCommand request, CancellationToken cancellationToken)
     {
         var user = await context.Users
-            .FirstOrDefaultAsync(u => u.Username == request.Username, cancellationToken)
+            .FirstOrDefaultAsync(u => u.NormalizedUsername == request.Username.ToNormalized(), cancellationToken)
             ?? throw new NotFoundException("Login yoki parol xato!");
 
         using var hmac = new HMACSHA512(user.PasswordSalt);

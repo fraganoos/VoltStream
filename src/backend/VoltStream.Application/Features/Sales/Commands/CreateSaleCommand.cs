@@ -5,7 +5,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using VoltStream.Application.Commons.Exceptions;
-using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
@@ -113,13 +112,13 @@ public class CreateSaleCommandHandler(
                 ?? throw new NotFoundException(nameof(Product), nameof(item.Id), item.ProductId);
 
             descriptionBuilder.Append($"{product.Name} - {item.TotalLength} m. X " +
-                $"{Math.Round(item.FinalAmount / item.TotalLength, 2).ToString("N2")} = " +
-                $"{item.FinalAmount.ToString("N2")}");
+                $"{Math.Round(item.FinalAmount / item.TotalLength, 2):N2} = " +
+                $"{item.FinalAmount:N2}");
             if (item.FinalAmount == item.TotalAmount && item.DiscountAmount != 0)
             {
-                descriptionBuilder.Append($" [ch: {item.DiscountAmount.ToString("N2")}]");
+                descriptionBuilder.Append($" [ch: {item.DiscountAmount:N2}]");
             }
-            descriptionBuilder.Append("; ");
+            descriptionBuilder.Append(";\n");
         }
     }
 
@@ -174,7 +173,7 @@ public class CreateSaleCommandHandler(
                    string description, StringBuilder descriptionBuilder, bool isApplied)
     {
         if (description.Trim().Length > 0) description = description + ". ";
-        string appliedText = isApplied ? "" : $"Chegirma: {sale.Discount.ToString("N2")}";
+        string appliedText = isApplied ? "" : $"Chegirma: {sale.Discount:N2}";
         return new CustomerOperation
         {
             Date = sale.Date,
@@ -183,7 +182,7 @@ public class CreateSaleCommandHandler(
             AccountId = account.Id,
             CustomerId = sale.CustomerId,
             OperationType = OperationType.Sale,
-            Description = $"Savdo: {description} {appliedText}; {descriptionBuilder}".Trimmer(3000)
+            Description = $"Savdo: {description} {appliedText};\n{descriptionBuilder}"
         };
     }
 }

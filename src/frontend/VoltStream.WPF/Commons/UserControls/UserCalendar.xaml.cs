@@ -1,5 +1,6 @@
 ﻿namespace VoltStream.WPF.Commons.UserControls;
 
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,7 +19,7 @@ public partial class UserCalendar : UserControl
         InitializeComponent();
         dateTextBox.PreviewTextInput += DateTextBox_PreviewTextInput;
         dateTextBox.TextChanged += DateTextBox_TextChanged;
-        Loaded += UserCalendar_Loaded; // yangi hodisa
+        Loaded += UserCalendar_Loaded;
         SetDefaultDate();
     }
 
@@ -30,20 +31,23 @@ public partial class UserCalendar : UserControl
 
     private void UserCalendar_Loaded(object sender, RoutedEventArgs e)
     {
-        // UserControl yuklanganda, agar Bindingdan kelgan qiymat bo‘lsa — shuni ko‘rsatadi
         if (SelectedDate is DateTime date)
             dateTextBox.Text = date.ToString("dd.MM.yyyy");
     }
 
     private static void OnSelectedDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is UserCalendar userCalendar && e.NewValue is DateTime newDate)
+        if (d is UserCalendar userCalendar)
         {
-            userCalendar.dateTextBox.Text = newDate.ToString("dd.MM.yyyy");
+            if (e.NewValue is DateTime newDate)
+            {
+                userCalendar.dateTextBox.Text = newDate.ToString("dd.MM.yyyy");
+            }
+            else
+            {
+                userCalendar.dateTextBox.Text = string.Empty;
+            }
         }
-        UserCalendar userCal = (d as UserCalendar)!;
-        userCal!.dateTextBox.Focus();
-        userCal.dateTextBox.SelectAll();
     }
 
     private void SetDefaultDate()
@@ -58,22 +62,19 @@ public partial class UserCalendar : UserControl
     {
         var textBox = (TextBox)sender;
 
-        // Текст, который будет после вставки нового символа
         if (!string.IsNullOrEmpty(textBox.SelectedText))
         {
-            // Если есть выделенный текст — заменяем его новым вводом
             _ = textBox.Text.Remove(textBox.SelectionStart, textBox.SelectionLength)
-                                  .Insert(textBox.SelectionStart, e.Text);
+                            .Insert(textBox.SelectionStart, e.Text);
         }
         else
         {
-            // Обычное добавление символа
             _ = textBox.Text.Insert(textBox.CaretIndex, e.Text);
         }
 
         if (dateTextBox.Text.Length > 10)
         {
-            e.Handled = true; // Блокируем ввод, если длина текста уже соответствует полному формату даты
+            e.Handled = true;
         }
         else
         {
@@ -85,17 +86,41 @@ public partial class UserCalendar : UserControl
     {
         if (sender is TextBox textBox)
         {
-            if (textBox.Text.Length == 2)
+            if (textBox.Text.Length == 2 || (textBox.Text.Length == 5 && textBox.Text[2] != '.'))
             {
                 textBox.Text += ".";
                 textBox.CaretIndex = textBox.Text.Length;
             }
-            if (textBox.Text.Length == 5)
+            if (textBox.Text.Length == 5 && textBox.Text[2] == '.')
             {
                 textBox.Text += ".";
                 textBox.CaretIndex = textBox.Text.Length;
             }
 
+            if (textBox.Text.Length == 10 && DateTime.TryParseExact(
+                textBox.Text,
+                "dd.MM.yyyy",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out DateTime parsedDate))
+            {
+                textBox.TextChanged -= DateTextBox_TextChanged;
+
+                SelectedDate = parsedDate;
+
+                textBox.TextChanged += DateTextBox_TextChanged;
+            }
+            else if (textBox.Text.Length < 10)
+            {
+                if (SelectedDate.HasValue)
+                {
+                    textBox.TextChanged -= DateTextBox_TextChanged;
+
+                    SetValue(SelectedDateProperty, null);
+
+                    textBox.TextChanged += DateTextBox_TextChanged;
+                }
+            }
         }
     }
 

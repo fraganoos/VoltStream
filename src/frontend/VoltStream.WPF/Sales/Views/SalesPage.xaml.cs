@@ -99,7 +99,11 @@ public partial class SalesPage : Page
         bool accept = ComboBoxHelper.BeforeUpdate(sender, e, "Xaridor", true);
         if (accept)
         {
-            var win = new CustomerWindow(CustomerName.Text);
+            var win = new CustomerWindow(CustomerName.Text)
+            {
+                Owner = Window.GetWindow(this),
+            };
+
             if (win.ShowDialog() == true)
             {
                 var customer = win.Result;

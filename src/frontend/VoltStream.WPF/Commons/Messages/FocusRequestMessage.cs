@@ -2,7 +2,4 @@
 
 using CommunityToolkit.Mvvm.Messaging.Messages;
 
-public class FocusRequestMessage : ValueChangedMessage<string>
-{
-    public FocusRequestMessage(string value) : base(value) { }
-}
+public class FocusRequestMessage(string value) : ValueChangedMessage<string>(value);

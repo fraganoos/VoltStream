@@ -49,7 +49,7 @@ public class NamozTimeService
             {
                 lastDate = lastDate.AddDays(-15); // Refresh 15 days before the end of the month
                 if (lastDate < DateTime.Now.Date)
-                    if (await DownloadFromApiAsync()==null)
+                    if (await DownloadFromApiAsync() == null)
                         return data;
             }
 

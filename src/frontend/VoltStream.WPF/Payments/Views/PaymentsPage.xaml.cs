@@ -10,6 +10,8 @@ using System.Windows.Input;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.Messages;
 using VoltStream.WPF.Customer;
+using VoltStream.WPF.Payments.PayDiscountWindow.Modela;
+using VoltStream.WPF.Payments.PayDiscountWindow.Views;
 using VoltStream.WPF.Payments.ViewModels;
 
 /// <summary>
@@ -27,13 +29,16 @@ public partial class PaymentsPage : Page
         Unloaded += PaymentsPage_Unloaded;
     }
 
-
     private async void CustomerName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
         bool accept = ComboBoxHelper.BeforeUpdate(sender, e, "Xaridor", true);
         if (accept)
         {
-            var win = new CustomerWindow(CustomerName.Text);
+            var win = new CustomerWindow(CustomerName.Text)
+            {
+                Owner = Window.GetWindow(this),
+            };
+
             if (win.ShowDialog() == true)
             {
                 var customer = win.Result;
@@ -63,7 +68,6 @@ public partial class PaymentsPage : Page
                     e.Handled = true;
                     MessageBox.Show($"Xatolik yuz berdi. {response.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-                // тут можете сохранить customer в БД или список
             }
             else { e.Handled = true; }
         }
@@ -77,15 +81,32 @@ public partial class PaymentsPage : Page
     }
 
     #region Messenger for Focus
+
     private void PaymentsPage_Loaded(object sender, RoutedEventArgs e)
     {
-        // Регистрируем мессенджер
         WeakReferenceMessenger.Default.Register<FocusRequestMessage>(this, OnFocusRequestMessage);
+        WeakReferenceMessenger.Default.Register<OpenDialogMessage<PayDiscountData>>(this, OnOpenDiscountWindowMessage);
     }
+
     private void PaymentsPage_Unloaded(object sender, RoutedEventArgs e)
     {
-        // Отписываемся при выгрузке страницы (во избежание утечек)
         WeakReferenceMessenger.Default.Unregister<FocusRequestMessage>(this);
+        WeakReferenceMessenger.Default.Unregister<OpenDialogMessage<PayDiscountData>>(this);
+    }
+
+    private async void OnOpenDiscountWindowMessage(object recipient, OpenDialogMessage<PayDiscountData> m)
+    {
+        var data = m.ViewModelData;
+
+        var discountsWindow = new PayDiscountWindow(data.CustomerId, data.CustomerName, data.Discount)
+        {
+            Owner = Window.GetWindow(this)
+        };
+
+        if (discountsWindow.ShowDialog() == true)
+        {
+            await vm.ApplyDiscountResultAsync(discountsWindow.ResultOfDiscount);
+        }
     }
 
     private async void OnFocusRequestMessage(object recipient, FocusRequestMessage m)
@@ -112,5 +133,6 @@ public partial class PaymentsPage : Page
             });
         }
     }
-    #endregion Messenger for Focus}
+
+    #endregion Messenger for Focus
 }

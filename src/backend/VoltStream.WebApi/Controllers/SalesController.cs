@@ -13,7 +13,7 @@ public class SalesController
         GetSaleByIdQuery>
 {
     [HttpPost]
-    public async Task<IActionResult> Create( CreateSaleCommand command)
+    public async Task<IActionResult> Create(CreateSaleCommand command)
         => Ok(new Response { Data = await Mediator.Send(command) });
 
     [HttpPut]

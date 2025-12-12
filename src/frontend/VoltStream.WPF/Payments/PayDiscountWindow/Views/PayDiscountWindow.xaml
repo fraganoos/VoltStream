@@ -7,48 +7,70 @@
     xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
     xmlns:viewModels="clr-namespace:VoltStream.WPF.Commons.ViewModels"
     Title="Yeg'ilgan Bonuslar taqsimoti"
-    ResizeMode="NoResize"
     SizeToContent="WidthAndHeight"
-    WindowStartupLocation="CenterOwner"
+    AllowsTransparency="True"
+    Background="Transparent"
+    WindowStartupLocation="CenterScreen"
+    WindowStyle="None"
+    ResizeMode="NoResize"
     mc:Ignorable="d">
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="120" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <!--  Mijoz  -->
-        <TextBlock
-            Grid.Row="0"
-            Grid.Column="0"
+
+
+	<Border BorderBrush="LightGray" Margin="25"
+            BorderThickness="1" 
+            Background="White"  CornerRadius="5">
+		<Border.Effect>
+			<DropShadowEffect BlurRadius="20"       ShadowDepth="10"        Direction="270"        Color="Black"          Opacity="0.4"/>
+		</Border.Effect>
+		<Grid Margin="10">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="120" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
+
+
+			<TextBlock
+            Grid.ColumnSpan="2"
+            Margin="0,5"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            FontSize="14"
+            FontWeight="SemiBold"
+            Text="Chegirmadan foydalanish:" />
+
+			<!--  Mijoz  -->
+			<TextBlock
+            Grid.Row="1"
             Margin="0,5"
             VerticalAlignment="Center"
             Text="Mijoz:" />
-        <TextBox
+			<TextBox
             x:Name="txtCustomer"
-            Grid.Row="0"
+            Grid.Row="1"
             Grid.Column="1"
             Margin="0,5"
             utils:TextBoxTabBehavior.EnableTabOnKeys="True"
             FontSize="14"
             IsEnabled="False" />
-        <!--  Yeg'ilgan discount  -->
-        <TextBlock
-            Grid.Row="1"
+			<!--  Yeg'ilgan discount  -->
+			<TextBlock
+            Grid.Row="2"
             Grid.Column="0"
             Margin="0,5"
             VerticalAlignment="Center"
             Text="Jami Bonuslar:" />
-        <TextBox
+			<TextBox
             x:Name="AmauntDiscount"
-            Grid.Row="1"
+            Grid.Row="2"
             Grid.Column="1"
             Margin="0,5"
             utils:NumericTextBox.IsNumeric="True"
@@ -56,49 +78,50 @@
             FontSize="14"
             IsEnabled="False" />
 
-        <!--  ishlatilgan bonus  -->
-        <TextBlock
-            Grid.Row="2"
+			<!--  ishlatilgan bonus  -->
+			<TextBlock
+            Grid.Row="3"
             Grid.Column="0"
             Margin="0,5"
             VerticalAlignment="Center"
             Text="Foydalanish miqdori:" />
-        <Grid Grid.Row="2" Grid.Column="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <TextBox
+
+			<Grid Grid.Row="3" Grid.Column="1">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+				<TextBox
                 x:Name="DiscountSum"
                 Grid.Column="0"
                 Margin="0,5"
                 utils:NumericTextBox.IsNumeric="True"
                 utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                 FontSize="14" />
-            <Button
+				<Button
                 Grid.Column="1"
                 Margin="3,5,0,6"
                 Padding="5,0"
                 Click="Button_Click"
                 Content="Σ"
                 IsTabStop="False" />
-        </Grid>
+			</Grid>
 
 
-        <!--  Начальная сумма  -->
-        <TextBlock
-            Grid.Row="3"
+			<!--  Начальная сумма  -->
+			<TextBlock
+            Grid.Row="4"
             Grid.Column="0"
             Margin="0,5"
             VerticalAlignment="Center"
             Text="Foydalanish:" />
-        <Grid Grid.Row="3" Grid.Column="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+			<Grid Grid.Row="4" Grid.Column="1">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
 
-            <RadioButton
+				<RadioButton
                 x:Name="inCash"
                 Grid.Column="0"
                 Margin="0,5,3,5"
@@ -107,46 +130,47 @@
                 Foreground="Red" />
 
 
-            <RadioButton
+				<RadioButton
                 x:Name="reСalculation"
                 Grid.Column="1"
                 Margin="3,5,0,5"
                 Content="Hisob-Kitob"
                 FontSize="14" />
-        </Grid>
-        <!--  Описание  -->
-        <TextBlock
-            Grid.Row="4"
+			</Grid>
+			<!--  Описание  -->
+			<TextBlock
+            Grid.Row="5"
             Grid.Column="0"
             Margin="0,5"
             VerticalAlignment="Center"
             Text="Izox:" />
-        <TextBox
+			<TextBox
             x:Name="txtDescription"
-            Grid.Row="4"
+            Grid.Row="5"
             Grid.Column="1"
             Margin="0,5"
             utils:TextBoxTabBehavior.EnableTabOnKeys="True"
             FontSize="14" />
 
-        <!--  Кнопки  -->
-        <StackPanel
+			<!--  Кнопки  -->
+			<StackPanel
             Grid.Row="6"
             Grid.Column="1"
             Margin="0,5,0,0"
             HorizontalAlignment="Right"
             Orientation="Horizontal">
-            <Button
+				<Button
                 x:Name="SaveDiscount"
                 Width="100"
                 Margin="5"
                 Click="SaveDiscount_Click"
                 Content="Saqlash" />
-            <Button
+				<Button
                 Width="100"
                 Margin="5"
                 Content="Bekor qilish"
                 IsCancel="True" />
-        </StackPanel>
-    </Grid>
+			</StackPanel>
+		</Grid>
+	</Border>
 </Window>

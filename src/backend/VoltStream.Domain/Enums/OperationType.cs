@@ -4,6 +4,5 @@ public enum OperationType
 {
     Sale,
     Payment,
-    Discount,
-    DiscountApplied
+    Discount
 }
