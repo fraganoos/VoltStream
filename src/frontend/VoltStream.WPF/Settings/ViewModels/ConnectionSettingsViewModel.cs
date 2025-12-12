@@ -95,7 +95,7 @@ public partial class ConnectionSettingsViewModel : ViewModelBase
     private void UpdatePreviewUrl()
     {
         var scheme = IsHttps ? "https" : "http";
-        var previewUrl = $"{scheme}://{Host}:{Port}";
+        var previewUrl = $"{scheme}://{Host}:{Port}/";
         OnPropertyChanged(nameof(Url));
     }
 
@@ -111,7 +111,7 @@ public partial class ConnectionSettingsViewModel : ViewModelBase
 
             // URL validatsiyasi
             var scheme = IsHttps ? "https" : "http";
-            var testUrl = $"{scheme}://{Host}:{Port}";
+            var testUrl = $"{scheme}://{Host}:{Port}/";
 
             if (!Uri.TryCreate(testUrl, UriKind.Absolute, out _))
             {
