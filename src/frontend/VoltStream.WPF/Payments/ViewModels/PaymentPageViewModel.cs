@@ -21,7 +21,6 @@ partial class PaymentPageViewModel : ViewModelBase
     public readonly ICustomersApi customersApi;
     public readonly ICurrenciesApi currenciesApi;
     public readonly IPaymentApi paymentApi;
-    public readonly IDiscountsApi discountsApi;
     public readonly IMapper mapper;
 
     public PaymentPageViewModel(IServiceProvider services)
@@ -29,7 +28,6 @@ partial class PaymentPageViewModel : ViewModelBase
         customersApi = services.GetRequiredService<ICustomersApi>();
         currenciesApi = services.GetRequiredService<ICurrenciesApi>();
         paymentApi = services.GetRequiredService<IPaymentApi>();
-        discountsApi = services.GetRequiredService<IDiscountsApi>();
         mapper = services.GetRequiredService<IMapper>();
 
         Payment = new();
@@ -119,7 +117,7 @@ partial class PaymentPageViewModel : ViewModelBase
             Description = result.discountInfo ?? string.Empty
         };
 
-        var response = await discountsApi.ApplyAsync(request)
+        var response = await paymentApi.ApplyAsync(request)
             .Handle(isLoading => IsLoading = isLoading);
 
         if (response.IsSuccess)

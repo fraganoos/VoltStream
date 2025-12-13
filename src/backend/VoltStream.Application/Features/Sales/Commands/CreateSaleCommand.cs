@@ -163,6 +163,8 @@ public class CreateSaleCommandHandler(
         {
             Date = sale.Date,
             Amount = -sale.Amount,
+            IsDiscountApplied = sale.IsDiscountApplied,
+            Discount = sale.Discount,
             Account = account,
             AccountId = account.Id,
             CustomerId = sale.CustomerId,

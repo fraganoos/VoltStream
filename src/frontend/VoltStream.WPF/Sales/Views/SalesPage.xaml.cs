@@ -564,11 +564,10 @@ public partial class SalesPage : Page
         }
     }
 
-    private async Task LoadWarehouseItemsAsync(long? productId) // Загрузка данных со склада по productId
+    private async Task LoadWarehouseItemsAsync(long? productId)
     {
         try
         {
-            // Сохраняем текущее выбранное значение
             var selectedValue = cbxPerRollCount.SelectedValue;
             Response<List<WarehouseStockResponse>> response;
             if (productId.HasValue && productId.Value != 0)
@@ -577,8 +576,6 @@ public partial class SalesPage : Page
             }
             else
             {
-                // Если productId не задан, можно либо не загружать данные, либо загрузить все элементы склада
-                // Здесь я выбрал не загружать ничего
                 cbxPerRollCount.ItemsSource = null;
                 return;
             }
@@ -605,6 +602,9 @@ public partial class SalesPage : Page
 
     private void AddButton_Click(object sender, RoutedEventArgs e)
     {
+        if (!IsSaleItemCompleted())
+            return;
+
         SaleItem saleItem = new()
         {
             CategoryId = cbxCategoryName.SelectedIndex,
@@ -623,6 +623,7 @@ public partial class SalesPage : Page
             Discount = decimal.TryParse(txtDiscount.Text, out decimal discount) ? discount : 0,
             FinalSumProduct = decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSumProduct) ? finalSumProduct : 0
         };
+
         sale.SaleItems.Insert(0, saleItem);
 
         CalcSaleSum();
@@ -640,6 +641,98 @@ public partial class SalesPage : Page
         sale.NewQuantity = 0;
         sale.WarehouseCountRoll = 0;
         sale.WarehouseQuantity = 0;
+    }
+
+    private bool IsSaleItemCompleted()
+    {
+        bool isSuccess = true;
+        decimal perDiscount = 0;
+        // Tanlov maydonlarini tekshirish (ComboBox-lar)
+        if (cbxCategoryName.SelectedValue == null)
+        {
+            MessageBox.Show("Kategoriya tanlanmagan.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            cbxCategoryName.Focus();
+            isSuccess = false;
+        }
+
+        else if (cbxProductName.SelectedValue == null)
+        {
+            MessageBox.Show("Mahsulot tanlanmagan.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            cbxProductName.Focus();
+            isSuccess = false;
+        }
+
+        else if (cbxPerRollCount.SelectedValue == null)
+        {
+            MessageBox.Show("Har bir rulondagi miqdor tanlanmagan.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            cbxPerRollCount.Focus();
+            isSuccess = false;
+        }
+
+        // Qiymat maydonlarini tekshirish (TextBox-lar)
+
+        // Rulon Soni (RollCount)
+        else if (!int.TryParse(txtRollCount.Text, out int rollCount) || rollCount <= 0)
+        {
+            MessageBox.Show("Rulon soni kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            txtRollCount.Focus();
+            isSuccess = false;
+        }
+
+        // Jami Miqdor (Quantity - Jami metr)
+        else if (!decimal.TryParse(txtQuantity.Text, out decimal quantity) || quantity <= 0)
+        {
+            MessageBox.Show("Jami miqdor (metr) kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            txtQuantity.Focus();
+            isSuccess = false;
+        }
+
+        // Narx (Price)
+        else if (!decimal.TryParse(txtPrice.Text, out decimal price) || price <= 0)
+        {
+            MessageBox.Show("Narx kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            txtPrice.Focus();
+            isSuccess = false;
+        }
+
+        // Jami Summa (Sum)
+        else if (!decimal.TryParse(txtSum.Text, out decimal sum) || sum <= 0)
+        {
+            MessageBox.Show("Jami summa kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            txtSum.Focus();
+            isSuccess = false;
+        }
+
+        // Umumiy Summa (FinalSumProduct)
+        else if (!decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSumProduct) || finalSumProduct <= 0)
+        {
+            MessageBox.Show("Umumiy summa kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            txtFinalSumProduct.Focus();
+            isSuccess = false;
+        }
+        else if (!string.IsNullOrWhiteSpace(txtPerDiscount.Text) && !decimal.TryParse(txtPerDiscount.Text, out perDiscount))
+        {
+            MessageBox.Show("Foiz chegirma noto'g'ri formatda.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            txtPerDiscount.Focus();
+            isSuccess = false;
+        }
+
+        else if (!string.IsNullOrWhiteSpace(txtDiscount.Text) && !decimal.TryParse(txtDiscount.Text, out decimal discount))
+        {
+            MessageBox.Show("Chegirma miqdori noto'g'ri formatda.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            txtDiscount.Focus();
+            isSuccess = false;
+        }
+
+        // Chegirma bo'yicha qo'shimcha tekshiruv (ixtiyoriy, 100% dan oshmasligi)
+        else if (perDiscount < 0 || perDiscount > 100)
+        {
+            MessageBox.Show("Foiz chegirma 0% dan 100% gacha bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            txtPerDiscount.Focus();
+            isSuccess = false;
+        }
+
+        return isSuccess;
     }
 
     private void CalcSaleSum()
@@ -731,7 +824,7 @@ public partial class SalesPage : Page
         {
             sale.Success = "Sotuv muvaffaqiyatli saqlandi!";
             sale = new();
-            ClearUI();
+            await ClearUI();
             CustomerName.Focus();
         }
         else

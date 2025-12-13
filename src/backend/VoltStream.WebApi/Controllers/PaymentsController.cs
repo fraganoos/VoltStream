@@ -16,6 +16,11 @@ public class PaymentsController
     public async Task<IActionResult> Create(CreatePaymentCommand command)
         => Ok(new Response { Data = await Mediator.Send(command) });
 
+
+    [HttpPost("discount")]
+    public async Task<IActionResult> Apply(ApplyDiscountCommand command)
+        => Ok(new Response { Data = await Mediator.Send(command) });
+
     [HttpPut]
     public async Task<IActionResult> Update(UpdatePaymentCommand command)
         => Ok(new Response { Data = await Mediator.Send(command) });
