@@ -21,11 +21,5 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
                .HasForeignKey(co => co.CustomerId)
                .IsRequired(false)
                .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(c => c.DiscountOperations)
-               .WithOne()
-               .HasForeignKey(dope => dope.CustomerId)
-               .IsRequired(false)
-               .OnDelete(DeleteBehavior.Cascade);
     }
 }

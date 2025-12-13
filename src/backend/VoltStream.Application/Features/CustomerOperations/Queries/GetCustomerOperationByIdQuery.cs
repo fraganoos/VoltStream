@@ -22,11 +22,11 @@ public class GetCustomerOperationByIdQueryHandler(
             .Include(co => co.Account)
                 .ThenInclude(co => co.Currency)
             .Include(co => co.Sale)
-                .ThenInclude(s => s.Items)
+                .ThenInclude(s => s!.Items)
                     .ThenInclude(si => si.Product)
                         .ThenInclude(p => p.Category)
             .Include(co => co.Payment)
-                .ThenInclude(p => p.Currency)
+                .ThenInclude(p => p!.Currency)
             .FirstOrDefaultAsync(co => co.Id == request.Id, cancellationToken))
         ?? throw new NotFoundException(nameof(CustomerOperation), nameof(request.Id), request.Id);
 }

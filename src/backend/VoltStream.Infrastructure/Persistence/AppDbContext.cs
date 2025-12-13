@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Threading;
 using System.Threading.Tasks;
+using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 using VoltStream.Infrastructure.Persistence.Interceptors;
@@ -25,7 +26,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Supply> Supplies { get; set; }
     public DbSet<WarehouseStock> WarehouseStocks { get; set; }
     public DbSet<Warehouse> Warehouses { get; set; }
-    public DbSet<DiscountOperation> DiscountOperations { get; set; }
     public DbSet<User> Users { get; set; }
 
     private IDbContextTransaction? currentTransaction;
@@ -86,36 +86,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        var staticSalt = new byte[]
-    {
-        207, 59, 204, 225, 8, 63, 123, 97, 231, 188, 115, 95, 151, 168,
-        158, 111, 135, 209, 47, 185, 19, 65, 31, 171, 177, 241, 34, 1,
-        136, 205, 249, 166, 77, 56, 219, 250, 241, 48, 162, 224, 60, 65,
-        232, 2, 43, 232, 17, 83, 130, 85, 7, 41, 168, 205, 9, 254, 157,
-        74, 111, 84, 173, 35, 146, 128, 125, 19, 4, 52, 5, 72, 57, 143,
-        112, 91, 154, 44, 100, 192, 197, 33, 51, 61, 166, 200, 19, 114,
-        95, 45, 77, 95, 151, 118, 218, 47, 4, 69, 97, 202, 40, 25, 160,
-        30, 199, 131, 47, 186, 247, 246, 159, 118, 112, 158, 253, 154,
-        201, 238, 44, 175, 168, 173, 234, 84, 20, 248, 48, 90, 16, 94
-    };
-
-        var staticHash = new byte[]
-        {
-        118, 62, 216, 239, 235, 45, 161, 97, 101, 27, 77, 239, 76, 120,
-        192, 237, 102, 224, 166, 22, 78, 113, 126, 59, 2, 187, 182, 251,
-        18, 12, 237, 95, 2, 90, 53, 5, 105, 3, 105, 243, 28, 188, 83, 24,
-        133, 200, 170, 108, 124, 147, 109, 18, 85, 208, 89, 19, 16, 32,
-        60, 26, 251, 4, 28, 82
-        };
-
         builder.Entity<User>().HasData(
             new User
             {
                 Id = 1,
                 Username = "admin",
-                NormalizedUsername = "ADMIN",
-                PasswordHash = staticHash,
-                PasswordSalt = staticSalt,
+                NormalizedUsername = "admin".ToNormalized(),
+                PasswordHash = "$2a$12$O3wXYFDxgXKacPH8rxQG6uZuAuw2dN7F4xOg14Wl02nFHckCabSPu",
                 CreatedAt = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero),
                 UpdatedAt = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero)
             });

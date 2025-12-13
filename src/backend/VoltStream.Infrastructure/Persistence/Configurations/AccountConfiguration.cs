@@ -16,11 +16,6 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
                .HasForeignKey(co => co.AccountId)
                .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany<DiscountOperation>()
-               .WithOne(co => co.Account)
-               .HasForeignKey(co => co.AccountId)
-               .OnDelete(DeleteBehavior.Cascade);
-
         builder.HasOne(a => a.Currency)
                .WithMany()
                .HasForeignKey(a => a.CurrencyId)

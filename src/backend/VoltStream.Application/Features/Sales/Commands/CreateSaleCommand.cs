@@ -54,7 +54,6 @@ public class CreateSaleCommandHandler(
 
                 UpdateAccountBalance(account, sale.Amount, sale.Discount, request.IsDiscountApplied);
                 sale.CustomerOperation = CreateCustomerOperation(sale, account, request.Description, descriptionBuilder, request.IsDiscountApplied);
-                sale.DiscountOperation = CreateDiscountOperation(request, account, descriptionBuilder);
             }
 
             context.Sales.Add(sale);
@@ -149,19 +148,6 @@ public class CreateSaleCommandHandler(
                 existStock.TotalLength += detail;
             }
         }
-    }
-
-    private static DiscountOperation CreateDiscountOperation(CreateSaleCommand request, Account account, StringBuilder description)
-    {
-        return new DiscountOperation
-        {
-            Date = request.Date.ToOffset(TimeSpan.Zero),
-            Amount = request.Discount,
-            IsApplied = request.IsDiscountApplied,
-            CustomerId = account.CustomerId,
-            Description = $"Chegirma savdo uchun: {description}",
-            Account = account
-        };
     }
 
     private static void UpdateAccountBalance(Account account, decimal amount, decimal discount, bool isApplied)

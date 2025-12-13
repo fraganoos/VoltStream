@@ -128,8 +128,8 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
 
             var items = response.Data.Select(c =>
             {
-                var discount = c.Accounts.First().Discount;
-                var totalBalance = c.Accounts.Sum(a => a.Balance);
+                var discount = c.Accounts!.First().Discount;
+                var totalBalance = c.Accounts!.Sum(a => a.Balance);
 
                 return new DebitorCreditorItemViewModel
                 {
@@ -146,7 +146,6 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
             DebitorCreditorItems = new ObservableCollection<DebitorCreditorItemViewModel>(items);
             FilteredDebitorCreditorItems = new ObservableCollection<DebitorCreditorItemViewModel>(items);
 
-            // 🔹 Yakuniy yig‘indilar
             FinalDebitor = items.Sum(x => x.Debitor);
             FinalKreditor = items.Sum(x => x.Creditor);
             FinalDiscount = items.Sum(x => x.Discount);

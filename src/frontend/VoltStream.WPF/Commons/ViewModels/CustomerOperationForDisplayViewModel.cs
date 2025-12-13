@@ -23,8 +23,8 @@ public partial class CustomerOperationForDisplayViewModel : ObservableObject
 
     public bool IsEditable { get; set; }
 
-    [ObservableProperty] private Sale sale;
-    [ObservableProperty] private PaymentViewModel payment;
+    [ObservableProperty] private Sale? sale;
+    [ObservableProperty] private PaymentViewModel? payment;
 
     public string FormattedDescription
     {

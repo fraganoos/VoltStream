@@ -26,6 +26,5 @@ public class PaymentMapperProfile : Profile
 
         CreateMap<Payment, PaymentDto>();
         CreateMap<Payment, PaymentForCustomerOperationDto>();
-        CreateMap<Payment, PaymentForDiscountOperationDto>();
     }
 }

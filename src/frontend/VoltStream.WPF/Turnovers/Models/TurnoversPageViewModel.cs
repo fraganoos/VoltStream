@@ -506,11 +506,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         int pageNumber = 1;
         int currentIndex = 0;
 
-        // Header va jadval sarlavhasi uchun ishg'ol qilingan balandlikni hisoblash
-        // (Sarlavhalar, sanalar va jadval sarlavhasi)
-        double headerAndTableTitleHeight = 30 + 15 + 16 + 5 + 10 + approxSingleRowHeight;
-        double balanceRowHeight = approxSingleRowHeight;
-
         // --- Sahifalash boshlanishi ---
 
         while (currentIndex < operations.Count)
@@ -944,7 +939,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
         public DateTime Date { get; set; }
         public decimal Debit { get; set; }
         public decimal Credit { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         // Sahifalash uchun qo'shimcha ma'lumot
         public int StartLineIndex { get; set; } // Bu qatorda Izoh qayerdan boshlanadi

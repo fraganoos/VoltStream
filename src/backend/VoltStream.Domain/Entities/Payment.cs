@@ -19,7 +19,4 @@ public class Payment : Auditable
 
     public long CustomerOperationId { get; set; }
     public CustomerOperation CustomerOperation { get; set; } = default!;
-
-    public long? DiscountOperationId { get; set; }
-    public DiscountOperation? DiscountOperation { get; set; } = default!;
 }

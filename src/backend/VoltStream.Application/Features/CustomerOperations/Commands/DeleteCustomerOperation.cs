@@ -22,9 +22,9 @@ public class DeleteCustomerOperationCommandHandler(
             var customerOperation = await context.CustomerOperations
                 .Include(co => co.Account)
                 .Include(co => co.Sale)
-                    .ThenInclude(s => s.Items)
+                    .ThenInclude(s => s!.Items)
                 .Include(co => co.Payment)
-                    .ThenInclude(p => p.Currency)
+                    .ThenInclude(p => p!.Currency)
                 .FirstOrDefaultAsync(co => co.Id == request.CustomerOperationId, cancellationToken)
                 ?? throw new NotFoundException(nameof(CustomerOperation), nameof(request.CustomerOperationId), request.CustomerOperationId);
 
@@ -122,15 +122,6 @@ public class DeleteCustomerOperationCommandHandler(
     private async Task RevertDiscountAppliedAsync(CustomerOperation co, Account account, CancellationToken cancellationToken)
     {
         account.Discount += co.Amount;
-
-        var specificDiscountOperation = await context.DiscountOperations
-            .FirstOrDefaultAsync(d => d.CustomerId == co.CustomerId && d.Amount == co.Amount * -1 && d.Date == co.Date, cancellationToken);
-
-        if (specificDiscountOperation is not null)
-        {
-            context.DiscountOperations.Remove(specificDiscountOperation);
-        }
-
         account.Balance -= co.Amount;
     }
 }

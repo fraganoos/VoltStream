@@ -2,11 +2,10 @@
 
 using VoltStream.Application.Features.Cashes.DTOs;
 using VoltStream.Application.Features.Currencies.DTOs;
-using VoltStream.Application.Features.CustomerOperations.DTOs;
 using VoltStream.Application.Features.Customers.DTOs;
 using VoltStream.Domain.Enums;
 
-public record PaymentDto
+public record PaymentForCustomerOperationDto
 {
     public long Id { get; set; }
     public DateTimeOffset PaidAt { get; set; } // to'langan sana
@@ -20,11 +19,10 @@ public record PaymentDto
     public CurrencyDto Currency { get; set; } = default!;
 
     public long CustomerId { get; set; }
-    public CustomerDto Customer { get; set; } = default!;
+    public CustomerForOperationDto Customer { get; set; } = default!;
 
     public long CashOperationId { get; set; }
     public CashOperationDto CashOperation { get; set; } = default!;
 
     public long CustomerOperationId { get; set; }
-    public CustomerOperationForSaleDto CustomerOperation { get; set; } = default!;
 }

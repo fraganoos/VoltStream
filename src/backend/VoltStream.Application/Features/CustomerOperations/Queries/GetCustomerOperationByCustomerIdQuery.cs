@@ -53,7 +53,7 @@ public class GetCustomerOperationByCustomerIdQueryHandler(
         {
 
             beforeBeginSum = await allOperations
-                .Where(x => x.Date != null && x.Date < beginUtc)
+                .Where(x => x.Date < beginUtc)
                 .SumAsync(x => x.Amount, cancellationToken);
         }
         beginBalance += beforeBeginSum;

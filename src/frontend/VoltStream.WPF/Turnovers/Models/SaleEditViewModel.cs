@@ -175,7 +175,7 @@ public partial class SaleEditViewModel : ViewModelBase
     {
         if (SelectedProduct?.Id <= 0) return;
 
-        var response = await warehouseStocksApi.GetProductDetailsFromWarehouseAsync(SelectedProduct.Id)
+        var response = await warehouseStocksApi.GetProductDetailsFromWarehouseAsync(SelectedProduct!.Id)
             .Handle(isLoading => IsLoading = isLoading);
 
         if (response.IsSuccess)

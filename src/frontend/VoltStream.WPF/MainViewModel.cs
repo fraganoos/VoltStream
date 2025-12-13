@@ -28,13 +28,13 @@ public partial class MainViewModel : ViewModelBase
 
     private readonly NamozTimeService _service = new();
 
-    [ObservableProperty] private string bomdod;
-    [ObservableProperty] private string quyosh;
-    [ObservableProperty] private string peshin;
-    [ObservableProperty] private string asr;
-    [ObservableProperty] private string shom;
-    [ObservableProperty] private string xufton;
-    [ObservableProperty] private string dateLabel;
+    [ObservableProperty] private string bomdod = string.Empty;
+    [ObservableProperty] private string quyosh = string.Empty;
+    [ObservableProperty] private string peshin = string.Empty;
+    [ObservableProperty] private string asr = string.Empty;
+    [ObservableProperty] private string shom = string.Empty;
+    [ObservableProperty] private string xufton = string.Empty;
+    [ObservableProperty] private string dateLabel = string.Empty;
 
     public MainViewModel(IServiceProvider services, INavigationService navigationService)
     {

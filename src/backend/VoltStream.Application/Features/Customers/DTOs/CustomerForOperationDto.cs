@@ -1,9 +1,8 @@
 ﻿namespace VoltStream.Application.Features.Customers.DTOs;
 
 using VoltStream.Application.Features.Accounts.DTOs;
-using VoltStream.Application.Features.CustomerOperations.DTOs;
 
-public record CustomerDto
+public record CustomerForOperationDto
 {
     public long Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -12,5 +11,4 @@ public record CustomerDto
     public string? Description { get; set; }
 
     public ICollection<AccountDto> Accounts { get; set; } = default!;
-    public ICollection<CustomerOperationDto> CustomerOperations { get; set; } = default!;
 }
