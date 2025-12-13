@@ -162,10 +162,10 @@
             CanUserAddRows="False"
             CanUserDeleteRows="False"
             FontSize="14"
-            HeadersVisibility="Column"
+            HeadersVisibility="Column, Row"
+            utils:DataGridRowNumbering.IsEnabled="True"
             IsReadOnly="True"
             ItemsSource="{Binding FilteredProductItems}"
-            RowHeaderWidth="0"
             SelectionMode="Single">
 
             <!--  Ustunlar  -->

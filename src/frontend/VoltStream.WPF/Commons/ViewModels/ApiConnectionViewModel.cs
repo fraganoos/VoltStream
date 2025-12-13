@@ -22,46 +22,38 @@ public partial class ApiConnectionViewModel : ViewModelBase
     #region Commands
 
     [RelayCommand]
-    private async Task SaveConnectionSettings()
+    public async Task Save()
     {
-        try
+        Error = string.Empty;
+        Success = string.Empty;
+
+        var scheme = IsHttps ? "https" : "http";
+        var candidateUrl = $"{scheme}://{Host}:{Port}/";
+
+        if (!Uri.TryCreate(candidateUrl, UriKind.Absolute, out var uri))
         {
-            Error = string.Empty;
-            Success = string.Empty;
-
-            var scheme = IsHttps ? "https" : "http";
-            var candidateUrl = $"{scheme}://{Host}:{Port}/";
-
-            if (!Uri.TryCreate(candidateUrl, UriKind.Absolute, out var uri))
-            {
-                Error = "Kiritilgan manzil yaroqsiz";
-                return;
-            }
-
-            Url = uri.ToString();
-            Status = ConnectionStatus.Connecting;
-
-            IsConnected = await App.Services!
-                .GetRequiredService<ConnectionTester>()
-                .TestAsync();
-
-            Status = IsConnected
-                ? ConnectionStatus.Connected
-                : ConnectionStatus.Disconnected;
-
-            if (IsConnected)
-            {
-                Success = "✓ Sozlamalar saqlandi va server bilan aloqa o'rnatildi";
-            }
-            else
-            {
-                Error = "✗ Sozlamalar saqlandi, lekin server bilan bog'lanib bo'lmadi";
-            }
+            Error = "Kiritilgan manzil yaroqsiz";
+            return;
         }
-        catch (Exception ex)
+
+        Url = uri.ToString();
+        Status = ConnectionStatus.Connecting;
+
+        IsConnected = await App.Services!
+            .GetRequiredService<ConnectionTester>()
+            .TestAsync();
+
+        Status = IsConnected
+            ? ConnectionStatus.Connected
+            : ConnectionStatus.Disconnected;
+
+        if (IsConnected)
         {
-            Error = $"Xatolik: {ex.Message}";
-            Status = ConnectionStatus.Disconnected;
+            Success = "✓ Sozlamalar saqlandi va server bilan aloqa o'rnatildi";
+        }
+        else
+        {
+            Error = "✗ Sozlamalar saqlandi, lekin server bilan bog'lanib bo'lmadi";
         }
     }
 
