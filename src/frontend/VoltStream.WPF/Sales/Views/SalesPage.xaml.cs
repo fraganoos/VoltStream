@@ -6,6 +6,7 @@ using ApiServices.Models;
 using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -672,10 +673,10 @@ public partial class SalesPage : Page
 
     }
 
-    private void ClearButton_Click(object sender, RoutedEventArgs e)
+    private async void ClearButton_Click(object sender, RoutedEventArgs e)
     {
         sale = new();
-        ClearUI();
+        await ClearUI();
     }
 
     private async void SubmitButton_Click(object sender, RoutedEventArgs e)
@@ -765,7 +766,7 @@ public partial class SalesPage : Page
         }
     }
 
-    private void ClearUI()
+    private async Task ClearUI()
     {
         // ComboBoxlarni tozalash
         CustomerName.Text = string.Empty;
@@ -803,6 +804,8 @@ public partial class SalesPage : Page
         sale.SaleItems.Clear();
         dataGrid.ItemsSource = sale.SaleItems;
         DataContext = sale;
+
+        await LoadCurrencyAsync();
     }
 
     private void supplyDate_LostFocus(object sender, RoutedEventArgs e)
