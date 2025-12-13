@@ -262,6 +262,8 @@
                   HorizontalAlignment="Center"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
+                    HeadersVisibility="Column, Row"
+                    utils:DataGridRowNumbering.IsEnabled="True"
                   Margin="10"
                   Foreground="Black">
             <DataGrid.Columns>

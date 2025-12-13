@@ -213,11 +213,11 @@
             AutoGenerateColumns="False"
             CanUserAddRows="False"
             CanUserDeleteRows="False"
+            HeadersVisibility="Column, Row"
+            utils:DataGridRowNumbering.IsEnabled="True"
             FontSize="14"
-            HeadersVisibility="Column"
             IsReadOnly="True"
             ItemsSource="{Binding CustomerOperationsForDisplay}"
-            RowHeaderWidth="0"
             SelectionMode="Single">
 
             <DataGrid.Columns>

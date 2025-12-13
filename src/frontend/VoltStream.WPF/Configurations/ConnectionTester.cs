@@ -6,10 +6,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 public class ConnectionTester(IServiceProvider services)
 {
-    public async Task<bool> TestAsync()
+    public async Task<bool> TestAsync(Action<bool>? setLoading = null)
     {
         var client = services.GetRequiredService<IHealthCheckApi>();
-        var response = await client.CheckAsync().Handle();
+        var response = await client.CheckAsync().Handle(setLoading);
         return response.IsSuccess;
     }
 }

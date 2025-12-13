@@ -73,7 +73,7 @@ public partial class SettingsPageViewModel : ViewModelBase
     private async Task LoadCurrencies()
     {
         var client = services.GetRequiredService<ICurrenciesApi>();
-        var response = await client.GetAllAsync().Handle();
+        var response = await client.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
 
         if (response.IsSuccess)
             Currencies = mapper.Map<ObservableCollection<CurrencyViewModel>>(response.Data);
