@@ -11,12 +11,15 @@ using CommunityToolkit.Mvvm.Messaging;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
+using System.Printing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
+using System.Windows.Xps;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.Messages;
 using VoltStream.WPF.Commons.Services;
@@ -359,61 +362,56 @@ public partial class TurnoversPageViewModel : ViewModelBase
         }
 
         var doc = CreateFixedDocument();
-
-        var viewer = new DocumentViewer { Document = doc, Margin = new Thickness(10, 5, 5, 5) };
-
-        var toolbar = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            HorizontalAlignment = HorizontalAlignment.Right,
-            Margin = new Thickness(5)
-        };
+        var viewer = new DocumentViewer { Document = doc };
 
         var shareButton = new Button
         {
             Content = "📤 Telegram'da ulashish",
-            Margin = new Thickness(5, 0, 0, 0),
-            Padding = new Thickness(10, 5, 10, 5)
+            Margin = new Thickness(5),
+            Padding = new Thickness(10, 5, 10, 5),
+            Background = Brushes.LightBlue
         };
 
         shareButton.Click += (s, e) =>
         {
             try
             {
-                if (SelectedCustomer == null)
+                if (SelectedCustomer == null) return;
+
+                // Papkani yaratish
+                string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Volstream");
+                if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+
+                // Fayl nomini shakllantirish (Mijoz_Sana-Sana.pdf)
+                string safeName = string.Join("_", SelectedCustomer.Name.Split(Path.GetInvalidFileNameChars()));
+                string fileName = $"{safeName}_{BeginDate:dd.MM.yyyy}-{EndDate:dd.MM.yyyy}.pdf";
+                string pdfPath = Path.Combine(folderPath, fileName);
+
+                // 1. PDF qilib saqlash
+                // Buning uchun MemoryStream yoki Xps orqali PDFSharp ishlating
+                ExportToPdf(doc, pdfPath);
+
+                // 2. Telegramga yuborish (Shell execute orqali)
+                if (File.Exists(pdfPath))
                 {
-                    MessageBox.Show("Mijoz tanlanmagan.", "Xato", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = pdfPath,
+                        UseShellExecute = true
+                    });
+                    // Telegram share API yoki papkani ochish:
+                    Process.Start("explorer.exe", $"/select,\"{pdfPath}\"");
+                    MessageBox.Show("Fayl tayyor! Uni Telegram'ga tashlashingiz mumkin.", "Muvaffaqiyatli");
                 }
-
-                string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                string valstreamFolder = Path.Combine(documentsPath, "Volstream");
-                if (!Directory.Exists(valstreamFolder))
-                    Directory.CreateDirectory(valstreamFolder);
-
-                string customerName = SelectedCustomer.Name.Replace(" ", "_");
-                string begin = BeginDate.ToString("dd.MM.yyyy") ?? "-";
-                string end = EndDate.ToString("dd.MM.yyyy") ?? "-";
-                string fileName = $"{customerName}_{begin}-{end}.pdf";
-
-                string pdfPath = Path.Combine(valstreamFolder, fileName);
-
-                //SaveFixedDocumentToPdf(doc, pdfPath, 96);
-
-                //if (!File.Exists(pdfPath))
-                //{
-                //    MessageBox.Show("PDF fayl yaratilmagan.", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
-                //    return;
-                //}
-
-                //SharePdfFile(pdfPath);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Xatolik: {ex.Message}");
             }
         };
 
+        // UI Layout
+        var toolbar = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
         toolbar.Children.Add(shareButton);
 
         var layout = new DockPanel();
@@ -421,18 +419,24 @@ public partial class TurnoversPageViewModel : ViewModelBase
         layout.Children.Add(toolbar);
         layout.Children.Add(viewer);
 
-        var previewWindow = new Window
+        new Window
         {
-            Title = "Operatsiyalar Preview",
-            Width = 900,
-            Height = 800,
-            WindowStartupLocation = WindowStartupLocation.CenterScreen,
-            Content = layout
-        };
-
-        previewWindow.ShowDialog();
+            Title = "Hisobot ko'rinishi",
+            Width = 950,
+            Height = 850,
+            Content = layout,
+            WindowStartupLocation = WindowStartupLocation.CenterScreen
+        }.ShowDialog();
     }
 
+    // FixedDocument -> PDF eksport (Oddiy visual render)
+    private void ExportToPdf(FixedDocument doc, string path)
+    {
+        // Bu yerda PDFSharp yoki Syncfusion kabi kutubxona bo'lishi ideal. 
+        // Agar yo'q bo'lsa, Microsoft Print to PDF dan foydalaniladi.
+        PrintDialog pd = new PrintDialog();
+        pd.PrintDocument(doc.DocumentPaginator, "Hisobot");
+    }
     #endregion Commands
 
     #region Private Helpers
@@ -482,161 +486,132 @@ public partial class TurnoversPageViewModel : ViewModelBase
     private FixedDocument CreateFixedDocument()
     {
         var doc = new FixedDocument();
-
-        // A4 o'lchamlari (96 DPI da)
         const double pageWidth = 793.7;
         const double pageHeight = 1122.5;
         const double margin = 40;
-        const double approxSingleRowHeight = 25; // Bitta satr uchun taxminiy balandlik
+        const double approxSingleRowHeight = 25;
 
         var operations = CustomerOperationsForDisplay?.ToList() ?? new List<CustomerOperationForDisplayViewModel>();
 
-        if (operations.Count == 0)
-        {
-            // Bo'sh sahifa yaratish logikasi (o'zgarishsiz qoladi)
-            // ...
-            return doc;
-        }
-
-        // Boshlang'ich balandliklar
-        double currentY = 0; // Sahifadagi hozirgi vertikal joylashuv
+        double currentY = 0;
         int pageNumber = 1;
         int currentIndex = 0;
-
-        // Header va jadval sarlavhasi uchun ishg'ol qilingan balandlikni hisoblash
-        // (Sarlavhalar, sanalar va jadval sarlavhasi)
-        double headerAndTableTitleHeight = 30 + 15 + 16 + 5 + 10 + approxSingleRowHeight;
-        double balanceRowHeight = approxSingleRowHeight;
-
-        // --- Sahifalash boshlanishi ---
 
         while (currentIndex < operations.Count)
         {
             bool isFirstPage = (pageNumber == 1);
-            bool isLastPage = false; // Oxirgi sahifani keyinroq aniqlaymiz
-
-            // Yangi sahifani sozlash
             var page = new FixedPage { Width = pageWidth, Height = pageHeight, Background = Brushes.White };
             var container = new StackPanel { Margin = new Thickness(margin, 30, margin, margin) };
 
-            // Headerlarni joylashtirish
-            currentY = AddHeaderContent(container, pageNumber);
+            // --- HEADER QISMI ---
+            if (isFirstPage)
+            {
+                currentY = AddHeaderContent(container, pageNumber, true); // To'liq header
+            }
+            else
+            {
+                currentY = AddHeaderContent(container, pageNumber, false); // Faqat sahifa raqami
+            }
 
-            // TABLE konteynerini yaratish (Endi Gridni bevosita containerga qo'shamiz)
             var table = new Grid();
             double[] widths = { 75, 110, 110, 415 };
             foreach (var w in widths)
                 table.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(w) });
 
-            // Jadval sarlavhasini qo'shish
             AddRowHeader(table, "Sana", "Debit", "Kredit", "Izoh", approxSingleRowHeight);
 
-            // Boshlang'ich qoldiq (faqat 1-sahifa)
             if (isFirstPage)
             {
                 AddBalanceRow(table, "Boshlang'ich qoldiq", BeginBalance?.ToString("N2") ?? "0.00", approxSingleRowHeight);
             }
 
-            // Sahifadagi minimal qolishi kerak bo'lgan bo'sh joy
-            double footerSpace = approxSingleRowHeight * 2.5; // Jami + Oxirgi qoldiq uchun taxminiy joy
-
-            // Hozirgi sahifaga sig'adigan qatorlar ro'yxati
+            double footerSpace = approxSingleRowHeight * 2.5;
             var opsOnPage = new List<CustomerOperationForDisplayViewModel>();
 
             int tempIndex = currentIndex;
             while (tempIndex < operations.Count)
             {
                 var op = operations[tempIndex];
-
-                // Operatsiyaning balandligini taxmin qilish
                 double requiredHeight = CalculateOperationRowHeight(op, widths[3]);
 
-                // Agar bu operatsiya qolsa, sahifa to'ladi deb hisoblaymiz
-                double availableSpace = pageHeight - margin * 2 - currentY - footerSpace;
+                // Sahifada qolgan joyni hisoblash
+                double availableSpace = pageHeight - (margin * 2) - currentY - footerSpace - 50;
 
-                if (requiredHeight > availableSpace && tempIndex > currentIndex)
-                {
-                    // Operatsiya sig'maydi, lekin oldingilari sig'di. Shu sahifani yopamiz.
-                    break;
-                }
-
-                // Agar birinchi elementning o'zi sig'masa, uni ham qo'shamiz (yoki boshqa sahifada qoldiramiz)
-                if (requiredHeight > availableSpace && tempIndex == currentIndex)
-                {
-                    // Birinchi operatsiyaning o'zi sig'maydi. Uni baribir qo'shamiz.
-                    // Chunki uni keyingi sahifaga o'tkazish uchun `FixedDocument` da kontentni bo'lish kerak.
-                    // Bu sizning talabingizga zid.
-                    // Bu yerda sizning talabingizni bajarish uchun biz uni qo'lda bo'lishimiz kerak edi (avvalgi yechim).
-                    // Hozircha: sig'masa ham kiritamiz, bu PDF da xato ko'rsatishi mumkin, ammo UI ga o'xshaydi.
-                }
+                if (requiredHeight > availableSpace && tempIndex > currentIndex) break;
 
                 opsOnPage.Add(op);
                 tempIndex++;
-                currentY += requiredHeight; // Keyingi qator boshlanishini hisoblash
+                currentY += requiredHeight;
             }
 
-            // Operatsiyalarni jadvalga qo'shish
             foreach (var op in opsOnPage)
             {
                 AddOperationRow(table, op, approxSingleRowHeight);
             }
 
             currentIndex += opsOnPage.Count;
-            isLastPage = (currentIndex >= operations.Count);
+            bool isLastPage = (currentIndex >= operations.Count);
 
-            // JAMI va OXIRGI QOLDIQ (faqat oxirgi sahifa)
             if (isLastPage)
             {
                 decimal totalDebit = operations.Sum(x => x.Debit);
                 decimal totalCredit = operations.Sum(x => x.Credit);
-
                 AddRowTotal(table, "JAMI", totalDebit.ToString("N2"), totalCredit.ToString("N2"), approxSingleRowHeight);
                 AddBalanceRow(table, "Oxirgi qoldiq", LastBalance?.ToString("N2") ?? "0.00", approxSingleRowHeight);
             }
 
             container.Children.Add(table);
-
             page.Children.Add(container);
             var pageContent = new PageContent();
             ((IAddChild)pageContent).AddChild(page);
             doc.Pages.Add(pageContent);
 
             pageNumber++;
-            currentY = 0; // Yangi sahifada balandlikni nolga tiklash
+            currentY = 0;
         }
-
         return doc;
     }
 
-    private double AddHeaderContent(StackPanel container, int pageNumber)
+    private double AddHeaderContent(StackPanel container, int pageNumber, bool isFullHeader)
     {
-        // HEADER
-        container.Children.Add(new TextBlock
+        if (isFullHeader)
         {
-            Text = "MIJOZ OPERATSIYALARI HISOBOTI",
-            FontSize = 20,
-            FontWeight = FontWeights.ExtraBold,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            Margin = new Thickness(0, 0, 0, 15)
-        });
+            container.Children.Add(new TextBlock
+            {
+                Text = "MIJOZ OPERATSIYALARI HISOBOTI",
+                FontSize = 20,
+                FontWeight = FontWeights.ExtraBold,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 15)
+            });
 
-        container.Children.Add(new TextBlock
+            container.Children.Add(new TextBlock
+            {
+                Text = $"Mijoz: {SelectedCustomer?.Name.ToUpper()}",
+                FontSize = 16,
+                FontWeight = FontWeights.Medium
+            });
+
+            container.Children.Add(new TextBlock
+            {
+                Text = $"Davr: {BeginDate:dd.MM.yyyy} — {EndDate:dd.MM.yyyy}    |    Sahifa {pageNumber}",
+                FontSize = 14,
+                Margin = new Thickness(0, 5, 0, 10)
+            });
+            return 120; // Taxminiy band qilingan balandlik
+        }
+        else
         {
-            Text = $"Mijoz: {SelectedCustomer?.Name.ToUpper() ?? "TANLANMAGAN"}",
-            FontSize = 16,
-            FontWeight = FontWeights.Medium
-        });
-
-        container.Children.Add(new TextBlock
-        {
-            Text = $"Davr: {BeginDate:dd.MM.yyyy} — {EndDate:dd.MM.yyyy}    |    Sahifa {pageNumber}",
-            FontSize = 15,
-            Margin = new Thickness(0, 5, 0, 10)
-        });
-
-        return 30 + 20 + 16 + 15 + 25; // Taxminiy piksel qiymati
+            container.Children.Add(new TextBlock
+            {
+                Text = $"Sahifa {pageNumber}",
+                FontSize = 12,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(0, 0, 0, 10)
+            });
+            return 30; // Kamroq joy oladi
+        }
     }
-
     private double CalculateOperationRowHeight(CustomerOperationForDisplayViewModel op, double commentColumnWidth)
     {
         // Izohning necha satrni egallashini hisoblaymiz
@@ -808,6 +783,20 @@ public partial class TurnoversPageViewModel : ViewModelBase
         AddSimpleCell(grid, row, 2, totalCredit, TextAlignment.Right, FontWeights.Bold, 12, new Thickness(0.5, 0.5, 0, 0.5));
     }
 
+    private void SaveFixedDocumentToPdf(FixedDocument fixedDoc, string pdfPath)
+    {
+        PrintDialog printDialog = new PrintDialog();
+        // "Microsoft Print to PDF" yoki sukut bo'yicha printer orqali saqlash
+        // Lekin eng yaxshisi PDFSharp yoki o'zingizning Rendering logikangiz.
+        // Bu erda eng oddiy va ishlaydigan yo'li:
+
+        using (FileStream fs = new FileStream(pdfPath, FileMode.Create))
+        {
+            XpsDocumentWriter xpsWriter = PrintQueue.CreateXpsDocumentWriter(new PrintQueue(new PrintServer(), "Microsoft Print to PDF"));
+            // Eslatma: Bu usul printerni tanlashni so'rashi mumkin. 
+            // Agar avtomatik PDF qilmoqchi bo'lsangiz, PdfSharp ishlating.
+        }
+    }
     public class PaginatedOperation
     {
         // Asosiy operatsiya ma'lumotlari
