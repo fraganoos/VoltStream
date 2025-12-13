@@ -10,6 +10,8 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -19,6 +21,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Xps;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.Messages;
@@ -376,40 +379,33 @@ public partial class TurnoversPageViewModel : ViewModelBase
         {
             try
             {
-                if (SelectedCustomer == null) return;
+                if (SelectedCustomer == null) { /* ... xato */ return; }
 
-                // Papkani yaratish
-                string folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Volstream");
-                if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+                string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                string voltFolder = Path.Combine(documentsPath, "VoltStream"); // Volt papkasi
 
-                // Fayl nomini shakllantirish (Mijoz_Sana-Sana.pdf)
+                if (!Directory.Exists(voltFolder)) Directory.CreateDirectory(voltFolder);
+
                 string safeName = string.Join("_", SelectedCustomer.Name.Split(Path.GetInvalidFileNameChars()));
-                string fileName = $"{safeName}_{BeginDate:dd.MM.yyyy}-{EndDate:dd.MM.yyyy}.pdf";
-                string pdfPath = Path.Combine(folderPath, fileName);
+                string begin = BeginDate.ToString("dd.MM.yyyy") ?? "-";
+                string end = EndDate.ToString("dd.MM.yyyy") ?? "-";
+                string fileName = $"{safeName}_{begin}-{end}.pdf";
+                string pdfPath = Path.Combine(voltFolder, fileName);
 
-                // 1. PDF qilib saqlash
-                // Buning uchun MemoryStream yoki Xps orqali PDFSharp ishlating
+                // >>> ENDI TO'G'RI FUNKSIYA CHAQQIRILYAPTI <<<
                 ExportToPdf(doc, pdfPath);
 
-                // 2. Telegramga yuborish (Shell execute orqali)
                 if (File.Exists(pdfPath))
                 {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = pdfPath,
-                        UseShellExecute = true
-                    });
-                    // Telegram share API yoki papkani ochish:
                     Process.Start("explorer.exe", $"/select,\"{pdfPath}\"");
-                    MessageBox.Show("Fayl tayyor! Uni Telegram'ga tashlashingiz mumkin.", "Muvaffaqiyatli");
+                    MessageBox.Show($"Hisobot \"{fileName}\" nomli fayl sifatida \"Documents\\Volt\" papkasida saqlandi.", "Muvaffaqiyatli", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Xatolik: {ex.Message}");
+                MessageBox.Show($"Ulashish/Saqlashda xatolik yuz berdi: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         };
-
         // UI Layout
         var toolbar = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
         toolbar.Children.Add(shareButton);
@@ -429,13 +425,66 @@ public partial class TurnoversPageViewModel : ViewModelBase
         }.ShowDialog();
     }
 
-    // FixedDocument -> PDF eksport (Oddiy visual render)
     private void ExportToPdf(FixedDocument doc, string path)
     {
-        // Bu yerda PDFSharp yoki Syncfusion kabi kutubxona bo'lishi ideal. 
-        // Agar yo'q bo'lsa, Microsoft Print to PDF dan foydalaniladi.
-        PrintDialog pd = new PrintDialog();
-        pd.PrintDocument(doc.DocumentPaginator, "Hisobot");
+        PdfDocument pdf = new PdfDocument();
+
+        // Yuqori sifat uchun DPI qiymati
+        const int renderDPI = 300;
+
+        // A4 o'lchamlari (96 DPI da)
+        const double pageWidth96DPI = 793.7;
+        const double pageHeight96DPI = 1122.5;
+
+        // DPI o'zgarishi tufayli piksel o'lchamlarini hisoblash
+        int pixelWidth = (int)(pageWidth96DPI / 96.0 * renderDPI);
+        int pixelHeight = (int)(pageHeight96DPI / 96.0 * renderDPI);
+
+        // PdfSharp sahifasi uchun o'lchamlar (ular 96 DPI ga asoslanadi, shuning uchun 96 DPI qiymatlari ishlatiladi)
+        double pdfPageWidth = pageWidth96DPI;
+        double pdfPageHeight = pageHeight96DPI;
+
+        int pageCount = doc.Pages.Count;
+
+        for (int i = 0; i < pageCount; i++)
+        {
+            FixedPage fixedPage = doc.Pages[i].Child;
+
+            // 1. Sahifani vizual element sifatida o'lchash (96 DPI da joylashuv uchun)
+            fixedPage.Measure(new Size(pdfPageWidth, pdfPageHeight));
+            fixedPage.Arrange(new Rect(0, 0, pdfPageWidth, pdfPageHeight));
+
+            // 2. Render target Bitmap yaratish (Yuqori DPI va hisoblangan PIXEL o'lchamlari bilan)
+            RenderTargetBitmap rtb = new RenderTargetBitmap(
+                pixelWidth, pixelHeight, renderDPI, renderDPI, PixelFormats.Pbgra32);
+            // ^ PIXEL, ^ PIXEL, ^ DPI, ^ DPI
+
+            rtb.Render(fixedPage);
+
+            // 3. PNG koderidan foydalangan holda MemoryStreamga yozish
+            PngBitmapEncoder pngEncoder = new PngBitmapEncoder();
+            pngEncoder.Frames.Add(BitmapFrame.Create(rtb));
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                pngEncoder.Save(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+
+                // 4. PdfSharp sahifasini yaratish
+                PdfPage pdfPage = pdf.AddPage();
+                pdfPage.Width = XUnit.FromPoint(pdfPageWidth);
+                pdfPage.Height = XUnit.FromPoint(pdfPageHeight);
+
+                XGraphics gfx = XGraphics.FromPdfPage(pdfPage);
+
+                // 5. Rasmni PDFga chizish. Rasm to'liq sahifani qoplashi kerak.
+                XImage image = XImage.FromStream(stream);
+                gfx.DrawImage(image, 0, 0, pdfPage.Width, pdfPage.Height);
+            }
+        }
+
+        // 6. PDF faylini saqlash
+        pdf.Save(path);
     }
     #endregion Commands
 
@@ -486,6 +535,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
     private FixedDocument CreateFixedDocument()
     {
         var doc = new FixedDocument();
+        // ... (constant qiymatlar o'zgarishsiz qoladi) ...
         const double pageWidth = 793.7;
         const double pageHeight = 1122.5;
         const double margin = 40;
@@ -497,22 +547,27 @@ public partial class TurnoversPageViewModel : ViewModelBase
         int pageNumber = 1;
         int currentIndex = 0;
 
+        // Sahifalarni va ularning kontentini vaqtincha saqlash uchun ro'yxat
+        var tempPages = new List<FixedPage>();
+
         while (currentIndex < operations.Count)
         {
             bool isFirstPage = (pageNumber == 1);
             var page = new FixedPage { Width = pageWidth, Height = pageHeight, Background = Brushes.White };
             var container = new StackPanel { Margin = new Thickness(margin, 30, margin, margin) };
 
-            // --- HEADER QISMI ---
+            // --- HEADER QISMI (Pastki footer joyini e'lon qilmasdan) ---
             if (isFirstPage)
             {
-                currentY = AddHeaderContent(container, pageNumber, true); // To'liq header
+                currentY = AddHeaderContent(container, pageNumber, true);
             }
             else
             {
-                currentY = AddHeaderContent(container, pageNumber, false); // Faqat sahifa raqami
+                // Headerda faqat Sahifa raqami bo'lmasligi uchun bu yerda pageNumber ni ko'rsatmaymiz
+                currentY = AddHeaderContent(container, pageNumber, false);
             }
 
+            // ... (Jadvalni yaratish va to'ldirish logikasi o'zgarishsiz qoladi) ...
             var table = new Grid();
             double[] widths = { 75, 110, 110, 415 };
             foreach (var w in widths)
@@ -525,7 +580,8 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 AddBalanceRow(table, "Boshlang'ich qoldiq", BeginBalance?.ToString("N2") ?? "0.00", approxSingleRowHeight);
             }
 
-            double footerSpace = approxSingleRowHeight * 2.5;
+            // Minimal Footer uchun 40-50 piksel (Sahifa raqami pastda)
+            double footerSpace = approxSingleRowHeight * 2.5 + 40;
             var opsOnPage = new List<CustomerOperationForDisplayViewModel>();
 
             int tempIndex = currentIndex;
@@ -534,8 +590,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 var op = operations[tempIndex];
                 double requiredHeight = CalculateOperationRowHeight(op, widths[3]);
 
-                // Sahifada qolgan joyni hisoblash
-                double availableSpace = pageHeight - (margin * 2) - currentY - footerSpace - 50;
+                double availableSpace = pageHeight - (margin * 2) - currentY - footerSpace;
 
                 if (requiredHeight > availableSpace && tempIndex > currentIndex) break;
 
@@ -562,16 +617,53 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
             container.Children.Add(table);
             page.Children.Add(container);
-            var pageContent = new PageContent();
-            ((IAddChild)pageContent).AddChild(page);
-            doc.Pages.Add(pageContent);
+
+            tempPages.Add(page); // Sahifani vaqtincha ro'yxatga qo'shamiz
 
             pageNumber++;
             currentY = 0;
         }
+
+        // --- Yakuniy Sahifa Raqamlarini Qo'shish ---
+
+        int totalPages = tempPages.Count;
+        int finalPageNumber = 1;
+
+        foreach (var finalPage in tempPages)
+        {
+            // Pastki o'ng qismga sahifalash ma'lumotini qo'shamiz
+            AddFooterContent(finalPage, finalPageNumber, totalPages);
+
+            var pageContent = new PageContent();
+            ((IAddChild)pageContent).AddChild(finalPage);
+            doc.Pages.Add(pageContent);
+
+            finalPageNumber++;
+        }
+
         return doc;
     }
 
+    private void AddFooterContent(FixedPage page, int currentPage, int totalPages)
+    {
+        const double margin = 40;
+        const double pageWidth = 793.7;
+
+        // Sahifa raqami matnini yaratish
+        var pageInfo = new TextBlock
+        {
+            Text = $"{currentPage}-bet / {totalPages}",
+            FontSize = 12,
+            FontWeight = FontWeights.Bold,
+            HorizontalAlignment = HorizontalAlignment.Right // Kerak emas, chunki FixedPage.SetLeft/Top ishlatiladi
+        };
+
+        // Sahifa raqamini joylashtirish
+        FixedPage.SetRight(pageInfo, margin); // O'ng chetidan margin masofada
+        FixedPage.SetBottom(pageInfo, 20);    // Pastki chetidan 20 piksel yuqorida
+
+        page.Children.Add(pageInfo);
+    }
     private double AddHeaderContent(StackPanel container, int pageNumber, bool isFullHeader)
     {
         if (isFullHeader)
@@ -594,7 +686,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
             container.Children.Add(new TextBlock
             {
-                Text = $"Davr: {BeginDate:dd.MM.yyyy} — {EndDate:dd.MM.yyyy}    |    Sahifa {pageNumber}",
+                Text = $"Davr: {BeginDate:dd.MM.yyyy} — {EndDate:dd.MM.yyyy}",
                 FontSize = 14,
                 Margin = new Thickness(0, 5, 0, 10)
             });
@@ -604,7 +696,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
         {
             container.Children.Add(new TextBlock
             {
-                Text = $"Sahifa {pageNumber}",
+                Text = $"",
                 FontSize = 12,
                 HorizontalAlignment = HorizontalAlignment.Right,
                 Margin = new Thickness(0, 0, 0, 10)
@@ -783,20 +875,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         AddSimpleCell(grid, row, 2, totalCredit, TextAlignment.Right, FontWeights.Bold, 12, new Thickness(0.5, 0.5, 0, 0.5));
     }
 
-    private void SaveFixedDocumentToPdf(FixedDocument fixedDoc, string pdfPath)
-    {
-        PrintDialog printDialog = new PrintDialog();
-        // "Microsoft Print to PDF" yoki sukut bo'yicha printer orqali saqlash
-        // Lekin eng yaxshisi PDFSharp yoki o'zingizning Rendering logikangiz.
-        // Bu erda eng oddiy va ishlaydigan yo'li:
-
-        using (FileStream fs = new FileStream(pdfPath, FileMode.Create))
-        {
-            XpsDocumentWriter xpsWriter = PrintQueue.CreateXpsDocumentWriter(new PrintQueue(new PrintServer(), "Microsoft Print to PDF"));
-            // Eslatma: Bu usul printerni tanlashni so'rashi mumkin. 
-            // Agar avtomatik PDF qilmoqchi bo'lsangiz, PdfSharp ishlating.
-        }
-    }
     public class PaginatedOperation
     {
         // Asosiy operatsiya ma'lumotlari
