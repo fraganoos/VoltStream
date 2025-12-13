@@ -1,4 +1,4 @@
-﻿namespace VoltStream.Application.Features.DiscountOperations.Commands;
+﻿namespace VoltStream.Application.Features.Payments.Commands;
 
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -42,25 +42,14 @@ public class ApplyDiscountCommandHandler(
 
             account.Discount -= request.DiscountAmount;
 
-            var discountOperation = new DiscountOperation
-            {
-                Date = request.Date.ToUniversalTime(),
-                Description = GenerateDescription(request, account.Currency),
-                IsApplied = true,
-                Amount = request.DiscountAmount * -1,
-                CustomerId = customer.Id,
-                AccountId = account.Id,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            context.DiscountOperations.Add(discountOperation);
-
             var customerOperation = new CustomerOperation
             {
-                Date = discountOperation.Date,
+                Date = request.Date.ToUniversalTime(),
                 AccountId = account.Id,
                 Amount = request.DiscountAmount,
                 CustomerId = customer.Id,
+                Discount = request.DiscountAmount * -1,
+                IsDiscountApplied = true,
                 Description = $"Chegirma hisobga olindi. {request.Description}",
                 OperationType = OperationType.Discount
             };
@@ -99,9 +88,8 @@ public class ApplyDiscountCommandHandler(
                     CurrencyId = account.CurrencyId,
                     CustomerId = customer.Id,
                     CustomerOperation = customerOperationCash,
-                    PaidAt = discountOperation.Date,
+                    PaidAt = request.Date.ToUniversalTime(),
                     Type = PaymentType.Cash,
-                    DiscountOperation = discountOperation
                 };
                 context.Payments.Add(paymentOperation);
             }
@@ -112,22 +100,12 @@ public class ApplyDiscountCommandHandler(
 
 
             await context.CommitTransactionAsync(cancellationToken);
-            return discountOperation.Id;
+            return customerOperation.Id;
         }
         catch
         {
             await context.RollbackTransactionAsync(cancellationToken);
             throw;
         }
-    }
-
-    private static string GenerateDescription(ApplyDiscountCommand request, Currency currency)
-    {
-        var typeText = request.IsCash ? "Chegirma naqd berildi" : "Chegirma hisobga olindi";
-        var additionalInfo = string.IsNullOrEmpty(request.Description)
-            ? ""
-            : $". {request.Description}";
-
-        return $"{typeText}: {request.DiscountAmount} {currency.Code}{additionalInfo}";
     }
 }

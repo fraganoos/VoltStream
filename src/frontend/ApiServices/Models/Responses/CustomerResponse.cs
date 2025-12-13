@@ -10,6 +10,5 @@ public record CustomerResponse
 
     public ICollection<AccountResponse>? Accounts { get; set; }
     public ICollection<CustomerOperationResponse>? CustomerOperations { get; set; }
-    public ICollection<DiscountOperationResponse>? DiscountOperations { get; set; }
 }
 

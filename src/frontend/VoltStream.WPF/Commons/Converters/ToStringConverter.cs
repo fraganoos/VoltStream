@@ -17,6 +17,6 @@ public class ToStringConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
         // ConvertBack kerak bo‘lmasa, faqat readonly uchun ishlatiladi
-        throw new NotImplementedException();
+        return default!;
     }
 }

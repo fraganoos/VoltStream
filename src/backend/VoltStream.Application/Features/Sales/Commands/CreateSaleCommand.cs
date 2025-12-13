@@ -54,7 +54,6 @@ public class CreateSaleCommandHandler(
 
                 UpdateAccountBalance(account, sale.Amount, sale.Discount, request.IsDiscountApplied);
                 sale.CustomerOperation = CreateCustomerOperation(sale, account, request.Description, descriptionBuilder, request.IsDiscountApplied);
-                sale.DiscountOperation = CreateDiscountOperation(request, account, descriptionBuilder);
             }
 
             context.Sales.Add(sale);
@@ -99,9 +98,6 @@ public class CreateSaleCommandHandler(
             var residue = warehouse.Stocks
                 .FirstOrDefault(r => r.ProductId == item.ProductId && r.LengthPerRoll == item.LengthPerRoll)
                 ?? throw new NotFoundException(nameof(WarehouseStock), nameof(item.Id), item.Id);
-
-            if (residue.TotalLength < item.TotalLength)
-                throw new ConflictException($"Omborda faqat {residue.TotalLength} metr mahsulot bor");
 
             residue.RollCount -= item.RollCount;
             residue.TotalLength -= item.RollCount * item.LengthPerRoll;
@@ -151,19 +147,6 @@ public class CreateSaleCommandHandler(
         }
     }
 
-    private static DiscountOperation CreateDiscountOperation(CreateSaleCommand request, Account account, StringBuilder description)
-    {
-        return new DiscountOperation
-        {
-            Date = request.Date.ToOffset(TimeSpan.Zero),
-            Amount = request.Discount,
-            IsApplied = request.IsDiscountApplied,
-            CustomerId = account.CustomerId,
-            Description = $"Chegirma savdo uchun: {description}",
-            Account = account
-        };
-    }
-
     private static void UpdateAccountBalance(Account account, decimal amount, decimal discount, bool isApplied)
     {
         account.Balance -= amount;
@@ -180,6 +163,8 @@ public class CreateSaleCommandHandler(
         {
             Date = sale.Date,
             Amount = -sale.Amount,
+            IsDiscountApplied = sale.IsDiscountApplied,
+            Discount = sale.Discount,
             Account = account,
             AccountId = account.Id,
             CustomerId = sale.CustomerId,

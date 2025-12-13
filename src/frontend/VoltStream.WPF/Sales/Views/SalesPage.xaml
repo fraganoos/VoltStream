@@ -480,50 +480,50 @@
                         <DataGridTextColumn
                             Width="1.8*"
                             MinWidth="120"
-                            Binding="{Binding ProductName}"
+                            Binding="{Binding ProductName, Mode=TwoWay}"
                             Header="Maxsulot nomi" />
                         <DataGridTextColumn
                             Width="*"
-                            Binding="{Binding PerRollCount}"
+                            Binding="{Binding PerRollCount, Mode=TwoWay}"
                             ElementStyle="{StaticResource RightAlignedText}"
                             Header="Rulon metr" />
                         <DataGridTextColumn
                             Width="*"
-                            Binding="{Binding RollCount, Converter={StaticResource ToStringConverter}}"
+                            Binding="{Binding RollCount, Mode=TwoWay, Converter={StaticResource ToStringConverter}}"
                             ElementStyle="{StaticResource RightAlignedText}"
                             Header="Rulon soni" />
                         <DataGridTextColumn
                             Width="*"
-                            Binding="{Binding Quantity, Converter={StaticResource ToStringConverter}}"
+                            Binding="{Binding Quantity, Mode=TwoWay, Converter={StaticResource ToStringConverter}}"
                             ElementStyle="{StaticResource RightAlignedText}"
                             Header="Jami metr" />
                         <DataGridTextColumn
                             Width="*"
                             utils:NumericTextBox.IsNumeric="True"
-                            Binding="{Binding Price, Converter={StaticResource ToStringConverter}}"
+                            Binding="{Binding Price, Mode=TwoWay, Converter={StaticResource ToStringConverter}}"
                             ElementStyle="{StaticResource RightAlignedText}"
                             Header="Narxi" />
                         <DataGridTextColumn
                             Width="*"
                             utils:NumericTextBox.IsNumeric="True"
-                            Binding="{Binding Sum, Converter={StaticResource ToStringConverter}}"
+                            Binding="{Binding Sum, Mode=TwoWay, Converter={StaticResource ToStringConverter}}"
                             ElementStyle="{StaticResource RightAlignedText}"
                             Header="Jami summa" />
                         <DataGridTextColumn
                             Width="*"
-                            Binding="{Binding PerDiscount, Converter={StaticResource ToStringConverter}}"
+                            Binding="{Binding PerDiscount, Mode=TwoWay, Converter={StaticResource ToStringConverter}}"
                             ElementStyle="{StaticResource RightAlignedText}"
                             Header="Chegirma%" />
                         <DataGridTextColumn
                             Width="*"
                             utils:NumericTextBox.IsNumeric="True"
-                            Binding="{Binding Discount, Converter={StaticResource ToStringConverter}}"
+                            Binding="{Binding Discount, Mode=TwoWay, Converter={StaticResource ToStringConverter}}"
                             ElementStyle="{StaticResource RightAlignedText}"
                             Header="Chegirma summasi" />
                         <DataGridTextColumn
                             Width="*"
                             utils:NumericTextBox.IsNumeric="True"
-                            Binding="{Binding FinalSumProduct, Converter={StaticResource ToStringConverter}}"
+                            Binding="{Binding FinalSumProduct, Mode=TwoWay, Converter={StaticResource ToStringConverter}}"
                             ElementStyle="{StaticResource RightAlignedText}"
                             Header="Umumiy summa" />
                     </DataGrid.Columns>

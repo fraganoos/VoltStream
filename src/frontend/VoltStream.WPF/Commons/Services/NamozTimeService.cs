@@ -79,12 +79,12 @@ public class NamozTimeService
 
 public class NamozData
 {
-    public string Date { get; set; }
-    public string Bomdod { get; set; }
-    public string Quyosh { get; set; }
-    public string Peshin { get; set; }
-    public string Asr { get; set; }
-    public string Shom { get; set; }
-    public string Xufton { get; set; }
+    public string Date { get; set; } = string.Empty;
+    public string Bomdod { get; set; } = string.Empty;
+    public string Quyosh { get; set; } = string.Empty;
+    public string Peshin { get; set; } = string.Empty;
+    public string Asr { get; set; } = string.Empty;
+    public string Shom { get; set; } = string.Empty;
+    public string Xufton { get; set; } = string.Empty;
 }
 

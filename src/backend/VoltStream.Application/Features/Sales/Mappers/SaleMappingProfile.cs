@@ -1,7 +1,6 @@
 ﻿namespace VoltStream.Application.Features.Sales.Mappers;
 
 using AutoMapper;
-using System;
 using VoltStream.Application.Features.Sales.Commands;
 using VoltStream.Application.Features.Sales.DTOs;
 using VoltStream.Domain.Entities;
@@ -22,10 +21,8 @@ public class SaleMappingProfile : Profile
         CreateMap<CreateSaleCommand, CustomerOperation>()
             .ForMember(dest => dest.Id, opt => opt.Ignore());
 
-        // Entity -> DTO: Sale.Date maydoni allaqachon UTC bo'lgani uchun bevosita map qilamiz
         CreateMap<Sale, SaleDto>();
         CreateMap<Sale, SaleForCustomerOperationDto>();
-        CreateMap<Sale, SaleForDiscountOperationDto>();
 
         CreateMap<SaleItem, SaleItemDto>();
         CreateMap<SaleItemCommand, SaleItem>();

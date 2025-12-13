@@ -51,7 +51,6 @@ public class CreatePaymentCommandHandler(
                     CurrencyId = defaultCurrency.Id,
                 };
 
-                context.Accounts.Add(account);
                 customer.Accounts.Add(account);
             }
 
@@ -131,3 +130,4 @@ public class CreatePaymentCommandHandler(
         return $"{typeText}: {currency.Code}. {request.NetAmount} x {request.ExchangeRate}";
     }
 }
+

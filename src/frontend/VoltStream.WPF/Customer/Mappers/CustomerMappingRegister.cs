@@ -4,7 +4,6 @@ using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Mapster;
 using VoltStream.WPF.Commons.ViewModels;
-using VoltStream.WPF.Customer.ViewModels;
 
 public class CustomerMappingRegister : IRegister
 {
@@ -20,8 +19,5 @@ public class CustomerMappingRegister : IRegister
 
         // Customer Operation
         config.NewConfig<CustomerOperationResponse, CustomerOperationViewModel>();
-
-        // Discount Operation
-        config.NewConfig<DiscountOperationResponse, DiscountOperationViewModel>();
     }
 }

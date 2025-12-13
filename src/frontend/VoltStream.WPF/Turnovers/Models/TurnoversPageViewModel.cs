@@ -547,7 +547,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
         int pageNumber = 1;
         int currentIndex = 0;
 
-        // Sahifalarni va ularning kontentini vaqtincha saqlash uchun ro'yxat
         var tempPages = new List<FixedPage>();
 
         while (currentIndex < operations.Count)
@@ -881,7 +880,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
         public DateTime Date { get; set; }
         public decimal Debit { get; set; }
         public decimal Credit { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         // Sahifalash uchun qo'shimcha ma'lumot
         public int StartLineIndex { get; set; } // Bu qatorda Izoh qayerdan boshlanadi

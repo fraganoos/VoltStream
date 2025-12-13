@@ -1,42 +1,52 @@
 ﻿namespace VoltStream.Application.Features.Users.Commands;
 
+using AutoMapper;
+using BCrypt.Net;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
+using VoltStream.Domain.Enums;
 
 public record CreateUserCommand(
     string Username,
-    string Password) : IRequest<long>;
+    string Password,
+    string? Name,
+    UserRole Role,
+    string? Phone,
+    string? Email,
+    string? Address,
+    DateTime? DateOfBirth)
+    : IRequest<long>;
 
-public class CreateUserCommandHandler(
-    IAppDbContext context)
+public class CreateUserCommandHandler(IAppDbContext context, IMapper mapper)
     : IRequestHandler<CreateUserCommand, long>
 {
     public async Task<long> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        var exitUser = await context.Users.AnyAsync(u => u.Username == request.Username, cancellationToken);
+        var normalizedUsername = request.Username.ToNormalized();
+        var exitUser = await context.Users.AnyAsync(
+            u => u.NormalizedUsername == normalizedUsername,
+            cancellationToken);
 
         if (exitUser)
             throw new AlreadyExistException(nameof(User), nameof(request.Username), request.Username);
 
-        using var hmac = new HMACSHA512();
-        var salt = hmac.Key;
-        var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(request.Password));
-
-        var user = new User
+        if (!string.IsNullOrEmpty(request.Email))
         {
-            Username = request.Username,
-            NormalizedUsername = request.Username.ToNormalized(),
-            PasswordHash = hash,
-            PasswordSalt = salt
-        };
+            var normalizedEmail = request.Email.ToNormalized();
+            var exitEmail = await context.Users.AnyAsync(
+                u => u.NormalizedEmail == normalizedEmail,
+                cancellationToken);
+
+            if (exitEmail)
+                throw new AlreadyExistException(nameof(User), nameof(request.Email), request.Email);
+        }
+
+        var user = mapper.Map<User>(request);
+        user.PasswordHash = BCrypt.HashPassword(request.Password, workFactor: 12);
 
         context.Users.Add(user);
         await context.SaveAsync(cancellationToken);

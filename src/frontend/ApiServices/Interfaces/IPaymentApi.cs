@@ -10,6 +10,9 @@ public interface IPaymentApi
     [Post("/payments")]
     Task<Response<long>> CreateAsync([Body] PaymentRequest request);
 
+    [Post("/payments/discount")]
+    Task<Response<long>> ApplyAsync([Body] ApplyDiscountRequest request);
+
     [Put("/payments")]
     Task<Response<bool>> UpdateAsync([Body] PaymentRequest request);
 

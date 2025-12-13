@@ -14,9 +14,6 @@ public record SaleResponse
     public long CustomerOperationId { get; set; }
     public CustomerOperationResponse CustomerOperation { get; set; } = default!;
 
-    public long DiscountOperationId { get; set; }
-    public DiscountOperationResponse DiscountOperation { get; set; } = default!;
-
     public long CurrencyId { get; set; }
     public CurrencyResponse Currency { get; set; } = default!;
 

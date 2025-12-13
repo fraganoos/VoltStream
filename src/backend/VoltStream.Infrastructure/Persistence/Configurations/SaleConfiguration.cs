@@ -16,12 +16,6 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
                .HasForeignKey(si => si.SaleId)
                .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(s => s.DiscountOperation)
-               .WithOne(dope => dope.Sale)
-               .HasForeignKey<Sale>(s => s.DiscountOperationId)
-               .IsRequired(false)
-               .OnDelete(DeleteBehavior.Cascade);
-
         builder.HasOne(s => s.CustomerOperation)
                .WithOne(co => co.Sale)
                .HasForeignKey<Sale>(s => s.CustomerOperationId)

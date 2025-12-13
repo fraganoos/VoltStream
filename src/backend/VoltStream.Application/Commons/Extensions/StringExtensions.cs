@@ -2,8 +2,8 @@
 
 public static class StringExtensions
 {
-    public static string ToNormalized(this string value) =>
-        value.Trim().ToUpperInvariant();
+    public static string ToNormalized(this string? value) =>
+        value?.Trim()?.ToUpperInvariant()!;
 
     public static string Trimmer(this string value, int length)
     {

@@ -3,9 +3,9 @@
 public record WarehouseStockForProductDto
 {
     public long Id { get; set; }
-    public decimal RollCount { get; set; }  // rulon soni
-    public decimal LengthPerRoll { get; set; }  //rulon uzunligi
-    public decimal TotalLength { get; set; } // jami uzunlik
+    public decimal RollCount { get; set; }
+    public decimal LengthPerRoll { get; set; }
+    public decimal TotalLength { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal DiscountRate { get; set; }
 
