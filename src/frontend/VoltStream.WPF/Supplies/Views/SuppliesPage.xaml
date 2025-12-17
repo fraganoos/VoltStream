@@ -45,9 +45,15 @@
                                FontSize="14" />
                     </StackPanel>
                 </Grid>
-                <Grid Grid.Row="0"
-                      Grid.Column="1">
-                    <controls:UserCalendar x:Name="supplyDate"
+
+                <Grid Grid.Row="0" Grid.Column="1">
+
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition/>
+						<ColumnDefinition/>
+					</Grid.ColumnDefinitions>
+
+					<controls:UserCalendar x:Name="supplyDate"
                                            VerticalAlignment="Center"
                                            HorizontalAlignment="Left"
                                            Width="150"
@@ -56,8 +62,21 @@
                                            GotFocus="SupplyDate_GotFocus"
                                            LostFocus="SupplyDate_LostFocus"
                                            utils:EnterKeyTab.IsEnabled="True" />
-                </Grid>
-                <Grid Grid.Row="1"
+
+					<ComboBox x:Name="cbxUnit"
+                              Grid.Column="1"
+                              IsEditable="True"
+                              StaysOpenOnEdit="True"
+                              Margin="0,0,10,0"
+                              DisplayMemberPath="Name"
+                              SelectedValuePath="Id"
+                              VerticalAlignment="Center"
+                              FontSize="14"
+                              utils:EnterKeyTab.IsEnabled="True"/>
+				</Grid>
+                
+
+				<Grid Grid.Row="1"
                       Grid.Column="0">
                     <StackPanel Orientation="Horizontal"
                                 Margin="10,0">
@@ -118,7 +137,7 @@
                 </Grid>
                 <Grid Grid.Row="2"
                       Grid.Column="0">
-                    <Label Content="Rulon metr:"
+                    <Label Content="To'plamda:"
                            VerticalAlignment="Center"
                            Margin="10,0"
                            FontSize="14" />
@@ -141,8 +160,7 @@
                              utils:EnterKeyTab.IsEnabled="True" />
 
                     <TextBlock Grid.Column="1"
-                               Text="Rulon soni:"
-                               Style="{StaticResource FloatingLabelStyle}"
+                               Text="To'plam soni:"
                                VerticalAlignment="Center"
                                HorizontalAlignment="Right"
                                FontSize="14"
@@ -160,7 +178,7 @@
                 </Grid>
                 <Grid Grid.Row="3"
                       Grid.Column="0">
-                    <Label Content="Jami metr:"
+                    <Label Content="Jami:"
                            VerticalAlignment="Center"
                            Margin="10,0"
                            FontSize="14" />
@@ -183,7 +201,7 @@
                              utils:EnterKeyTab.IsEnabled="True"
                              IsReadOnly="True" />
                     <Label Grid.Column="1"
-                           Content="Narxi m.:"
+                           Content="Narxi:"
                            VerticalAlignment="Center"
                            Margin="10,0"
                            FontSize="14" />
@@ -321,7 +339,7 @@
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Rulon soni"
+                <DataGridTextColumn Header="To'plam soni"
                                     Binding="{Binding RollCount, StringFormat=N2}"
                                     Width="*">
                     <DataGridTextColumn.ElementStyle>
@@ -341,7 +359,7 @@
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Rulon metr"
+                <DataGridTextColumn Header="To'plamda"
                                     Binding="{Binding LengthPerRoll, StringFormat=N2}"
                                     Width="*">
                     <DataGridTextColumn.ElementStyle>
@@ -363,7 +381,7 @@
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Jami metr"
+                <DataGridTextColumn Header="Jami"
                                     Binding="{Binding TotalLength, StringFormat=N2}"
                                     Width="*">
                     <DataGridTextColumn.ElementStyle>

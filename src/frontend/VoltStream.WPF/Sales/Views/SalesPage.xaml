@@ -11,7 +11,7 @@
     xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
     Title="SalesPage"
     d:DesignHeight="450"
-    d:DesignWidth="800"
+    d:DesignWidth="1100"
     Loaded="Page_Loaded"
     mc:Ignorable="d">
     <Grid>
@@ -329,7 +329,7 @@
                 IsHitTestVisible="False"
                 Style="{StaticResource FloatingLabelStyle}"
                 Tag="{Binding ElementName=cbxPerRollCount}"
-                Text="Rulon metr" />
+                Text="To'plamda" />
             <ComboBox
                 x:Name="cbxPerRollCount"
                 Grid.Column="2"
@@ -344,7 +344,7 @@
                 IsHitTestVisible="False"
                 Style="{StaticResource FloatingLabelStyle}"
                 Tag="{Binding ElementName=txtRollCount}"
-                Text="Rulon soni" />
+                Text="To'plam soni" />
             <TextBox
                 x:Name="txtRollCount"
                 Grid.Column="3"
@@ -360,7 +360,7 @@
                 IsHitTestVisible="False"
                 Style="{StaticResource FloatingLabelStyle}"
                 Tag="{Binding ElementName=txtQuantity}"
-                Text="Jami metr" />
+                Text="Jami" />
             <TextBox
                 x:Name="txtQuantity"
                 Grid.Column="4"
@@ -470,8 +470,8 @@
                     utils:DataGridRowNumbering.IsEnabled="True"
                     SelectionUnit="FullRow">
                     <DataGrid.Resources>
-                        <Style x:Key="RightAlignedText" TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Right" />
+						<Style x:Key="RightAlignedText" TargetType="TextBlock">
+							<Setter Property="HorizontalAlignment" Value="Right" />
                             <Setter Property="TextAlignment" Value="Right" />
                         </Style>
                     </DataGrid.Resources>
@@ -486,17 +486,18 @@
                             Width="*"
                             Binding="{Binding PerRollCount, Mode=TwoWay}"
                             ElementStyle="{StaticResource RightAlignedText}"
-                            Header="Rulon metr" />
+                            Header="To'plamda" />
                         <DataGridTextColumn
                             Width="*"
                             Binding="{Binding RollCount, Mode=TwoWay, Converter={StaticResource ToStringConverter}}"
                             ElementStyle="{StaticResource RightAlignedText}"
-                            Header="Rulon soni" />
+                            Header="To'plam soni" />
                         <DataGridTextColumn
                             Width="*"
                             Binding="{Binding Quantity, Mode=TwoWay, Converter={StaticResource ToStringConverter}}"
                             ElementStyle="{StaticResource RightAlignedText}"
-                            Header="Jami metr" />
+                            
+                            Header="Jami" />
                         <DataGridTextColumn
                             Width="*"
                             utils:NumericTextBox.IsNumeric="True"

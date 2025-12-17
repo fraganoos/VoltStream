@@ -18,9 +18,26 @@ public partial class SaleEditPage : Page
         InitializeComponent();
         viewModel = ActivatorUtilities.CreateInstance<SaleEditViewModel>(services, saleData);
         DataContext = viewModel;
-        btnAdd.Click += AddButton_Click;
 
-        FocusNavigator.AttachEnterNavigation(
+        Loaded += Page_Loaded;
+    }
+
+    private void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        RegisterFocusNavigation();
+    }
+
+    private async void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (dataGrid.SelectedItem is SaleItemViewModel item)
+        {
+            await viewModel.EditItem(item);
+        }
+    }
+
+    private void RegisterFocusNavigation()
+    {
+        FocusNavigator.RegisterElements(
             [
                 calendar.calendar,
                 cbxCustomer,
@@ -43,21 +60,7 @@ public partial class SaleEditPage : Page
                 btnAdd,
                 btnCancel
             ]);
-    }
 
-    private void AddButton_Click(object sender, RoutedEventArgs e)
-    {
-        Dispatcher.BeginInvoke(new Action(() =>
-        {
-            cbxCategory.Focus();
-        }), System.Windows.Threading.DispatcherPriority.Input);
-    }
-
-    private async void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-    {
-        if (dataGrid.SelectedItem is SaleItemViewModel item)
-        {
-            await viewModel.EditItem(item);
-        }
+        FocusNavigator.SetFocusRedirect(btnAdd, cbxCategory);
     }
 }

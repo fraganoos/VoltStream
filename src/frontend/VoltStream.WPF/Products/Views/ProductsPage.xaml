@@ -207,7 +207,7 @@
                 <DataGridTextColumn
                     Width="*"
                     Binding="{Binding RollLength, StringFormat={}{0:N0}}"
-                    Header="Rulon uzunligi">
+                    Header="To'plamda">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="TextAlignment" Value="Right" />
@@ -230,7 +230,7 @@
                 <DataGridTextColumn
                     Width="*"
                     Binding="{Binding Quantity, StringFormat={}{0:N0}}"
-                    Header="Rulon soni">
+                    Header="To'plam soni">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="TextAlignment" Value="Right" />
