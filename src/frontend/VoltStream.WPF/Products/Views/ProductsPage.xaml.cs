@@ -18,5 +18,4 @@ public partial class ProductsPage : Page
         vm = new ProductPageViewModel(services);
         DataContext = vm;
     }
-
 }
