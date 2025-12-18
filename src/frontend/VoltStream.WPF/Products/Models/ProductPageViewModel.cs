@@ -40,7 +40,6 @@ public partial class ProductPageViewModel : ViewModelBase
 
     [ObservableProperty] private decimal? finalAmount;
 
-    // --- Boshlang‘ich ma’lumotlarni yuklash
     private async Task LoadInitialDataAsync()
     {
         await Task.WhenAll(
@@ -58,13 +57,10 @@ public partial class ProductPageViewModel : ViewModelBase
         SelectedCategory = null;
         SelectedProduct = null;
 
-        // Barcha productlarni qayta tiklaymiz
         Products = new ObservableCollection<ProductResponse>(AllProducts);
 
-        // Datagridni to‘liq ko‘rsatamiz
         FilteredProductItems = new ObservableCollection<ProductItemViewModel>(ProductItems);
 
-        // Jami summa qayta hisoblanadi
         FinalAmount = FilteredProductItems.Sum(x => x.TotalAmount);
     }
 
@@ -93,7 +89,6 @@ public partial class ProductPageViewModel : ViewModelBase
             {
                 var worksheet = workbook.Worksheets.Add("Mahsulotlar");
 
-                // --- Headerlar
                 worksheet.Cell(1, 1).Value = "Mahsulot turi";
                 worksheet.Cell(1, 2).Value = "Nomi";
                 worksheet.Cell(1, 3).Value = "Rulon uzunligi";
@@ -103,12 +98,10 @@ public partial class ProductPageViewModel : ViewModelBase
                 worksheet.Cell(1, 7).Value = "Narxi";
                 worksheet.Cell(1, 8).Value = "Umumiy summa";
 
-                // --- Header format
                 var headerRange = worksheet.Range("A1:H1");
                 headerRange.Style.Font.Bold = true;
                 headerRange.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
 
-                // --- Ma'lumotlarni yozish
                 int row = 2;
                 foreach (var item in FilteredProductItems)
                 {
@@ -136,7 +129,7 @@ public partial class ProductPageViewModel : ViewModelBase
                     worksheet.Cell(row, 8).Value = item.TotalAmount;
                     worksheet.Cell(row, 8).Value = (decimal)item.TotalAmount!;
                     worksheet.Cell(row, 8).Style.NumberFormat.Format = "#,##0.00";
-                    // --- Raqamli ustunlar o‘ngga tekislansin
+
                     worksheet.Range(row, 3, row, 8)
                         .Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Right;
 
@@ -144,7 +137,6 @@ public partial class ProductPageViewModel : ViewModelBase
                     row++;
                 }
 
-                // --- Jami qatorini qo‘shamiz
                 worksheet.Cell(row, 1).Value = "Jami";
                 worksheet.Cell(row, 1).Style.Font.Bold = true;
                 worksheet.Cell(row, 8).Value = FinalAmount ?? 0;
@@ -153,12 +145,9 @@ public partial class ProductPageViewModel : ViewModelBase
                 worksheet.Cell(row, 8).Style.NumberFormat.Format = "#,##0.00";
                 worksheet.Cell(row, 8).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Right;
 
-
-                // --- Avtomatik ustun kengliklari
                 worksheet.Columns().AdjustToContents();
 
-                // Faqat TotalAmount ustunini header uzunligiga qarab belgilaymiz
-                double headerWidth = worksheet.Cell(1, 8).GetValue<string>().Length + 5; // “Umumiy summa” uzunligiga qarab
+                double headerWidth = worksheet.Cell(1, 8).GetValue<string>().Length + 5;
                 worksheet.Column(8).Width = headerWidth;
 
                 workbook.SaveAs(dialog.FileName);
@@ -219,18 +208,14 @@ public partial class ProductPageViewModel : ViewModelBase
         }
     }
 
-
-    // Create FixedDocument (A4), pages with grid table, footer and total.
-    // Uses FilteredProductItems and FinalAmount from your ViewModel.
     private FixedDocument CreateFixedDocumentForPrint()
     {
-        // Page size A4 at 96 DPI
-        double pageWidth = 793.700787;   // 8.27 * 96
-        double pageHeight = 1122.51969;  // 11.69 * 96
-        double margin = 40;              // page inner margin
+        double pageWidth = 793.700787;
+        double pageHeight = 1122.51969;
+        double margin = 40;
 
         var items = FilteredProductItems?.ToList() ?? [];
-        int rowsPerPage = 25; // adjust depending on row height — tweak if you need more/less per page
+        int rowsPerPage = 25;
 
         int totalPages = (int)Math.Ceiling((double)items.Count / rowsPerPage);
         if (totalPages == 0) totalPages = 1;
@@ -247,22 +232,18 @@ public partial class ProductPageViewModel : ViewModelBase
                 Background = Brushes.White
             };
 
-            // Root container with margin (we position it with Canvas)
             var rootGrid = new Grid
             {
                 Width = pageWidth - margin * 2,
                 Height = pageHeight - margin * 2
             };
-            // place rootGrid at (margin, margin)
             FixedPage.SetLeft(rootGrid, margin);
             FixedPage.SetTop(rootGrid, margin);
 
-            // Define rows: header (auto), table (*), footer (auto)
             rootGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             rootGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
             rootGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-            // --- Header
             var headerText = new TextBlock
             {
                 Text = "Mahsulotlar qoldig'i",
@@ -274,12 +255,9 @@ public partial class ProductPageViewModel : ViewModelBase
             Grid.SetRow(headerText, 0);
             rootGrid.Children.Add(headerText);
 
-            // --- Table (use Grid to draw rows/columns, wrap cell content in Border)
             var tableGrid = new Grid { ShowGridLines = false };
             Grid.SetRow(tableGrid, 1);
 
-            // Define 8 columns (you can adjust widths)
-            // We'll use proportional widths: you can tweak numbers to your layout
             tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.4, GridUnitType.Star) }); // CategoryResponse
             tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2.4, GridUnitType.Star) }); // Name
             tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star) }); // RollLength
@@ -289,7 +267,6 @@ public partial class ProductPageViewModel : ViewModelBase
             tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star) }); // Price
             tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.2, GridUnitType.Star) }); // TotalAmount
 
-            // Header row
             tableGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             string[] headers = ["Mahsulot turi", "Nomi", "Rulon uzunligi", "Rulon soni", "Jami", "O‘lchov", "Narxi", "Umumiy summa"];
             for (int c = 0; c < headers.Length; c++)
@@ -315,7 +292,6 @@ public partial class ProductPageViewModel : ViewModelBase
                 tableGrid.Children.Add(border);
             }
 
-            // Fill rows for this page
             var pageItems = items.Skip(p * rowsPerPage).Take(rowsPerPage).ToList();
             int startRowIndex = 1;
             foreach (var item in pageItems)
@@ -350,10 +326,9 @@ public partial class ProductPageViewModel : ViewModelBase
                         TextWrapping = TextWrapping.NoWrap
                     };
 
-                    // Right-align numeric columns (columns 2..4,6..7 based on zero-index)
                     if (c >= 2 && c <= 4 || c == 6 || c == 7)
                         cellText.TextAlignment = TextAlignment.Right;
-                    else if (c == 5) // unit center
+                    else if (c == 5)
                         cellText.TextAlignment = TextAlignment.Center;
                     else
                         cellText.TextAlignment = TextAlignment.Left;
@@ -367,13 +342,11 @@ public partial class ProductPageViewModel : ViewModelBase
                 startRowIndex++;
             }
 
-            // If last page, append total row inside the table (so it appears above footer)
             if (p == totalPages - 1)
             {
                 tableGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(26) });
                 int totalRowIndex = tableGrid.RowDefinitions.Count - 1;
 
-                // Merge first 6 columns in a single "Jami" cell
                 var mergeBorder = new Border
                 {
                     BorderThickness = new Thickness(0.5),
@@ -395,8 +368,6 @@ public partial class ProductPageViewModel : ViewModelBase
                 Grid.SetColumn(mergeBorder, 0);
                 Grid.SetColumnSpan(mergeBorder, 7);
                 tableGrid.Children.Add(mergeBorder);
-
-                // Total value in last column (right aligned)
                 var totalBorder = new Border
                 {
                     BorderThickness = new Thickness(0.5),
@@ -417,10 +388,8 @@ public partial class ProductPageViewModel : ViewModelBase
                 tableGrid.Children.Add(totalBorder);
             }
 
-            // Add tableGrid to root
             rootGrid.Children.Add(tableGrid);
-
-            // --- Footer row (page number)
+            
             var footerPanel = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
@@ -438,10 +407,8 @@ public partial class ProductPageViewModel : ViewModelBase
             footerPanel.Children.Add(pageNumberText);
             rootGrid.Children.Add(footerPanel);
 
-            // position rootGrid on page
             page.Children.Add(rootGrid);
 
-            // Wrap page into PageContent and add to document
             var pageContent = new PageContent();
             ((IAddChild)pageContent).AddChild(page);
             fixedDoc.Pages.Add(pageContent);
@@ -450,7 +417,6 @@ public partial class ProductPageViewModel : ViewModelBase
         return fixedDoc;
     }
 
-    // --- Ombordagi mahsulotlar
     public async Task LoadWarehouseItemsAsync()
     {
         try
@@ -478,6 +444,7 @@ public partial class ProductPageViewModel : ViewModelBase
                         RollLength = item.LengthPerRoll,
                         Quantity = item.RollCount,
                         Price = item.UnitPrice,
+                        Unit = item.Product.Unit,
                         TotalCount = (int)item.TotalLength,
                     });
                 }
@@ -489,12 +456,10 @@ public partial class ProductPageViewModel : ViewModelBase
         }
     }
 
-    // --- Kategoriya bo‘yicha filtr
     partial void OnSelectedCategoryChanged(CategoryResponse? value)
     {
         if (value != null)
         {
-            // ComboBox uchun mahsulotlarni faqat tanlangan kategoriyadan olish
             var filteredProducts = AllProducts
                 .Where(p => p.CategoryId == value.Id)
                 .ToList();
@@ -503,13 +468,11 @@ public partial class ProductPageViewModel : ViewModelBase
             foreach (var product in filteredProducts)
                 Products.Add(product);
 
-            // Agar tanlangan product boshqa kategoriyaga tegishli bo‘lsa, tozalaymiz
             if (SelectedProduct != null && SelectedProduct.CategoryId != value.Id)
                 SelectedProduct = null;
         }
         else
         {
-            // Agar kategoriya olib tashlansa — barcha mahsulotlarni qaytaramiz
             Products.Clear();
             foreach (var product in AllProducts)
                 Products.Add(product);
@@ -518,13 +481,11 @@ public partial class ProductPageViewModel : ViewModelBase
         ApplyFilter();
     }
 
-    // --- ProductResponse tanlanganda DataGrid filtrlansin
     partial void OnSelectedProductChanged(ProductResponse? value)
     {
         ApplyFilter();
     }
 
-    // --- Kategoriya yuklash
     public async Task LoadCategoriesAsync()
     {
         try
@@ -540,7 +501,6 @@ public partial class ProductPageViewModel : ViewModelBase
         }
     }
 
-    // --- Mahsulotlarni yuklash
     public async Task LoadProductsAsync()
     {
         try
@@ -550,8 +510,6 @@ public partial class ProductPageViewModel : ViewModelBase
             if (response.IsSuccess)
             {
                 AllProducts = mapper.Map<ObservableCollection<ProductResponse>>(response.Data!);
-
-                // Default holatda barcha productlar ComboBox’da ko‘rinadi
                 Products.Clear();
                 foreach (var product in AllProducts)
                     Products.Add(product);
@@ -563,7 +521,6 @@ public partial class ProductPageViewModel : ViewModelBase
         }
     }
 
-    // --- Filtrlash funksiyasi (DataGrid uchun)
     private void ApplyFilter()
     {
         IEnumerable<ProductItemViewModel> filtered = ProductItems;
@@ -578,7 +535,6 @@ public partial class ProductPageViewModel : ViewModelBase
         FinalAmount = FilteredProductItems.Sum(x => x.TotalAmount);
     }
 
-    // --- Har bir product item o‘zgarishida summa qayta hisoblanadi
     private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(ProductItemViewModel.TotalAmount))

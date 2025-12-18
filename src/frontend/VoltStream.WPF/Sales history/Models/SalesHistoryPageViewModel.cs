@@ -419,6 +419,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                             RollLength = item.LengthPerRoll,
                             Quantity = item.RollCount,
                             Price = item.UnitPrice,
+                            Unit = item.Product.Unit,
                             TotalCount = (int)item.TotalLength,
                             Customer = sale.Customer?.Name
                         });

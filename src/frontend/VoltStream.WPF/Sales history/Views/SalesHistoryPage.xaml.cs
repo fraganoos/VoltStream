@@ -44,7 +44,7 @@ public partial class SalesHistoryPage : Page
 
     }
 
-    private async void endDate_LostFocus(object sender, RoutedEventArgs e)
+    private async void EndDate_LostFocus(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(endDate.dateTextBox.Text))
         {
