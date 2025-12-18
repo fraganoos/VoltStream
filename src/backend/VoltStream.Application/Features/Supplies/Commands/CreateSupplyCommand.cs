@@ -14,6 +14,7 @@ public record CreateSupplyCommand(
     long ProductId,
     string ProductName,
     decimal RollCount,
+    string Unit,
     decimal LengthPerRoll,
     decimal TotalLength,
     decimal UnitPrice,
@@ -59,7 +60,8 @@ public class CreateSupplyCommandHandler(
             {
                 Name = request.ProductName.Trim(),
                 NormalizedName = request.ProductName.Trim().ToUpper(),
-                CategoryId = newCategoryId
+                CategoryId = newCategoryId,
+                Unit = request.Unit
             };
 
             context.Products.Add(product);

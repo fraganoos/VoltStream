@@ -8,7 +8,8 @@ using VoltStream.Domain.Entities;
 
 public record UpdateProductCommand(
     long Id,
-    string Name,
+    string Unit,
+string Name,
     long CategoryId)
     : IRequest<bool>;
 

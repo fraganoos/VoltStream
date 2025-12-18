@@ -5,16 +5,16 @@ using VoltStream.WPF.Commons;
 
 public partial class ProductItemViewModel : ViewModelBase
 {
-    [ObservableProperty] private DateTimeOffset? operationDate;                    //amaliyot sanasi
-    [ObservableProperty] private string? category = string.Empty;           // Mahsulot turi
-    [ObservableProperty] private string? name = string.Empty;               // Nomi
-    [ObservableProperty] private decimal? rollLength;                       // Rulon uzunligi
-    [ObservableProperty] private decimal? quantity;                             // Rulon soni
-    [ObservableProperty] private int? totalCount;                           // Jami (rulon uzunligi * soni)
-    [ObservableProperty] private string? unit = "metr";                     // O‘lchov birligi
-    [ObservableProperty] private decimal? price;                            // Narxi
+    [ObservableProperty] private DateTimeOffset? operationDate;
+    [ObservableProperty] private string? category = string.Empty;
+    [ObservableProperty] private string? name = string.Empty;
+    [ObservableProperty] private decimal? rollLength;
+    [ObservableProperty] private decimal? quantity;
+    [ObservableProperty] private int? totalCount;
+    [ObservableProperty] private string? unit;
+    [ObservableProperty] private decimal? price;
     [ObservableProperty] private decimal? totalAmount;
-    [ObservableProperty] private string? customer = string.Empty;                     // Mijoz
+    [ObservableProperty] private string? customer = string.Empty;
 
     partial void OnPriceChanged(decimal? value)
         => ReCalculateTotalAmount();

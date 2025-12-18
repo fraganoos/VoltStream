@@ -101,7 +101,7 @@
                         VerticalAlignment="Center"
                         utils:EnterKeyTab.IsEnabled="True"
                         FontSize="14"
-                        LostFocus="endDate_LostFocus"
+                        LostFocus="EndDate_LostFocus"
                         SelectedDate="{Binding EndDate, Mode=TwoWay}" />
                     <TextBlock
                         Grid.Column="3"

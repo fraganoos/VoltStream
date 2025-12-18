@@ -14,6 +14,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Commons.Services;
 using VoltStream.WPF.Sales.ViewModels;
 
 public partial class SuppliesPage : Page
@@ -250,6 +251,7 @@ public partial class SuppliesPage : Page
                 CategoryId = categoryId,
                 ProductId = productId,
                 RollCount = rollCount,
+                Unit = cbxUnit.Text,
                 LengthPerRoll = perRollCount,
                 TotalLength = totalQuantity,
                 ProductName = ((ProductResponse)cbxProduct.SelectedItem)?.Name ?? cbxProduct.Text ?? string.Empty,
