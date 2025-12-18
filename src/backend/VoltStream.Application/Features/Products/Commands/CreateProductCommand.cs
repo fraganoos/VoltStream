@@ -10,7 +10,8 @@ using VoltStream.Domain.Entities;
 
 public record CreateProductCommand(
     string Name,
-    long CategoryId)
+    string Unit,
+long CategoryId)
     : IRequest<long>;
 
 public class CreateProductCommandHandler(

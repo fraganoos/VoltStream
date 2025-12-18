@@ -7,10 +7,10 @@ using VoltStream.WPF.Commons;
 public partial class ProductViewModel : ViewModelBase
 {
     public long Id { get; set; }
-    [ObservableProperty] private string name = string.Empty;
-
     public long CategoryId { get; internal set; }
-    [ObservableProperty] private CategoryViewModel category = new();
 
+    [ObservableProperty] private string name = string.Empty;
+    [ObservableProperty] private string unit = string.Empty;
+    [ObservableProperty] private CategoryViewModel category = new();
     [ObservableProperty] private ObservableCollection<WarehouseStockViewModel> stocks = [];
 }
