@@ -65,14 +65,15 @@
 
 					<ComboBox x:Name="cbxUnit"
                               Grid.Column="1"
-                              IsEditable="True"
                               StaysOpenOnEdit="True"
                               Margin="0,0,10,0"
-                              DisplayMemberPath="Name"
-                              SelectedValuePath="Id"
                               VerticalAlignment="Center"
                               FontSize="14"
-                              utils:EnterKeyTab.IsEnabled="True"/>
+                              utils:EnterKeyTab.IsEnabled="True">
+
+						<ComboBoxItem IsSelected="True">metr</ComboBoxItem>
+						<ComboBoxItem >dona</ComboBoxItem>
+					</ComboBox>
 				</Grid>
                 
 

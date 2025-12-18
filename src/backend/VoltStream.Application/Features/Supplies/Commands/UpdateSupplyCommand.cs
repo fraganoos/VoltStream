@@ -14,6 +14,7 @@ public record UpdateSupplyCommand(
     string CategoryName,
     long ProductId,
     string ProductName,
+    string Unit,
     decimal RollCount,
     decimal LengthPerRoll,
     decimal TotalLength,
@@ -59,14 +60,15 @@ public class UpdateSupplyCommandHandler(
             }
 
             var product = await context.Products
-                .FirstOrDefaultAsync(p => p.NormalizedName == request.ProductName.Trim().ToUpper(), cancellationToken);
+                .FirstOrDefaultAsync(p => p.NormalizedName == request.ProductName.ToNormalized(), cancellationToken);
             if (product is null)
             {
                 product = new Product
                 {
                     Name = request.ProductName.Trim(),
                     NormalizedName = request.ProductName.Trim().ToUpper(),
-                    CategoryId = category.Id
+                    CategoryId = category.Id,
+                    Unit = request.Unit
                 };
                 context.Products.Add(product);
                 await context.SaveAsync(cancellationToken);

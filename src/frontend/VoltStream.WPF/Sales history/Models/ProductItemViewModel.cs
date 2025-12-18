@@ -11,7 +11,7 @@ public partial class ProductItemViewModel : ViewModelBase
     [ObservableProperty] private decimal? rollLength;
     [ObservableProperty] private decimal? quantity;
     [ObservableProperty] private int? totalCount;
-    [ObservableProperty] private string? unit = "metr";
+    [ObservableProperty] private string? unit;
     [ObservableProperty] private decimal? price;
     [ObservableProperty] private decimal? totalAmount;
     [ObservableProperty] private string? customer = string.Empty;
