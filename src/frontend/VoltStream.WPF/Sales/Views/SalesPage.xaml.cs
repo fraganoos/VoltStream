@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using VoltStream.WPF.Commons;
+using VoltStream.WPF.Commons.Utils;
 using VoltStream.WPF.Customer;
 using VoltStream.WPF.Sales.ViewModels;
 

@@ -389,7 +389,7 @@ public partial class ProductPageViewModel : ViewModelBase
             }
 
             rootGrid.Children.Add(tableGrid);
-            
+
             var footerPanel = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
