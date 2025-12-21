@@ -13,7 +13,7 @@
       Title="SupplyPage">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="140" />
+            <RowDefinition Height="175" />
             <RowDefinition Height="*" />
             <RowDefinition Height="30" />
         </Grid.RowDefinitions>
@@ -30,6 +30,7 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
@@ -63,17 +64,7 @@
                                            LostFocus="SupplyDate_LostFocus"
                                            utils:EnterKeyTab.IsEnabled="True" />
 
-					<ComboBox x:Name="cbxUnit"
-                              Grid.Column="1"
-                              StaysOpenOnEdit="True"
-                              Margin="0,0,10,0"
-                              VerticalAlignment="Center"
-                              FontSize="14"
-                              utils:EnterKeyTab.IsEnabled="True">
-
-						<ComboBoxItem IsSelected="True">metr</ComboBoxItem>
-						<ComboBoxItem >dona</ComboBoxItem>
-					</ComboBox>
+					
 				</Grid>
                 
 
@@ -200,29 +191,28 @@
                              Margin="0,0,10,0"
                              utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                              utils:EnterKeyTab.IsEnabled="True"
+                             IsTabStop="False"
                              IsReadOnly="True" />
                     <Label Grid.Column="1"
-                           Content="Narxi:"
+                           Content="O'lcho'vi:"
                            VerticalAlignment="Center"
                            Margin="10,0"
                            FontSize="14" />
-
-                    <TextBox Grid.Column="2"
-                             x:Name="txtPrice"
-                             VerticalAlignment="Center"
-                             HorizontalAlignment="Stretch"
-                             HorizontalContentAlignment="Right"
-                             FontSize="14"
-                             Margin="0,0,10,0"
-                             GotFocus="TxtPrice_GotFocus"
-                             PreviewMouseDown="TxtPrice_PreviewMouseDown"
-                             utils:NumericTextBox.IsNumeric="True"
-                             utils:EnterKeyTab.IsEnabled="True" />
+                    <ComboBox Grid.Column="2"
+                              x:Name="cbxUnit"
+                              StaysOpenOnEdit="True"
+                              Margin="0,0,10,0"
+                          VerticalAlignment="Center"
+                          FontSize="14"
+                          utils:EnterKeyTab.IsEnabled="True">
+                        <ComboBoxItem IsSelected="True">metr</ComboBoxItem>
+                        <ComboBoxItem >dona</ComboBoxItem>
+                    </ComboBox>
 
                 </Grid>
                 <Grid Grid.Row="4"
                       Grid.Column="0">
-                    <Label Content="Chegirma:"
+                    <Label Content="Narxi:"
                            VerticalAlignment="Center"
                            Margin="10,0"
                            FontSize="14" />
@@ -236,6 +226,22 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="0"
+                             x:Name="txtPrice"
+                             VerticalAlignment="Center"
+                             HorizontalAlignment="Stretch"
+                             HorizontalContentAlignment="Right"
+                             FontSize="14"
+                             Margin="0,0,10,0"
+                             GotFocus="TxtPrice_GotFocus"
+                             PreviewMouseDown="TxtPrice_PreviewMouseDown"
+                             utils:NumericTextBox.IsNumeric="True"
+                             utils:EnterKeyTab.IsEnabled="True" />
+                    <Label Grid.Column="1"
+                           Content="Chegirma: %"
+                           VerticalAlignment="Center"
+                           FontSize="14"
+                           Margin="-10,0,0,0" />
+                    <TextBox Grid.Column="2"
                              x:Name="tbxDiscountPercent"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
@@ -246,22 +252,17 @@
                              utils:EnterKeyTab.IsEnabled="True"
                              GotFocus="TbxDiscountPercent_GotFocus"
                              PreviewMouseDown="TbxDiscountPercent_PreviewMouseDown" />
-                    <Label Grid.Column="1"
-                           Content="%"
-                           VerticalAlignment="Center"
-                           FontSize="14"
-                           Margin="-10,0,0,0" />
-                    <Button Grid.Column="1"
+                </Grid>
+                    <Button Grid.Column="1" Grid.Row="5"
                             x:Name="addSupplyBtn"
                             Content=" Qo'shish  🗹"
-                            VerticalAlignment="Bottom"
+                            VerticalAlignment="Center"
                             FontWeight="DemiBold"
-                            Margin="84,0,10,4"
+                            Margin="2,4,10,4"
                             FontSize="14"
                             Click="AddSupplyBtn_Click"
                             Grid.ColumnSpan="2"
                             Height="27" />
-                </Grid>
             </Grid>
             <Grid Grid.Column="2">
                 <Border BorderBrush="Gray"
