@@ -1,19 +1,11 @@
-﻿namespace VoltStream.WPF.Commons;
+﻿namespace VoltStream.WPF.Commons.Utils;
 
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 public static class ComboBoxHelper
 {
-    /// <summary>
-    /// Проверка введённого текста в ComboBox.
-    /// </summary>
-    /// <returns>
-    /// true  – если введённый текст принят (есть в списке или разрешено добавить),  
-    /// false – если введённый текст отвергнут.
-    /// </returns>
     public static bool BeforeUpdate(
         object sender,
         KeyboardFocusChangedEventArgs e,
@@ -58,11 +50,10 @@ public static class ComboBoxHelper
             }
             if (string.Equals(value, inputText, StringComparison.OrdinalIgnoreCase))
             {
-                return false; // найден в списке
+                return false;
             }
         }
 
-        // не найден
         if (allow)
         {
             var result = MessageBox.Show($"{inputText} - {strInfo}: ro'yxatda yo'q. Yangi {strInfo} qo'shilsinmi?",
