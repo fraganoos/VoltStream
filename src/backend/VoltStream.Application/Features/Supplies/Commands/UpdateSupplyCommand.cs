@@ -86,9 +86,9 @@ public class UpdateSupplyCommandHandler(
                 {
                     product.CategoryId = category.Id;
                     // Also update Unit if changed? 
-                    if(!string.IsNullOrWhiteSpace(request.Unit) && product.Unit != request.Unit)
+                    if (!string.IsNullOrWhiteSpace(request.Unit) && product.Unit != request.Unit)
                         product.Unit = request.Unit;
-                        
+
                     context.Products.Update(product);
                     await context.SaveAsync(cancellationToken);
                 }
@@ -130,8 +130,8 @@ public class UpdateSupplyCommandHandler(
             supply.LengthPerRoll = request.LengthPerRoll;
             supply.TotalLength = request.TotalLength;
             supply.ProductId = product.Id;
-            //supply.UnitPrice = request.UnitPrice; // Update snapshot price too if Supply has it
-            //supply.DiscountRate = request.DiscountRate;
+            supply.UnitPrice = request.UnitPrice;
+            supply.DiscountRate = request.DiscountRate;
 
             await context.SaveAsync(cancellationToken);
             await context.CommitTransactionAsync(cancellationToken);

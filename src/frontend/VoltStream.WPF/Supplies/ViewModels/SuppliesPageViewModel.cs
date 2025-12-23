@@ -30,27 +30,27 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
         _ = LoadDataAsync();
     }
-        
+
     [ObservableProperty] private DateTime selectedDate;
     [ObservableProperty] private ObservableCollection<CategoryResponse> categories = [];
     [ObservableProperty] private CategoryResponse? selectedCategory;
-    
+
     // New Text Property for ComboBox
     [ObservableProperty] private string categoryText = string.Empty;
 
     [ObservableProperty] private ObservableCollection<ProductResponse> products = [];
     [ObservableProperty] private ProductResponse? selectedProduct;
-    
+
     // New Text Property for ComboBox
     [ObservableProperty] private string productText = string.Empty;
 
     // Form inputs
-    [ObservableProperty] private decimal perRollCount;
-    [ObservableProperty] private decimal rollCount;
-    [ObservableProperty] private decimal price;
-    [ObservableProperty] private decimal discountPercent; 
-    [ObservableProperty] private decimal totalMeters;
-    [ObservableProperty] private string unit = "metr";
+    [ObservableProperty] private decimal? perRollCount;
+    [ObservableProperty] private decimal? rollCount;
+    [ObservableProperty] private decimal? unitPrice;
+    [ObservableProperty] private decimal? discountRate;
+    [ObservableProperty] private decimal? totalQuantity;
+    [ObservableProperty] private string unit;
 
     [ObservableProperty] private ObservableCollection<SupplyViewModel> supplies = [];
     [ObservableProperty] private SupplyViewModel? selectedSupply;
@@ -95,8 +95,8 @@ public partial class SuppliesPageViewModel : ViewModelBase
         // Logic handled by ConfirmProductText called from View
     }
 
-    partial void OnPerRollCountChanged(decimal value) => CalculateTotal();
-    partial void OnRollCountChanged(decimal value) => CalculateTotal();
+    partial void OnPerRollCountChanged(decimal? value) => CalculateTotal();
+    partial void OnRollCountChanged(decimal? value) => CalculateTotal();
 
     #endregion Property Change Handlers
 
@@ -123,8 +123,8 @@ public partial class SuppliesPageViewModel : ViewModelBase
     {
         if (categoryId is null)
         {
-             var result = await productsApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
-             if (result.IsSuccess)
+            var result = await productsApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
+            if (result.IsSuccess)
                 Products = new ObservableCollection<ProductResponse>(result.Data);
         }
         else
@@ -147,7 +147,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
             Descending = true
         };
 
-        var result = await suppliesApi.Filter(filter).Handle(isLoading => IsLoading = IsLoading);
+        var result = await suppliesApi.Filter(filter).Handle(isLoading => IsLoading = isLoading);
         if (result.IsSuccess)
         {
             Supplies.Clear();
@@ -157,18 +157,18 @@ public partial class SuppliesPageViewModel : ViewModelBase
             }
         }
     }
-    
+
     private async Task LoadProductDetails(long productId)
     {
         var warehouseItems = await warehouseItemsApi.GetAllWarehouseItemsAsync().Handle();
         if (warehouseItems?.Data is not null)
         {
-             var item = warehouseItems.Data.FirstOrDefault(x => x.ProductId == productId);
-             if (item is not null)
-             {
-                 Price = item.UnitPrice;
-                 DiscountPercent = item.DiscountRate;
-             }
+            var item = warehouseItems.Data.FirstOrDefault(x => x.ProductId == productId);
+            if (item is not null)
+            {
+                UnitPrice = item.UnitPrice;
+                DiscountRate = item.DiscountRate;
+            }
         }
     }
 
@@ -187,19 +187,19 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
         var request = new SupplyRequest
         {
-            Id = IsEditing && EditingItemBackup is not null ? EditingItemBackup.Id : 0, 
+            Id = IsEditing && EditingItemBackup is not null ? EditingItemBackup.Id : 0,
             Date = SelectedDate.ToUniversalTime(),
             // Uses SelectedCategory.Id if exists, otherwise 0 for new
-            CategoryId = SelectedCategory?.Id ?? 0, 
+            CategoryId = SelectedCategory?.Id ?? 0,
             ProductId = SelectedProduct?.Id ?? 0,
-            RollCount = RollCount,
+            RollCount = RollCount ?? 0,
             Unit = Unit,
-            LengthPerRoll = PerRollCount,
-            TotalLength = TotalMeters,
+            LengthPerRoll = PerRollCount ?? 0,
+            TotalLength = TotalQuantity ?? 0,
             ProductName = ProductText,
             CategoryName = CategoryText,
-            UnitPrice = Price,
-            DiscountRate = DiscountPercent
+            UnitPrice = UnitPrice ?? 0,
+            DiscountRate = DiscountRate ?? 0
         };
 
         var isSuccess = false;
@@ -208,13 +208,13 @@ public partial class SuppliesPageViewModel : ViewModelBase
         if (IsEditing)
         {
             var result = await suppliesApi.UpdateSupplyAsync(request).Handle(isLoading => IsLoading = isLoading);
-            if(result.IsSuccess) isSuccess = true;
+            if (result.IsSuccess) isSuccess = true;
             else errorMsg = result.Message ?? "Mahsulotni yangilashda xatolik yuz berdi.";
         }
         else
         {
             var result = await suppliesApi.CreateSupplyAsync(request).Handle(isLoading => IsLoading = isLoading);
-            if(result.IsSuccess) isSuccess = true;
+            if (result.IsSuccess) isSuccess = true;
             else errorMsg = result.Message ?? "Mahsulot qo'shishda xatolik yuz berdi.";
         }
 
@@ -227,14 +227,14 @@ public partial class SuppliesPageViewModel : ViewModelBase
                 EditingItemBackup = null;
                 _editingItemIndex = -1;
             }
-            await LoadSuppliesAsync();
+            await LoadDataAsync();
         }
         else
         {
-             MessageBox.Show(errorMsg, "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(errorMsg, "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
-    
+
     [RelayCommand]
     private async Task EditItem(SupplyViewModel item)
     {
@@ -258,7 +258,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         IsEditing = true;
         EditingItemBackup = item;
         _editingItemIndex = Supplies.IndexOf(item);
-        
+
         Supplies.Remove(item);
 
         FillFormFromItem(item);
@@ -307,12 +307,12 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
     private bool IsFormDirty()
     {
-        if (!string.IsNullOrWhiteSpace(CategoryText) || 
+        if (!string.IsNullOrWhiteSpace(CategoryText) ||
             !string.IsNullOrWhiteSpace(ProductText) ||
-            RollCount > 0 || 
-            PerRollCount > 0 || 
-            Price > 0 || 
-            DiscountPercent > 0)
+            RollCount > 0 ||
+            PerRollCount > 0 ||
+            UnitPrice > 0 ||
+            DiscountRate > 0)
         {
             return true;
         }
@@ -323,11 +323,11 @@ public partial class SuppliesPageViewModel : ViewModelBase
     {
         if (SelectedCategory?.Id != item.CategoryId)
         {
-             var cat = Categories.FirstOrDefault(c => c.Id == item.CategoryId);
-             SelectedCategory = cat;
-             CategoryText = cat?.Name ?? item.CategoryName; 
-             
-             await LoadProductsAsync(item.CategoryId); 
+            var cat = Categories.FirstOrDefault(c => c.Id == item.CategoryId);
+            SelectedCategory = cat;
+            CategoryText = cat?.Name ?? item.CategoryName;
+
+            await LoadProductsAsync(item.CategoryId);
         }
 
         FilteringRequest request = new()
@@ -340,17 +340,17 @@ public partial class SuppliesPageViewModel : ViewModelBase
         };
 
         var response = await suppliesApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
-        if(!response.IsSuccess)
+        if (!response.IsSuccess)
         {
             Error = response.Message ?? "Ta'minot modelini yuklashda xatolik";
             return;
         }
 
         var supplyResponse = response.Data.FirstOrDefault();
-        if (supplyResponse is null) return; 
+        if (supplyResponse is null) return;
 
         var supply = MapToViewModel(supplyResponse);
-        
+
         var prod = supplyResponse.Product;
         var stock = prod.Stocks.FirstOrDefault();
         SelectedProduct = prod;
@@ -358,8 +358,8 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
         PerRollCount = item.LengthPerRoll;
         RollCount = item.RollCount;
-        Price = stock!.UnitPrice;
-        DiscountPercent = stock.DiscountRate;
+        UnitPrice = stock!.UnitPrice;
+        DiscountRate = stock.DiscountRate;
         CalculateTotal();
     }
 
@@ -367,15 +367,15 @@ public partial class SuppliesPageViewModel : ViewModelBase
     {
         SelectedCategory = null;
         CategoryText = string.Empty;
-        
+
         SelectedProduct = null;
         ProductText = string.Empty;
 
-        PerRollCount = 0;
-        RollCount = 0;
-        TotalMeters = 0;
-        Price = 0;
-        DiscountPercent = 0;
+        PerRollCount = null;
+        RollCount = null;
+        TotalQuantity = null;
+        UnitPrice = null;
+        DiscountRate = null;
     }
 
     private SupplyViewModel MapToViewModel(SupplyResponse response)
@@ -459,7 +459,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
     private void CalculateTotal()
     {
-        TotalMeters = PerRollCount * RollCount;
+        TotalQuantity = PerRollCount * RollCount;
     }
 
     #endregion Helper Methods

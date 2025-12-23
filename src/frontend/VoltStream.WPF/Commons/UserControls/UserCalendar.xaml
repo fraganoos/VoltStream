@@ -13,7 +13,7 @@
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0">
             <TextBox
-                x:Name="dateTextBox"
+                x:Name="TextBox"
                 Margin="0"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
@@ -29,8 +29,8 @@
                 IsTabStop="False" />
         </Grid>
         <Popup
-            x:Name="calendarPopup"
-            PlacementTarget="{Binding ElementName=dateTextBox}"
+            x:Name="Popup"
+            PlacementTarget="{Binding ElementName=TextBox}"
             StaysOpen="False">
             <Border BorderBrush="Aqua" BorderThickness="1">
                 <Calendar x:Name="calendar" SelectedDatesChanged="Calendar_SelectedDatesChanged" />

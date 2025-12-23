@@ -22,7 +22,7 @@ public partial class SalesHistoryPage : Page
     private async void beginDate_LostFocus(object sender, System.Windows.RoutedEventArgs e)
     {
         // 1. Agar foydalanuvchi sanani kiritmagan bo‘lsa
-        if (string.IsNullOrWhiteSpace(beginDate.dateTextBox.Text))
+        if (string.IsNullOrWhiteSpace(beginDate.TextBox.Text))
         {
             //MessageBox.Show("Sana kiritilmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
             beginDate.Focus();
@@ -30,7 +30,7 @@ public partial class SalesHistoryPage : Page
         }
 
         // 2. Qo‘lda yozilgan sanani DateTime ga o‘tkazamiz
-        if (DateTime.TryParse(beginDate.dateTextBox.Text, out DateTime parsedDate))
+        if (DateTime.TryParse(beginDate.TextBox.Text, out DateTime parsedDate))
         {
             beginDate.SelectedDate = parsedDate; // ✅ foydalanuvchi yozgan sana tanlangan bo‘ladi
         }
@@ -46,7 +46,7 @@ public partial class SalesHistoryPage : Page
 
     private async void EndDate_LostFocus(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(endDate.dateTextBox.Text))
+        if (string.IsNullOrWhiteSpace(endDate.TextBox.Text))
         {
             //MessageBox.Show("Sana kiritilmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
             endDate.Focus();
@@ -54,7 +54,7 @@ public partial class SalesHistoryPage : Page
         }
 
         // 2. Qo‘lda yozilgan sanani DateTime ga o‘tkazamiz
-        if (DateTime.TryParse(endDate.dateTextBox.Text, out DateTime parsedDate))
+        if (DateTime.TryParse(endDate.TextBox.Text, out DateTime parsedDate))
         {
             endDate.SelectedDate = parsedDate; // ✅ foydalanuvchi yozgan sana tanlangan bo‘ladi
         }

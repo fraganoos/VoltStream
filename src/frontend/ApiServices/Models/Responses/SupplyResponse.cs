@@ -7,6 +7,8 @@ public record SupplyResponse
     public decimal RollCount { get; set; }
     public decimal LengthPerRoll { get; set; }
     public decimal TotalLength { get; set; }
+    public decimal UnitPrice { get; set; }
+    public decimal DiscountRate { get; set; }
 
     public long ProductId { get; set; }
     public ProductResponse Product { get; set; } = default!;

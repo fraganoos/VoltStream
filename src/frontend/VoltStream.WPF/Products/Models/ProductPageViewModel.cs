@@ -523,7 +523,7 @@ public partial class ProductPageViewModel : ViewModelBase
 
     private void ApplyFilter()
     {
-        IEnumerable<ProductItemViewModel> filtered = ProductItems;
+        IEnumerable<ProductItemViewModel> filtered = ProductItems.Where(pi => pi.TotalCount > 0);
 
         if (SelectedCategory != null)
             filtered = filtered.Where(x => x.Category == SelectedCategory.Name);
