@@ -1,0 +1,466 @@
+namespace VoltStream.WPF.Supplies.ViewModels;
+
+using ApiServices.Extensions;
+using ApiServices.Interfaces;
+using ApiServices.Models;
+using ApiServices.Models.Requests;
+using ApiServices.Models.Responses;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
+using System.Collections.ObjectModel;
+using System.Windows;
+using VoltStream.WPF.Commons;
+
+public partial class SuppliesPageViewModel : ViewModelBase
+{
+    private readonly IProductsApi productsApi;
+    private readonly ICategoriesApi categoriesApi;
+    private readonly ISuppliesApi suppliesApi;
+    private readonly IWarehouseStocksApi warehouseItemsApi;
+
+    public SuppliesPageViewModel(IServiceProvider services)
+    {
+        productsApi = services.GetRequiredService<IProductsApi>();
+        categoriesApi = services.GetRequiredService<ICategoriesApi>();
+        suppliesApi = services.GetRequiredService<ISuppliesApi>();
+        warehouseItemsApi = services.GetRequiredService<IWarehouseStocksApi>();
+
+        SelectedDate = DateTime.Now;
+
+        _ = LoadDataAsync();
+    }
+        
+    [ObservableProperty] private DateTime selectedDate;
+    [ObservableProperty] private ObservableCollection<CategoryResponse> categories = [];
+    [ObservableProperty] private CategoryResponse? selectedCategory;
+    
+    // New Text Property for ComboBox
+    [ObservableProperty] private string categoryText = string.Empty;
+
+    [ObservableProperty] private ObservableCollection<ProductResponse> products = [];
+    [ObservableProperty] private ProductResponse? selectedProduct;
+    
+    // New Text Property for ComboBox
+    [ObservableProperty] private string productText = string.Empty;
+
+    // Form inputs
+    [ObservableProperty] private decimal perRollCount;
+    [ObservableProperty] private decimal rollCount;
+    [ObservableProperty] private decimal price;
+    [ObservableProperty] private decimal discountPercent; 
+    [ObservableProperty] private decimal totalMeters;
+    [ObservableProperty] private string unit = "metr";
+
+    [ObservableProperty] private ObservableCollection<SupplyViewModel> supplies = [];
+    [ObservableProperty] private SupplyViewModel? selectedSupply;
+
+    [ObservableProperty] private bool isEditing;
+    [ObservableProperty] private SupplyViewModel? editingItemBackup;
+    private int _editingItemIndex = -1;
+
+    #region Property Change Handlers
+
+    partial void OnSelectedDateChanged(DateTime value)
+    {
+        _ = LoadSuppliesAsync();
+    }
+
+    partial void OnSelectedCategoryChanged(CategoryResponse? value)
+    {
+        if (value is not null)
+        {
+            CategoryText = value.Name;
+            _ = LoadProductsAsync(value.Id);
+        }
+    }
+
+    partial void OnCategoryTextChanged(string value)
+    {
+        // Logic handled by ConfirmCategoryText called from View
+    }
+
+    partial void OnSelectedProductChanged(ProductResponse? value)
+    {
+        if (value is not null)
+        {
+            ProductText = value.Name;
+            Unit = value.Unit ?? "metr";
+            _ = LoadProductDetails(value.Id);
+        }
+    }
+
+    partial void OnProductTextChanged(string value)
+    {
+        // Logic handled by ConfirmProductText called from View
+    }
+
+    partial void OnPerRollCountChanged(decimal value) => CalculateTotal();
+    partial void OnRollCountChanged(decimal value) => CalculateTotal();
+
+    #endregion Property Change Handlers
+
+    #region Load Data
+
+    private async Task LoadDataAsync()
+    {
+        await Task.WhenAll(
+            LoadCategoriesAsync(),
+            LoadSuppliesAsync()
+        );
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        var result = await categoriesApi.GetAllAsync().Handle();
+        if (result.IsSuccess)
+        {
+            Categories = new ObservableCollection<CategoryResponse>(result.Data);
+        }
+    }
+
+    private async Task LoadProductsAsync(long? categoryId)
+    {
+        if (categoryId is null)
+        {
+             var result = await productsApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
+             if (result.IsSuccess)
+                Products = new ObservableCollection<ProductResponse>(result.Data);
+        }
+        else
+        {
+            var result = await productsApi.GetAllByCategoryIdAsync(categoryId.Value).Handle(isLoading => IsLoading = isLoading);
+            if (result.IsSuccess)
+                Products = new ObservableCollection<ProductResponse>(result.Data);
+        }
+    }
+
+    private async Task LoadSuppliesAsync()
+    {
+        var filter = new FilteringRequest
+        {
+            Filters = new()
+            {
+                ["date"] = [$"{SelectedDate:yyyy-MM-dd}"],
+                ["product"] = ["include:category"]
+            },
+            Descending = true
+        };
+
+        var result = await suppliesApi.Filter(filter).Handle(isLoading => IsLoading = IsLoading);
+        if (result.IsSuccess)
+        {
+            Supplies.Clear();
+            foreach (var item in result.Data)
+            {
+                Supplies.Add(MapToViewModel(item));
+            }
+        }
+    }
+    
+    private async Task LoadProductDetails(long productId)
+    {
+        var warehouseItems = await warehouseItemsApi.GetAllWarehouseItemsAsync().Handle();
+        if (warehouseItems?.Data is not null)
+        {
+             var item = warehouseItems.Data.FirstOrDefault(x => x.ProductId == productId);
+             if (item is not null)
+             {
+                 Price = item.UnitPrice;
+                 DiscountPercent = item.DiscountRate;
+             }
+        }
+    }
+
+    #endregion Load Data
+
+    #region Commands
+
+    [RelayCommand]
+    private async Task Save()
+    {
+        if (string.IsNullOrWhiteSpace(CategoryText) || string.IsNullOrWhiteSpace(ProductText))
+        {
+            MessageBox.Show("Kategoriya va Mahsulot nomi kiritilishi shart!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        var request = new SupplyRequest
+        {
+            Id = IsEditing && EditingItemBackup is not null ? EditingItemBackup.Id : 0, 
+            Date = SelectedDate.ToUniversalTime(),
+            // Uses SelectedCategory.Id if exists, otherwise 0 for new
+            CategoryId = SelectedCategory?.Id ?? 0, 
+            ProductId = SelectedProduct?.Id ?? 0,
+            RollCount = RollCount,
+            Unit = Unit,
+            LengthPerRoll = PerRollCount,
+            TotalLength = TotalMeters,
+            ProductName = ProductText,
+            CategoryName = CategoryText,
+            UnitPrice = Price,
+            DiscountRate = DiscountPercent
+        };
+
+        var isSuccess = false;
+        string errorMsg = "";
+
+        if (IsEditing)
+        {
+            var result = await suppliesApi.UpdateSupplyAsync(request).Handle(isLoading => IsLoading = isLoading);
+            if(result.IsSuccess) isSuccess = true;
+            else errorMsg = result.Message ?? "Mahsulotni yangilashda xatolik yuz berdi.";
+        }
+        else
+        {
+            var result = await suppliesApi.CreateSupplyAsync(request).Handle(isLoading => IsLoading = isLoading);
+            if(result.IsSuccess) isSuccess = true;
+            else errorMsg = result.Message ?? "Mahsulot qo'shishda xatolik yuz berdi.";
+        }
+
+        if (isSuccess)
+        {
+            ClearForm();
+            if (IsEditing)
+            {
+                IsEditing = false;
+                EditingItemBackup = null;
+                _editingItemIndex = -1;
+            }
+            await LoadSuppliesAsync();
+        }
+        else
+        {
+             MessageBox.Show(errorMsg, "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+    
+    [RelayCommand]
+    private async Task EditItem(SupplyViewModel item)
+    {
+        if (item is null) return;
+
+        if (IsFormDirty())
+        {
+            var result = MessageBox.Show(
+                "Formada saqlanmagan ma'lumotlar mavjud. Agar davom ettirsangiz, ular o'chib ketadi. Davom ettirishni istaysizmi?",
+                "Diqqat",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.No)
+                return;
+        }
+
+        if (_editingItemIndex > -1 && EditingItemBackup is not null)
+            Supplies.Insert(_editingItemIndex, EditingItemBackup);
+
+        IsEditing = true;
+        EditingItemBackup = item;
+        _editingItemIndex = Supplies.IndexOf(item);
+        
+        Supplies.Remove(item);
+
+        FillFormFromItem(item);
+    }
+
+    [RelayCommand]
+    private void CancelEdit()
+    {
+        if (IsEditing && EditingItemBackup is not null)
+        {
+            if (_editingItemIndex >= 0 && _editingItemIndex <= Supplies.Count)
+                Supplies.Insert(_editingItemIndex, EditingItemBackup);
+            else
+                Supplies.Add(EditingItemBackup);
+
+            ClearForm();
+            IsEditing = false;
+            EditingItemBackup = null;
+            _editingItemIndex = -1;
+        }
+    }
+
+    [RelayCommand]
+    private async Task DeleteItem(SupplyViewModel item)
+    {
+        if (item is null) return;
+
+        var result = MessageBox.Show("Haqiqatan ham o'chirmoqchimisiz?", "O'chirish", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (result == MessageBoxResult.Yes)
+        {
+            var response = await suppliesApi.DeleteSupplyAsync(item.Id).Handle();
+            if (response.IsSuccess)
+            {
+                Supplies.Remove(item);
+            }
+            else
+            {
+                MessageBox.Show($"O'chirishda xatolik: {response.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
+
+    #endregion Commands
+
+    #region Helper Methods
+
+    private bool IsFormDirty()
+    {
+        if (!string.IsNullOrWhiteSpace(CategoryText) || 
+            !string.IsNullOrWhiteSpace(ProductText) ||
+            RollCount > 0 || 
+            PerRollCount > 0 || 
+            Price > 0 || 
+            DiscountPercent > 0)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private async void FillFormFromItem(SupplyViewModel item)
+    {
+        if (SelectedCategory?.Id != item.CategoryId)
+        {
+             var cat = Categories.FirstOrDefault(c => c.Id == item.CategoryId);
+             SelectedCategory = cat;
+             CategoryText = cat?.Name ?? item.CategoryName; 
+             
+             await LoadProductsAsync(item.CategoryId); 
+        }
+
+        FilteringRequest request = new()
+        {
+            Filters = new()
+            {
+                ["product"] = ["include:stocks"],
+                ["id"] = [item.Id.ToString()]
+            }
+        };
+
+        var response = await suppliesApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
+        if(!response.IsSuccess)
+        {
+            Error = response.Message ?? "Ta'minot modelini yuklashda xatolik";
+            return;
+        }
+
+        var supplyResponse = response.Data.FirstOrDefault();
+        if (supplyResponse is null) return; 
+
+        var supply = MapToViewModel(supplyResponse);
+        
+        var prod = supplyResponse.Product;
+        var stock = prod.Stocks.FirstOrDefault();
+        SelectedProduct = prod;
+        ProductText = prod?.Name ?? item.ProductName;
+
+        PerRollCount = item.LengthPerRoll;
+        RollCount = item.RollCount;
+        Price = stock!.UnitPrice;
+        DiscountPercent = stock.DiscountRate;
+        CalculateTotal();
+    }
+
+    private void ClearForm()
+    {
+        SelectedCategory = null;
+        CategoryText = string.Empty;
+        
+        SelectedProduct = null;
+        ProductText = string.Empty;
+
+        PerRollCount = 0;
+        RollCount = 0;
+        TotalMeters = 0;
+        Price = 0;
+        DiscountPercent = 0;
+    }
+
+    private SupplyViewModel MapToViewModel(SupplyResponse response)
+    {
+        return new SupplyViewModel
+        {
+            Id = response.Id,
+            Date = response.Date,
+            CategoryId = response.Product?.CategoryId ?? 0,
+            CategoryName = response.Product?.Category?.Name ?? "",
+            ProductId = response.ProductId,
+            ProductName = response.Product?.Name ?? "",
+            RollCount = response.RollCount,
+            LengthPerRoll = response.LengthPerRoll,
+            TotalLength = response.TotalLength,
+            Unit = response.Product?.Unit ?? "metr"
+        };
+    }
+
+    public bool ConfirmCategoryText(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return true;
+
+        if (SelectedCategory is not null && string.Equals(SelectedCategory.Name, value, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        var existing = Categories.FirstOrDefault(c => string.Equals(c.Name, value, StringComparison.OrdinalIgnoreCase));
+        if (existing is not null)
+        {
+            SelectedCategory = existing;
+            return true;
+        }
+
+        var result = MessageBox.Show($"'{value}' bu to'plamda mavjud emas. Yangi kategoriya sifatida qo'shishni istaysizmi?",
+                            "Tasdiqlash",
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Question);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            SelectedCategory = null;
+            return true;
+        }
+        else
+        {
+            CategoryText = SelectedCategory?.Name ?? string.Empty;
+            return false;
+        }
+    }
+
+    public bool ConfirmProductText(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return true;
+
+        if (SelectedProduct is not null && string.Equals(SelectedProduct.Name, value, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        var existing = Products.FirstOrDefault(p => string.Equals(p.Name, value, StringComparison.OrdinalIgnoreCase));
+        if (existing is not null)
+        {
+            SelectedProduct = existing;
+            return true;
+        }
+
+        var result = MessageBox.Show($"'{value}' bu ro'yxatda mavjud emas. Yangi mahsulot sifatida qo'shishni istaysizmi?",
+                            "Tasdiqlash",
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Question);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            SelectedProduct = null;
+            return true;
+        }
+        else
+        {
+            ProductText = SelectedProduct?.Name ?? string.Empty;
+            return false;
+        }
+    }
+
+    private void CalculateTotal()
+    {
+        TotalMeters = PerRollCount * RollCount;
+    }
+
+    #endregion Helper Methods
+}

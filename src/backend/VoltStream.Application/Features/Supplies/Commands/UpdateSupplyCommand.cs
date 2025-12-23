@@ -42,9 +42,15 @@ public class UpdateSupplyCommandHandler(
                                        cancellationToken)
                 ?? throw new NotFoundException(nameof(WarehouseStock), nameof(supply.Id), supply.Id);
 
+            // Capture WarehouseId to ensure new stock stays in same warehouse
+            var warehouseId = oldStock.WarehouseId;
+
             // 3️⃣ Eski qiymatni revert qilish
             oldStock.RollCount -= supply.RollCount;
             oldStock.TotalLength -= supply.TotalLength;
+
+            // If oldStock becomes empty, should we delete it? 
+            // Current logic keeps it. Leaving as is to minimize regression risk unless requested.
 
             var category = await context.Categories
                 .FirstOrDefaultAsync(c => c.NormalizedName == request.CategoryName.ToNormalized(), cancellationToken);
@@ -73,17 +79,33 @@ public class UpdateSupplyCommandHandler(
                 context.Products.Add(product);
                 await context.SaveAsync(cancellationToken);
             }
+            else
+            {
+                // Fix: Update category if changed
+                if (product.CategoryId != category.Id)
+                {
+                    product.CategoryId = category.Id;
+                    // Also update Unit if changed? 
+                    if(!string.IsNullOrWhiteSpace(request.Unit) && product.Unit != request.Unit)
+                        product.Unit = request.Unit;
+                        
+                    context.Products.Update(product);
+                    await context.SaveAsync(cancellationToken);
+                }
+            }
 
             // 5️⃣ Yangi stockni topish yoki yaratish
             var newStock = await context.WarehouseStocks
                 .FirstOrDefaultAsync(ws => ws.ProductId == product.Id &&
-                                           ws.LengthPerRoll == request.LengthPerRoll,
+                                           ws.LengthPerRoll == request.LengthPerRoll &&
+                                           ws.WarehouseId == warehouseId, // Ensure match on Warehouse
                                        cancellationToken);
 
             if (newStock is null)
             {
                 newStock = new WarehouseStock
                 {
+                    WarehouseId = warehouseId, // Fix: Set WarehouseId
                     ProductId = product.Id,
                     RollCount = request.RollCount,
                     LengthPerRoll = request.LengthPerRoll,
@@ -97,6 +119,7 @@ public class UpdateSupplyCommandHandler(
             {
                 newStock.RollCount += request.RollCount;
                 newStock.TotalLength += request.TotalLength;
+                // Update pricing on existing stock too
                 newStock.UnitPrice = request.UnitPrice;
                 newStock.DiscountRate = request.DiscountRate;
             }
@@ -107,6 +130,8 @@ public class UpdateSupplyCommandHandler(
             supply.LengthPerRoll = request.LengthPerRoll;
             supply.TotalLength = request.TotalLength;
             supply.ProductId = product.Id;
+            //supply.UnitPrice = request.UnitPrice; // Update snapshot price too if Supply has it
+            //supply.DiscountRate = request.DiscountRate;
 
             await context.SaveAsync(cancellationToken);
             await context.CommitTransactionAsync(cancellationToken);

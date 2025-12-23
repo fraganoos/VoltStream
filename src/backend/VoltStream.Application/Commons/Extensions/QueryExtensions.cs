@@ -168,12 +168,12 @@ public static class QueryExtensions
                 ? TimeSpan.FromHours(timezoneOffset.Value)
                 : TimeSpan.Zero;
 
-            if (DateTimeOffset.TryParseExact(value, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dtDay))
+            if (DateTimeOffset.TryParseExact(value, "yyyy.MM.dd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dtDay))
             {
                 parsedStart = new DateTimeOffset(dtDay.Year, dtDay.Month, dtDay.Day, 0, 0, 0, offsetToApply);
                 parsedEnd = parsedStart.AddDays(1);
             }
-            else if (DateTimeOffset.TryParseExact(value, "MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dtMonth))
+            else if (DateTimeOffset.TryParseExact(value, "yyyy.MM", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dtMonth))
             {
                 parsedStart = new DateTimeOffset(dtMonth.Year, dtMonth.Month, 1, 0, 0, 0, offsetToApply);
                 parsedEnd = parsedStart.AddMonths(1);
