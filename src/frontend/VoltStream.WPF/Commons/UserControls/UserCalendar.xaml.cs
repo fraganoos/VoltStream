@@ -17,8 +17,8 @@ public partial class UserCalendar : UserControl
     public UserCalendar()
     {
         InitializeComponent();
-        dateTextBox.PreviewTextInput += DateTextBox_PreviewTextInput;
-        dateTextBox.TextChanged += DateTextBox_TextChanged;
+        TextBox.PreviewTextInput += DateTextBox_PreviewTextInput;
+        TextBox.TextChanged += DateTextBox_TextChanged;
         Loaded += UserCalendar_Loaded;
         SetDefaultDate();
     }
@@ -32,7 +32,7 @@ public partial class UserCalendar : UserControl
     private void UserCalendar_Loaded(object sender, RoutedEventArgs e)
     {
         if (SelectedDate is DateTime date)
-            dateTextBox.Text = date.ToString("dd.MM.yyyy");
+            TextBox.Text = date.ToString("dd.MM.yyyy");
     }
 
     private static void OnSelectedDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -41,11 +41,11 @@ public partial class UserCalendar : UserControl
         {
             if (e.NewValue is DateTime newDate)
             {
-                userCalendar.dateTextBox.Text = newDate.ToString("dd.MM.yyyy");
+                userCalendar.TextBox.Text = newDate.ToString("dd.MM.yyyy");
             }
             else
             {
-                userCalendar.dateTextBox.Text = string.Empty;
+                userCalendar.TextBox.Text = string.Empty;
             }
         }
     }
@@ -72,7 +72,7 @@ public partial class UserCalendar : UserControl
             _ = textBox.Text.Insert(textBox.CaretIndex, e.Text);
         }
 
-        if (dateTextBox.Text.Length > 10)
+        if (TextBox.Text.Length > 10)
         {
             e.Handled = true;
         }
@@ -126,7 +126,7 @@ public partial class UserCalendar : UserControl
 
     private void OpenCalendar_Click(object sender, RoutedEventArgs e)
     {
-        calendarPopup.IsOpen = true;
+        Popup.IsOpen = true;
     }
 
     private void Calendar_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
@@ -134,7 +134,7 @@ public partial class UserCalendar : UserControl
         if (calendar.SelectedDate.HasValue)
         {
             SelectedDate = calendar.SelectedDate.Value;
-            calendarPopup.IsOpen = false;
+            Popup.IsOpen = false;
         }
     }
 

@@ -904,7 +904,7 @@ public partial class SalesPage : Page
     private void supplyDate_LostFocus(object sender, RoutedEventArgs e)
     {
         // 1. Agar foydalanuvchi sanani kiritmagan bo‘lsa
-        if (string.IsNullOrWhiteSpace(saleDate.dateTextBox.Text))
+        if (string.IsNullOrWhiteSpace(saleDate.TextBox.Text))
         {
             MessageBox.Show("Sana kiritilmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
             saleDate.Focus();
@@ -912,7 +912,7 @@ public partial class SalesPage : Page
         }
 
         // 2. Qo‘lda yozilgan sanani DateTime ga o‘tkazamiz
-        if (DateTime.TryParse(saleDate.dateTextBox.Text, out DateTime parsedDate))
+        if (DateTime.TryParse(saleDate.TextBox.Text, out DateTime parsedDate))
         {
             saleDate.SelectedDate = parsedDate; // ✅ foydalanuvchi yozgan sana tanlangan bo‘ladi
         }

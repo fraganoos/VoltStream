@@ -90,40 +90,75 @@ public static class NumericTextBox
 
     private static void TextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (sender is not TextBox textBox) return;
+        if (sender is not TextBox textBox || !GetIsNumeric(textBox)) return;
 
-        string decimalSeparator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
-        string altSeparator = decimalSeparator == "." ? "," : ".";
-        if (textBox.Text.Contains(altSeparator))
+        if (!textBox.IsFocused) return;
+
+        int caretIndex = textBox.CaretIndex;
+        string originalText = textBox.Text;
+
+        string cleanText = originalText.Replace(" ", "").Replace(",", ".");
+
+        if (string.IsNullOrEmpty(cleanText)) return;
+
+        string[] parts = cleanText.Split('.');
+        string integerPart = parts[0];
+        string decimalPart = parts.Length > 1 ? parts[1] : null!;
+
+        string formattedInteger = "";
+        int count = 0;
+        for (int i = integerPart.Length - 1; i >= 0; i--)
         {
-            var newText = textBox.Text.Replace(altSeparator, decimalSeparator);
-            if (newText != textBox.Text)
+            if (count > 0 && count % 3 == 0)
+                formattedInteger = " " + formattedInteger;
+
+            formattedInteger = integerPart[i] + formattedInteger;
+            count++;
+        }
+
+        string newText = formattedInteger;
+        if (cleanText.Contains('.'))
+        {
+            newText += "." + decimalPart;
+        }
+
+        if (newText != originalText)
+        {
+            textBox.Text = newText;
+
+            int spacesBeforeCaret = originalText[..Math.Min(caretIndex, originalText.Length)].Count(c => c == ' ');
+            int cleanCharsBeforeCaret = Math.Min(caretIndex, originalText.Length) - spacesBeforeCaret;
+
+            int newCaretIndex = 0;
+            int charsCount = 0;
+            while (newCaretIndex < newText.Length && charsCount < cleanCharsBeforeCaret)
             {
-                var caret = textBox.CaretIndex;
-                textBox.Text = newText;
-                textBox.CaretIndex = Math.Min(caret, textBox.Text.Length);
+                if (newText[newCaretIndex] != ' ')
+                    charsCount++;
+                newCaretIndex++;
             }
+
+            textBox.CaretIndex = newCaretIndex;
         }
     }
 
     private static void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
-        if (sender is not TextBox textBox) { e.Handled = true; return; }
+        if (sender is not TextBox textBox) return;
 
-        if (textBox.SelectionLength == textBox.Text.Length && char.IsDigit(e.Text, 0))
+        bool isDigit = char.IsDigit(e.Text, 0);
+        bool isSeparator = e.Text == "." || e.Text == ",";
+
+        if (!isDigit && !isSeparator)
         {
-            e.Handled = false;
+            e.Handled = true;
             return;
         }
 
-        if (e.Text == "-")
+        if (isSeparator && textBox.Text.Contains('.'))
         {
-            e.Handled = textBox.CaretIndex != 0 || textBox.Text.Contains('-');
-            return;
+            e.Handled = true;
         }
-
-        int decimalDigits = GetDecimalDigits(textBox);
-        e.Handled = !IsTextNumeric(textBox.Text, e.Text, decimalDigits);
     }
 
     private static void OnPreviewKeyDown(object sender, KeyEventArgs e)
@@ -177,56 +212,37 @@ public static class NumericTextBox
 
     private static void FormatTextBoxText(TextBox textBox)
     {
-        var raw = textBox.Text;
-        if (string.IsNullOrWhiteSpace(raw)) return;
-
-        var groupSep = CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator;
-        var decSep = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
-        string toParse = raw.Replace(groupSep, string.Empty).Trim();
-
-        string altSep = decSep == "." ? "," : ".";
-        if (toParse.Contains(altSep))
-            toParse = toParse.Replace(altSep, decSep);
-
-        if (double.TryParse(toParse, NumberStyles.Number | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.CurrentCulture, out double value))
+        string raw = textBox.Text.Replace(" ", "").Replace(",", ".");
+        if (double.TryParse(raw, NumberStyles.Any, CultureInfo.InvariantCulture, out double value))
         {
-            int decimalDigits = GetDecimalDigits(textBox);
-            string format = "N" + decimalDigits;
-            string formatted = value.ToString(format, CultureInfo.CurrentCulture);
+            int digits = GetDecimalDigits(textBox);
 
-            if (textBox.Text != formatted)
+            var nfi = new NumberFormatInfo
             {
-                textBox.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    if (textBox.Text != formatted)
-                        textBox.Text = formatted;
-                }), System.Windows.Threading.DispatcherPriority.Normal);
-            }
+                NumberGroupSeparator = " ",
+                NumberDecimalSeparator = ".",
+                NumberGroupSizes = [3]
+            };
+
+            textBox.Text = value.ToString("N" + digits, nfi);
         }
     }
 
     private static bool IsTextNumeric(string? currentText, string newText, int decimalDigits)
     {
-        string decSep = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
-        string groupSep = CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator;
-        string altSep = decSep == "." ? "," : ".";
+        string combined = (currentText ?? "").Replace(" ", "").Replace(",", ".") + newText.Replace(",", ".");
 
-        string combined = (currentText ?? "") + newText;
-        combined = combined.Replace(groupSep, string.Empty);
-
-        combined = combined.Replace(altSep, decSep);
-
-        int sepCount = combined.Split([decSep], StringSplitOptions.None).Length - 1;
+        int sepCount = combined.Split('.').Length - 1;
         if (sepCount > 1) return false;
 
-        int sepIndex = combined.IndexOf(decSep, StringComparison.Ordinal);
+        int sepIndex = combined.IndexOf('.');
         if (sepIndex >= 0)
         {
             int afterSep = combined.Length - sepIndex - 1;
             if (afterSep > decimalDigits) return false;
         }
 
-        string pattern = @"^-?\d*(" + Regex.Escape(decSep) + @"\d{0," + decimalDigits + @"})?$";
-        return Regex.IsMatch(combined, pattern);
+        string pattern = @"^-?\d*\.?\d{0," + decimalDigits + @"}$";
+        return Regex.IsMatch(combined.Replace(" ", ""), pattern);
     }
 }
