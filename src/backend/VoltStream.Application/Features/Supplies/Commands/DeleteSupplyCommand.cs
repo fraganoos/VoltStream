@@ -38,7 +38,7 @@ public class DeleteSupplyCommandHandler(
             stock.RollCount -= supply.RollCount;
 
             // Supply ni soft delete qilish
-            supply.IsDeleted = true;
+            context.Supplies.Remove(supply);
 
             return await context.CommitTransactionAsync(cancellationToken);
         }

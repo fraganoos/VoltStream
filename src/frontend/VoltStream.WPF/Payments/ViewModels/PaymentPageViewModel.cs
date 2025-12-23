@@ -150,12 +150,11 @@ partial class PaymentPageViewModel : ViewModelBase
 
     private async Task LoadDatagrid()
     {
-        string date = Payment.PaidAt.ToString("dd.MM.yyyy");
         FilteringRequest request = new()
         {
             Filters = new()
             {
-                ["paidAt"] = [date],
+                ["paidAt"] = [$"{Payment.PaidAt:yyyy.MM.dd}"],
                 ["customer"] = ["include"],
                 ["currency"] = ["include"]
             }

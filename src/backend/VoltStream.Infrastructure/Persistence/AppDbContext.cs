@@ -2,8 +2,6 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using System.Threading;
-using System.Threading.Tasks;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
@@ -86,15 +84,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        builder.Entity<User>().HasData(
-            new User
-            {
-                Id = 1,
-                Username = "admin",
-                NormalizedUsername = "admin".ToNormalized(),
-                PasswordHash = "$2a$12$O3wXYFDxgXKacPH8rxQG6uZuAuw2dN7F4xOg14Wl02nFHckCabSPu",
-                CreatedAt = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero),
-                UpdatedAt = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero)
-            });
+        builder.Entity<User>().HasData(new User
+        {
+            Id = 1,
+            Username = "admin",
+            NormalizedUsername = "admin".ToNormalized(),
+            PasswordHash = "$2a$12$O3wXYFDxgXKacPH8rxQG6uZuAuw2dN7F4xOg14Wl02nFHckCabSPu",
+            CreatedAt = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            UpdatedAt = new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero)
+        });
     }
 }

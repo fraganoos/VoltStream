@@ -10,7 +10,6 @@ public record SupplyDto
     public decimal RollCount { get; set; }
     public decimal LengthPerRoll { get; set; }
     public decimal TotalLength { get; set; }
-    public DateTimeOffset CreatedAt { get; set; }
 
     public long ProductId { get; set; }
     public ProductDto Product { get; set; } = default!;
