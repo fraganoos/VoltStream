@@ -12,8 +12,7 @@ public class UserMappingProfile : Profile
         CreateMap<CreateUserCommand, User>()
             .ForMember(dest => dest.NormalizedEmail, opt => opt.MapFrom(src => src.Email.ToNormalized()))
             .ForMember(dest => dest.NormalizedName, opt => opt.MapFrom(src => src.Name.ToNormalized()))
-            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username.ToNormalized()))
-            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.Username.ToNormalized()))
+            .ForMember(dest => dest.NormalizedUsername, opt => opt.MapFrom(src => src.Username.ToNormalized()))
             .ForMember(dest => dest.DateOfBirth, opt => opt.MapFrom(src => src.DateOfBirth.HasValue
                                         ? src.DateOfBirth.Value.ToUniversalTime()
                                         : (DateTime?)null));

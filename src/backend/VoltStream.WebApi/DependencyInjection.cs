@@ -1,13 +1,11 @@
 ﻿namespace VoltStream.WebApi;
 
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Scalar.AspNetCore;
 using System.Text.Json.Serialization;
 using VoltStream.Application;
 using VoltStream.Infrastructure;
 using VoltStream.WebApi.Conventions;
-using VoltStream.WebApi.Extensions;
 using VoltStream.WebApi.Utils;
 
 public static class DependencyInjection
@@ -16,17 +14,10 @@ public static class DependencyInjection
     {
         services.AddApplicationServices();
         services.AddInfrastructureServices(conf);
-
-        // UDP-based discovery service
         services.AddHostedService<SimpleDiscoveryResponder>();
 
-        services.AddControllers(options =>
-            options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())))
-            .AddJsonOptions(opt => opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
-            .ConfigureApplicationPartManager(apm =>
-            {
-                apm.ApplicationParts.Add(new AssemblyPart(typeof(WebApiHostBuilder).Assembly));
-            });
+        services.AddControllers(opt => opt.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())))
+                .AddJsonOptions(opt => opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
         services.AddOpenApi();
     }
@@ -46,17 +37,11 @@ public static class DependencyInjection
         }
     }
 
-    public static void UseInfrastructure(this WebApplication app)
+    public static void UseVoltStreamPipeline(this WebApplication app)
     {
         app.UseHttpsRedirection();
         app.UseStaticFiles();
-
-        app.UseCors(s => s
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader());
-
+        app.UseCors(s => s.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
         app.UseAuthorization();
-        app.ApplyMigrations();
     }
 }

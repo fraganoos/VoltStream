@@ -5,7 +5,6 @@ using BCrypt.Net;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
-using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 using VoltStream.Domain.Enums;
@@ -26,9 +25,10 @@ public class CreateUserCommandHandler(IAppDbContext context, IMapper mapper)
 {
     public async Task<long> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        var normalizedUsername = request.Username.ToNormalized();
+        var user = mapper.Map<User>(request);
+
         var exitUser = await context.Users.AnyAsync(
-            u => u.NormalizedUsername == normalizedUsername,
+            u => u.NormalizedUsername == user.NormalizedUsername,
             cancellationToken);
 
         if (exitUser)
@@ -36,16 +36,14 @@ public class CreateUserCommandHandler(IAppDbContext context, IMapper mapper)
 
         if (!string.IsNullOrEmpty(request.Email))
         {
-            var normalizedEmail = request.Email.ToNormalized();
             var exitEmail = await context.Users.AnyAsync(
-                u => u.NormalizedEmail == normalizedEmail,
+                u => u.NormalizedEmail == user.NormalizedEmail,
                 cancellationToken);
 
             if (exitEmail)
                 throw new AlreadyExistException(nameof(User), nameof(request.Email), request.Email);
         }
 
-        var user = mapper.Map<User>(request);
         user.PasswordHash = BCrypt.HashPassword(request.Password, workFactor: 12);
 
         context.Users.Add(user);

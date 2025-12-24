@@ -19,7 +19,7 @@ public static class WebApiHostBuilder
 
         var app = builder.Build();
 
-        app.UseInfrastructure();
+        app.UseVoltStreamPipeline();
         app.UseOpenApiDocumentation();
         app.UseVoltStreamMiddlewares(logCallback);
 

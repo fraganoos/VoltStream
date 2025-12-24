@@ -1,3 +1,4 @@
+using VoltStream.Infrastructure;
 using VoltStream.WebApi;
 using VoltStream.WebApi.Middlewares;
 
@@ -10,8 +11,10 @@ var app = builder.Build();
 
 // Middleware pipeline
 app.UseMiddleware<ExceptionHandlerMiddleware>(); // Global exception handling
-app.UseInfrastructure(); // HTTPS, CORS, Auth
+app.UseVoltStreamPipeline(); // HTTPS, CORS, Auth
 app.UseOpenApiDocumentation(); // Scalar UI
+
+await app.UseInfrastructureDatabase();
 
 app.MapControllers();
 

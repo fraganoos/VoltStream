@@ -147,7 +147,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="0"
                              x:Name="tbxPerRollCount"
-                             Text="{Binding PerRollCount}"
+                             Text="{Binding PerRollCount, Mode=TwoWay}"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
                              HorizontalContentAlignment="Right"
@@ -165,7 +165,7 @@
                                Margin="0,0,5,0" />
                     <TextBox Grid.Column="2"
                              x:Name="tbxRollCount"
-                             Text="{Binding RollCount}"
+                             Text="{Binding RollCount, Mode=TwoWay}"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
                              Validation.ErrorTemplate="{x:Null}"    
@@ -375,8 +375,7 @@
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
                 <DataGridTextColumn Header="To'plam soni"
-                                    Binding="{Binding RollCount}"
-                             utils:NumericTextBox.IsNumeric="True"
+                                    Binding="{Binding RollCount, StringFormat=N2}"
                                     Width="*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -396,8 +395,7 @@
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
                 <DataGridTextColumn Header="To'plamda"
-                                    Binding="{Binding LengthPerRoll}"
-                             utils:NumericTextBox.IsNumeric="True"
+                                    Binding="{Binding LengthPerRoll, StringFormat=N2}"
                                     Width="*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
