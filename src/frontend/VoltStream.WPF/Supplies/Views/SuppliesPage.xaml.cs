@@ -1,7 +1,9 @@
 ﻿namespace VoltStream.WPF.Supplies.Views;
 
+using CommunityToolkit.Mvvm.Messaging;
 using System.Windows;
 using System.Windows.Controls;
+using VoltStream.WPF.Commons.Messages;
 using VoltStream.WPF.Commons.Services;
 using VoltStream.WPF.Supplies.ViewModels;
 
@@ -11,6 +13,11 @@ public partial class SuppliesPage : Page
     {
         InitializeComponent();
         DataContext = new SuppliesPageViewModel(services);
+
+        WeakReferenceMessenger.Default.Register<FocusControlMessage>(this, (r, m) =>
+        {
+            OnFocusRequestReceived(m.ControlName);
+        });
 
         Loaded += Page_Loaded;
     }
@@ -39,17 +46,11 @@ public partial class SuppliesPage : Page
         FocusNavigator.SetFocusRedirect(cancelBtn, cbxCategory);
     }
 
-    private void CbxCategory_LostFocus(object sender, RoutedEventArgs e)
+    private void OnFocusRequestReceived(string controlName)
     {
-        if (DataContext is SuppliesPageViewModel vm && sender is ComboBox cbx)
-            if (!vm.ConfirmCategoryText(cbx.Text))
-                FocusNavigator.FocusElement(cbx);
-    }
-
-    private void CbxProduct_LostFocus(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is SuppliesPageViewModel vm && sender is ComboBox cbx)
-            if (!vm.ConfirmProductText(cbx.Text))
-                FocusNavigator.FocusElement(cbx);
+        if (controlName == "Category")
+            FocusNavigator.FocusElement(cbxCategory);
+        else if (controlName == "Product")
+            FocusNavigator.FocusElement(cbxProduct);
     }
 }
