@@ -48,10 +48,12 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     // --- Boshlang‘ich ma’lumotlarni yuklash
     private async Task LoadInitialDataAsync()
     {
-        await LoadCategoriesAsync();
-        await LoadProductsAsync();
-        await LoadCustomersAsync();
-        await LoadSalesHistoryAsync();
+        await Task.WhenAll(
+            LoadCategoriesAsync(),
+            LoadProductsAsync(),
+            LoadCustomersAsync(),
+            LoadSalesHistoryAsync()
+        );
     }
 
     public async Task LoadCustomersAsync()
@@ -396,12 +398,12 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 {
                     ["Items"] = ["include:Product.Category"],
                     ["Customer"] = ["include"],
-                    ["date"] = [$">={BeginDate}", $"<{EndDate.AddDays(1)}"]
+                    ["date"] = [$">={BeginDate:o}", $"<{EndDate.AddDays(1):o}"]
                 }
             };
 
             var srvc = services.GetRequiredService<ISaleApi>();
-            var response = await srvc.Filtering(request).Handle();
+            var response = await srvc.Filtering(request).Handle(isLoading => IsLoading = isLoading);
 
             if (response.IsSuccess)
             {

@@ -2,6 +2,7 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Commons.ViewModels;
 
 public partial class WarehouseStockViewModel : ViewModelBase
 {

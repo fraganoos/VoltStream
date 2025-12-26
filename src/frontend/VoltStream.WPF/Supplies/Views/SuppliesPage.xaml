@@ -147,7 +147,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="0"
                              x:Name="tbxPerRollCount"
-                             Text="{Binding PerRollCount, Mode=TwoWay}"
+                             Text="{Binding PerRollCount, UpdateSourceTrigger=PropertyChanged}"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
                              HorizontalContentAlignment="Right"
@@ -165,7 +165,7 @@
                                Margin="0,0,5,0" />
                     <TextBox Grid.Column="2"
                              x:Name="tbxRollCount"
-                             Text="{Binding RollCount, Mode=TwoWay}"
+                             Text="{Binding RollCount, UpdateSourceTrigger=PropertyChanged}"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
                              Validation.ErrorTemplate="{x:Null}"    
@@ -191,7 +191,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="0"
                              x:Name="totalMeters"
-                             Text="{Binding TotalQuantity}"
+                             Text="{Binding TotalQuantity, UpdateSourceTrigger=PropertyChanged}"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
                              HorizontalContentAlignment="Right"
@@ -208,7 +208,7 @@
                            FontSize="14" />
                     <ComboBox Grid.Column="2"
                               x:Name="cbxUnit"
-                              Text="{Binding Unit}"
+                              Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged}"
                               StaysOpenOnEdit="True"
                               Margin="0,0,10,0"
                           VerticalAlignment="Center"
@@ -236,7 +236,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="0"
                              x:Name="txtUnitPrice"
-                             Text="{Binding UnitPrice}"
+                             Text="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged}"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
                              HorizontalContentAlignment="Right"
@@ -252,7 +252,7 @@
                            Margin="-10,0,0,0" />
                     <TextBox Grid.Column="2"
                              x:Name="tbxDiscountRate"
-                             Text="{Binding DiscountRate}"
+                             Text="{Binding DiscountRate, UpdateSourceTrigger=PropertyChanged}"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
                              HorizontalContentAlignment="Right"

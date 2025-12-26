@@ -1,8 +1,7 @@
-namespace VoltStream.WPF.Supplies.ViewModels;
+namespace VoltStream.WPF.Commons.ViewModels;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using VoltStream.WPF.Commons;
-using VoltStream.WPF.Commons.ViewModels;
 
 public partial class SupplyViewModel : ViewModelBase
 {

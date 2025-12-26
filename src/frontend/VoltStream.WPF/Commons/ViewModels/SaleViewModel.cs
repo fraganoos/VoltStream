@@ -1,10 +1,8 @@
-﻿namespace VoltStream.WPF.Turnovers.Models;
+﻿namespace VoltStream.WPF.Commons.ViewModels;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using VoltStream.WPF.Commons;
-using VoltStream.WPF.Commons.ViewModels;
-using VoltStream.WPF.Customer.ViewModels;
 using VoltStream.WPF.Sales.ViewModels;
 
 public partial class SaleViewModel : ViewModelBase
@@ -23,7 +21,6 @@ public partial class SaleViewModel : ViewModelBase
     [ObservableProperty] private string description = string.Empty;
     [ObservableProperty] private bool isDiscountApplied;
     [ObservableProperty] private CustomerOperationViewModel customerOperation = new();
-    [ObservableProperty] private DiscountOperationViewModel discountOperation = new();
     [ObservableProperty] private CurrencyViewModel currency = new();
     [ObservableProperty] private CustomerViewModel customer = new();
     [ObservableProperty] private ObservableCollection<SaleItemViewModel> items = [];

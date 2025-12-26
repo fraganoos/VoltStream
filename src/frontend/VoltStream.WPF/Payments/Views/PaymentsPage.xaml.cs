@@ -3,7 +3,6 @@
 using ApiServices.Extensions;
 using ApiServices.Models.Requests;
 using CommunityToolkit.Mvvm.Messaging;
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;

@@ -10,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
-using VoltStream.WPF.Customer.ViewModels;
 
 public partial class SalePageViewModel : ViewModelBase
 {
@@ -53,7 +52,6 @@ public partial class SalePageViewModel : ViewModelBase
 
     [ObservableProperty] private decimal? discount;
     [ObservableProperty] private bool isApplied;
-    [ObservableProperty] private DiscountOperationViewModel discountOperation = new();
 
     [ObservableProperty] private long currencyId;
     [ObservableProperty] private CurrencyViewModel currency = new();

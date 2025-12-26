@@ -7,10 +7,12 @@ using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.Windows;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Commons.ViewModels;
 
 public partial class SuppliesPageViewModel : ViewModelBase
 {
@@ -18,6 +20,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
     private readonly ICategoriesApi categoriesApi;
     private readonly ISuppliesApi suppliesApi;
     private readonly IWarehouseStocksApi warehouseItemsApi;
+    private readonly IMapper mapper;
 
     public SuppliesPageViewModel(IServiceProvider services)
     {
@@ -25,6 +28,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         categoriesApi = services.GetRequiredService<ICategoriesApi>();
         suppliesApi = services.GetRequiredService<ISuppliesApi>();
         warehouseItemsApi = services.GetRequiredService<IWarehouseStocksApi>();
+        mapper = services.GetRequiredService<IMapper>();
 
         SelectedDate = DateTime.Now;
 
@@ -32,14 +36,14 @@ public partial class SuppliesPageViewModel : ViewModelBase
     }
 
     [ObservableProperty] private DateTime selectedDate;
-    [ObservableProperty] private ObservableCollection<CategoryResponse> categories = [];
-    [ObservableProperty] private CategoryResponse? selectedCategory;
+    [ObservableProperty] private ObservableCollection<CategoryViewModel> categories = [];
+    [ObservableProperty] private CategoryViewModel? selectedCategory;
 
     // New Text Property for ComboBox
     [ObservableProperty] private string categoryText = string.Empty;
 
-    [ObservableProperty] private ObservableCollection<ProductResponse> products = [];
-    [ObservableProperty] private ProductResponse? selectedProduct;
+    [ObservableProperty] private ObservableCollection<ProductViewModel> products = [];
+    [ObservableProperty] private ProductViewModel? selectedProduct;
 
     // New Text Property for ComboBox
     [ObservableProperty] private string productText = string.Empty;
@@ -66,7 +70,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         _ = LoadSuppliesAsync();
     }
 
-    partial void OnSelectedCategoryChanged(CategoryResponse? value)
+    partial void OnSelectedCategoryChanged(CategoryViewModel? value)
     {
         if (value is not null)
         {
@@ -80,7 +84,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         // Logic handled by ConfirmCategoryText called from View
     }
 
-    partial void OnSelectedProductChanged(ProductResponse? value)
+    partial void OnSelectedProductChanged(ProductViewModel? value)
     {
         if (value is not null)
         {
@@ -115,7 +119,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         var result = await categoriesApi.GetAllAsync().Handle();
         if (result.IsSuccess)
         {
-            Categories = new ObservableCollection<CategoryResponse>(result.Data);
+            Categories = mapper.Map<ObservableCollection<CategoryViewModel>>(result.Data);
         }
     }
 
@@ -125,13 +129,13 @@ public partial class SuppliesPageViewModel : ViewModelBase
         {
             var result = await productsApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
             if (result.IsSuccess)
-                Products = new ObservableCollection<ProductResponse>(result.Data);
+                Products = mapper.Map<ObservableCollection<ProductViewModel>>(result.Data);
         }
         else
         {
             var result = await productsApi.GetAllByCategoryIdAsync(categoryId.Value).Handle(isLoading => IsLoading = isLoading);
             if (result.IsSuccess)
-                Products = new ObservableCollection<ProductResponse>(result.Data);
+                Products = mapper.Map<ObservableCollection<ProductViewModel>>(result.Data);
         }
     }
 
@@ -174,6 +178,13 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
     #endregion Load Data
 
+
+    partial void OnUnitPriceChanged(decimal? value)
+    {
+
+    }
+
+
     #region Commands
 
     [RelayCommand]
@@ -189,7 +200,6 @@ public partial class SuppliesPageViewModel : ViewModelBase
         {
             Id = IsEditing && EditingItemBackup is not null ? EditingItemBackup.Id : 0,
             Date = SelectedDate.ToUniversalTime(),
-            // Uses SelectedCategory.Id if exists, otherwise 0 for new
             CategoryId = SelectedCategory?.Id ?? 0,
             ProductId = SelectedProduct?.Id ?? 0,
             RollCount = RollCount ?? 0,
@@ -289,14 +299,14 @@ public partial class SuppliesPageViewModel : ViewModelBase
         var result = MessageBox.Show("Haqiqatan ham o'chirmoqchimisiz?", "O'chirish", MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (result == MessageBoxResult.Yes)
         {
-            var response = await suppliesApi.DeleteSupplyAsync(item.Id).Handle();
-            if (response.IsSuccess)
+            var ViewModel = await suppliesApi.DeleteSupplyAsync(item.Id).Handle();
+            if (ViewModel.IsSuccess)
             {
                 Supplies.Remove(item);
             }
             else
             {
-                MessageBox.Show($"O'chirishda xatolik: {response.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"O'chirishda xatolik: {ViewModel.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
@@ -330,36 +340,12 @@ public partial class SuppliesPageViewModel : ViewModelBase
             await LoadProductsAsync(item.CategoryId);
         }
 
-        FilteringRequest request = new()
-        {
-            Filters = new()
-            {
-                ["product"] = ["include:stocks"],
-                ["id"] = [item.Id.ToString()]
-            }
-        };
-
-        var response = await suppliesApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
-        if (!response.IsSuccess)
-        {
-            Error = response.Message ?? "Ta'minot modelini yuklashda xatolik";
-            return;
-        }
-
-        var supplyResponse = response.Data.FirstOrDefault();
-        if (supplyResponse is null) return;
-
-        var supply = MapToViewModel(supplyResponse);
-
-        var prod = supplyResponse.Product;
-        var stock = prod.Stocks.FirstOrDefault();
-        SelectedProduct = prod;
-        ProductText = prod?.Name ?? item.ProductName;
-
+        SelectedProduct = item.Product;
+        ProductText = item.ProductName;
         PerRollCount = item.LengthPerRoll;
         RollCount = item.RollCount;
-        UnitPrice = stock!.UnitPrice;
-        DiscountRate = stock.DiscountRate;
+        UnitPrice = item.UnitPrice;
+        DiscountRate = item.DiscountRate;
         CalculateTotal();
     }
 
@@ -376,22 +362,25 @@ public partial class SuppliesPageViewModel : ViewModelBase
         TotalQuantity = null;
         UnitPrice = null;
         DiscountRate = null;
+        Unit = null!;
     }
 
-    private SupplyViewModel MapToViewModel(SupplyResponse response)
+    private SupplyViewModel MapToViewModel(SupplyResponse viewModel)
     {
         return new SupplyViewModel
         {
-            Id = response.Id,
-            Date = response.Date,
-            CategoryId = response.Product?.CategoryId ?? 0,
-            CategoryName = response.Product?.Category?.Name ?? "",
-            ProductId = response.ProductId,
-            ProductName = response.Product?.Name ?? "",
-            RollCount = response.RollCount,
-            LengthPerRoll = response.LengthPerRoll,
-            TotalLength = response.TotalLength,
-            Unit = response.Product?.Unit ?? "metr"
+            Id = viewModel.Id,
+            Date = viewModel.Date,
+            CategoryId = viewModel.Product?.CategoryId ?? 0,
+            CategoryName = viewModel.Product?.Category?.Name ?? "",
+            ProductId = viewModel.ProductId,
+            ProductName = viewModel.Product?.Name ?? "",
+            RollCount = viewModel.RollCount,
+            LengthPerRoll = viewModel.LengthPerRoll,
+            TotalLength = viewModel.TotalLength,
+            UnitPrice = viewModel.UnitPrice,
+            DiscountRate = viewModel.DiscountRate,
+            Unit = viewModel.Product?.Unit ?? "metr"
         };
     }
 

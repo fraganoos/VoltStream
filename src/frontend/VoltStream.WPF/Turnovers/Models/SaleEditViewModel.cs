@@ -61,12 +61,12 @@ public partial class SaleEditViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<CustomerViewModel> customers = [];
     [ObservableProperty] private ObservableCollection<CurrencyViewModel> currencies = [];
     [ObservableProperty] private ObservableCollection<CategoryViewModel> categories = [];
-    [ObservableProperty] private ObservableCollection<Sales.ViewModels.ProductViewModel> products = [];
+    [ObservableProperty] private ObservableCollection<ProductViewModel> products = [];
     [ObservableProperty] private ObservableCollection<WarehouseStockViewModel> warehouseStocks = [];
     [ObservableProperty] private CustomerViewModel? selectedCustomer;
     [ObservableProperty] private CurrencyViewModel? selectedCurrency;
     [ObservableProperty] private CategoryViewModel? selectedCategory;
-    [ObservableProperty] private Sales.ViewModels.ProductViewModel? selectedProduct;
+    [ObservableProperty] private ProductViewModel? selectedProduct;
     [ObservableProperty] private WarehouseStockViewModel? selectedWarehouseStock;
     [ObservableProperty] private string categorySearchText = string.Empty;
     [ObservableProperty] private string productSearchText = string.Empty;
@@ -166,7 +166,7 @@ public partial class SaleEditViewModel : ViewModelBase
             .Handle(isLoading => IsLoading = isLoading);
 
         if (response.IsSuccess)
-            Products = mapper.Map<ObservableCollection<Sales.ViewModels.ProductViewModel>>(response.Data!);
+            Products = mapper.Map<ObservableCollection<ProductViewModel>>(response.Data!);
         else
             Error = response.Message ?? "Maxsulotlarni yuklashda xatolik!";
     }
@@ -316,7 +316,7 @@ public partial class SaleEditViewModel : ViewModelBase
         }
     }
 
-    partial void OnSelectedProductChanged(Sales.ViewModels.ProductViewModel? value)
+    partial void OnSelectedProductChanged(ProductViewModel? value)
     {
         if (isCalculating) return;
 
@@ -791,7 +791,7 @@ public partial class SaleEditViewModel : ViewModelBase
         Product = item.Product
     };
 
-    private Sales.ViewModels.ProductViewModel MapProduct(Sales.ViewModels.ProductViewModel source) => new()
+    private ProductViewModel MapProduct(ProductViewModel source) => new()
     {
         Id = source.Id,
         Name = source.Name,

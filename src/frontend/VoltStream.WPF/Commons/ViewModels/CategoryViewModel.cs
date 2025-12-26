@@ -1,4 +1,4 @@
-﻿namespace VoltStream.WPF.Sales.ViewModels;
+﻿namespace VoltStream.WPF.Commons.ViewModels;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
