@@ -6,9 +6,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-/// <summary>
-/// Логика взаимодействия для UserCalendar.xaml
-/// </summary>
 public partial class UserCalendar : UserControl
 {
     public static readonly DependencyProperty SelectedDateProperty =
@@ -140,12 +137,6 @@ public partial class UserCalendar : UserControl
 
     private static bool IsValidDateInput(string input) => DateInputRegex().IsMatch(input);
 
-    private static bool IsValidDateFormat(string input) => DateFormatRegex().IsMatch(input);
-
-
     [GeneratedRegex("[0-9]", RegexOptions.Compiled)]
     private static partial Regex DateInputRegex();
-
-    [GeneratedRegex(@"^(?:\d{2}\.\d{2}\.\d{2,4})?$", RegexOptions.Compiled)]
-    private static partial Regex DateFormatRegex();
 }

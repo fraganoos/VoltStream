@@ -9,15 +9,12 @@ public class CustomerMappingRegister : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        // Customer
         config.NewConfig<CustomerResponse, CustomerViewModel>();
         config.NewConfig<CustomerViewModel, CustomerRequest>();
 
-        // Account
         config.NewConfig<AccountResponse, AccountViewModel>();
         config.NewConfig<AccountViewModel, AccountResponse>();
 
-        // Customer Operation
         config.NewConfig<CustomerOperationResponse, CustomerOperationViewModel>();
     }
 }

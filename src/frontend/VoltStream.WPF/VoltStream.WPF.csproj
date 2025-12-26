@@ -10,9 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Customer\ViewModels\**" />
     <Compile Remove="Payments\Models\**" />
+    <EmbeddedResource Remove="Customer\ViewModels\**" />
     <EmbeddedResource Remove="Payments\Models\**" />
+    <None Remove="Customer\ViewModels\**" />
     <None Remove="Payments\Models\**" />
+    <Page Remove="Customer\ViewModels\**" />
     <Page Remove="Payments\Models\**" />
   </ItemGroup>
 
@@ -23,10 +27,6 @@
     <None Remove="Commons\Source\Images\LogoVolt.jpg" />
     <None Remove="Commons\Source\Images\oramkabel.png" />
     <None Remove="Commons\Source\Images\user-icon.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Customer\ViewModels\" />
   </ItemGroup>
 
   <ItemGroup>

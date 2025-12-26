@@ -40,9 +40,8 @@ public static class EnterKeyTab
     {
         if (e.Key == Key.Enter)
         {
-            e.Handled = true; // предотвращаем стандартное поведение
+            e.Handled = true;
 
-            // Enter-ni Tab-ga aylantirish uchun yangi KeyEventArgs yaratamiz
             KeyEventArgs tabKeyEvent = new(
                 Keyboard.PrimaryDevice,
                 Keyboard.PrimaryDevice.ActiveSource,
@@ -52,7 +51,6 @@ public static class EnterKeyTab
                 RoutedEvent = Keyboard.KeyDownEvent
             };
 
-            // Отправляем событие текущему элементу
             InputManager.Current.ProcessInput(tabKeyEvent);
         }
     }
@@ -60,7 +58,6 @@ public static class EnterKeyTab
 
 public static class FocusMovement
 {
-    // Метод для перевода фокуса по имени
     public static void MoveFocusToElement(string elementName, DependencyObject parent)
     {
         Window window = Window.GetWindow(parent);

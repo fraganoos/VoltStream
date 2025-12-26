@@ -38,30 +38,20 @@ public partial class SaleItem : ViewModelBase
         {
             isUpdating = true;
 
-            // 1️⃣ Agar rulon soni yoki perRollCount mavjud bo‘lsa quantity hisobla
             if ((Quantity is null || Quantity == 0) && RollCount.HasValue && PerRollCount.HasValue)
             {
                 Quantity = RollCount.Value * PerRollCount.Value;
                 OnPropertyChanged(nameof(Quantity));
             }
 
-            // 2️⃣ Sum hisoblash
             if (Price.HasValue && Quantity.HasValue)
-            {
                 Sum = Price.Value * Quantity.Value;
-            }
 
-            // 3️⃣ Discount (foiz yoki summa)
             if (PerDiscount.HasValue && PerDiscount.Value > 0 && Sum.HasValue)
-            {
                 Discount = Sum.Value * (PerDiscount.Value / 100);
-            }
             else if (Discount.HasValue && Sum.HasValue && Sum.Value > 0)
-            {
                 PerDiscount = (Discount.Value / Sum.Value) * 100;
-            }
 
-            // 4️⃣ Yakuniy summa
             if (Sum.HasValue && Discount.HasValue)
                 FinalSumProduct = Sum.Value - Discount.Value;
             else if (Sum.HasValue)

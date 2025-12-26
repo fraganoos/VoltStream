@@ -6,9 +6,6 @@ using System.Windows.Input;
 using VoltStream.WPF.Commons.ViewModels;
 using VoltStream.WPF.Settings.ViewModels;
 
-/// <summary>
-/// Interaction logic for SettingsPage.xaml
-/// </summary>
 public partial class SettingsPage : Page
 {
     private readonly SettingsPageViewModel vm;

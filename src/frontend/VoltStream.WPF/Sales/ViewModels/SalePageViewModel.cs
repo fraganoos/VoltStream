@@ -61,8 +61,6 @@ public partial class SalePageViewModel : ViewModelBase
 
     [ObservableProperty] private ObservableCollection<SaleItemViewModel> items = [];
 
-    // ============ for UI ================
-
     #region Commands
 
     [ObservableProperty] private SaleItemViewModel currentItem = new();

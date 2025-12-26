@@ -11,14 +11,12 @@ public partial class ConnectionSettingsWindow : Window
         InitializeComponent();
         DataContext = vm;
 
-        // Oynani yopish actionini o'rnatish
         vm.SetCloseAction(() =>
         {
             DialogResult = true;
             Close();
         });
 
-        // Focus ni Host TextBox ga o'rnatish
         Loaded += (s, e) => HostTextBox.Focus();
     }
 
@@ -28,7 +26,6 @@ public partial class ConnectionSettingsWindow : Window
         Close();
     }
 
-    // Oynani sichqoncha bilan sudrab yurish
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
     {
         base.OnMouseLeftButtonDown(e);

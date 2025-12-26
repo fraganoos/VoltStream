@@ -13,9 +13,6 @@ using VoltStream.WPF.Payments.PayDiscountWindow.Modela;
 using VoltStream.WPF.Payments.PayDiscountWindow.Views;
 using VoltStream.WPF.Payments.ViewModels;
 
-/// <summary>
-/// Логика взаимодействия для PaymentsPage.xaml
-/// </summary>
 public partial class PaymentsPage : Page
 {
     PaymentPageViewModel vm;

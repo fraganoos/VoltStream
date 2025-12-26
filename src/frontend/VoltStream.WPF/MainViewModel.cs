@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿namespace VoltStream.WPF.ViewModels;
+
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel;
@@ -17,16 +19,14 @@ using VoltStream.WPF.Turnovers.Views;
 
 public partial class MainViewModel : ViewModelBase
 {
-    private readonly INavigationService _navigationService;
-
-    private readonly IServiceProvider _services;
+    private readonly INavigationService navigationService;
+    private readonly IServiceProvider services;
+    private readonly NamozTimeService namozService;
 
     [ObservableProperty] private ApiConnectionViewModel apiConnection;
-    [ObservableProperty] private object? currentChildView; // Made nullable
+    [ObservableProperty] private object? currentChildView;
     [ObservableProperty] private string currentPageTitle = "Bosh sahifa";
     [ObservableProperty] private bool isSidebarCollapsed = false;
-
-    private readonly NamozTimeService _service = new();
 
     [ObservableProperty] private string bomdod = string.Empty;
     [ObservableProperty] private string quyosh = string.Empty;
@@ -35,108 +35,63 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string shom = string.Empty;
     [ObservableProperty] private string xufton = string.Empty;
     [ObservableProperty] private string dateLabel = string.Empty;
+    [ObservableProperty] private string regionName = string.Empty;
 
-    public MainViewModel(IServiceProvider services, INavigationService navigationService)
+    public MainViewModel(IServiceProvider services, INavigationService navigationService, NamozTimeService namozService)
     {
-        _services = services;
-        _navigationService = navigationService;
+        this.services = services;
+        this.navigationService = navigationService;
+        this.namozService = namozService;
 
         ApiConnection = services.GetRequiredService<ApiConnectionViewModel>();
 
-        // Subscribe to navigation changes
-        if (_navigationService is NavigationService navImpl)
+        if (this.navigationService is NavigationService navImpl)
         {
             navImpl.PropertyChanged += NavigationService_PropertyChanged;
         }
 
-        // Set initial view
-        _navigationService.Navigate(_services.GetRequiredService<DashboardPage>());
+        this.navigationService.Navigate(this.services.GetRequiredService<DashboardPage>());
     }
 
     public async Task LoadNamozTimesAsync()
     {
-        var data = await _service.GetTodayAsync();
-        if (data == null) return;
+        var data = await namozService.GetFullDataAsync();
+        if (data == null || data.PeriodTable == null) return;
 
-        Bomdod = data.Bomdod;
-        Quyosh = data.Quyosh;
-        Peshin = data.Peshin;
-        Asr = data.Asr;
-        Shom = data.Shom;
-        Xufton = data.Xufton;
-        DateLabel = data.Date;
+        string todayStr = DateTime.Now.ToString("dd.MM.yyyy");
+        var todayData = data.PeriodTable.FirstOrDefault(x => x.Date == todayStr);
+        var times = todayData?.Times ?? data.Today.Times;
+
+        Bomdod = times.Bomdod;
+        Quyosh = times.Quyosh;
+        Peshin = times.Peshin;
+        Asr = times.Asr;
+        Shom = times.Shom;
+        Xufton = times.Xufton;
+
+        DateLabel = todayData?.Date ?? DateTime.Now.ToString("dd.MM.yyyy");
+        RegionName = data.Meta.Region.Name;
     }
 
     private void NavigationService_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(NavigationService.CurrentView))
-        {
-            CurrentChildView = _navigationService.CurrentView;
-        }
+            CurrentChildView = navigationService.CurrentView;
     }
 
+    [RelayCommand] private void ShowDashboardView() => NavigateTo<DashboardPage>("Bosh sahifa");
+    [RelayCommand] private void ShowSalesView() => NavigateTo<SalesPage>("Savdo");
+    [RelayCommand] private void ShowSuppliesView() => NavigateTo<SuppliesPage>("Ishlab chiqarish");
+    [RelayCommand] private void ShowPaymentView() => NavigateTo<PaymentsPage>("Oldi-berdi");
+    [RelayCommand] private void ShowProductView() => NavigateTo<ProductsPage>("Mahsulotlar qoldig'i");
+    [RelayCommand] private void ShowSalesHistoryView() => NavigateTo<SalesHistoryPage>("Savdo Tarixi");
+    [RelayCommand] private void ShowDebitorCreditor() => NavigateTo<DebitorCreditorPage>("Debitor va Kreditor");
+    [RelayCommand] private void ShowTurnoversPage() => NavigateTo<TurnoversPage>("Oborotka");
+    [RelayCommand] private void ShowSettings() => NavigateTo<SettingsPage>("Sozlamalar");
 
-
-    [RelayCommand]
-    private void ShowDashboardView()
+    private void NavigateTo<T>(string title) where T : notnull
     {
-        _navigationService.Navigate(_services.GetRequiredService<DashboardPage>());
-        CurrentPageTitle = "Bosh sahifa";
+        navigationService.Navigate(services.GetRequiredService<T>());
+        CurrentPageTitle = title;
     }
-    [RelayCommand]
-    private void ShowSalesView()
-    {
-        _navigationService.Navigate(_services.GetRequiredService<SalesPage>());
-        CurrentPageTitle = "Savdo";
-    }
-
-    [RelayCommand]
-    private void ShowSuppliesView()
-    {
-        _navigationService.Navigate(_services.GetRequiredService<SuppliesPage>());
-        CurrentPageTitle = "Ishlab chiqarish";
-    }
-
-    [RelayCommand]
-    private void ShowPaymentView()
-    {
-        _navigationService.Navigate(_services.GetRequiredService<PaymentsPage>());
-        CurrentPageTitle = "Oldi-berdi";
-    }
-
-    [RelayCommand]
-    private void ShowProductView()
-    {
-        _navigationService.Navigate(_services.GetRequiredService<ProductsPage>());
-        CurrentPageTitle = "Mahsulotlar qoldig'i";
-    }
-
-    [RelayCommand]
-    private void ShowSalesHistoryView()
-    {
-        _navigationService.Navigate(_services.GetRequiredService<SalesHistoryPage>());
-        CurrentPageTitle = "Savdo Tarixi";
-    }
-
-    [RelayCommand]
-    private void ShowDebitorCreditor()
-    {
-        _navigationService.Navigate(_services.GetRequiredService<DebitorCreditorPage>());
-        CurrentPageTitle = "Debitor va Kreditor";
-    }
-
-    [RelayCommand]
-    private void ShowTurnoversPage()
-    {
-        _navigationService.Navigate(_services.GetRequiredService<TurnoversPage>());
-        CurrentPageTitle = "Oborotka";
-    }
-
-    [RelayCommand]
-    private void ShowSettings()
-    {
-        _navigationService.Navigate(_services.GetRequiredService<SettingsPage>());
-        CurrentPageTitle = "Sozlamalar";
-    }
-
 }

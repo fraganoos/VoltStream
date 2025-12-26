@@ -3,9 +3,6 @@
 using System.Windows.Controls;
 using VoltStream.WPF.Debitors.Models;
 
-/// <summary>
-/// Interaction logic for DebitorCreditorPage.xaml
-/// </summary>
 public partial class DebitorCreditorPage : Page
 {
     private readonly IServiceProvider service;
