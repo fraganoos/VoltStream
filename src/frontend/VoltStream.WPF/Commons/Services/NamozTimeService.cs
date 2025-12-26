@@ -2,89 +2,63 @@
 
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 public class NamozTimeService
 {
-    private static readonly string ApiUrl =
-        "https://namoz-vaqti.uz/?format=json&lang=lotin&period=month&region=qoqon-shahri";
-    private static readonly string CachePath =
-        Path.Combine(AppContext.BaseDirectory, "namoz_times.json");
-
-    public async Task<NamozData?> GetTodayAsync()
+    private const string ApiUrl = "https://namoz-vaqti.uz/?format=json&lang=lotin&period=month&region=qoqon-shahri";
+    private static readonly string CachePath = Path.Combine(AppContext.BaseDirectory, "namoz_times.json");
+    private static readonly HttpClient _httpClient = new();
+    private static readonly JsonSerializerOptions _jsonOptions = new()
     {
-        NamozApiResponse? data = await LoadOrUpdateAsync();
-        if (data?.PeriodTable is null || data.PeriodTable.Count == 0)
-            return null;
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+    };
 
-        string today = DateTime.Now.ToString("dd.MM.yyyy");
-        var todayRecord = data.PeriodTable.FirstOrDefault(d => d.Date == today)
-                          ?? data.PeriodTable.LastOrDefault();
-
-        if (todayRecord is null)
-            return null;
-
-        return new NamozData
-        {
-            Date = todayRecord.Date,
-            Bomdod = todayRecord.Times.Bomdod,
-            Quyosh = todayRecord.Times.Quyosh,
-            Peshin = todayRecord.Times.Peshin,
-            Asr = todayRecord.Times.Asr,
-            Shom = todayRecord.Times.Shom,
-            Xufton = todayRecord.Times.Xufton
-        };
-    }
-
-    private async Task<NamozApiResponse?> LoadOrUpdateAsync()
+    public async Task<NamozApiResponse?> GetFullDataAsync()
     {
+        NamozApiResponse? cachedData = null;
+
         if (File.Exists(CachePath))
         {
-            var json = await File.ReadAllTextAsync(CachePath);
-            var data = JsonSerializer.Deserialize<NamozApiResponse>(json);
-
-            var lastDateStr = data?.PeriodTable?.LastOrDefault()?.Date;
-            if (DateTime.TryParseExact(lastDateStr, "dd.MM.yyyy", null,
-                System.Globalization.DateTimeStyles.None, out var lastDate))
+            try
             {
-                lastDate = lastDate.AddDays(-15); // Refresh 15 days before the end of the month
-                if (lastDate < DateTime.Now.Date)
-                    if (await DownloadFromApiAsync() == null)
-                        return data;
+                var json = await File.ReadAllTextAsync(CachePath);
+                cachedData = JsonSerializer.Deserialize<NamozApiResponse>(json, _jsonOptions);
             }
-
-            return data;
+            catch { cachedData = null; }
         }
 
-        return await DownloadFromApiAsync();
+        if (cachedData?.PeriodTable != null && cachedData.PeriodTable.Count != 0)
+        {
+            var lastDateStr = cachedData.PeriodTable.Last().Date;
+            if (DateTime.TryParseExact(lastDateStr, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out var lastDate))
+            {
+                var daysRemaining = (lastDate.Date - DateTime.Now.Date).Days;
+
+                if (daysRemaining <= 10)
+                    _ = RefreshCacheAsync();
+
+                return cachedData;
+            }
+        }
+
+        return await RefreshCacheAsync();
     }
 
-    private async Task<NamozApiResponse?> DownloadFromApiAsync()
+    private async Task<NamozApiResponse?> RefreshCacheAsync()
     {
         try
         {
-            using var client = new HttpClient();
-            var response = await client.GetStringAsync(ApiUrl);
-
-            await File.WriteAllTextAsync(CachePath, response);
-            return JsonSerializer.Deserialize<NamozApiResponse>(response);
+            var response = await _httpClient.GetFromJsonAsync<NamozApiResponse>(ApiUrl, _jsonOptions);
+            if (response != null)
+            {
+                var json = JsonSerializer.Serialize(response, _jsonOptions);
+                await File.WriteAllTextAsync(CachePath, json);
+            }
+            return response;
         }
-        catch (Exception)
-        {
-            // Если API недоступен, просто возвращаем null, не выбрасываем исключение
-            return null;
-        }
+        catch { return null; }
     }
 }
-
-public class NamozData
-{
-    public string Date { get; set; } = string.Empty;
-    public string Bomdod { get; set; } = string.Empty;
-    public string Quyosh { get; set; } = string.Empty;
-    public string Peshin { get; set; } = string.Empty;
-    public string Asr { get; set; } = string.Empty;
-    public string Shom { get; set; } = string.Empty;
-    public string Xufton { get; set; } = string.Empty;
-}
-

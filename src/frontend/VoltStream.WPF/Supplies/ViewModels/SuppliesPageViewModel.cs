@@ -41,16 +41,13 @@ public partial class SuppliesPageViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<CategoryViewModel> categories = [];
     [ObservableProperty] private CategoryViewModel? selectedCategory;
 
-    // New Text Property for ComboBox
     [ObservableProperty] private string categoryText = string.Empty;
 
     [ObservableProperty] private ObservableCollection<ProductViewModel> products = [];
     [ObservableProperty] private ProductViewModel? selectedProduct;
 
-    // New Text Property for ComboBox
     [ObservableProperty] private string productText = string.Empty;
 
-    // Form inputs
     [ObservableProperty] private decimal? perRollCount;
     [ObservableProperty] private decimal? rollCount;
     [ObservableProperty] private decimal? unitPrice;

@@ -225,7 +225,6 @@ public partial class SaleEditViewModel : ViewModelBase
 
         await LoadItemRelatedDataAsync(item);
 
-        // Set initial previous values
         previousTotalLength = CurrentItem.TotalLength;
         previousRollCount = CurrentItem.RollCount;
     }
@@ -467,10 +466,8 @@ public partial class SaleEditViewModel : ViewModelBase
 
         var newTotalLength = CurrentItem.RollCount.Value * CurrentItem.LengthPerRoll.Value;
 
-        // Check warehouse availability before updating
         if (!CheckWarehouseAvailabilityForLength(newTotalLength, CurrentItem.RollCount.Value))
         {
-            // Restore previous value
             isCalculating = true;
             CurrentItem.RollCount = previousRollCount;
             isCalculating = false;
@@ -493,10 +490,8 @@ public partial class SaleEditViewModel : ViewModelBase
             ? (int)Math.Ceiling(newTotalLength / CurrentItem.LengthPerRoll.Value)
             : 0;
 
-        // Check warehouse availability
         if (!CheckWarehouseAvailabilityForLength(newTotalLength, newRollCount))
         {
-            // Restore previous value
             isCalculating = true;
             CurrentItem.TotalLength = previousTotalLength;
             isCalculating = false;
@@ -506,7 +501,6 @@ public partial class SaleEditViewModel : ViewModelBase
         var remainder = newTotalLength % CurrentItem.LengthPerRoll.Value;
         if (remainder > 0 && !ConfirmRemainder(remainder))
         {
-            // Restore previous value
             isCalculating = true;
             CurrentItem.TotalLength = previousTotalLength;
             isCalculating = false;
@@ -652,7 +646,6 @@ public partial class SaleEditViewModel : ViewModelBase
 
         var totalRollsInWarehouse = (int)(selectedStock.TotalLength / selectedStock.LengthPerRoll);
 
-        // Check if enough rolls are available
         if (requestedRolls > totalRollsInWarehouse)
         {
             var result = MessageBox.Show(
@@ -665,7 +658,6 @@ public partial class SaleEditViewModel : ViewModelBase
             return result == MessageBoxResult.Yes;
         }
 
-        // Check if enough total length is available
         if (requestedLength > selectedStock.TotalLength)
         {
             var result = MessageBox.Show(

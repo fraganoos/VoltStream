@@ -3,10 +3,6 @@
 using System.Windows.Controls;
 using VoltStream.WPF.Products.Models;
 
-
-/// <summary>
-/// Interaction logic for ProductsPage.xaml
-/// </summary>
 public partial class ProductsPage : Page
 {
     private ProductPageViewModel vm;

@@ -19,14 +19,12 @@ public partial class PaymentViewModel : ViewModelBase
     [ObservableProperty] private CurrencyViewModel currency = default!;
     [ObservableProperty] private CustomerViewModel customer = default!;
 
-    // for UI
     [ObservableProperty] private decimal? incomeAmount;
     [ObservableProperty] private decimal? expenseAmount;
 
     [ObservableProperty] private decimal? lastBalance;
     [ObservableProperty] private decimal? balance;
 
-    // UI control properties
     [ObservableProperty] private bool isIncomeEnabled = true;
     [ObservableProperty] private bool isExpenseEnabled = true;
 

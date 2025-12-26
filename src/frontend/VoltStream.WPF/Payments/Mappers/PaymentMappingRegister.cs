@@ -15,8 +15,6 @@ public class PaymentMappingRegister : IRegister
         config.NewConfig<CustomerResponse, CustomerViewModel>();
         config.NewConfig<CustomerViewModel, CustomerRequest>();
 
-
-        // --- Payment ---
         config.NewConfig<PaymentResponse, PaymentViewModel>()
             .Map(dest => dest.PaidAt, src => src.PaidAt.LocalDateTime);
 

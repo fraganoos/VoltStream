@@ -6,7 +6,6 @@ using ApiServices.Models;
 using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -14,9 +13,6 @@ using VoltStream.WPF.Commons.Utils;
 using VoltStream.WPF.Customer;
 using VoltStream.WPF.Sales.ViewModels;
 
-/// <summary>
-/// Логика взаимодействия для SalesPage.xaml
-/// </summary>
 public partial class SalesPage : Page
 {
     private readonly IServiceProvider services;
@@ -54,7 +50,6 @@ public partial class SalesPage : Page
         cbxProductName.PreviewLostKeyboardFocus += CbxProductName_PreviewLostKeyboardFocus;
         cbxProductName.LostFocus += CbxProductName_LostFocus;
 
-        //cbxPerRollCount.GotFocus += CbxPerRollCount_GotFocus;
         cbxPerRollCount.SelectionChanged += CbxPerRollCount_SelectionChanged;
         cbxPerRollCount.PreviewLostKeyboardFocus += CbxPerRollCount_PreviewLostKeyboardFocus;
 
@@ -219,7 +214,6 @@ public partial class SalesPage : Page
     {
         try
         {
-            // Сохраняем текущее выбранное значение
             var selectedValue = CustomerName.SelectedValue;
             var response = await customersApi.GetAllAsync();
 
@@ -397,7 +391,6 @@ public partial class SalesPage : Page
             if (decimal.TryParse(txtRollCount.Text, out decimal rollCount) &&
             decimal.TryParse(cbxPerRollCount.Text, out decimal perRollCount))
             {
-                // Umumiy uzunlik hisoblaymiz
                 decimal totalQuantity = rollCount * perRollCount;
                 txtQuantity.Text = totalQuantity.ToString("N2");
             }
@@ -412,7 +405,6 @@ public partial class SalesPage : Page
             decimal.TryParse(txtQuantity.Text, out decimal quantity) &&
             decimal.TryParse(txtPerDiscount.Text, out decimal discountPercent))
         {
-            // Umumiy narx hisoblaymiz
             decimal totalPrice = price * quantity;
             decimal discountAmount = totalPrice * (discountPercent / 100);
             decimal finalPrice = totalPrice - discountAmount;
@@ -457,13 +449,11 @@ public partial class SalesPage : Page
             categoryId = (long)cbxCategoryName.SelectedValue;
         }
         await LoadProductAsync(categoryId);
-        //cbxProductName.IsDropDownOpen = true;
     }
     private void CbxProductName_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (cbxProductName.SelectedItem is ProductResponse selectedProduct)
         {
-            // maxsulot tanlanganda, uning categoryId sini ham olamiz va cbxCategoryName dagini o'zgartiramiz
             cbxCategoryName.SelectedValue = selectedProduct.Category.Id;
             sale.CategoryId = selectedProduct.Category.Id;
             sale.CategoryName = (cbxCategoryName.ItemsSource as IEnumerable<CategoryResponse>)?
@@ -521,11 +511,10 @@ public partial class SalesPage : Page
         }
     }
 
-    private async Task LoadProductAsync(long? categoryId) // Загрузка продукции
+    private async Task LoadProductAsync(long? categoryId)
     {
         try
         {
-            // Сохраняем текущее выбранное значение
             var selectedValue = cbxProductName.SelectedValue;
             Response<List<ProductResponse>> response;
 
@@ -548,7 +537,7 @@ public partial class SalesPage : Page
                 cbxProductName.ItemsSource = products;
                 cbxProductName.DisplayMemberPath = "Name";
                 cbxProductName.SelectedValuePath = "Id";
-                // Восстанавливаем выбранное значение
+
                 if (selectedValue is not null)
                     cbxProductName.SelectedValue = selectedValue;
             }
@@ -647,7 +636,7 @@ public partial class SalesPage : Page
     {
         bool isSuccess = true;
         decimal perDiscount = 0;
-        // Tanlov maydonlarini tekshirish (ComboBox-lar)
+
         if (cbxCategoryName.SelectedValue == null)
         {
             MessageBox.Show("Kategoriya tanlanmagan.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -669,9 +658,6 @@ public partial class SalesPage : Page
             isSuccess = false;
         }
 
-        // Qiymat maydonlarini tekshirish (TextBox-lar)
-
-        // Rulon Soni (RollCount)
         else if (!int.TryParse(txtRollCount.Text, out int rollCount) || rollCount <= 0)
         {
             MessageBox.Show("Rulon soni kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -679,7 +665,6 @@ public partial class SalesPage : Page
             isSuccess = false;
         }
 
-        // Jami Miqdor (Quantity - Jami metr)
         else if (!decimal.TryParse(txtQuantity.Text, out decimal quantity) || quantity <= 0)
         {
             MessageBox.Show("Jami miqdor (metr) kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -687,7 +672,6 @@ public partial class SalesPage : Page
             isSuccess = false;
         }
 
-        // Narx (Price)
         else if (!decimal.TryParse(txtPrice.Text, out decimal price) || price <= 0)
         {
             MessageBox.Show("Narx kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -695,7 +679,6 @@ public partial class SalesPage : Page
             isSuccess = false;
         }
 
-        // Jami Summa (Sum)
         else if (!decimal.TryParse(txtSum.Text, out decimal sum) || sum <= 0)
         {
             MessageBox.Show("Jami summa kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -703,7 +686,6 @@ public partial class SalesPage : Page
             isSuccess = false;
         }
 
-        // Umumiy Summa (FinalSumProduct)
         else if (!decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSumProduct) || finalSumProduct <= 0)
         {
             MessageBox.Show("Umumiy summa kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -724,7 +706,6 @@ public partial class SalesPage : Page
             isSuccess = false;
         }
 
-        // Chegirma bo'yicha qo'shimcha tekshiruv (ixtiyoriy, 100% dan oshmasligi)
         else if (perDiscount < 0 || perDiscount > 100)
         {
             MessageBox.Show("Foiz chegirma 0% dan 100% gacha bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -861,7 +842,6 @@ public partial class SalesPage : Page
 
     private async Task ClearUI()
     {
-        // ComboBoxlarni tozalash
         CustomerName.Text = string.Empty;
         CustomerName.SelectedIndex = -1;
 
@@ -874,7 +854,6 @@ public partial class SalesPage : Page
         cbxPerRollCount.Text = string.Empty;
         cbxPerRollCount.SelectedIndex = -1;
 
-        // TextBoxlarni tozalash
         txtRollCount.Text = string.Empty;
         txtQuantity.Text = string.Empty;
         txtPrice.Text = string.Empty;
@@ -890,7 +869,6 @@ public partial class SalesPage : Page
         lastBalans.Text = string.Empty;
         tel.Text = string.Empty;
 
-        // CheckBox va kalendarni tozalash
         checkedDiscount.IsChecked = false;
         saleDate.SelectedDate = DateTime.Now;
 
@@ -903,7 +881,6 @@ public partial class SalesPage : Page
 
     private void supplyDate_LostFocus(object sender, RoutedEventArgs e)
     {
-        // 1. Agar foydalanuvchi sanani kiritmagan bo‘lsa
         if (string.IsNullOrWhiteSpace(saleDate.TextBox.Text))
         {
             MessageBox.Show("Sana kiritilmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -911,10 +888,9 @@ public partial class SalesPage : Page
             return;
         }
 
-        // 2. Qo‘lda yozilgan sanani DateTime ga o‘tkazamiz
         if (DateTime.TryParse(saleDate.TextBox.Text, out DateTime parsedDate))
         {
-            saleDate.SelectedDate = parsedDate; // ✅ foydalanuvchi yozgan sana tanlangan bo‘ladi
+            saleDate.SelectedDate = parsedDate;
         }
         else
         {

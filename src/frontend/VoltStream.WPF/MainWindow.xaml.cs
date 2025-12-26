@@ -9,6 +9,7 @@ using VoltStream.WPF.Commons.Animations;
 using VoltStream.WPF.Commons.Enums;
 using VoltStream.WPF.Commons.Services;
 using VoltStream.WPF.Commons.ViewModels;
+using VoltStream.WPF.ViewModels;
 
 public partial class MainWindow : Window
 {

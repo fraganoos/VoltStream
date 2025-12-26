@@ -46,7 +46,6 @@ public static class TextBoxTabBehavior
                            textBox.SelectionLength == textBox.Text.Length &&
                            textBox.Text.Length > 0;
 
-        // ENTER → Tab (вперёд)
         if (e.Key == Key.Enter)
         {
             e.Handled = true;
@@ -54,7 +53,6 @@ public static class TextBoxTabBehavior
             return;
         }
 
-        // ← / ↑ → Shift+Tab (назад), если в начале текста или всё выделено
         if (e.Key == Key.Left || e.Key == Key.Up)
         {
             if (textBox.CaretIndex == 0 || string.IsNullOrEmpty(textBox.Text) || allSelected)
@@ -64,7 +62,6 @@ public static class TextBoxTabBehavior
             }
         }
 
-        // → / ↓ → Tab (вперёд), если в конце текста или всё выделено
         if (e.Key == Key.Right || e.Key == Key.Down)
         {
             if (textBox.CaretIndex == textBox.Text.Length || allSelected)

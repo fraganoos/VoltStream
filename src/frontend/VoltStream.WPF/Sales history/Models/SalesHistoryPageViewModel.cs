@@ -36,8 +36,8 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<CategoryResponse> categories = [];
 
     [ObservableProperty] private ProductResponse? selectedProduct;
-    [ObservableProperty] private ObservableCollection<ProductResponse> allProducts = []; // Barcha mahsulotlar
-    [ObservableProperty] private ObservableCollection<ProductResponse> products = []; // ComboBox uchun filtrlangan productlar
+    [ObservableProperty] private ObservableCollection<ProductResponse> allProducts = [];
+    [ObservableProperty] private ObservableCollection<ProductResponse> products = [];
 
     [ObservableProperty] private ObservableCollection<ProductItemViewModel> filteredSaleItems = [];
 
@@ -45,7 +45,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     [ObservableProperty] private DateTime beginDate = new(DateTime.Today.Year, DateTime.Today.Month, 1);
     [ObservableProperty] private DateTime endDate = DateTime.Today;
 
-    // --- Boshlang‘ich ma’lumotlarni yuklash
     private async Task LoadInitialDataAsync()
     {
         await Task.WhenAll(
@@ -107,7 +106,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             {
                 var worksheet = workbook.Worksheets.Add("Savdo tarixi");
 
-                // 🧾 1-qator: Sana yoki sana oralig‘i
                 string headerText = "Sotilgan mahsulotlar ro'yxati";
 
 
@@ -118,7 +116,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 worksheet.Cell(1, 1).Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
                 worksheet.Row(1).Height = 25;
 
-                // 🟦 Ustun nomlari (2-qator)
                 worksheet.Cell(2, 1).Value = "Sana";
                 worksheet.Cell(2, 2).Value = "Xaridor";
                 worksheet.Cell(2, 3).Value = "Mahsulot turi";
@@ -156,7 +153,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                     row++;
                 }
 
-                // 🟨 Jami qatori
                 worksheet.Cell(row, 1).Value = "Jami";
                 worksheet.Range(row, 1, row, 9).Merge();
                 worksheet.Cell(row, 1).Style.Font.Bold = true;
@@ -221,7 +217,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             dlg.PrintDocument(fixedDoc.DocumentPaginator, "Savdo tarixi");
     }
 
-    // Create FixedDocument (A4), pages with grid table, footer and total.
     private FixedDocument CreateFixedDocumentForPrint()
     {
         double pageWidth = 793.7;
@@ -231,8 +226,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         var fixedDoc = new FixedDocument();
         fixedDoc.DocumentPaginator.PageSize = new Size(pageWidth, pageHeight);
 
-        // Sahifaga nechta satr sig‘ishini hisoblash uchun
-        int maxRowsPerPage = 45; // tajriba asosida sozlasa bo‘ladi
+        int maxRowsPerPage = 45;
         int pageNumber = 0;
 
         var items = FilteredSaleItems.ToList();
@@ -244,7 +238,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             pageNumber++;
 
             var page = new FixedPage { Width = pageWidth, Height = pageHeight, Background = Brushes.White };
-            var grid = new Grid { Margin = new Thickness(margin, 5, margin, 5) }; // tepa va pastga joy qoldirish
+            var grid = new Grid { Margin = new Thickness(margin, 5, margin, 5) };
             FixedPage.SetLeft(grid, margin);
             FixedPage.SetTop(grid, margin + 40);
 
@@ -280,7 +274,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 grid.Children.Add(border);
             }
 
-            // Ma'lumotlar qo'shish
             var pageItems = items.Skip(processedItems).Take(maxRowsPerPage).ToList();
 
             foreach (var item in pageItems)
@@ -325,7 +318,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
             processedItems += pageItems.Count;
 
-            // Agar bu oxirgi sahifa bo‘lsa jami chiqsin
             if (processedItems >= items.Count)
             {
                 row++;
@@ -351,7 +343,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 grid.Children.Add(totalValue);
             }
 
-            // --- Sarlavha qo‘shish ---
             var title = new TextBlock
             {
                 Text = "Sotilgan mahsulotlar ro‘yxati",
@@ -364,7 +355,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             FixedPage.SetLeft(title, (pageWidth - 300) / 2);
             page.Children.Add(title);
 
-            // --- Sahifa raqami qo‘shish ---
             var pageNumberText = new TextBlock
             {
                 Text = $"{pageNumber}-bet / {totalPages}",
@@ -387,7 +377,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         return fixedDoc;
     }
 
-    // --- Ombordagi mahsulotlar
     public async Task LoadSalesHistoryAsync()
     {
         try
@@ -435,12 +424,10 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         }
     }
 
-    // --- Kategoriya bo‘yicha filtr
     partial void OnSelectedCategoryChanged(CategoryResponse? value)
     {
         if (value != null)
         {
-            // ComboBox uchun mahsulotlarni faqat tanlangan kategoriyadan olish
             var filteredProducts = AllProducts
                 .Where(p => p.CategoryId == value.Id)
                 .ToList();
@@ -449,13 +436,11 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             foreach (var product in filteredProducts)
                 Products.Add(product);
 
-            // Agar tanlangan product boshqa kategoriyaga tegishli bo‘lsa, tozalaymiz
             if (SelectedProduct != null && SelectedProduct.CategoryId != value.Id)
                 SelectedProduct = null;
         }
         else
         {
-            // Agar kategoriya olib tashlansa — barcha mahsulotlarni qaytaramiz
             Products.Clear();
             foreach (var product in AllProducts)
                 Products.Add(product);
@@ -463,19 +448,16 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
     }
 
-    // --- ProductResponse tanlanganda DataGrid filtrlansin
     partial void OnSelectedProductChanged(ProductResponse? value)
     {
         _ = LoadSalesHistoryAsync();
     }
 
-    // customerResponse tanlanganda DataGrid filtrlash
     partial void OnSelectedCustomerChanged(CustomerResponse? value)
     {
         _ = LoadSalesHistoryAsync();
     }
 
-    // --- Kategoriya yuklash
     public async Task LoadCategoriesAsync()
     {
         try
@@ -491,7 +473,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         }
     }
 
-    // --- Mahsulotlarni yuklash
     public async Task LoadProductsAsync()
     {
         try
@@ -510,7 +491,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             {
                 AllProducts = mapper.Map<ObservableCollection<ProductResponse>>(response.Data!);
 
-                // Default holatda barcha productlar ComboBox’da ko‘rinadi
                 Products.Clear();
                 foreach (var product in AllProducts)
                     Products.Add(product);
@@ -522,8 +502,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         }
     }
 
-
-    // --- Har bir product item o‘zgarishida summa qayta hisoblanadi
     private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(ProductItemViewModel.TotalAmount))
