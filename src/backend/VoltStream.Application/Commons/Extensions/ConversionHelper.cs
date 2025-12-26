@@ -43,7 +43,6 @@ public static class ConversionHelper
         if (string.IsNullOrWhiteSpace(input))
             throw new AppException("Sana qiymati bo‘sh bo‘lishi mumkin emas.");
 
-        // Dockerda xato bermasligi uchun AssumeLocal o'rniga None
         foreach (var format in DateFormats)
             if (DateTime.TryParseExact(input, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
                 return parsed;

@@ -11,7 +11,7 @@ public class Customer : Auditable
     public string? Description { get; set; }
     public string? ImageUrl { get; set; }
     public bool IsActive { get; set; } = true;
-    public string? ClientType { get; set; } // Individual / Company
+    public string? ClientType { get; set; }
 
     public ICollection<Account> Accounts { get; set; } = default!;
     public ICollection<CustomerOperation> CustomerOperations { get; set; } = default!;
