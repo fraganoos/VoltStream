@@ -2,13 +2,13 @@
 
 public class SaleItem : Auditable
 {
-    public int RollCount { get; set; }  // rulon soni
-    public decimal LengthPerRoll { get; set; }  //rulon uzunligi
-    public decimal TotalLength { get; set; } // jami uzunlik
-    public decimal UnitPrice { get; set; } // 1 metr narxi
+    public int RollCount { get; set; }
+    public decimal LengthPerRoll { get; set; }
+    public decimal TotalLength { get; set; }
+    public decimal UnitPrice { get; set; }
     public decimal DiscountRate { get; set; }
     public decimal DiscountAmount { get; set; }
-    public decimal TotalAmount { get; set; } // jami summa
+    public decimal TotalAmount { get; set; }
     public decimal FinalAmount { get; set; }
 
     public long SaleId { get; set; }

@@ -3,8 +3,6 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
-using System.Threading.Tasks;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Features.Customers.DTOs;
 

@@ -2,8 +2,6 @@
 
 using AutoMapper;
 using MediatR;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Application.Commons.Models;

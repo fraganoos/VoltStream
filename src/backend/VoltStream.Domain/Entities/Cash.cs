@@ -38,7 +38,7 @@ public class Cash : Auditable
 //{
 //    public long UserId { get; set; }
 
-//    public ThemeType? Theme { get; set; }    // null bo‘lsa AppSettings’dan oladi
+//    public ThemeType? Theme { get; set; }
 //    public AppMode? Mode { get; set; }
 //    public string? Language { get; set; }
 //    public string? Timezone { get; set; }
