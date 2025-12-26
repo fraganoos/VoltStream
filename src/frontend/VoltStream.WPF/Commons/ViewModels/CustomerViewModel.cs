@@ -3,7 +3,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using VoltStream.WPF.Customer.ViewModels;
 
 public partial class CustomerViewModel : ViewModelBase
 {
@@ -19,7 +18,6 @@ public partial class CustomerViewModel : ViewModelBase
     [ObservableProperty] private string? description;
 
     [ObservableProperty] private ObservableCollection<CustomerOperationViewModel> customerOperations = [];
-    [ObservableProperty] private ObservableCollection<DiscountOperationViewModel> discountOperations = [];
     [ObservableProperty] private ObservableCollection<AccountViewModel> accounts = [];
 
     [ObservableProperty] private decimal balance;

@@ -2,7 +2,7 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using VoltStream.WPF.Commons;
-using VoltStream.WPF.Turnovers.Models;
+using VoltStream.WPF.Commons.ViewModels;
 
 public partial class SaleItemViewModel : ViewModelBase
 {

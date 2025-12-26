@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using VoltStream.WPF.Commons;
-using VoltStream.WPF.Commons.Messages; // OpenDialogMessage<T> ni o'z ichiga oladi
+using VoltStream.WPF.Commons.Messages;
 using VoltStream.WPF.Commons.ViewModels;
 using VoltStream.WPF.Payments.PayDiscountWindow.Modela;
 

@@ -3,8 +3,8 @@
 using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Mapster;
+using VoltStream.WPF.Commons.ViewModels;
 using VoltStream.WPF.Sales.ViewModels;
-using VoltStream.WPF.Turnovers.Models;
 
 public class SaleMappingRegister : IRegister
 {

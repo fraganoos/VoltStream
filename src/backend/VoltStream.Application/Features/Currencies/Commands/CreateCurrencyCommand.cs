@@ -17,7 +17,7 @@ public record CreateCurrencyCommand(
     bool IsEditable,
     int Position,
     bool IsCash,
-decimal ExchangeRate)
+    decimal ExchangeRate)
     : IRequest<long>;
 
 public class CreateCurrencyCommandHandler(
@@ -26,7 +26,7 @@ public class CreateCurrencyCommandHandler(
 {
     public async Task<long> Handle(CreateCurrencyCommand request, CancellationToken cancellationToken)
     {
-        var CurrencyExists = await context.Categories
+        var CurrencyExists = await context.Currencies
             .AnyAsync(p => p.NormalizedName == request.Name.ToNormalized(), cancellationToken);
 
         if (CurrencyExists)

@@ -3,7 +3,7 @@
 using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Mapster;
-using VoltStream.WPF.Sales.ViewModels;
+using VoltStream.WPF.Commons.ViewModels;
 
 public class SupplyMappingRegister : IRegister
 {

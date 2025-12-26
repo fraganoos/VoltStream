@@ -1,15 +1,14 @@
-﻿using System.Windows.Controls;
+﻿namespace VoltStream.WPF.Home.Views;
 
-namespace VoltStream.WPF.Home.Views
+using System.Windows.Controls;
+
+/// <summary>
+/// Логика взаимодействия для DashboardPage.xaml
+/// </summary>
+public partial class DashboardPage : Page
 {
-    /// <summary>
-    /// Логика взаимодействия для DashboardPage.xaml
-    /// </summary>
-    public partial class DashboardPage : Page
+    public DashboardPage()
     {
-        public DashboardPage()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

@@ -1,8 +1,7 @@
-﻿namespace VoltStream.WPF.Turnovers.Models;
+﻿namespace VoltStream.WPF.Commons.ViewModels;
 
 using ApiServices.Enums;
 using CommunityToolkit.Mvvm.ComponentModel;
-using VoltStream.WPF.Commons.ViewModels;
 using VoltStream.WPF.Sales.ViewModels;
 
 public partial class CustomerOperationForDisplayViewModel : ObservableObject

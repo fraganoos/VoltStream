@@ -53,7 +53,6 @@ public partial class PaymentEditViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<CustomerViewModel> customers = [];
     [ObservableProperty] private ObservableCollection<CurrencyViewModel> currencies = [];
 
-
     #region Property Changes
 
     private async void Payment_PropertyChanged(object? sender, PropertyChangedEventArgs e)
