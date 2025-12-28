@@ -185,7 +185,8 @@ public static class NumericInput
         }
         else if (decimal.TryParse(cleanValues, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
         {
-            SetValue(textBox, ConvertChangeType(val, GetValue(textBox)?.GetType()));
+            // Just set the decimal value - WPF binding will handle type conversion automatically
+            SetValue(textBox, val);
         }
 
         string formattedText = ApplyFormatting(cleanValues);
@@ -321,15 +322,6 @@ public static class NumericInput
         {
             return 0;
         }
-    }
-
-    private static object ConvertChangeType(decimal value, System.Type targetType)
-    {
-        if (targetType == typeof(double)) return (double)value;
-        if (targetType == typeof(float)) return (float)value;
-        if (targetType == typeof(int)) return (int)value;
-        if (targetType == typeof(long)) return (long)value;
-        return value;
     }
 }
 
