@@ -127,7 +127,7 @@
                         FontSize="14"
                         IsReadOnly="True"
                         IsTabStop="False"
-                        Text="{Binding TotalSum}" />
+                        utils:NumericTextBox.Value="{Binding TotalSum}" />
                 </Grid>
                 <Grid Grid.Row="3" Grid.Column="1">
                     <Grid.ColumnDefinitions>
@@ -150,7 +150,7 @@
                             FontSize="14"
                             IsReadOnly="True"
                             IsTabStop="False"
-                            Text="{Binding TotalDiscount}" />
+                            utils:NumericTextBox.Value="{Binding TotalDiscount}" />
                         <Border
                             Grid.Column="1"
                             Margin="2,2,10,2"
@@ -186,7 +186,7 @@
                         FontSize="14"
                         IsReadOnly="True"
                         IsTabStop="False"
-                        Text="{Binding FinalSum}" />
+                        utils:NumericTextBox.Value="{Binding FinalSum}" />
 
 
                 </Grid>
@@ -240,7 +240,8 @@
                         BorderThickness="0"
                         FontSize="12"
                         IsReadOnly="True"
-                        IsTabStop="False" />
+                        IsTabStop="False"
+                        utils:NumericTextBox.Value="{Binding BeginBalance}" />
                     <TextBlock
                         Grid.Row="2"
                         VerticalAlignment="Center"
@@ -258,7 +259,8 @@
                         BorderThickness="0"
                         FontSize="12"
                         IsReadOnly="True"
-                        IsTabStop="False" />
+                        IsTabStop="False"
+                        utils:NumericTextBox.Value="{Binding LastBalance}" />
                     <TextBlock
                         Grid.Row="3"
                         VerticalAlignment="Center"
@@ -349,11 +351,11 @@
                 x:Name="txtRollCount"
                 Grid.Column="3"
                 Margin="1,3"
-                utils:NumericTextBox.DecimalDigits="0"
+                utils:NumericTextBox.Precision="0"
                 utils:NumericTextBox.IsNumeric="True"
                 utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                 FontSize="14"
-                Text="{Binding RollCount}" />
+                utils:NumericTextBox.Value="{Binding RollCount}" />
             <TextBlock
                 Grid.Column="4"
                 Panel.ZIndex="1"
@@ -368,7 +370,7 @@
                 utils:NumericTextBox.IsNumeric="True"
                 utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                 FontSize="14"
-                Text="{Binding Quantity}" />
+                utils:NumericTextBox.Value="{Binding Quantity}" />
             <TextBlock
                 Grid.Column="5"
                 Panel.ZIndex="1"
@@ -383,7 +385,7 @@
                 utils:NumericTextBox.IsNumeric="True"
                 utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                 FontSize="14"
-                Text="{Binding Price}" />
+                utils:NumericTextBox.Value="{Binding Price}" />
             <TextBlock
                 Grid.Column="6"
                 Panel.ZIndex="1"
@@ -398,7 +400,7 @@
                 utils:NumericTextBox.IsNumeric="True"
                 utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                 FontSize="14"
-                Text="{Binding Sum}" />
+                utils:NumericTextBox.Value="{Binding Sum}" />
             <TextBlock
                 Grid.Column="7"
                 Panel.ZIndex="1"
@@ -413,7 +415,7 @@
                 utils:NumericTextBox.IsNumeric="True"
                 utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                 FontSize="14"
-                Text="{Binding PerDiscount}" />
+                utils:NumericTextBox.Value="{Binding PerDiscount}" />
             <TextBlock
                 Grid.Column="8"
                 Panel.ZIndex="1"
@@ -428,7 +430,7 @@
                 utils:NumericTextBox.IsNumeric="True"
                 utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                 FontSize="14"
-                Text="{Binding Discount}" />
+                utils:NumericTextBox.Value="{Binding Discount}" />
             <TextBlock
                 Grid.Column="9"
                 Panel.ZIndex="1"
@@ -443,7 +445,7 @@
                 utils:NumericTextBox.IsNumeric="True"
                 utils:TextBoxTabBehavior.EnableTabOnKeys="True"
                 FontSize="14"
-                Text="{Binding FinalSumProduct}" />
+                utils:NumericTextBox.Value="{Binding FinalSumProduct}" />
             <Button
                 x:Name="addButton"
                 Grid.Column="10"

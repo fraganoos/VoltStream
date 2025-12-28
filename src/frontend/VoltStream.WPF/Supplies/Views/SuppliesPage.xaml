@@ -143,7 +143,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="0"
                              x:Name="tbxPerRollCount"
-                             Text="{Binding PerRollCount, UpdateSourceTrigger=PropertyChanged}"
+                             utils:NumericTextBox.Value="{Binding PerRollCount, UpdateSourceTrigger=PropertyChanged}"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
                              HorizontalContentAlignment="Right"
@@ -161,7 +161,7 @@
                                Margin="0,0,5,0" />
                     <TextBox Grid.Column="2"
                              x:Name="tbxRollCount"
-                             Text="{Binding RollCount, UpdateSourceTrigger=PropertyChanged}"
+                             utils:NumericTextBox.Value="{Binding RollCount, UpdateSourceTrigger=PropertyChanged}"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
                              Validation.ErrorTemplate="{x:Null}"    
@@ -187,7 +187,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="0"
                              x:Name="totalMeters"
-                             Text="{Binding TotalQuantity, UpdateSourceTrigger=PropertyChanged}"
+                             utils:NumericTextBox.Value="{Binding TotalQuantity, UpdateSourceTrigger=PropertyChanged}"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
                              HorizontalContentAlignment="Right"
@@ -230,16 +230,17 @@
                         <ColumnDefinition Width="85" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBox Grid.Column="0"
+                    <TextBox Grid.Column="0" 
                              x:Name="txtUnitPrice"
-                             Text="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged}"
+                             utils:NumericTextBox.Value="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged}"
+                             utils:NumericTextBox.IsNumeric="True"
+                             utils:NumericTextBox.Precision="2"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
                              HorizontalContentAlignment="Right"
                              FontSize="14"
                              Validation.ErrorTemplate="{x:Null}"
-                             Margin="0,0,10,0"
-                             utils:NumericTextBox.IsNumeric="True"
+                             Margin="0,0,10,0"       
                               />
                     <Label Grid.Column="1"
                            Content="Chegirma: %"
@@ -248,7 +249,7 @@
                            Margin="-10,0,0,0" />
                     <TextBox Grid.Column="2"
                              x:Name="tbxDiscountRate"
-                             Text="{Binding DiscountRate, UpdateSourceTrigger=PropertyChanged}"
+                             utils:NumericTextBox.Value="{Binding DiscountRate, UpdateSourceTrigger=PropertyChanged}"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
                              HorizontalContentAlignment="Right"
