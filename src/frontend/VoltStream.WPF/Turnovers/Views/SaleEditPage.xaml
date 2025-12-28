@@ -1,4 +1,4 @@
-﻿<Page
+<Page
     x:Class="VoltStream.WPF.Sales.Views.SaleEditPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -86,8 +86,8 @@
                         VerticalAlignment="Top"
                         FontSize="14"
                         IsReadOnly="True"
-                        utils:NumericTextBox.IsNumeric="True"
-                        utils:NumericTextBox.Value="{Binding TotalSum}" />
+                        utils:NumericInput.IsNumeric="True"
+                        utils:NumericInput.Value="{Binding TotalSum}" />
 				</Grid>
 
 				<Grid Grid.Row="3" Grid.Column="1">
@@ -102,8 +102,8 @@
                         Margin="0,2,0,2"
                         FontSize="14"
                         IsReadOnly="True"
-                        utils:NumericTextBox.IsNumeric="True"
-                        utils:NumericTextBox.Value="{Binding Sale.Discount}"/>
+                        utils:NumericInput.IsNumeric="True"
+                        utils:NumericInput.Value="{Binding Sale.Discount}"/>
 
 					<Border
                         Grid.Column="1"
@@ -123,8 +123,8 @@
                         Margin="0,2"
                         FontSize="14"
                         IsReadOnly="True"
-                        utils:NumericTextBox.IsNumeric="True"
-                        utils:NumericTextBox.Value="{Binding Sale.Amount}" />
+                        utils:NumericInput.IsNumeric="True"
+                        utils:NumericInput.Value="{Binding Sale.Amount}" />
 				</Grid>
 
 				<TextBox x:Name="txtSaleDescription"
@@ -158,9 +158,9 @@
                         BorderThickness="0"
                         FontSize="12"
                         IsReadOnly="True"
-                        utils:NumericTextBox.IsNumeric="True"
+                        utils:NumericInput.IsNumeric="True"
                         VerticalContentAlignment="Center"
-                        utils:NumericTextBox.Value="{Binding BeginBalance}" />
+                        utils:NumericInput.Value="{Binding BeginBalance}" />
 
 					<TextBlock Grid.Row="2" Text="Natija:" VerticalAlignment="Center" />
 					<TextBox
@@ -171,9 +171,9 @@
                         BorderThickness="0"
                         FontSize="12"
                         IsReadOnly="True"
-                        utils:NumericTextBox.IsNumeric="True"
+                        utils:NumericInput.IsNumeric="True"
                         VerticalContentAlignment="Center"
-                        utils:NumericTextBox.Value="{Binding LastBalance}" />
+                        utils:NumericInput.Value="{Binding LastBalance}" />
 
 					<TextBlock Grid.Row="3" Text="Telefon:" VerticalAlignment="Center" />
 					<TextBox
@@ -252,9 +252,9 @@
                 Margin="1,3" 
                 FontSize="14"
                 Validation.ErrorTemplate="{x:Null}" 
-                utils:NumericTextBox.Precision="0"
-                utils:NumericTextBox.IsNumeric="True"
-                utils:NumericTextBox.Value="{Binding CurrentItem.RollCount, UpdateSourceTrigger=PropertyChanged}" />
+                utils:NumericInput.Precision="0"
+                utils:NumericInput.IsNumeric="True"
+                utils:NumericInput.Value="{Binding CurrentItem.RollCount, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Column="4" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtTotalLength}" Text="Jami metr" />
 			<TextBox 
@@ -263,8 +263,9 @@
                 Margin="1,3" 
                 FontSize="14"
                 Validation.ErrorTemplate="{x:Null}" 
-                utils:NumericTextBox.IsNumeric="True"
-                utils:NumericTextBox.Value="{Binding CurrentItem.TotalLength}" />
+                utils:NumericInput.IsNumeric="True"
+                utils:NumericInput.Precision="2"
+                utils:NumericInput.Value="{Binding CurrentItem.TotalLength}" />
 
 			<TextBlock Grid.Column="5" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtUnitPrice}" Text="Narxi" />
 			<TextBox 
@@ -273,8 +274,9 @@
                 Margin="1,3" 
                 FontSize="14"
                 Validation.ErrorTemplate="{x:Null}" 
-                utils:NumericTextBox.IsNumeric="True"
-                utils:NumericTextBox.Value="{Binding CurrentItem.UnitPrice, UpdateSourceTrigger=PropertyChanged}" />
+                utils:NumericInput.IsNumeric="True"
+                utils:NumericInput.Precision="2"
+                utils:NumericInput.Value="{Binding CurrentItem.UnitPrice, UpdateSourceTrigger=PropertyChanged}" />
 
 			<TextBlock Grid.Column="6" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtTotalAmount}" Text="Jami summa" />
 			<TextBox 
@@ -283,8 +285,9 @@
                 Margin="1,3" 
                 Validation.ErrorTemplate="{x:Null}" 
                 FontSize="14"
-                utils:NumericTextBox.IsNumeric="True"
-                utils:NumericTextBox.Value="{Binding CurrentItem.TotalAmount}" />
+                utils:NumericInput.IsNumeric="True"
+                utils:NumericInput.Precision="2"
+                utils:NumericInput.Value="{Binding CurrentItem.TotalAmount}" />
 
 			<TextBlock Grid.Column="7" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtDiscountRate}" Text="Chegirma%" />
 			<TextBox 
@@ -293,8 +296,9 @@
                 Margin="1,3" 
                 FontSize="14"
                 Validation.ErrorTemplate="{x:Null}" 
-                utils:NumericTextBox.IsNumeric="True"
-                utils:NumericTextBox.Value="{Binding CurrentItem.DiscountRate}" />
+                utils:NumericInput.IsNumeric="True"
+                utils:NumericInput.Precision="2"
+                utils:NumericInput.Value="{Binding CurrentItem.DiscountRate}" />
 
 			<TextBlock Grid.Column="8" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtDiscountAmount}" Text="Chegirma summasi" />
 			<TextBox 
@@ -303,8 +307,9 @@
                 Margin="1,3" 
                 FontSize="14"
                 Validation.ErrorTemplate="{x:Null}"
-                utils:NumericTextBox.IsNumeric="True"
-                utils:NumericTextBox.Value="{Binding CurrentItem.DiscountAmount}" />
+                utils:NumericInput.IsNumeric="True"
+                utils:NumericInput.Precision="2"
+                utils:NumericInput.Value="{Binding CurrentItem.DiscountAmount}" />
 
 			<TextBlock Grid.Column="9" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtFinalAmount}" Text="Umumiy summa" />
 			<TextBox 
@@ -313,8 +318,9 @@
                 Margin="1,3" 
                 Validation.ErrorTemplate="{x:Null}" 
                 FontSize="14"
-                utils:NumericTextBox.IsNumeric="True"
-                utils:NumericTextBox.Value="{Binding CurrentItem.FinalAmount}" />
+                utils:NumericInput.IsNumeric="True"
+                utils:NumericInput.Precision="2"
+                utils:NumericInput.Value="{Binding CurrentItem.FinalAmount}" />
 
 			<Button  x:Name="btnAdd"
                 Grid.Column="10" 

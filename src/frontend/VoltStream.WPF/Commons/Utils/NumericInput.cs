@@ -6,27 +6,27 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-public static class NumericTextBox
+public static class NumericInput
 {
     public static readonly DependencyProperty IsNumericProperty =
         DependencyProperty.RegisterAttached(
             "IsNumeric",
             typeof(bool),
-            typeof(NumericTextBox),
+            typeof(NumericInput),
             new PropertyMetadata(false, OnIsNumericChanged));
 
     public static readonly DependencyProperty ValueProperty =
         DependencyProperty.RegisterAttached(
             "Value",
             typeof(object),
-            typeof(NumericTextBox),
+            typeof(NumericInput),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnValueChanged));
 
     public static readonly DependencyProperty PrecisionProperty =
         DependencyProperty.RegisterAttached(
             "Precision",
             typeof(int?),
-            typeof(NumericTextBox),
+            typeof(NumericInput),
             new PropertyMetadata(null));
 
     public static bool GetIsNumeric(DependencyObject obj) => (bool)obj.GetValue(IsNumericProperty);
@@ -39,13 +39,13 @@ public static class NumericTextBox
     public static void SetPrecision(DependencyObject obj, int? value) => obj.SetValue(PrecisionProperty, value);
 
     private static readonly DependencyProperty IsSubscribedProperty =
-        DependencyProperty.RegisterAttached("IsSubscribed", typeof(bool), typeof(NumericTextBox), new PropertyMetadata(false));
+        DependencyProperty.RegisterAttached("IsSubscribed", typeof(bool), typeof(NumericInput), new PropertyMetadata(false));
 
     private static bool GetIsSubscribed(DependencyObject obj) => (bool)obj.GetValue(IsSubscribedProperty);
     private static void SetIsSubscribed(DependencyObject obj, bool value) => obj.SetValue(IsSubscribedProperty, value);
 
     private static readonly DependencyProperty IsInternalChangeProperty =
-        DependencyProperty.RegisterAttached("IsInternalChange", typeof(bool), typeof(NumericTextBox), new PropertyMetadata(false));
+        DependencyProperty.RegisterAttached("IsInternalChange", typeof(bool), typeof(NumericInput), new PropertyMetadata(false));
 
     private static bool GetIsInternalChange(DependencyObject obj) => (bool)obj.GetValue(IsInternalChangeProperty);
     private static void SetIsInternalChange(DependencyObject obj, bool value) => obj.SetValue(IsInternalChangeProperty, value);
@@ -332,3 +332,4 @@ public static class NumericTextBox
         return value;
     }
 }
+

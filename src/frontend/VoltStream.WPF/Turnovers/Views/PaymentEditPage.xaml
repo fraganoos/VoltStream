@@ -1,4 +1,4 @@
-﻿<Page
+<Page
     x:Class="VoltStream.WPF.Payments.Views.PaymentEditPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -91,7 +91,7 @@
                         FontSize="14"
                         IsEnabled="{Binding Payment.Currency.IsEditable}"
                         Text="{Binding Payment.ExchangeRate}"
-                        utils:NumericTextBox.IsNumeric="True" />
+                        utils:NumericInput.IsNumeric="True" />
 				</Grid>
 			</Grid>
 
@@ -127,7 +127,7 @@
                         IsReadOnly="True"
                         IsTabStop="False"
                         Text="{Binding Payment.Amount, StringFormat=N2}"
-                        utils:NumericTextBox.IsNumeric="True" />
+                        utils:NumericInput.IsNumeric="True" />
 
 					<TextBox
                         Grid.Row="1"
@@ -136,7 +136,7 @@
                         FontSize="14"
                         IsEnabled="{Binding Payment.IsIncomeEnabled}"
                         Text="{Binding Payment.IncomeAmount}"
-                        utils:NumericTextBox.IsNumeric="True" />
+                        utils:NumericInput.IsNumeric="True" />
 
 					<TextBox
                         Grid.Row="2"
@@ -145,7 +145,7 @@
                         FontSize="14"
                         IsEnabled="{Binding Payment.IsExpenseEnabled}"
                         Text="{Binding Payment.ExpenseAmount}"
-                        utils:NumericTextBox.IsNumeric="True" />
+                        utils:NumericInput.IsNumeric="True" />
 				</Grid>
 
 				<Grid Grid.Column="1">
@@ -172,7 +172,7 @@
                             FontStyle="Italic"
                             IsReadOnly="True"
                             Text="{Binding BeginBalance, StringFormat=N2}"
-                            utils:NumericTextBox.IsNumeric="True" />
+                            utils:NumericInput.IsNumeric="True" />
 
 						<TextBlock Grid.Column="2" Text="Natija:" FontSize="12" FontStyle="Italic" Foreground="#888" Margin="5,0,0,0" VerticalAlignment="Center" />
 						<TextBox
@@ -184,7 +184,7 @@
                             FontStyle="Italic"
                             IsReadOnly="True"
                             Text="{Binding LastBalance, StringFormat=N2}"
-                            utils:NumericTextBox.IsNumeric="True" />
+                            utils:NumericInput.IsNumeric="True" />
 					</Grid>
 
 					<Grid Grid.Row="1">
