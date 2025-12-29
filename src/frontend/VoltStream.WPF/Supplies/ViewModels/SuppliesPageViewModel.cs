@@ -49,7 +49,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
     [ObservableProperty] private string productText = string.Empty;
 
     [ObservableProperty] private decimal? perRollCount;
-    [ObservableProperty] private decimal? rollCount;
+    [ObservableProperty] private int? rollCount;
     [ObservableProperty] private decimal? unitPrice;
     [ObservableProperty] private decimal? discountRate;
     [ObservableProperty] private decimal? totalQuantity;
@@ -167,7 +167,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
     }
 
     partial void OnPerRollCountChanged(decimal? value) => CalculateTotal();
-    partial void OnRollCountChanged(decimal? value) => CalculateTotal();
+    partial void OnRollCountChanged(int? value) => CalculateTotal();
 
     #endregion Property Change Handlers
 

@@ -242,4 +242,19 @@ partial class PaymentPageViewModel : ViewModelBase
     }
 
     #endregion Load data
+
+
+    #region Property Changed
+
+    partial void OnCustomerChanged(CustomerViewModel? oldValue, CustomerViewModel? newValue)
+    {
+        if (oldValue?.Name == newValue?.Name)
+            return;
+
+        Payment.IncomeAmount = null;
+        Payment.ExpenseAmount = null;
+        Payment.Amount = 0;
+    }
+
+    #endregion Property changed
 }

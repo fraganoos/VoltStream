@@ -1,6 +1,5 @@
 ﻿namespace VoltStream.WPF.Commons.Converters;
 
-using System;
 using System.Drawing;
 using System.Globalization;
 using System.Windows.Data;

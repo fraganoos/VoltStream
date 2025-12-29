@@ -13,7 +13,7 @@ public partial class SupplyViewModel : ViewModelBase
     [ObservableProperty] private string categoryName = string.Empty;
     [ObservableProperty] private string productName = string.Empty;
 
-    [ObservableProperty] private decimal rollCount;
+    [ObservableProperty] private int rollCount;
     [ObservableProperty] private decimal lengthPerRoll;
     [ObservableProperty] private decimal totalLength;
 
@@ -26,7 +26,7 @@ public partial class SupplyViewModel : ViewModelBase
 
     public string DisplayDate => Date.ToString("dd.MM.yyyy");
 
-    partial void OnRollCountChanged(decimal value) => CalculateTotal();
+    partial void OnRollCountChanged(int value) => CalculateTotal();
     partial void OnLengthPerRollChanged(decimal value) => CalculateTotal();
 
     private void CalculateTotal()

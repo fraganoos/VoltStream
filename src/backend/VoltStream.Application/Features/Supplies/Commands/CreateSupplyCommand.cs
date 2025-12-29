@@ -13,7 +13,7 @@ public record CreateSupplyCommand(
     string CategoryName,
     long ProductId,
     string ProductName,
-    decimal RollCount,
+    int RollCount,
     string Unit,
     decimal LengthPerRoll,
     decimal TotalLength,

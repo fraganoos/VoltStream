@@ -9,7 +9,7 @@ public record SupplyRequest
     public string Unit { get; set; } = string.Empty;
     public long ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty;
-    public decimal RollCount { get; set; }
+    public int RollCount { get; set; }
     public decimal LengthPerRoll { get; set; }
     public decimal TotalLength { get; set; }
     public decimal UnitPrice { get; set; }

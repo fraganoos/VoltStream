@@ -16,6 +16,6 @@ public class PaymentFilterQueryHandler(
 {
 
     public async Task<IReadOnlyCollection<PaymentDto>> Handle(PaymentFilterQuery request, CancellationToken cancellationToken)
-    => mapper.Map<IReadOnlyCollection<PaymentDto>>(await context.Payments
+        => mapper.Map<IReadOnlyCollection<PaymentDto>>(await context.Payments
             .ToPagedListAsync(request, writer, cancellationToken));
 }
