@@ -37,7 +37,7 @@ public class CreateSaleCommandHandler(
 
             var descriptionBuilder = new StringBuilder();
 
-            await ProcessSaleItemsAsync(request.Items, warehouse, descriptionBuilder, cancellationToken);
+            await ProcessSaleItemsAsync(request.Items, warehouse, descriptionBuilder, request.IsDiscountApplied, cancellationToken);
             var sale = mapper.Map<Sale>(request);
 
 
@@ -91,6 +91,7 @@ public class CreateSaleCommandHandler(
         List<SaleItemCommand> saleItems,
         Warehouse warehouse,
         StringBuilder descriptionBuilder,
+        bool isDiscountApplied,
         CancellationToken cancellationToken)
     {
         foreach (var item in saleItems)
@@ -107,13 +108,16 @@ public class CreateSaleCommandHandler(
             var product = await context.Products.FirstOrDefaultAsync(p => p.Id == item.ProductId, cancellationToken)
                 ?? throw new NotFoundException(nameof(Product), nameof(item.Id), item.ProductId);
 
+            var amount = item.TotalAmount;
+            if (isDiscountApplied)
+                amount = item.FinalAmount;
+
             descriptionBuilder.Append($"{product.Name} - {item.TotalLength} m. X " +
-                $"{Math.Round(item.FinalAmount / item.TotalLength, 2):N2} = " +
-                $"{item.FinalAmount:N2}");
-            if (item.FinalAmount == item.TotalAmount && item.DiscountAmount != 0)
-            {
+                $"{Math.Round(amount / item.TotalLength, 2):N2} = " +
+                $"{amount:N2}");
+
+            if (!isDiscountApplied && item.DiscountAmount != 0)
                 descriptionBuilder.Append($" [ch: {item.DiscountAmount:N2}]");
-            }
 
             if (saleItems.IndexOf(item) < saleItems.Count - 1)
                 descriptionBuilder.Append(";\n");

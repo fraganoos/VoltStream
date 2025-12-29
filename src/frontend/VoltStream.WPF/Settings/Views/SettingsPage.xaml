@@ -406,11 +406,14 @@
                                Tag="{Binding ElementName=cbxCategoryOldName}"
                                Text="Eski nomi" />
                     <ComboBox Grid.Row="0" Grid.Column="1" 
-                              x:Name="cbxCategoryOldName"
-                                Margin="5,15"
-                                FontSize="14"
-                                IsEditable="True"
-                               />
+                               x:Name="cbxCategoryOldName"
+                                 Margin="5,15"
+                                 FontSize="14"
+                                 IsEditable="True"
+                                 ItemsSource="{Binding Categories}"
+                                 SelectedItem="{Binding SelectedOldCategory}"
+                                 DisplayMemberPath="Name"
+                                />
                     <TextBlock Grid.Row="0" Grid.Column="2"
                                Panel.ZIndex="1"
                                IsHitTestVisible="False"
@@ -418,10 +421,11 @@
                                Tag="{Binding ElementName=txtCategoryNewName}"
                                Text="Yangi nomi" />
                     <TextBox Grid.Row="0" Grid.Column="2" 
-                              x:Name="txtCategoryNewName"
-                                Margin="5,15"
-                                FontSize="14"
-                               />
+                               x:Name="txtCategoryNewName"
+                                 Margin="5,15"
+                                 FontSize="14"
+                                 Text="{Binding NewCategoryName, UpdateSourceTrigger=PropertyChanged}"
+                                />
                     <Button Grid.Row="0" Grid.Column="3"
                             Content="O'zgartirish"
                             Width="100"
@@ -429,7 +433,8 @@
                             Margin="10,10"
                             Background="#0A003A"
                             Foreground="White"
-                            FontWeight="SemiBold">
+                            FontWeight="SemiBold"
+                            Command="{Binding UpdateCategoryCommand}">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border Background="{TemplateBinding Background}"
@@ -454,11 +459,14 @@
                                Tag="{Binding ElementName=cbxProductOldName}"
                                Text="Eski nomi" />
                     <ComboBox Grid.Row="1" Grid.Column="1" 
-                              x:Name="cbxProductOldName"
-                                Margin="5,15"
-                                FontSize="14"
-                                IsEditable="True"
-                               />
+                               x:Name="cbxProductOldName"
+                                 Margin="5,15"
+                                 FontSize="14"
+                                 IsEditable="True"
+                                 ItemsSource="{Binding Products}"
+                                 SelectedItem="{Binding SelectedOldProduct}"
+                                 DisplayMemberPath="Name"
+                                />
                     <TextBlock Grid.Row="1" Grid.Column="2"
                                Panel.ZIndex="1"
                                IsHitTestVisible="False"
@@ -466,10 +474,11 @@
                                Tag="{Binding ElementName=txtProductNewName}"
                                Text="Yangi nomi" />
                     <TextBox Grid.Row="1" Grid.Column="2" 
-                              x:Name="txtProductNewName"
-                                Margin="5,15"
-                                FontSize="14"
-                               />
+                               x:Name="txtProductNewName"
+                                 Margin="5,15"
+                                 FontSize="14"
+                                 Text="{Binding NewProductName, UpdateSourceTrigger=PropertyChanged}"
+                                />
                     <Button Grid.Row="1" Grid.Column="3"
                             Content="O'zgartirish"
                             Width="100"
@@ -477,7 +486,8 @@
                             Margin="10,10"
                             Background="#0A003A"
                             Foreground="White"
-                            FontWeight="SemiBold">
+                            FontWeight="SemiBold"
+                            Command="{Binding UpdateProductCommand}">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border Background="{TemplateBinding Background}"
@@ -502,11 +512,14 @@
                                Tag="{Binding ElementName=cbxCustomerOldName}"
                                Text="Eski nomi" />
                     <ComboBox Grid.Row="2" Grid.Column="1" 
-                              x:Name="cbxCustomerOldName"
-                                Margin="5,15"
-                                FontSize="14"
-                                IsEditable="True"
-                               />
+                               x:Name="cbxCustomerOldName"
+                                 Margin="5,15"
+                                 FontSize="14"
+                                 IsEditable="True"
+                                 ItemsSource="{Binding Customers}"
+                                 SelectedItem="{Binding SelectedOldCustomer}"
+                                 DisplayMemberPath="Name"
+                                />
                     <TextBlock Grid.Row="2" Grid.Column="2"
                                Panel.ZIndex="1"
                                IsHitTestVisible="False"
@@ -514,10 +527,11 @@
                                Tag="{Binding ElementName=txtCustomerNewName}"
                                Text="Yangi nomi" />
                     <TextBox Grid.Row="2" Grid.Column="2" 
-                              x:Name="txtCustomerNewName"
-                                Margin="5,15"
-                                FontSize="14"
-                               />
+                               x:Name="txtCustomerNewName"
+                                 Margin="5,15"
+                                 FontSize="14"
+                                 Text="{Binding NewCustomerName, UpdateSourceTrigger=PropertyChanged}"
+                                />
                     <Button Grid.Row="2" Grid.Column="3"
                             Content="O'zgartirish"
                             Width="100"
@@ -525,7 +539,8 @@
                             Margin="10,10"
                             Background="#0A003A"
                             Foreground="White"
-                            FontWeight="SemiBold">
+                            FontWeight="SemiBold"
+                            Command="{Binding UpdateCustomerCommand}">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border Background="{TemplateBinding Background}"
@@ -557,11 +572,14 @@
                                Tag="{Binding ElementName=cbxProductName}"
                                Text="Maxsulot nomi" />
                     <ComboBox Grid.Row="0" 
-                              x:Name="cbxProductName"
-                                Margin="5,15"
-                                FontSize="14"
-                                IsEditable="True"
-                               />
+                               x:Name="cbxProductName"
+                                 Margin="5,15"
+                                 FontSize="14"
+                                 IsEditable="True"
+                                 ItemsSource="{Binding Products}"
+                                 SelectedItem="{Binding SelectedProductToChangeCategory}"
+                                 DisplayMemberPath="Name" />
+                                
                     </Grid>
                     <Grid Grid.Row="3" Grid.Column="2">
                         <Grid.RowDefinitions>
@@ -575,10 +593,11 @@
                                Tag="{Binding ElementName=txtCategoryOldName}"
                                Text="Eski turi" />
                         <TextBox Grid.Row="0" 
-                              x:Name="txtCategoryOldName"
-                                Margin="5,15"
-                                FontSize="14"
+                               x:Name="txtCategoryOldName"
+                                 Margin="5,15"
+                                 FontSize="14"
                                  IsEnabled="False"
+                                 Text="{Binding CurrentCategoryName}"
                                />
                         <TextBlock Grid.Row="1"
                                Panel.ZIndex="1"
@@ -587,11 +606,14 @@
                                Tag="{Binding ElementName=cbxCategoryChangedName}"
                                Text="Yangi turi" />
                         <ComboBox Grid.Row="1" 
-                              x:Name="cbxCategoryChangedName"
-                                Margin="5,10"
-                                FontSize="14"
-                                IsEditable="True"
-                               />
+                               x:Name="cbxCategoryChangedName"
+                                 Margin="5,10"
+                                 FontSize="14"
+                                 IsEditable="True"
+                                 ItemsSource="{Binding Categories}"
+                                 SelectedItem="{Binding SelectedNewCategory}"
+                                 DisplayMemberPath="Name"
+                                />
 
 
                     </Grid>
@@ -602,7 +624,8 @@
                             Margin="10,10"
                             Background="#0A003A"
                             Foreground="White"
-                            FontWeight="SemiBold">
+                            FontWeight="SemiBold"
+                            Command="{Binding ChangeProductCategoryCommand}">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border Background="{TemplateBinding Background}"
