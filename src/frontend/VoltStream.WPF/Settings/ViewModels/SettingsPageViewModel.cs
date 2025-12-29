@@ -2,13 +2,14 @@
 
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
+using ApiServices.Models;
 using ApiServices.Models.Requests;
+using ApiServices.Models.Responses;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
-using ApiServices.Models.Responses;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.ViewModels;
 
@@ -110,9 +111,9 @@ public partial class SettingsPageViewModel : ViewModelBase
         }
 
         var client = services.GetRequiredService<IProductsApi>();
-        var response = await client.UpdateAsync(new ProductRequest 
-        { 
-            Id = SelectedOldProduct.Id, 
+        var response = await client.UpdateAsync(new ProductRequest
+        {
+            Id = SelectedOldProduct.Id,
             Name = NewProductName,
             Unit = SelectedOldProduct.Unit,
             CategoryId = SelectedOldProduct.CategoryId
@@ -138,9 +139,9 @@ public partial class SettingsPageViewModel : ViewModelBase
         }
 
         var client = services.GetRequiredService<ICustomersApi>();
-        var response = await client.UpdateAsync(new CustomerRequest 
-        { 
-            Id = SelectedOldCustomer.Id, 
+        var response = await client.UpdateAsync(new CustomerRequest
+        {
+            Id = SelectedOldCustomer.Id,
             Name = NewCustomerName,
             Phone = SelectedOldCustomer.Phone,
             Address = SelectedOldCustomer.Address,
@@ -167,9 +168,9 @@ public partial class SettingsPageViewModel : ViewModelBase
         }
 
         var client = services.GetRequiredService<IProductsApi>();
-        var response = await client.UpdateAsync(new ProductRequest 
-        { 
-            Id = SelectedProductToChangeCategory.Id, 
+        var response = await client.UpdateAsync(new ProductRequest
+        {
+            Id = SelectedProductToChangeCategory.Id,
             Name = SelectedProductToChangeCategory.Name,
             Unit = SelectedProductToChangeCategory.Unit,
             CategoryId = SelectedNewCategory.Id
@@ -225,7 +226,17 @@ public partial class SettingsPageViewModel : ViewModelBase
     private async Task LoadProducts()
     {
         var client = services.GetRequiredService<IProductsApi>();
-        var response = await client.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
+        var request = new FilteringRequest
+        {
+            Filters = new Dictionary<string, List<string>>
+            {
+                { "Category", ["include"] }
+            },
+            Page = 0,
+            PageSize = 0
+        };
+
+        var response = await client.Filter(request).Handle(isLoading => IsLoading = isLoading);
 
         if (response.IsSuccess)
             Products = new ObservableCollection<ProductResponse>(response.Data);

@@ -13,10 +13,10 @@ public interface ICustomersApi
     [Post("/customers")]
     Task<Response<long>> CreateAsync([Body] CustomerRequest request);
 
-    [Put("/customers​")]
+    [Put("/customers")]
     Task<Response<bool>> UpdateAsync([Body] CustomerRequest request);
 
-    [Delete("/customers​/{id}")]
+    [Delete("/customers/{id}")]
     Task<Response<bool>> DeleteAsync(long id);
 
     [Get("/customers/{id}")]

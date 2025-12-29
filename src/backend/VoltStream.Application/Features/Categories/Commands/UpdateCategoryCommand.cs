@@ -30,7 +30,7 @@ public class UpdateCategoryCommandHandler(
             throw new AlreadyExistException(nameof(Category), "Name", request.Name);
 
         mapper.Map(request, category);
-        
+
         return await context.SaveAsync(cancellationToken) > 0;
     }
 }

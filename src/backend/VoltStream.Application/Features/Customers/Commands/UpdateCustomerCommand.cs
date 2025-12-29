@@ -16,7 +16,7 @@ public record UpdateCustomerCommand(
     string? Email,
     string? ImageUrl,
     string? ClientType,
-    string? Description) 
+    string? Description)
     : IRequest<bool>;
 
 public class UpdateCustomerCommandHandler(

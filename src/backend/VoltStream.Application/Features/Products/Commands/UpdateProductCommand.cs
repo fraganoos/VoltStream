@@ -27,8 +27,8 @@ public class UpdateProductCommandHandler(
 
         var normalizedName = request.Name.ToNormalized();
         var productExists = await context.Products
-            .AnyAsync(p => p.NormalizedName == normalizedName 
-                           && p.CategoryId == request.CategoryId 
+            .AnyAsync(p => p.NormalizedName == normalizedName
+                           && p.CategoryId == request.CategoryId
                            && p.Id != request.Id, cancellationToken);
 
         if (productExists)

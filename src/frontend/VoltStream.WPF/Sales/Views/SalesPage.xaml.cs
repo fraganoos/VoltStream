@@ -792,7 +792,7 @@ public partial class SalesPage : Page
                 TotalAmount = i.Sum ?? 0,
                 DiscountRate = i.PerDiscount ?? 0,
                 DiscountAmount = i.Discount ?? 0,
-                FinalAmount = sale.IsDiscountApplied ? (i.FinalSumProduct ?? 0) : (i.Sum ?? 0)
+                FinalAmount = i.FinalSumProduct ?? 0
             })]
         };
 

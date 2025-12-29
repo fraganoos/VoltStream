@@ -254,7 +254,7 @@
                 Validation.ErrorTemplate="{x:Null}" 
                 utils:NumericInput.Precision="0"
                 utils:NumericInput.IsNumeric="True"
-                utils:NumericInput.Value="{Binding CurrentItem.RollCount, UpdateSourceTrigger=PropertyChanged}" />
+                utils:NumericInput.Value="{Binding CurrentItem.RollCount, UpdateSourceTrigger=LostFocus}" />
 
 			<TextBlock Grid.Column="4" Panel.ZIndex="1" IsHitTestVisible="False" Style="{StaticResource FloatingLabelStyle}" Tag="{Binding ElementName=txtTotalLength}" Text="Jami metr" />
 			<TextBox 
