@@ -178,20 +178,17 @@ public static class NumericInput
         string originalText = textBox.Text;
         string cleanValues = originalText.Replace(" ", "");
 
-        // Temporarily clear flag to allow binding update
         SetIsInternalChange(textBox, false);
-        
+
         if (string.IsNullOrEmpty(cleanValues))
         {
-            SetValue(textBox, null);
+            SetValue(textBox, null!);
         }
         else if (cleanValues == ".")
         {
-            // Do nothing to value
         }
         else if (decimal.TryParse(cleanValues, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
         {
-            // Convert to appropriate type based on binding target
             var bindingExpression = textBox.GetBindingExpression(ValueProperty);
             if (bindingExpression?.ResolvedSourcePropertyName != null)
             {
@@ -199,12 +196,10 @@ public static class NumericInput
                 var propertyInfo = source?.GetType().GetProperty(bindingExpression.ResolvedSourcePropertyName);
                 var targetType = propertyInfo?.PropertyType;
 
-                // Remove Nullable<T> wrapper to get underlying type
                 var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
 
                 if (underlyingType == typeof(int))
                 {
-                    // Convert decimal to int (round to nearest integer)
                     SetValue(textBox, (int)Math.Round(val));
                 }
                 else if (underlyingType == typeof(long))
@@ -221,18 +216,15 @@ public static class NumericInput
                 }
                 else
                 {
-                    // Default: keep as decimal
                     SetValue(textBox, val);
                 }
             }
             else
             {
-                // No binding or cannot determine type - use decimal
                 SetValue(textBox, val);
             }
         }
 
-        // Restore flag for Text formatting
         SetIsInternalChange(textBox, true);
 
         string formattedText = ApplyFormatting(cleanValues);
@@ -253,7 +245,7 @@ public static class NumericInput
 
         string[] parts = cleanText.Split('.');
         string integerPart = parts[0];
-        string decimalPart = parts.Length > 1 ? parts[1] : null;
+        string decimalPart = parts.Length > 1 ? parts[1] : null!;
 
         string formattedInteger = "";
         if (!string.IsNullOrEmpty(integerPart))
