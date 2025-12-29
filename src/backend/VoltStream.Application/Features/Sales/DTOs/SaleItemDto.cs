@@ -5,7 +5,7 @@ using VoltStream.Application.Features.Products.DTOs;
 public record SaleItemDto
 {
     public long Id { get; set; }
-    public decimal RollCount { get; set; }
+    public int RollCount { get; set; }
     public decimal LengthPerRoll { get; set; }
     public decimal TotalLength { get; set; }
     public decimal UnitPrice { get; set; }

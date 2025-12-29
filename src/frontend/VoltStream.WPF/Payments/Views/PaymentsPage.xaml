@@ -158,12 +158,15 @@
                              x:Name="Summa"
                              IsReadOnly="True"
                              IsTabStop="False"
-                             FontSize="14" BorderThickness="0"
+                             FontSize="14" 
+                             BorderThickness="0"
                              Margin="5,2"
-                             Text="{Binding Payment.Amount, Mode=TwoWay}"
+                             utils:NumericInput.Value="{Binding Payment.Amount, UpdateSourceTrigger=PropertyChanged}"
+                             utils:NumericInput.Precision="2"
                              FontStyle="Italic"
                              Background="Transparent"
                              utils:NumericInput.IsNumeric="True" />
+
 					<TextBox Grid.Column="1"
                              Grid.Row="1"
                              x:Name="Kirim"
@@ -171,9 +174,11 @@
                              Margin="5 2"
                              Validation.ErrorTemplate="{x:Null}"
                              IsEnabled="{Binding Payment.IsIncomeEnabled}"
+                                 utils:TextBoxTabBehavior.EnableTabOnKeys="True" 
                              utils:NumericInput.IsNumeric="True"
-                             utils:TextBoxTabBehavior.EnableTabOnKeys="True"
-                             Text="{Binding Payment.IncomeAmount, Mode=TwoWay}"/>
+                             utils:NumericInput.Precision="2"
+                             utils:NumericInput.Value="{Binding Payment.IncomeAmount, UpdateSourceTrigger=LostFocus}"/>
+
 					<TextBox Grid.Column="1"
                              Grid.Row="2"
                              x:Name="Chiqim"
@@ -181,9 +186,10 @@
                              Margin="5,2"
                              Validation.ErrorTemplate="{x:Null}"
                              IsEnabled="{Binding Payment.IsExpenseEnabled}"
-                             utils:TextBoxTabBehavior.EnableTabOnKeys="True"
+                                 utils:TextBoxTabBehavior.EnableTabOnKeys="True" 
                              utils:NumericInput.IsNumeric="True"
-                             Text="{Binding Payment.ExpenseAmount, Mode=TwoWay}"/>
+                             utils:NumericInput.Precision="2"
+                             utils:NumericInput.Value="{Binding Payment.ExpenseAmount, UpdateSourceTrigger=LostFocus}"/>
                    
                 </Grid>
                 <Grid Grid.Column="1">

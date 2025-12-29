@@ -151,7 +151,7 @@ public static class QueryExtensions
             ? TimeSpan.FromHours(timezoneOffset.Value)
             : TimeSpan.Zero;
 
-        string[] dayFormats = ["yyyy-MM-dd", "dd.MM.yyyy", "yyyy/MM/dd"];
+        string[] dayFormats = ["yyyy-MM-dd", "dd.MM.yyyy", "yyyy/MM/dd", "yyyy.MM.dd"];
         string[] monthFormats = ["yyyy-MM", "MM.yyyy", "yyyy/MM"];
         string[] yearFormats = ["yyyy"];
 

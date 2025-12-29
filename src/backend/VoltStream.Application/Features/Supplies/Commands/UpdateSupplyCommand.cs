@@ -15,7 +15,7 @@ public record UpdateSupplyCommand(
     long ProductId,
     string ProductName,
     string Unit,
-    decimal RollCount,
+    int RollCount,
     decimal LengthPerRoll,
     decimal TotalLength,
     decimal UnitPrice,

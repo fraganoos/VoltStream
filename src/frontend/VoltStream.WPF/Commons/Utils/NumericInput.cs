@@ -91,7 +91,10 @@ public static class NumericInput
 
         if (GetIsInternalChange(textBox)) return;
 
-        FormatValue(textBox);
+        if (!textBox.IsFocused)
+        {
+            FormatValue(textBox);
+        }
     }
 
     private static void FormatValue(TextBox textBox)
@@ -175,6 +178,9 @@ public static class NumericInput
         string originalText = textBox.Text;
         string cleanValues = originalText.Replace(" ", "");
 
+        // Temporarily clear flag to allow binding update
+        SetIsInternalChange(textBox, false);
+        
         if (string.IsNullOrEmpty(cleanValues))
         {
             SetValue(textBox, null);
@@ -185,9 +191,49 @@ public static class NumericInput
         }
         else if (decimal.TryParse(cleanValues, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
         {
-            // Just set the decimal value - WPF binding will handle type conversion automatically
-            SetValue(textBox, val);
+            // Convert to appropriate type based on binding target
+            var bindingExpression = textBox.GetBindingExpression(ValueProperty);
+            if (bindingExpression?.ResolvedSourcePropertyName != null)
+            {
+                var source = bindingExpression.ResolvedSource;
+                var propertyInfo = source?.GetType().GetProperty(bindingExpression.ResolvedSourcePropertyName);
+                var targetType = propertyInfo?.PropertyType;
+
+                // Remove Nullable<T> wrapper to get underlying type
+                var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+
+                if (underlyingType == typeof(int))
+                {
+                    // Convert decimal to int (round to nearest integer)
+                    SetValue(textBox, (int)Math.Round(val));
+                }
+                else if (underlyingType == typeof(long))
+                {
+                    SetValue(textBox, (long)Math.Round(val));
+                }
+                else if (underlyingType == typeof(double))
+                {
+                    SetValue(textBox, (double)val);
+                }
+                else if (underlyingType == typeof(float))
+                {
+                    SetValue(textBox, (float)val);
+                }
+                else
+                {
+                    // Default: keep as decimal
+                    SetValue(textBox, val);
+                }
+            }
+            else
+            {
+                // No binding or cannot determine type - use decimal
+                SetValue(textBox, val);
+            }
         }
+
+        // Restore flag for Text formatting
+        SetIsInternalChange(textBox, true);
 
         string formattedText = ApplyFormatting(cleanValues);
 

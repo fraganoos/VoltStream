@@ -3,7 +3,7 @@
 public record WarehouseStockResponse
 {
     public long Id { get; set; }
-    public decimal RollCount { get; set; }  // rulon soni
+    public int RollCount { get; set; }  // rulon soni
     public decimal LengthPerRoll { get; set; }  //rulon uzunligi
     public decimal TotalLength { get; set; } // jami uzunlik
     public decimal UnitPrice { get; set; }

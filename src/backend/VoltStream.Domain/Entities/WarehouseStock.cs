@@ -2,7 +2,7 @@
 
 public class WarehouseStock : Auditable
 {
-    public decimal RollCount { get; set; }
+    public int RollCount { get; set; }
     public decimal LengthPerRoll { get; set; }
     public decimal TotalLength { get; set; }
     public decimal UnitPrice { get; set; }
