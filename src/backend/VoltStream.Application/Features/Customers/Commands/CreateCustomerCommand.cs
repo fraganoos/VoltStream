@@ -13,6 +13,9 @@ public record CreateCustomerCommand(
     string Name,
     string? Phone,
     string? Address,
+    string? Email,
+    string? ImageUrl,
+    string? ClientType,
     string? Description,
     List<AccountCommandDto> Accounts)
     : IRequest<long>;

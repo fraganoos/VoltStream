@@ -15,7 +15,6 @@ public class CategoriesController
         UpdateCategoryCommand,
         DeleteCategoryCommand>
 {
-
     [HttpPost("filter")]
     public async Task<IActionResult> GetFiltered(CategoryFilterQuery query)
         => Ok(new Response { Data = await Mediator.Send(query) });

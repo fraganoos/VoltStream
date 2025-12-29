@@ -4,6 +4,7 @@ using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
+using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 using VoltStream.Domain.Entities;
 
@@ -24,7 +25,17 @@ public class UpdateProductCommandHandler(
         var product = await context.Products.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Product), nameof(request.Id), request.Id);
 
+        var normalizedName = request.Name.ToNormalized();
+        var productExists = await context.Products
+            .AnyAsync(p => p.NormalizedName == normalizedName 
+                           && p.CategoryId == request.CategoryId 
+                           && p.Id != request.Id, cancellationToken);
+
+        if (productExists)
+            throw new AlreadyExistException(nameof(Product), "Name", request.Name);
+
         mapper.Map(request, product);
+        product.NormalizedName = normalizedName;
 
         return await context.SaveAsync(cancellationToken) > 0;
     }

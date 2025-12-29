@@ -15,10 +15,14 @@ public class CustomerMappingProfile : Profile
 
         CreateMap<CreateCustomerCommand, Customer>()
             .ForMember(dest => dest.NormalizedName, opt =>
-            opt.MapFrom(src => src.Name.ToNormalized()));
+            opt.MapFrom(src => src.Name.ToNormalized()))
+            .ForMember(dest => dest.NormalizedEmail, opt =>
+            opt.MapFrom(src => src.Email.ToNormalized()));
 
         CreateMap<UpdateCustomerCommand, Customer>()
             .ForMember(dest => dest.NormalizedName, opt =>
-            opt.MapFrom(src => src.Name.ToNormalized()));
+            opt.MapFrom(src => src.Name.ToNormalized()))
+            .ForMember(dest => dest.NormalizedEmail, opt =>
+            opt.MapFrom(src => src.Email.ToNormalized()));
     }
 }

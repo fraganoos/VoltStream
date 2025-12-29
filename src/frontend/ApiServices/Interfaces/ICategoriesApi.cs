@@ -9,10 +9,10 @@ using Refit;
 public interface ICategoriesApi
 {
     [Post("/categories​")]
-    Task<Response<long>> CreateAsync([Body] CategoryRequest categoryCreate);
+    Task<Response<long>> CreateAsync(CategoryRequest categoryCreate);
 
     [Put("/categories​")]
-    Task<Response<bool>> UpdateAsync([Body] CategoryRequest categoryUpdate);
+    Task<Response<bool>> UpdateAsync(CategoryRequest categoryUpdate);
 
     [Delete("/categories​/{id}")]
     Task<Response<bool>> DeleteAsync(long id);
