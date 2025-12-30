@@ -27,7 +27,7 @@ public class DeleteCategoryCommandHandler(
         {
             throw new ForbiddenException("Ushbu kategoriyada mahsulotlar mavjud yoki tizim xatoligi tufayli o'chirib bo'lmaydi.");
         }
-        
+
         return true;
     }
 }

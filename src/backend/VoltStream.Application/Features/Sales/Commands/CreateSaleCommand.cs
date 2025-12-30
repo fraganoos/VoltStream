@@ -37,7 +37,7 @@ public class CreateSaleCommandHandler(
 
             var descriptionBuilder = new StringBuilder();
 
-            await ProcessSaleItemsAsync(request.Items, warehouse, descriptionBuilder, request.IsDiscountApplied, cancellationToken);
+            await ProcessSaleItemsAsync(request.Items, warehouse, descriptionBuilder, cancellationToken);
             var sale = mapper.Map<Sale>(request);
 
 
@@ -91,7 +91,6 @@ public class CreateSaleCommandHandler(
         List<SaleItemCommand> saleItems,
         Warehouse warehouse,
         StringBuilder descriptionBuilder,
-        bool isDiscountApplied,
         CancellationToken cancellationToken)
     {
         foreach (var item in saleItems)
@@ -108,16 +107,10 @@ public class CreateSaleCommandHandler(
             var product = await context.Products.FirstOrDefaultAsync(p => p.Id == item.ProductId, cancellationToken)
                 ?? throw new NotFoundException(nameof(Product), nameof(item.Id), item.ProductId);
 
-            var amount = item.TotalAmount;
-            if (isDiscountApplied)
-                amount = item.FinalAmount;
+            descriptionBuilder.Append($"{product.Name} - {item.TotalLength:N2} x {item.UnitPrice:N2} = {item.TotalAmount:N2}");
 
-            descriptionBuilder.Append($"{product.Name} - {item.TotalLength} m. X " +
-                $"{Math.Round(amount / item.TotalLength, 2):N2} = " +
-                $"{amount:N2}");
-
-            if (!isDiscountApplied && item.DiscountAmount != 0)
-                descriptionBuilder.Append($" [ch: {item.DiscountAmount:N2}]");
+            if (item.DiscountAmount != 0)
+                descriptionBuilder.Append($" [ch: {item.DiscountRate}% = {item.DiscountAmount:N2}]");
 
             if (saleItems.IndexOf(item) < saleItems.Count - 1)
                 descriptionBuilder.Append(";\n");
@@ -162,7 +155,6 @@ public class CreateSaleCommandHandler(
                    string description, StringBuilder descriptionBuilder, bool isApplied)
     {
         if (description.Trim().Length > 0) description = description + ". ";
-        string appliedText = isApplied ? "" : $"Chegirma: {sale.Discount:N2}";
         return new CustomerOperation
         {
             Date = sale.Date,
@@ -173,7 +165,11 @@ public class CreateSaleCommandHandler(
             AccountId = account.Id,
             CustomerId = sale.CustomerId,
             OperationType = OperationType.Sale,
-            Description = $"Savdo: {description} {appliedText};\n{descriptionBuilder}"
+            Description = $"Savdo: {description}\n" +
+                          $"{descriptionBuilder}\n" +
+                          $"------------------------------------\n" +
+                          $"Jami: {sale.Amount + (isApplied ? sale.Discount : 0):N2}\n" +
+                          (sale.Discount > 0 ? $"Chegirma: {sale.Discount:N2} {(isApplied ? "(ayrildi)" : "(saqlandi)")}" : "")
         };
     }
 }

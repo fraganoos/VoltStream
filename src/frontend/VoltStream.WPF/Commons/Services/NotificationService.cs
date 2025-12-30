@@ -55,41 +55,41 @@ public static class NotificationService
         var borderFactory = new FrameworkElementFactory(typeof(Border));
         borderFactory.SetValue(Border.BackgroundProperty, Brushes.Transparent);
         borderFactory.SetValue(Border.BorderThicknessProperty, new Thickness(0));
-        
+
         var contentPresenter = new FrameworkElementFactory(typeof(ContentPresenter));
         contentPresenter.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
         contentPresenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
-        
+
         borderFactory.AppendChild(contentPresenter);
         template.VisualTree = borderFactory;
         copyButton.Template = template;
 
         Panel.SetZIndex(copyButton, 100);
 
-        copyButton.Click += (_, _) => 
+        copyButton.Click += (_, _) =>
         {
-            try 
-            { 
+            try
+            {
                 var formattedMessage = $"[{type.ToString().ToUpper()}] {DateTime.Now:yyyy-MM-dd HH:mm:ss} -> {message}";
                 Clipboard.SetText(formattedMessage);
-                
+
                 if (copyButton.Content is FontAwesome.Sharp.IconImage icon)
                 {
                     var originalIcon = icon.Icon;
                     icon.Icon = FontAwesome.Sharp.IconChar.Check;
                     copyButton.ToolTip = "Buferga saqlandi!";
-                    
-                    Task.Delay(1500).ContinueWith(_ => 
+
+                    Task.Delay(1500).ContinueWith(_ =>
                     {
-                        Application.Current.Dispatcher.Invoke(() => 
+                        Application.Current.Dispatcher.Invoke(() =>
                         {
                             icon.Icon = originalIcon;
                             copyButton.ToolTip = "Nusxa olish";
                         });
                     });
                 }
-            } 
-            catch {}
+            }
+            catch { }
         };
 
         var textBlock = new TextBlock
@@ -110,7 +110,7 @@ public static class NotificationService
 
         Grid.SetColumn(copyButton, 0);
         Grid.SetColumn(textBlock, 1);
-        
+
         contentGrid.Children.Add(copyButton);
         contentGrid.Children.Add(textBlock);
 
