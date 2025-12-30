@@ -70,7 +70,31 @@ public static class NotificationService
 
         copyButton.Click += (_, _) => 
         {
-            try { Clipboard.SetText(message); } catch {}
+            try 
+            { 
+                // 📝 Format: [TYPE] YYYY-MM-DD HH:mm:ss -> Message
+                var formattedMessage = $"[{type.ToString().ToUpper()}] {DateTime.Now:yyyy-MM-dd HH:mm:ss} -> {message}";
+                Clipboard.SetText(formattedMessage);
+                
+                // ✅ Visual Feedback (Change Icon to Check)
+                if (copyButton.Content is FontAwesome.Sharp.IconImage icon)
+                {
+                    var originalIcon = icon.Icon;
+                    icon.Icon = FontAwesome.Sharp.IconChar.Check;
+                    copyButton.ToolTip = "Buferga saqlandi!";
+                    
+                    // Revert back after 1.5 seconds
+                    Task.Delay(1500).ContinueWith(_ => 
+                    {
+                        Application.Current.Dispatcher.Invoke(() => 
+                        {
+                            icon.Icon = originalIcon;
+                            copyButton.ToolTip = "Nusxa olish";
+                        });
+                    });
+                }
+            } 
+            catch {}
         };
 
         // 📝 Text Message
