@@ -20,7 +20,7 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
                .WithOne(co => co.Sale)
                .HasForeignKey<Sale>(s => s.CustomerOperationId)
                .IsRequired(false)
-               .OnDelete(DeleteBehavior.Restrict);
+               .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(s => s.Currency)
                .WithMany()

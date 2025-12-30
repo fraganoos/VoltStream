@@ -15,7 +15,7 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
                .WithOne(co => co.Payment)
                .HasForeignKey<Payment>(p => p.CustomerOperationId)
                .IsRequired(false)
-               .OnDelete(DeleteBehavior.Restrict);
+               .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(p => p.Currency)
                 .WithMany()
