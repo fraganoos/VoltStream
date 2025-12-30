@@ -15,6 +15,7 @@ using System.Windows;
 using VoltStream.WPF.Commons;
 using VoltStream.WPF.Commons.Messages;
 using VoltStream.WPF.Commons.ViewModels;
+using VoltStream.WPF.Sales.ViewModels;
 
 public partial class SuppliesPageViewModel : ViewModelBase
 {
@@ -38,29 +39,31 @@ public partial class SuppliesPageViewModel : ViewModelBase
     }
 
     [ObservableProperty] private DateTime selectedDate;
+
     [ObservableProperty] private ObservableCollection<CategoryViewModel> categories = [];
     [ObservableProperty] private CategoryViewModel? selectedCategory;
-
     [ObservableProperty] private string categoryText = string.Empty;
 
     [ObservableProperty] private ObservableCollection<ProductViewModel> products = [];
     [ObservableProperty] private ProductViewModel? selectedProduct;
-
     [ObservableProperty] private string productText = string.Empty;
+
+    [ObservableProperty] private ObservableCollection<WarehouseStockViewModel> warehouseStocks = [];
+    [ObservableProperty] private WarehouseStockViewModel? selectedWarehouseStock;
+    [ObservableProperty] private decimal? warehouseStockValue;
 
     [ObservableProperty] private decimal? perRollCount;
     [ObservableProperty] private int? rollCount;
     [ObservableProperty] private decimal? unitPrice;
     [ObservableProperty] private decimal? discountRate;
     [ObservableProperty] private decimal? totalQuantity;
-    [ObservableProperty] private string unit;
+    [ObservableProperty] private string? unit;
 
     [ObservableProperty] private ObservableCollection<SupplyViewModel> supplies = [];
     [ObservableProperty] private SupplyViewModel? selectedSupply;
 
-    [ObservableProperty] private bool isEditing;
     [ObservableProperty] private SupplyViewModel? editingItemBackup;
-    private int _editingItemIndex = -1;
+    private int editingItemIndex = -1;
 
     #region Property Change Handlers
 
@@ -123,7 +126,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         {
             ProductText = value.Name;
             Unit = value.Unit ?? "metr";
-            _ = LoadProductDetails(value.Id);
+            _ = LoadWarehouseStocksAsync(value.Id);
         }
     }
 
@@ -166,6 +169,47 @@ public partial class SuppliesPageViewModel : ViewModelBase
         }
     }
 
+    partial void OnSelectedWarehouseStockChanged(WarehouseStockViewModel? value)
+    {
+        if (value is not null)
+        {
+            UnitPrice = value.UnitPrice;
+            DiscountRate = value.DiscountRate;
+        }
+    }
+
+
+    partial void OnWarehouseStockValueChanged(decimal? oldValue, decimal? newValue)
+    {
+        var old = WarehouseStocks.FirstOrDefault(c => c.LengthPerRoll == oldValue && c.Id < 1);
+        if (old is not null) WarehouseStocks.Remove(old);
+
+        if (newValue == null) return;
+
+        if (SelectedWarehouseStock?.LengthPerRoll == newValue) return;
+
+        var existing = WarehouseStocks.FirstOrDefault(c => c.LengthPerRoll == newValue);
+        if (existing is not null)
+        {
+            SelectedWarehouseStock = existing;
+            return;
+        }
+
+        var result = MessageBox.Show($"'{newValue}' ro'yxatda yo'q. Yangi to'plam sifatida qo'shilsinmi?",
+                            "Tasdiqlash", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            WarehouseStocks.Add(new() { LengthPerRoll = newValue.Value });
+            SelectedWarehouseStock = null;
+        }
+        else
+        {
+            WarehouseStockValue = null;
+            WeakReferenceMessenger.Default.Send(new FocusControlMessage("WarehouseStock"));
+        }
+    }
+
     partial void OnPerRollCountChanged(decimal? value) => CalculateTotal();
     partial void OnRollCountChanged(int? value) => CalculateTotal();
 
@@ -183,7 +227,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
     private async Task LoadCategoriesAsync()
     {
-        var result = await categoriesApi.GetAllAsync().Handle();
+        var result = await categoriesApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
         if (result.IsSuccess) Categories = mapper.Map<ObservableCollection<CategoryViewModel>>(result.Data);
         else Error = result.Message ?? "Kategoriyalarni yuklashda xatolik";
     }
@@ -228,18 +272,19 @@ public partial class SuppliesPageViewModel : ViewModelBase
         else Error = result.Message ?? "Ta'minotlarni yuklashda xatolik";
     }
 
-    private async Task LoadProductDetails(long productId)
+    private async Task LoadWarehouseStocksAsync(long productId)
     {
-        var warehouseItems = await warehouseItemsApi.GetAllWarehouseItemsAsync().Handle();
-        if (warehouseItems?.Data is not null)
+        FilteringRequest request = new()
         {
-            var item = warehouseItems.Data.FirstOrDefault(x => x.ProductId == productId);
-            if (item is not null)
+            Filters = new()
             {
-                UnitPrice = item.UnitPrice;
-                DiscountRate = item.DiscountRate;
+                ["productId"] = [productId.ToString()]
             }
-        }
+        };
+
+        var response = await warehouseItemsApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
+        if (response.IsSuccess) WarehouseStocks = mapper.Map<ObservableCollection<WarehouseStockViewModel>>(response.Data);
+        else Error = response.Message ?? "Ombor mahsulotlarini yuklashda xatolik yuz berdi.";
     }
 
     #endregion Load Data
@@ -294,7 +339,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
             {
                 IsEditing = false;
                 EditingItemBackup = null;
-                _editingItemIndex = -1;
+                editingItemIndex = -1;
             }
             await LoadDataAsync();
         }
@@ -321,12 +366,12 @@ public partial class SuppliesPageViewModel : ViewModelBase
                 return;
         }
 
-        if (_editingItemIndex > -1 && EditingItemBackup is not null)
-            Supplies.Insert(_editingItemIndex, EditingItemBackup);
+        if (editingItemIndex > -1 && EditingItemBackup is not null)
+            Supplies.Insert(editingItemIndex, EditingItemBackup);
 
         IsEditing = true;
         EditingItemBackup = item;
-        _editingItemIndex = Supplies.IndexOf(item);
+        editingItemIndex = Supplies.IndexOf(item);
 
         Supplies.Remove(item);
 
@@ -338,15 +383,15 @@ public partial class SuppliesPageViewModel : ViewModelBase
     {
         if (IsEditing && EditingItemBackup is not null)
         {
-            if (_editingItemIndex >= 0 && _editingItemIndex <= Supplies.Count)
-                Supplies.Insert(_editingItemIndex, EditingItemBackup);
+            if (editingItemIndex >= 0 && editingItemIndex <= Supplies.Count)
+                Supplies.Insert(editingItemIndex, EditingItemBackup);
             else
                 Supplies.Add(EditingItemBackup);
 
             ClearForm();
             IsEditing = false;
             EditingItemBackup = null;
-            _editingItemIndex = -1;
+            editingItemIndex = -1;
         }
     }
 
@@ -358,7 +403,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         var result = MessageBox.Show("Haqiqatan ham o'chirmoqchimisiz?", "O'chirish", MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (result == MessageBoxResult.Yes)
         {
-            var ViewModel = await suppliesApi.DeleteSupplyAsync(item.Id).Handle();
+            var ViewModel = await suppliesApi.DeleteSupplyAsync(item.Id).Handle(isLoading => IsLoading = isLoading);
             if (ViewModel.IsSuccess)
             {
                 Supplies.Remove(item);

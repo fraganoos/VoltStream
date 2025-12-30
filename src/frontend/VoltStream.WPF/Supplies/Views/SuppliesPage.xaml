@@ -11,25 +11,20 @@
       d:DesignHeight="450"
       d:DesignWidth="800"
       Title="SupplyPage">
-    <Page.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <conv:UtcToUzbekistanTimeConverter x:Key="UtcToUzbekistanTimeConverter" />
-    </Page.Resources>
-    
-    <Grid>
+
+	<Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="175" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="30" />
-        </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
+			<RowDefinition Height="*" />
+		</Grid.RowDefinitions>
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1.5*"
                                   MaxWidth="600" />
                 <ColumnDefinition Width="20" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Grid Grid.Column="0">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100" />
                     <ColumnDefinition Width="*" />
@@ -44,8 +39,7 @@
                 </Grid.RowDefinitions>
                 <Grid  Grid.Row="0"
                        Grid.Column="0">
-                    <StackPanel Orientation="Horizontal"
-                                Margin="10,0">
+                    <StackPanel Orientation="Horizontal">
                         <Label Content="Sana:"
                                VerticalAlignment="Center"
                                FontSize="14" />
@@ -64,16 +58,13 @@
                                            VerticalAlignment="Center"
                                            HorizontalAlignment="Left"
                                            Width="150"
-                                           FontSize="14"
-                                           Margin="0,0,10,0"
-                                            />
+                                           FontSize="14"/>
 				</Grid>
                 
 
 				<Grid Grid.Row="1"
                       Grid.Column="0">
-                    <StackPanel Orientation="Horizontal"
-                                Margin="10,0">
+                    <StackPanel Orientation="Horizontal">
                         <Label Content="Maxsulot:"
                                VerticalAlignment="Center"
                                FontSize="14" />
@@ -124,14 +115,12 @@
                               Text="{Binding ProductText, UpdateSourceTrigger=LostFocus}"
                               DisplayMemberPath="Name"
                               VerticalAlignment="Center"
-                              FontSize="14"
-                              Margin="0,0,10,0"/>
+                              FontSize="14"/>
                 </Grid>
                 <Grid Grid.Row="2"
                       Grid.Column="0">
                     <Label Content="To'plamda:"
                            VerticalAlignment="Center"
-                           Margin="10,0"
                            FontSize="14" />
                 </Grid>
                 <Grid Grid.Row="2"
@@ -141,18 +130,20 @@
                         <ColumnDefinition Width="85" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBox Grid.Column="0"
-                             x:Name="tbxPerRollCount"
-                             utils:NumericInput.Value="{Binding PerRollCount, UpdateSourceTrigger=PropertyChanged}"
-                             utils:NumericInput.Precision="2"
-                             VerticalAlignment="Center"
-                             HorizontalAlignment="Stretch"
-                             HorizontalContentAlignment="Right"
-                             FontSize="14"
-                             Validation.ErrorTemplate="{x:Null}"
-                             Margin="0,0,10,0"
-                             utils:NumericInput.IsNumeric="True"
-                              />
+
+					<ComboBox x:Name="cbxWarehouseStock"
+                              IsEditable="True"
+                              ItemsSource="{Binding WarehouseStocks}"
+                              SelectedItem="{Binding SelectedWarehouseStock}"
+                              utils:NumericInput.Value="{Binding WarehouseStockValue, UpdateSourceTrigger=LostFocus}"
+                              utils:NumericInput.IsNumeric="True"
+                              utils:NumericInput.Precision="2"
+                              DisplayMemberPath="LengthPerRoll"
+                              Margin="0,0,10,0"
+                              HorizontalAlignment="Stretch"
+                              HorizontalContentAlignment="Right"
+                              VerticalAlignment="Center"
+                              FontSize="14"/>
 
                     <TextBlock Grid.Column="1"
                                Text="To'plam soni:"
@@ -169,7 +160,6 @@
                              Validation.ErrorTemplate="{x:Null}"    
                              HorizontalContentAlignment="Right"
                              FontSize="14"
-                             Margin="0,0,10,0"
                              utils:NumericInput.IsNumeric="True"
                               />
                 </Grid>
@@ -177,7 +167,6 @@
                       Grid.Column="0">
                     <Label Content="Jami:"
                            VerticalAlignment="Center"
-                           Margin="10,0"
                            FontSize="14" />
                 </Grid>
                 <Grid Grid.Row="3"
@@ -209,7 +198,6 @@
                               x:Name="cbxUnit"
                               Text="{Binding Unit, UpdateSourceTrigger=PropertyChanged}"
                               StaysOpenOnEdit="True"
-                              Margin="0,0,10,0"
                           VerticalAlignment="Center"
                           FontSize="14"
                           >
@@ -222,7 +210,6 @@
                       Grid.Column="0">
                     <Label Content="Narxi:"
                            VerticalAlignment="Center"
-                           Margin="10,0"
                            FontSize="14" />
                 </Grid>
 
@@ -258,7 +245,6 @@
                              HorizontalAlignment="Stretch"
                              HorizontalContentAlignment="Right"
                              FontSize="14"
-                             Margin="0,0,10,0"
                              Validation.ErrorTemplate="{x:Null}"
                              utils:NumericInput.IsNumeric="True"
                              />
@@ -271,11 +257,10 @@
                     
                     <Button Grid.Column="0"
                             x:Name="addSupplyBtn"
-                            Content="{Binding IsEditing, Converter={StaticResource BoolToTextConverter}, ConverterParameter=' Saqlash  💾 | Qoshish  🗹 '}"
+                            Content="{Binding IsEditing, Converter={StaticResource BoolToTextConverter}, ConverterParameter=' Saqlash  🗹 | Qoshish  🗹 '}"
                             Command="{Binding SaveCommand}"
                             VerticalAlignment="Center"
                             FontWeight="DemiBold"
-                            Margin="2,4,10,4"
                             FontSize="14"
                             Height="27" />
 
@@ -286,15 +271,14 @@
                             Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}"
                             VerticalAlignment="Center"
                             FontWeight="DemiBold"
-                            Margin="2,4,10,4"
+                            Margin="5,4,0,4"
                             FontSize="14"
                             Height="27" />
                 </Grid>
             </Grid>
             <Grid Grid.Column="2">
                 <Border BorderBrush="Gray"
-                        BorderThickness="1"
-                        Margin="10">
+                        BorderThickness="1">
                     <Label Content="Mahsulot haqida ma'lumotlar.."
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
@@ -314,7 +298,7 @@
                   CanUserAddRows="False"
                   HeadersVisibility="Column, Row"
                   utils:DataGridRowNumbering.IsEnabled="True"
-                  Margin="10"
+                  Margin="0 10 0 0"
                   Foreground="Black">
             <DataGrid.InputBindings>
                 <MouseBinding Gesture="LeftDoubleClick" Command="{Binding EditItemCommand}" CommandParameter="{Binding SelectedSupply}" />

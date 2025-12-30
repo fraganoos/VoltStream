@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:VoltStream.WPF.Commons.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:VoltStream.WPF.Turnovers.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
     Title="TurnoversPage"
@@ -12,224 +11,159 @@
     d:DesignWidth="900"
     mc:Ignorable="d">
 
-    <Grid>
+    <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="80" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
         </Grid.RowDefinitions>
 
-        <!--  🔍 Filter panel  -->
-        <Grid Grid.Row="0" Margin="10,5">
+        <Grid Margin="0,0,0,10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-            <!--  👤 Mijoz  -->
-            <Grid Grid.Column="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+            <TextBlock
+                VerticalAlignment="Center"
+                FontSize="13"
+                Text="Xisobot davri" />
+            <StackPanel
+                Grid.Column="1"
+                Margin="10,0"
+                Orientation="Horizontal">
+                <controls:UserCalendar
+                    Width="110"
+                    FontSize="14"
+                    SelectedDate="{Binding BeginDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    utils:EnterKeyTab.IsEnabled="True" />
                 <TextBlock
-                    Grid.Row="1"
-                    Grid.Column="0"
                     Margin="5,0"
                     VerticalAlignment="Center"
                     FontSize="13"
-                    Text="Mijoz" />
-                <!--  Foreground="{DynamicResource PrimaryTextColor}"  -->
-                <ComboBox
-                    x:Name="cbxCustomer"
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Margin="0"
-                    Padding="4,2"
-                    VerticalAlignment="Center"
-                    BorderBrush="#ccc"
-                    BorderThickness="1"
-                    DisplayMemberPath="Name"
+                    Text="dan" />
+                <controls:UserCalendar
+                    Width="110"
                     FontSize="14"
-                    IsEditable="True"
-                    ItemsSource="{Binding Customers}"
-                    SelectedItem="{Binding SelectedCustomer}" />
-                <!--  📅 Sana oralig‘i  -->
+                    SelectedDate="{Binding EndDate, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                    utils:EnterKeyTab.IsEnabled="True" />
                 <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    Margin="05,0"
+                    Margin="5,0"
                     VerticalAlignment="Center"
                     FontSize="13"
-                    Text="Xisobot davri" />
-                <Grid Grid.Row="0" Grid.Column="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <controls:UserCalendar
-                        Grid.Column="0"
-                        Width="110"
-                        Margin="0"
-                        VerticalAlignment="Center"
-                        utils:EnterKeyTab.IsEnabled="True"
-                        FontSize="14"
-                        SelectedDate="{Binding BeginDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock
-                        Grid.Column="1"
-                        Width="25"
-                        Margin="2,0"
-                        VerticalAlignment="Center"
-                        FontSize="13"
-                        Text="dan" />
-                    <controls:UserCalendar
-                        Grid.Column="2"
-                        Width="110"
-                        Margin="0"
-                        VerticalAlignment="Center"
-                        utils:EnterKeyTab.IsEnabled="True"
-                        FontSize="14"
-                        SelectedDate="{Binding EndDate, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-                    <TextBlock
-                        Grid.Column="3"
-                        Width="35"
-                        Margin="0"
-                        VerticalAlignment="Center"
-                        FontSize="13"
-                        Text="gacha" />
-                </Grid>
+                    Text="gacha" />
+            </StackPanel>
 
-            </Grid>
-            <!--  🔘 Tugmalar  -->
-            <Grid Grid.Column="1">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Button
-                    Grid.Row="0"
-                    Margin="5"
-                    Padding="10,3"
-                    VerticalAlignment="Center"
-                    Command="{Binding PreviewCommand}"
-                    Content="📄 Ko‘rish"
-                    FontSize="13"
-                    ToolTip="Chop etishdan oldin ma'lumotlarni ko‘rish (Print Preview)" />
-                <Button
-                    Grid.Row="1"
-                    Margin="5"
-                    Padding="10,3"
-                    VerticalAlignment="Center"
-                    Command="{Binding ClearFilterCommand}"
-                    Content="🧹 Tozalash"
-                    FontSize="13"
-                    ToolTip="Filterni tozalash yoki barcha ma'lumotlarni qayta ko‘rsatish" />
-            </Grid>
-            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Button
-                    Grid.Row="0"
-                    Margin="5"
-                    Padding="10,3"
-                    VerticalAlignment="Center"
-                    Command="{Binding PrintCommand}"
-                    Content="🖨 Pechat"
-                    FontSize="13"
-                    ToolTip="Chiqarish (Printerga yuborish)" />
+            <TextBlock
+                Grid.Row="1"
+                Margin="0,5,0,0"
+                VerticalAlignment="Center"
+                FontSize="13"
+                Text="Mijoz" />
+            <ComboBox
+                x:Name="cbxCustomer"
+                Grid.Row="1"
+                Grid.Column="1"
+                Width="280"
+                Margin="10,5,10,0"
+                HorizontalAlignment="Left"
+                DisplayMemberPath="Name"
+                FontSize="14"
+                IsEditable="True"
+                ItemsSource="{Binding Customers}"
+                SelectedItem="{Binding SelectedCustomer}" />
 
-                <Button
-                    Grid.Row="1"
-                    Margin="5"
-                    Padding="10,3"
-                    VerticalAlignment="Center"
-                    Command="{Binding ExportToExcelCommand}"
-                    Content="📊 Excel"
-                    FontSize="13"
-                    ToolTip="Excel faylga eksport qilish" />
+            <Button
+                Grid.Column="2"
+                Width="100"
+                Command="{Binding PreviewCommand}"
+                Content="📄 Ko‘rish"
+                FontSize="13" />
+            <Button
+                Grid.Row="1"
+                Grid.Column="2"
+                Width="100"
+                Margin="0,5,0,0"
+                Command="{Binding ClearFilterCommand}"
+                Content="🧹 Tozalash"
+                FontSize="13" />
 
-            </Grid>
-            <Grid Grid.Column="3" Visibility="Visible">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <StackPanel Margin="5,0" Orientation="Horizontal">
-                    <TextBlock
-                        VerticalAlignment="Center"
-                        FontSize="14"
-                        Text="Boshlang'ich qoldiq" />
-                    <TextBlock
-                        x:Name="beginBalance"
-                        Width="200"
-                        Height="25"
-                        Margin="10,0,0,0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"
-                        FontSize="14"
-                        FontWeight="Medium"
-                        Text="{Binding BeginBalance, StringFormat={}{0:N2}}" />
-                </StackPanel>
-                <StackPanel
-                    Grid.Row="1"
-                    Margin="5"
-                    Orientation="Horizontal">
-                    <TextBlock
-                        Width="120"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        FontSize="14"
-                        Text="Oxirgi qoldiq" />
-                    <TextBlock
-                        x:Name="lastBalance"
-                        Width="200"
-                        Height="25"
-                        Margin="10,0,0,0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"
-                        FontSize="14"
-                        FontWeight="Medium"
-                        Text="{Binding LastBalance, StringFormat={}{0:N2}}" />
-                </StackPanel>
-            </Grid>
+            <Button
+                Grid.Column="3"
+                Width="100"
+                Margin="10,0"
+                Command="{Binding PrintCommand}"
+                Content="🖨 Pechat"
+                FontSize="13" />
+            <Button
+                Grid.Row="1"
+                Grid.Column="3"
+                Width="100"
+                Margin="10,5,10,0"
+                Command="{Binding ExportToExcelCommand}"
+                Content="📊 Excel"
+                FontSize="13" />
 
+            <TextBlock
+                Grid.Column="4"
+                Margin="20,0,10,0"
+                VerticalAlignment="Center"
+                FontSize="14"
+                Text="Boshlang'ich qoldiq:" />
+            <TextBlock
+                Grid.Column="5"
+                VerticalAlignment="Center"
+                FontSize="14"
+                FontWeight="SemiBold"
+                Text="{Binding BeginBalance, StringFormat={}{0:N2}}" />
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="4"
+                Margin="20,5,10,0"
+                VerticalAlignment="Center"
+                FontSize="14"
+                Text="Oxirgi qoldiq:" />
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="5"
+                Margin="0,5,0,0"
+                VerticalAlignment="Center"
+                FontSize="14"
+                FontWeight="SemiBold"
+                Text="{Binding LastBalance, StringFormat={}{0:N2}}" />
         </Grid>
-        <!--  📋 DataGrid  -->
+
         <DataGrid
             x:Name="MyDataGrid"
             Grid.Row="1"
-            Margin="10,5,10,0"
             AlternatingRowBackground="#F5F5F5"
             AutoGenerateColumns="False"
             CanUserAddRows="False"
             CanUserDeleteRows="False"
-            HeadersVisibility="Column, Row"
-            utils:DataGridRowNumbering.IsEnabled="True"
             FontSize="14"
+            HeadersVisibility="Column, Row"
             IsReadOnly="True"
             ItemsSource="{Binding CustomerOperationsForDisplay}"
-            SelectionMode="Single">
-
+            SelectionMode="Single"
+            utils:DataGridRowNumbering.IsEnabled="True">
             <DataGrid.Columns>
-                <!--  🕓 Sana  -->
                 <DataGridTextColumn
                     Width="0.7*"
                     Binding="{Binding Date, StringFormat={}{0:dd.MM.yyyy}}"
                     Header="Sana">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Center" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.HeaderStyle>
@@ -240,15 +174,14 @@
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
 
-                <!--  💰 Debit  -->
                 <DataGridTextColumn
                     Width="*"
                     Binding="{Binding Debit, StringFormat={}{0:N0}}"
                     Header="Debit">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Right" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Right" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.HeaderStyle>
@@ -259,15 +192,14 @@
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
 
-                <!--  💳 Kredit  -->
                 <DataGridTextColumn
                     Width="*"
                     Binding="{Binding Credit, StringFormat={}{0:N0}}"
                     Header="Kredit">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Right" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Right" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.HeaderStyle>
@@ -278,15 +210,14 @@
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
 
-                <!--  📝 Izoh (long text wrap + ; bo'yicha split)  -->
                 <DataGridTextColumn
                     Width="3*"
                     Binding="{Binding FormattedDescription}"
                     Header="Izoh">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Left" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Left" />
                             <Setter Property="TextWrapping" Value="Wrap" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
@@ -298,44 +229,56 @@
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
 
-                <!-- MAVJUD COLUMNLARdan keyin, oxirida qo‘shing -->
                 <DataGridTemplateColumn Width="100" Header="Amallar">
                     <DataGridTemplateColumn.HeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="HorizontalContentAlignment" Value="Center" />
                             <Setter Property="FontWeight" Value="SemiBold" />
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
                         </Style>
                     </DataGridTemplateColumn.HeaderStyle>
-
                     <DataGridTemplateColumn.CellStyle>
                         <Style TargetType="DataGridCell">
-                            <Setter Property="Padding" Value="5"/>
+                            <Setter Property="Padding" Value="5" />
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="DataGridCell">
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-
-                                            <!-- EDIT BUTTON -->
-                                            <Button Width="32" Height="28" Margin="2,0"
-                                                    Background="#FFB300" Foreground="White"
-                                                    ToolTip="Tahrirlash"
-                                                    IsEnabled="{Binding CanEdit}"
-                                                    Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                    CommandParameter="{Binding}">
-                                                <Path Data="M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25ZM20.71,7.04C21.1,6.65 21.1,6 20.71,5.61L18.37,3.29C17.98,2.9 17.33,2.9 16.94,3.29L15.12,5.12L18.87,8.87L20.71,7.04Z"
-                                                      Fill="White" Width="14" Height="14" Stretch="Uniform"/>
+                                        <StackPanel
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Orientation="Horizontal">
+                                            <Button
+                                                Width="32"
+                                                Height="28"
+                                                Margin="2,0"
+                                                Background="#FFB300"
+                                                Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Foreground="White"
+                                                IsEnabled="{Binding CanEdit}"
+                                                ToolTip="Tahrirlash">
+                                                <Path
+                                                    Width="14"
+                                                    Height="14"
+                                                    Data="M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25ZM20.71,7.04C21.1,6.65 21.1,6 20.71,5.61L18.37,3.29C17.98,2.9 17.33,2.9 16.94,3.29L15.12,5.12L18.87,8.87L20.71,7.04Z"
+                                                    Fill="White"
+                                                    Stretch="Uniform" />
                                             </Button>
-
-                                            <!-- DELETE BUTTON -->
-                                            <Button Width="32" Height="28" Margin="2,0"
-                                                    Background="#E53935" Foreground="White"
-                                                    ToolTip="O‘chirish"
-                                                    Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                    CommandParameter="{Binding}">
-                                                <Path Data="M6,19C6,20.1 6.9,21 8,21H16C17.1,21 18,20.1 18,19V7H6V19ZM19,4H15.5L14.5,3H9.5L8.5,4H5V6H19V4Z"
-                                                      Fill="White" Width="14" Height="14" Stretch="Uniform"/>
+                                            <Button
+                                                Width="32"
+                                                Height="28"
+                                                Margin="2,0"
+                                                Background="#E53935"
+                                                Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Foreground="White"
+                                                ToolTip="O‘chirish">
+                                                <Path
+                                                    Width="14"
+                                                    Height="14"
+                                                    Data="M6,19C6,20.1 6.9,21 8,21H16C17.1,21 18,20.1 18,19V7H6V19ZM19,4H15.5L14.5,3H9.5L8.5,4H5V6H19V4Z"
+                                                    Fill="White"
+                                                    Stretch="Uniform" />
                                             </Button>
-
                                         </StackPanel>
                                     </ControlTemplate>
                                 </Setter.Value>

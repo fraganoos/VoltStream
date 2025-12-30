@@ -8,34 +8,81 @@
     xmlns:vm="clr-namespace:VoltStream.WPF"
     Title="Volt Stream"
     Width="1300"
-    Height="700"
+    Height="750"
+    AllowsTransparency="True"
+    Background="Transparent"
     Loaded="MainWindow_Loaded"
+    ResizeMode="CanResizeWithGrip"
     WindowStartupLocation="CenterScreen"
+    WindowStyle="None"
     mc:Ignorable="d">
 
-    <Border>
+    <WindowChrome.WindowChrome>
+        <WindowChrome
+            CaptionHeight="0"
+            CornerRadius="8"
+            GlassFrameThickness="0"
+            ResizeBorderThickness="8" />
+    </WindowChrome.WindowChrome>
+
+    <Border
+        x:Name="MainBorder"
+        Background="#0A003A"
+        BorderThickness="2"
+        CornerRadius="8">
+        <Border.BorderBrush>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <LinearGradientBrush.RelativeTransform>
+                    <RotateTransform x:Name="BorderRotateTransform" CenterX="0.5" CenterY="0.5" />
+                </LinearGradientBrush.RelativeTransform>
+                <GradientStop Color="{StaticResource winBorderColor1}" Offset="0" />
+                <GradientStop Color="{StaticResource winBorderColor2}" Offset="0.5" />
+                <GradientStop Color="{StaticResource winBorderColor3}" Offset="1" />
+            </LinearGradientBrush>
+        </Border.BorderBrush>
+
+        <Border.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            RepeatBehavior="Forever"
+                            Storyboard.TargetName="BorderRotateTransform"
+                            Storyboard.TargetProperty="Angle"
+                            From="0"
+                            To="360"
+                            Duration="0:0:20" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Border.Triggers>
+
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition x:Name="SidebarColumn" Width="250" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!--  Sidebar  -->
-            <Grid x:Name="Sidebar" Background="#0A003A">
+            <Grid x:Name="Sidebar">
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition Height="50" />
                 </Grid.RowDefinitions>
                 <StackPanel>
-                    <!--  Logo ToggleButton  -->
-                    <ToggleButton IsChecked="{Binding IsSidebarCollapsed}" Style="{DynamicResource menuToggleButton}">
-                        <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                    <ToggleButton
+                        Width="250"
+                        HorizontalContentAlignment="Left"
+                        IsChecked="{Binding IsSidebarCollapsed}"
+                        Style="{DynamicResource menuToggleButton}">
+                        <StackPanel Orientation="Horizontal">
                             <Image
                                 Width="30"
                                 Height="30"
                                 Source="/Commons/Source/Images/LogoVolt.png" />
                             <TextBlock
-                                Margin="15,0"
+                                x:Name="LogoText"
+                                Margin="15,0,0,0"
+                                VerticalAlignment="Center"
                                 FontSize="20"
                                 FontWeight="Bold"
                                 Foreground="White"
@@ -43,7 +90,6 @@
                         </StackPanel>
                     </ToggleButton>
 
-                    <!--  Menyu  -->
                     <RadioButton
                         Command="{Binding ShowDashboardViewCommand}"
                         GroupName="MenuGroup"
@@ -174,16 +220,19 @@
 
             </Grid>
 
-            <!--  Header va content  -->
-            <Grid Grid.Column="1" >
+            <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="50" />
+                    <RowDefinition Height="40" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-				<Grid Grid.Row="0" Background="#0A003A">
+                <Grid
+                    Grid.Row="0"
+                    Background="Transparent"
+                    MouseDown="Header_MouseDown">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <Border Grid.Row="0" Grid.Column="0">
                         <TextBlock
@@ -195,36 +244,181 @@
                             Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     </Border>
                     <Grid Grid.Row="0" Grid.Column="1">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" >
-                            <TextBlock Text="{Binding DateLabel}" FontWeight="Bold" 
-                                       Margin="5,10" Foreground="#E0E1F1"/>
-                            <TextBlock Text="Bomdod:" Foreground="#E0E1F1" Margin="5,10"/>
-                            <TextBlock Text="{Binding Bomdod}" FontWeight="Bold" Foreground="#E0E1F1" Margin="5,10"/>
-                            <TextBlock Text=" |    Peshin:" Foreground="#E0E1F1" Margin="5,10"/>
-                            <TextBlock Text="{Binding Peshin}" FontWeight="Bold" Foreground="#E0E1F1" Margin="5,10"/>
-                            <TextBlock Text=" |    Asr:" Foreground="#E0E1F1" Margin="5,10"/>
-                            <TextBlock Text="{Binding Asr}" FontWeight="Bold" Foreground="#E0E1F1" Margin="5,10"/>
-                            <TextBlock Text=" |    Shom:" Foreground="#E0E1F1" Margin="5,10"/>
-                            <TextBlock Text="{Binding Shom}" FontWeight="Bold" Foreground="#E0E1F1" Margin="5,10"/>
-                            <TextBlock Text=" |    Xufton:" Foreground="#E0E1F1" Margin="5,10"/>
-                            <TextBlock Text="{Binding Xufton}" FontWeight="Bold" Foreground="#E0E1F1" Margin="5,10"/>
+                        <StackPanel
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
+                            <TextBlock
+                                Margin="5,10"
+                                FontWeight="Bold"
+                                Foreground="#E0E1F1"
+                                Text="{Binding DateLabel}" />
+                            <TextBlock
+                                Margin="5,10"
+                                Foreground="#E0E1F1"
+                                Text="Bomdod:" />
+                            <TextBlock
+                                Margin="5,10"
+                                FontWeight="Bold"
+                                Foreground="#E0E1F1"
+                                Text="{Binding Bomdod}" />
+                            <TextBlock
+                                Margin="5,10"
+                                Foreground="#E0E1F1"
+                                Text=" |    Peshin:" />
+                            <TextBlock
+                                Margin="5,10"
+                                FontWeight="Bold"
+                                Foreground="#E0E1F1"
+                                Text="{Binding Peshin}" />
+                            <TextBlock
+                                Margin="5,10"
+                                Foreground="#E0E1F1"
+                                Text=" |    Asr:" />
+                            <TextBlock
+                                Margin="5,10"
+                                FontWeight="Bold"
+                                Foreground="#E0E1F1"
+                                Text="{Binding Asr}" />
+                            <TextBlock
+                                Margin="5,10"
+                                Foreground="#E0E1F1"
+                                Text=" |    Shom:" />
+                            <TextBlock
+                                Margin="5,10"
+                                FontWeight="Bold"
+                                Foreground="#E0E1F1"
+                                Text="{Binding Shom}" />
+                            <TextBlock
+                                Margin="5,10"
+                                Foreground="#E0E1F1"
+                                Text=" |    Xufton:" />
+                            <TextBlock
+                                Margin="5,10"
+                                FontWeight="Bold"
+                                Foreground="#E0E1F1"
+                                Text="{Binding Xufton}" />
                         </StackPanel>
                     </Grid>
+
+                    <StackPanel
+                        Grid.Column="2"
+                        Margin="0,0,15,0"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
+                        <Button
+                            Width="18"
+                            Height="18"
+                            Margin="0,0,10,0"
+                            Click="BtnMinimize_Click"
+                            Cursor="Hand"
+                            Focusable="False">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#28AEED" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#278BEF" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border CornerRadius="9" Background="{TemplateBinding Background}">
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="14"
+                                            Foreground="White"
+                                            Text="-" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <Button
+                            Width="18"
+                            Height="18"
+                            Margin="0,0,10,0"
+                            Click="BtnMaximize_Click"
+                            Cursor="Hand"
+                            Focusable="False">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#2ecc71" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#27ae60" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border CornerRadius="9" Background="{TemplateBinding Background}">
+                                        <fa:IconImage
+                                            Width="10"
+                                            Height="10"
+                                            Foreground="White"
+                                            Icon="WindowMaximize" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <Button
+                            Width="18"
+                            Height="18"
+                            Click="BtnClose_Click"
+                            Cursor="Hand"
+                            Focusable="False">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#DA34AE" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#C62DAE" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border CornerRadius="9" Background="{TemplateBinding Background}">
+                                        <TextBlock
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="10"
+                                            Foreground="White"
+                                            Text="X" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
                 </Grid>
 
-                <StackPanel x:Name="NotificationHost"
-                            Grid.Row="1"
+                <Border
+                    Grid.Row="1"
+                    Margin="0,0,8,8"
+                    Background="#F8F9FA"
+                    CornerRadius="0,0,12,0">
+                    <Grid>
+                        <StackPanel
+                            x:Name="NotificationHost"
                             Margin="10"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Top"
-                            Panel.ZIndex="100"
-                            Orientation="Vertical" />
-                
-                <Frame Grid.Row="1"
-                        Margin="5"
-                        Content="{Binding CurrentChildView}"
-                        NavigationUIVisibility="Hidden" />
+                            Orientation="Vertical"
+                            Panel.ZIndex="100" />
+
+                        <Frame Content="{Binding CurrentChildView}" NavigationUIVisibility="Hidden" />
+                    </Grid>
+                </Border>
             </Grid>
         </Grid>
     </Border>
 </Window>
+
+

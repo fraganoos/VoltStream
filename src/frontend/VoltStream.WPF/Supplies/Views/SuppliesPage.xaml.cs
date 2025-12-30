@@ -33,7 +33,7 @@ public partial class SuppliesPage : Page
             date.TextBox,
             cbxCategory,
             cbxProduct,
-            tbxPerRollCount,
+            cbxWarehouseStock,
             tbxRollCount,
             cbxUnit,
             txtUnitPrice,
@@ -52,5 +52,7 @@ public partial class SuppliesPage : Page
             FocusNavigator.FocusElement(cbxCategory);
         else if (controlName == "Product")
             FocusNavigator.FocusElement(cbxProduct);
+        else if (controlName == "WarehouseStock")
+            FocusNavigator.FocusElement(cbxWarehouseStock);
     }
 }
