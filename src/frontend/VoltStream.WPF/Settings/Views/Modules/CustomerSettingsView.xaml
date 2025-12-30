@@ -12,50 +12,91 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="300" />
         </Grid.ColumnDefinitions>
+        
+        <!-- Main Content -->
+        <Grid Grid.Column="0" Margin="0,0,20,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <DataGrid Grid.Column="0" 
-                  ItemsSource="{Binding Customers}" 
-                  AutoGenerateColumns="False" 
-                  CanUserAddRows="False" 
-                  IsReadOnly="True"
-                  SelectedItem="{Binding SelectedCustomer}"
-                  Margin="0,0,20,0"
-                  BorderThickness="1"
-                  BorderBrush="#DDDDDD"
-                  Background="White"
-                  RowHeight="35"
-                  FontSize="14">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50" />
-                <DataGridTextColumn Header="Nomi" Binding="{Binding Name}" Width="*" />
-                <DataGridTextColumn Header="Telefon" Binding="{Binding Phone}" Width="120" />
-                <DataGridTextColumn Header="Manzil" Binding="{Binding Address}" Width="150" />
-                <DataGridTemplateColumn Width="100">
-                    <DataGridTemplateColumn.CellTemplate>
+            <!-- Header -->
+            <Border Grid.Row="0"
+                    BorderBrush="LightGray"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="10"
+                    Margin="0,0,0,10"
+                    Background="White"
+                    SnapsToDevicePixels="True">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="100" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="ID" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="Nomi" FontWeight="SemiBold" Margin="10,0,0,0"/>
+                    <TextBlock Grid.Column="2" Text="Telefon" FontWeight="SemiBold" Margin="10,0,0,0"/>
+                    <TextBlock Grid.Column="3" Text="Manzil" FontWeight="SemiBold" Margin="10,0,0,0"/>
+                    <TextBlock Grid.Column="4" Text="Amallar" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                </Grid>
+            </Border>
+
+            <!-- List -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Customers}">
+                    <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Button Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                        CommandParameter="{Binding}"
-                                        Margin="0,0,5,0"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        ToolTip="Tahrirlash">
-                                    <fa:IconImage Icon="Pen" Foreground="#0A003A" Width="14" Height="14"/>
-                                </Button>
-                                <Button Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                        CommandParameter="{Binding}"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        ToolTip="O'chirish">
-                                    <fa:IconImage Icon="Trash" Foreground="Red" Width="14" Height="14"/>
-                                </Button>
-                            </StackPanel>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+                            <Border BorderBrush="#DDDDDD"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="10"
+                                    Margin="0,0,0,5"
+                                    Background="White">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="50" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="150" />
+                                        <ColumnDefinition Width="100" />
+                                    </Grid.ColumnDefinitions>
 
+                                    <TextBlock Text="{Binding Id}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="14"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Phone}" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="14"/>
+                                    <TextBlock Grid.Column="3" Text="{Binding Address}" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="14"/>
+                                    
+                                    <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                CommandParameter="{Binding}"
+                                                Margin="0,0,5,0"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                ToolTip="Tahrirlash">
+                                            <fa:IconImage Icon="Pen" Foreground="#0A003A" Width="14" Height="14"/>
+                                        </Button>
+                                        <Button Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                CommandParameter="{Binding}"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                ToolTip="O'chirish">
+                                            <fa:IconImage Icon="Trash" Foreground="Red" Width="14" Height="14"/>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Sidebar form (Same as before) -->
         <Border Grid.Column="1" 
                 BorderThickness="1" 
                 BorderBrush="#DDDDDD" 

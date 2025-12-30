@@ -30,7 +30,7 @@ public partial class CustomerSettingsViewModel : ViewModelBase
     [ObservableProperty] private string description = string.Empty;
     [ObservableProperty] private bool isEditing;
 
-    private async Task LoadCustomers()
+    public async Task LoadCustomers()
     {
         var response = await customersApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
         if (response.IsSuccess)

@@ -2,7 +2,6 @@
 
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
-using ApiServices.Models;
 using ApiServices.Models.Requests;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -77,6 +76,9 @@ public partial class SettingsPageViewModel : ViewModelBase
     private async Task LoadData()
     {
         await LoadCurrencies();
+        await CategorySettings.LoadCategories();
+        await ProductSettings.LoadData();
+        await CustomerSettings.LoadCustomers();
     }
 
     private async Task LoadCurrencies()

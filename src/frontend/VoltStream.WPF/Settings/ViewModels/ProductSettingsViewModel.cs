@@ -32,7 +32,7 @@ public partial class ProductSettingsViewModel : ViewModelBase
     [ObservableProperty] private string unit = string.Empty;
     [ObservableProperty] private bool isEditing;
 
-    private async Task LoadData()
+    public async Task LoadData()
     {
         await Task.WhenAll(LoadProducts(), LoadCategories());
     }

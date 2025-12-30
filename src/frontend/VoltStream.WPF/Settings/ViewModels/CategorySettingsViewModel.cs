@@ -27,7 +27,7 @@ public partial class CategorySettingsViewModel : ViewModelBase
     [ObservableProperty] private string name = string.Empty;
     [ObservableProperty] private bool isEditing;
 
-    private async Task LoadCategories()
+    public async Task LoadCategories()
     {
         var response = await categoriesApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
         if (response.IsSuccess)
