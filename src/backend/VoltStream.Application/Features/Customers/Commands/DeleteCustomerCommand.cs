@@ -14,38 +14,21 @@ public class DeleteCustomerCommandHandler(
 {
     public async Task<bool> Handle(DeleteCustomerCommand request, CancellationToken cancellationToken)
     {
-        // Mijozni olish va accountlarini yuklash
         var customer = await context.Customers
-            .Include(c => c.Accounts)
             .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Customer), nameof(request.Id), request.Id);
 
-        foreach (var account in customer.Accounts)
-        {
-            if (account.Balance > 0)
-                throw new ForbiddenException($"Mijoz haqdor: {account.Balance}");
-            if (account.Balance < 0)
-                throw new ForbiddenException($"Mijoz qarzdor: {account.Balance}");
-            if (account.Discount > 0)
-                throw new ForbiddenException($"Mijozda chegirma mavjud: {account.Discount}");
-        }
-
-        await context.BeginTransactionAsync(cancellationToken);
+        context.Customers.Remove(customer);
 
         try
         {
-            // Soft delete bajarish
-            customer.IsDeleted = true;
-            foreach (var account in customer.Accounts)
-                account.IsDeleted = true;
-
-            var result = await context.CommitTransactionAsync(cancellationToken);
-            return result;
+            await context.SaveAsync(cancellationToken);
         }
-        catch
+        catch (DbUpdateException)
         {
-            await context.RollbackTransactionAsync(cancellationToken);
-            throw;
+            throw new ForbiddenException("Ushbu mijozda operatsiyalar mavjud bo'lgani uchun o'chirib bo'lmaydi.");
         }
+
+        return true;
     }
 }

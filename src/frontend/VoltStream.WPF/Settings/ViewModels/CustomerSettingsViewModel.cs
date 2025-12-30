@@ -10,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.Windows;
 using VoltStream.WPF.Commons;
-using VoltStream.WPF.Commons.ViewModels;
 
 public partial class CustomerSettingsViewModel : ViewModelBase
 {
