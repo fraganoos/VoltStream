@@ -85,7 +85,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         var existing = Categories.FirstOrDefault(c => string.Equals(c.Name, newValue, StringComparison.OrdinalIgnoreCase));
 
         if (existing != null) SelectedCategory = existing;
-        else if (ConfirmNew($"'{newValue}' yangi kategoriya sifatida qo'shilsinmi?")) 
+        else if (ConfirmNew($"'{newValue}' yangi kategoriya sifatida qo'shilsinmi?"))
         {
             Categories.Add(new() { Name = newValue });
             SelectedCategory = null;
@@ -322,7 +322,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         if (!IsEditing || EditingItemBackup == null) return;
         if (editingItemIndex >= 0) Supplies.Insert(editingItemIndex, EditingItemBackup);
         else Supplies.Add(EditingItemBackup);
-        
+
         ClearForm();
         IsEditing = false;
         EditingItemBackup = null;
@@ -416,7 +416,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         vm.Product = mapper.Map<ProductViewModel>(viewModel.Product!);
         return vm;
     }
-    
+
     private static bool ConfirmNew(string message) =>
         MessageBox.Show(message, "Tasdiqlash", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
 
