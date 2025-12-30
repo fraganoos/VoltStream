@@ -167,9 +167,9 @@ public class CreateSaleCommandHandler(
             OperationType = OperationType.Sale,
             Description = $"Savdo: {description}\n" +
                           $"{descriptionBuilder}\n" +
-                          $"------------------------------------\n" +
-                          $"Jami: {sale.Amount + (isApplied ? sale.Discount : 0):N2}\n" +
-                          (sale.Discount > 0 ? $"Chegirma: {sale.Discount:N2} {(isApplied ? "(ayrildi)" : "(saqlandi)")}" : "")
+                          $"-------------------------------------\n" +
+                          $"Jami: {sale.Amount + (isApplied ? sale.Discount : 0):N2}" +
+                          (sale.Discount > 0 ? $"\nChegirma: {sale.Discount:N2} {(isApplied ? "(ayrildi)" : "(saqlandi)")}" : "")
         };
     }
 }

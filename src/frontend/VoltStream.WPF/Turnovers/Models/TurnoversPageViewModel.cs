@@ -62,7 +62,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<CustomerOperationViewModel> customerOperations = [];
     [ObservableProperty] private ObservableCollection<CustomerOperationForDisplayViewModel> customerOperationsForDisplay = [];
     [ObservableProperty] private CustomerOperationForDisplayViewModel? selectedItem;
-    [ObservableProperty] private DateTime beginDate = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+    [ObservableProperty] private DateTime beginDate = DateTime.Today.AddDays(-7);
     [ObservableProperty] private DateTime endDate = DateTime.Today;
     [ObservableProperty] private decimal? beginBalance;
     [ObservableProperty] private decimal? lastBalance;
@@ -533,19 +533,18 @@ public partial class TurnoversPageViewModel : ViewModelBase
     private FixedDocument CreateFixedDocument()
     {
         var doc = new FixedDocument();
-        // ... (constant qiymatlar o'zgarishsiz qoladi) ...
         const double pageWidth = 793.7;
         const double pageHeight = 1122.5;
-        const double margin = 40;
+        const double margin = 25;
         const double approxSingleRowHeight = 25;
 
-        var operations = CustomerOperationsForDisplay?.ToList() ?? new List<CustomerOperationForDisplayViewModel>();
+        var operations = CustomerOperationsForDisplay?.ToList() ?? [];
 
         double currentY = 0;
         int pageNumber = 1;
         int currentIndex = 0;
 
-        var tempPages = new List<FixedPage>();
+        List<FixedPage> tempPages = [];
 
         while (currentIndex < operations.Count)
         {
@@ -566,7 +565,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
             // ... (Jadvalni yaratish va to'ldirish logikasi o'zgarishsiz qoladi) ...
             var table = new Grid();
-            double[] widths = { 75, 110, 110, 415 };
+            double[] widths = [70, 105, 105, 460];
             foreach (var w in widths)
                 table.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(w) });
 
@@ -729,7 +728,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
         int row = grid.RowDefinitions.Count;
 
         // Balandlikni hisoblash
-        double requiredHeight = CalculateOperationRowHeight(op, 415);
+        double requiredHeight = CalculateOperationRowHeight(op, 460);
 
         // Balandlikni RowDefinition ga kiritish
         grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(requiredHeight) });
