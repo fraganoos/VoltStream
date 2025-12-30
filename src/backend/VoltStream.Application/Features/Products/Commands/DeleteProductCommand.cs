@@ -17,8 +17,17 @@ public class DeleteProductCommandHandler(
         var product = await context.Products.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Product), nameof(request.Id), request.Id);
 
-        product.IsDeleted = true;
-        context.Products.Update(product);
-        return await context.SaveAsync(cancellationToken) > 0;
+        context.Products.Remove(product);
+
+        try
+        {
+            await context.SaveAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            throw new ForbiddenException("Ushbu mahsulot savdoda ishtirok etgani uchun o'chirib bo'lmaydi.");
+        }
+
+        return true;
     }
 }

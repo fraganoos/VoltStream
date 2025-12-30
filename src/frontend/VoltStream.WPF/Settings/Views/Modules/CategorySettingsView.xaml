@@ -162,9 +162,6 @@
 						</Button.Template>
 					</Button>
 				</StackPanel>
-
-				<TextBlock Text="{Binding Error}" Foreground="Red" Margin="0,10,0,0" TextWrapping="Wrap"/>
-				<TextBlock Text="{Binding Success}" Foreground="Green" Margin="0,10,0,0" TextWrapping="Wrap"/>
 			</StackPanel>
 		</Border>
 	</Grid>

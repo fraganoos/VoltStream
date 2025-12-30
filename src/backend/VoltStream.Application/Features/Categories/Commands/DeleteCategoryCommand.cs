@@ -17,7 +17,17 @@ public class DeleteCategoryCommandHandler(
         var category = await context.Categories.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Category), nameof(request.Id), request.Id);
 
-        category.IsDeleted = true;
-        return await context.SaveAsync(cancellationToken) > 0;
+        context.Categories.Remove(category);
+
+        try
+        {
+            await context.SaveAsync(cancellationToken);
+        }
+        catch (DbUpdateException)
+        {
+            throw new ForbiddenException("Ushbu kategoriyada mahsulotlar mavjud yoki tizim xatoligi tufayli o'chirib bo'lmaydi.");
+        }
+        
+        return true;
     }
 }
