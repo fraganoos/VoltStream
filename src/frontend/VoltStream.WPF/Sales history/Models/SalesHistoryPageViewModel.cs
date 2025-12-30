@@ -255,7 +255,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
             for (int i = 0; i < headers.Length; i++)
             {
-                var border = new System.Windows.Controls.Border
+                var border = new Border
                 {
                     BorderBrush = Brushes.Black,
                     BorderThickness = new Thickness(0.5),
@@ -266,7 +266,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 {
                     Text = headers[i],
                     FontWeight = FontWeights.Bold,
-                    TextAlignment = System.Windows.TextAlignment.Center
+                    TextAlignment = TextAlignment.Center
                 };
                 border.Child = text;
                 Grid.SetRow(border, row);
@@ -297,7 +297,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
                 for (int i = 0; i < values.Length; i++)
                 {
-                    var border = new System.Windows.Controls.Border
+                    var border = new Border
                     {
                         BorderBrush = Brushes.Black,
                         BorderThickness = new Thickness(0.5),
@@ -307,7 +307,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                     {
                         Text = values[i],
                         FontSize = 11,
-                        TextAlignment = (i >= 4 ? System.Windows.TextAlignment.Right : System.Windows.TextAlignment.Left)
+                        TextAlignment = (i >= 4 ? TextAlignment.Right : TextAlignment.Left)
                     };
                     border.Child = text;
                     Grid.SetRow(border, row);
@@ -326,7 +326,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 {
                     Text = "Jami:",
                     FontWeight = FontWeights.Bold,
-                    TextAlignment = System.Windows.TextAlignment.Center
+                    TextAlignment = TextAlignment.Center
                 };
                 Grid.SetRow(totalLabel, row);
                 Grid.SetColumn(totalLabel, headers.Length - 10);
@@ -336,7 +336,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 {
                     Text = (FinalAmount ?? 0).ToString("N2"),
                     FontWeight = FontWeights.Bold,
-                    TextAlignment = System.Windows.TextAlignment.Center
+                    TextAlignment = TextAlignment.Center
                 };
                 Grid.SetRow(totalValue, row);
                 Grid.SetColumn(totalValue, headers.Length - 1);
@@ -348,7 +348,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 Text = "Sotilgan mahsulotlar ro‘yxati",
                 FontSize = 18,
                 FontWeight = FontWeights.Bold,
-                TextAlignment = System.Windows.TextAlignment.Right,
+                TextAlignment = TextAlignment.Right,
                 Margin = new Thickness(0, 10, 0, 5)
             };
             FixedPage.SetTop(title, 10);
