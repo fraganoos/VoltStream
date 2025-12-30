@@ -163,32 +163,6 @@ public partial class ProductPageViewModel : ViewModelBase
         }
     }
 
-    [RelayCommand]
-    private void Preview()
-    {
-        if (FilteredProductItems == null || !FilteredProductItems.Any())
-        {
-            MessageBox.Show("Ko‘rsatish uchun ma’lumot yo‘q.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
-
-        var fixedDoc = CreateFixedDocumentForPrint();
-
-        var previewWindow = new Window
-        {
-            Title = "Print Preview",
-            Width = 900,
-            Height = 800,
-            WindowStartupLocation = WindowStartupLocation.CenterScreen,
-            Content = new DocumentViewer
-            {
-                Document = fixedDoc,
-                Margin = new Thickness(10)
-            }
-        };
-
-        previewWindow.ShowDialog();
-    }
 
     [RelayCommand]
     private void Print()
@@ -199,7 +173,7 @@ public partial class ProductPageViewModel : ViewModelBase
             return;
         }
 
-        var fixedDoc = CreateFixedDocumentForPrint();
+        var fixedDoc = CreateFixedDocument();
 
         var dlg = new PrintDialog();
         if (dlg.ShowDialog() == true)
@@ -208,213 +182,228 @@ public partial class ProductPageViewModel : ViewModelBase
         }
     }
 
-    private FixedDocument CreateFixedDocumentForPrint()
+    [RelayCommand]
+    private void Preview()
     {
-        double pageWidth = 793.700787;
-        double pageHeight = 1122.51969;
-        double margin = 40;
-
-        var items = FilteredProductItems?.ToList() ?? [];
-        int rowsPerPage = 25;
-
-        int totalPages = (int)Math.Ceiling((double)items.Count / rowsPerPage);
-        if (totalPages == 0) totalPages = 1;
-
-        var fixedDoc = new FixedDocument();
-        fixedDoc.DocumentPaginator.PageSize = new Size(pageWidth, pageHeight);
-
-        for (int p = 0; p < totalPages; p++)
+        // FilteredProductItems - bu sizning DataGrid bog'langan list
+        if (FilteredProductItems == null || !FilteredProductItems.Any())
         {
-            var page = new FixedPage
+            MessageBox.Show("Ko‘rsatish uchun ma’lumot yo‘q!", "Xabar", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var doc = CreateFixedDocument();
+        var viewer = new DocumentViewer { Document = doc, Margin = new Thickness(10) };
+        var window = new Window
+        {
+            Title = "Ombor qoldiqlari hisoboti",
+            Width = 1000,
+            Height = 800,
+            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            Content = viewer
+        };
+        window.ShowDialog();
+    }
+
+    private FixedDocument CreateFixedDocument()
+    {
+        var doc = new FixedDocument();
+        const double pageWidth = 793.7;
+        const double pageHeight = 1122.5;
+        const double margin = 30;
+        const double bottomReservedSpace = 70;
+
+        var itemsList = FilteredProductItems.ToList();
+
+        // --- 1. Jami summani hisoblab olamiz ---
+        // Agar TotalAmount string bo'lsa, uni parse qilamiz
+        decimal totalSumma = itemsList.Sum(item => {
+            decimal.TryParse(item.TotalAmount?.ToString(), out decimal val);
+            return val;
+        });
+
+        int currentItemIndex = 0;
+        int pageNumber = 1;
+        double[] widths = { 35, 90, 100, 70, 80, 75, 60, 80, 120 };
+
+        while (currentItemIndex < itemsList.Count)
+        {
+            var page = new FixedPage { Width = pageWidth, Height = pageHeight, Background = Brushes.White };
+            double currentTop = 30;
+
+            if (pageNumber == 1)
             {
-                Width = pageWidth,
-                Height = pageHeight,
-                Background = Brushes.White
-            };
-
-            var rootGrid = new Grid
+                var header = CreateHeader(pageWidth, margin);
+                FixedPage.SetTop(header, currentTop);
+                FixedPage.SetLeft(header, margin);
+                page.Children.Add(header);
+                currentTop = 100;
+            }
+            else
             {
-                Width = pageWidth - margin * 2,
-                Height = pageHeight - margin * 2
-            };
-            FixedPage.SetLeft(rootGrid, margin);
-            FixedPage.SetTop(rootGrid, margin);
-
-            rootGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            rootGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            rootGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-            var headerText = new TextBlock
-            {
-                Text = "Mahsulotlar qoldig'i",
-                FontSize = 16,
-                FontWeight = FontWeights.Bold,
-                Margin = new Thickness(0, 0, 0, 8),
-                TextAlignment = TextAlignment.Left
-            };
-            Grid.SetRow(headerText, 0);
-            rootGrid.Children.Add(headerText);
-
-            var tableGrid = new Grid { ShowGridLines = false };
-            Grid.SetRow(tableGrid, 1);
-
-            tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.4, GridUnitType.Star) }); // CategoryResponse
-            tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2.4, GridUnitType.Star) }); // Name
-            tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star) }); // RollLength
-            tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star) }); // Quantity
-            tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(0.9, GridUnitType.Star) }); // TotalCount
-            tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(0.9, GridUnitType.Star) }); // Unit
-            tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.0, GridUnitType.Star) }); // Price
-            tableGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.2, GridUnitType.Star) }); // TotalAmount
-
-            tableGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            string[] headers = ["Mahsulot turi", "Nomi", "Rulon uzunligi", "Rulon soni", "Jami", "O‘lchov", "Narxi", "Umumiy summa"];
-            for (int c = 0; c < headers.Length; c++)
-            {
-                var border = new Border
-                {
-                    BorderThickness = new Thickness(0.5),
-                    BorderBrush = Brushes.Black,
-                    Background = Brushes.LightGray,
-                    Padding = new Thickness(4, 2, 4, 2)
-                };
-                var tb = new TextBlock
-                {
-                    Text = headers[c],
-                    FontWeight = FontWeights.Bold,
-                    TextAlignment = TextAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    FontSize = 12
-                };
-                border.Child = tb;
-                Grid.SetRow(border, 0);
-                Grid.SetColumn(border, c);
-                tableGrid.Children.Add(border);
+                currentTop = 40;
             }
 
-            var pageItems = items.Skip(p * rowsPerPage).Take(rowsPerPage).ToList();
-            int startRowIndex = 1;
-            foreach (var item in pageItems)
+            var grid = new Grid { Width = pageWidth - (margin * 2) };
+            foreach (var w in widths) grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(w) });
+
+            // Header qatori
+            AddRow(grid, true, "№", "Mahsulot turi", "Nomi", "To'plamda", "To'plam soni", "Jami", "Birligi", "Narxi", "Summasi");
+
+            // Ma'lumotlarni qo'shish
+            // 3. Ma'lumotlarni qo'shish
+            while (currentItemIndex < itemsList.Count)
             {
-                tableGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(24) });
+                var item = itemsList[currentItemIndex];
 
-                string[] values =
-                [
-                item.Category ?? string.Empty,
-                item.Name ?? string.Empty,
-                item.RollLength?.ToString("N0") ?? string.Empty,
-                item.Quantity?.ToString("N0") ?? string.Empty,
-                item.TotalCount?.ToString() ?? string.Empty,
-                item.Unit ?? string.Empty,
-                item.Price?.ToString("N2") ?? string.Empty,
-                (item.TotalAmount ?? 0m).ToString("N2")
-            ];
+                // Qiymatlarni formatlash (Xatolarni oldini olish uchun)
+                string rollLen = double.TryParse(item.RollLength?.ToString(), out double rl) ? rl.ToString("N0") : "0";
+                string qty = double.TryParse(item.Quantity?.ToString(), out double q) ? q.ToString("N0") : "0";
+                string totalCnt = double.TryParse(item.TotalCount?.ToString(), out double tc) ? tc.ToString("N0") : "0";
+                string price = double.TryParse(item.Price?.ToString(), out double p) ? p.ToString("N2") : "0.00";
+                string amount = double.TryParse(item.TotalAmount?.ToString(), out double ta) ? ta.ToString("N2") : "0.00";
 
-                for (int c = 0; c < values.Length; c++)
+                string[] rowData = {
+        (currentItemIndex + 1).ToString(),
+        item.Category ?? "-",
+        item.Name ?? "-",
+        rollLen,
+        qty,
+        totalCnt,
+        item.Unit ?? "-",
+        price,
+        amount
+    };
+
+                // Sig'ishini tekshirish uchun formatlangan rowData ni beramiz
+                double rowHeight = EstimateRowHeight(grid.Width, widths, rowData, false);
+
+                if (currentTop + grid.DesiredSize.Height + rowHeight > pageHeight - bottomReservedSpace)
+                    break;
+
+                AddRow(grid, false, rowData);
+                grid.Measure(new Size(grid.Width, double.PositiveInfinity));
+                currentItemIndex++;
+            }
+
+            // --- 2. Jami qatorini qo'shish (Faqat eng oxirgi sahifada) ---
+            if (currentItemIndex == itemsList.Count)
+            {
+                string[] footerRow = { "", "JAMI:", "", "", "", "", "", "", totalSumma.ToString("N2") };
+
+                // Jami qatori sig'adimi?
+                double footerHeight = 35;
+                if (currentTop + grid.DesiredSize.Height + footerHeight < pageHeight - bottomReservedSpace)
                 {
-                    var cellBorder = new Border
-                    {
-                        BorderThickness = new Thickness(0.5),
-                        BorderBrush = Brushes.Gray,
-                        Padding = new Thickness(4, 2, 4, 2)
-                    };
-                    var cellText = new TextBlock
-                    {
-                        Text = values[c],
-                        FontSize = 11,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        TextWrapping = TextWrapping.NoWrap
-                    };
-
-                    if (c >= 2 && c <= 4 || c == 6 || c == 7)
-                        cellText.TextAlignment = TextAlignment.Right;
-                    else if (c == 5)
-                        cellText.TextAlignment = TextAlignment.Center;
-                    else
-                        cellText.TextAlignment = TextAlignment.Left;
-
-                    cellBorder.Child = cellText;
-                    Grid.SetRow(cellBorder, startRowIndex);
-                    Grid.SetColumn(cellBorder, c);
-                    tableGrid.Children.Add(cellBorder);
+                    AddRow(grid, true, footerRow); // true berdik, qalinroq chiqishi uchun
                 }
-
-                startRowIndex++;
+                else
+                {
+                    // Agar sig'masa, yangi betga o'tib yozish kerak bo'ladi (kamdan-kam holat)
+                    // Bu yerda break qilsangiz, keyingi betga faqat JAMI o'zi chiqadi
+                }
             }
 
-            if (p == totalPages - 1)
+            FixedPage.SetTop(grid, currentTop);
+            FixedPage.SetLeft(grid, margin);
+            page.Children.Add(grid);
+
+            // Sahifa raqami
+            var footer = new TextBlock
             {
-                tableGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(26) });
-                int totalRowIndex = tableGrid.RowDefinitions.Count - 1;
-
-                var mergeBorder = new Border
-                {
-                    BorderThickness = new Thickness(0.5),
-                    BorderBrush = Brushes.Black,
-                    Padding = new Thickness(4, 2, 4, 2),
-                    Background = Brushes.Transparent
-                };
-                var mergeText = new TextBlock
-                {
-                    Text = "Jami",
-                    FontWeight = FontWeights.Bold,
-                    FontSize = 12,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    TextAlignment = TextAlignment.Left
-                };
-                mergeBorder.Child = mergeText;
-
-                Grid.SetRow(mergeBorder, totalRowIndex);
-                Grid.SetColumn(mergeBorder, 0);
-                Grid.SetColumnSpan(mergeBorder, 7);
-                tableGrid.Children.Add(mergeBorder);
-                var totalBorder = new Border
-                {
-                    BorderThickness = new Thickness(0.5),
-                    BorderBrush = Brushes.Black,
-                    Padding = new Thickness(4, 2, 4, 2)
-                };
-                var totalText = new TextBlock
-                {
-                    Text = (FinalAmount ?? 0m).ToString("N2"),
-                    FontWeight = FontWeights.Bold,
-                    FontSize = 12,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    TextAlignment = TextAlignment.Right
-                };
-                totalBorder.Child = totalText;
-                Grid.SetRow(totalBorder, totalRowIndex);
-                Grid.SetColumn(totalBorder, 7);
-                tableGrid.Children.Add(totalBorder);
-            }
-
-            rootGrid.Children.Add(tableGrid);
-
-            var footerPanel = new StackPanel
-            {
-                Orientation = Orientation.Horizontal,
-                HorizontalAlignment = HorizontalAlignment.Right
+                Text = $"{pageNumber}-bet",
+                FontSize = 10,
+                Width = pageWidth - (margin * 2),
+                TextAlignment = TextAlignment.Right
             };
-            Grid.SetRow(footerPanel, 2);
-
-            var pageNumberText = new TextBlock
-            {
-                Text = $"{p + 1}-bet / {totalPages}",
-                FontSize = 11,
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(0, 6, 0, 0)
-            };
-            footerPanel.Children.Add(pageNumberText);
-            rootGrid.Children.Add(footerPanel);
-
-            page.Children.Add(rootGrid);
+            FixedPage.SetTop(footer, pageHeight - 40);
+            FixedPage.SetLeft(footer, margin);
+            page.Children.Add(footer);
 
             var pageContent = new PageContent();
             ((IAddChild)pageContent).AddChild(page);
-            fixedDoc.Pages.Add(pageContent);
+            doc.Pages.Add(pageContent);
+            pageNumber++;
         }
 
-        return fixedDoc;
+        return doc;
+    }
+
+    private double EstimateRowHeight(double width, double[] widths, string[] data, bool isHeader)
+    {
+        var testGrid = new Grid { Width = width };
+        // Ustunlarni aniqlaymiz
+        foreach (var w in widths)
+        {
+            testGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(w) });
+        }
+
+        // Vaqtincha qator qo'shamiz
+        AddRow(testGrid, isHeader, data);
+
+        // O'lchashni amalga oshiramiz
+        testGrid.Measure(new Size(width, double.PositiveInfinity));
+
+        return testGrid.DesiredSize.Height;
+    }
+    private FrameworkElement CreateHeader(double pageWidth, double margin)
+    {
+        var panel = new StackPanel { Width = pageWidth - (margin * 2) };
+        panel.Children.Add(new TextBlock
+        {
+            Text = "OMBORXONADAGI MAHSULOTLAR QOLDIQLARI",
+            FontSize = 18,
+            FontWeight = FontWeights.Bold,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 0, 0, 5)
+        });
+        panel.Children.Add(new TextBlock
+        {
+            Text = $"Sana: {DateTime.Now:dd.MM.yyyy HH:mm}",
+            FontSize = 12,
+            HorizontalAlignment = HorizontalAlignment.Center
+        });
+        return panel;
+    }
+
+    private void AddRow(Grid grid, bool isHeader, params string[] values)
+    {
+        int row = grid.RowDefinitions.Count;
+        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+        for (int i = 0; i < values.Length; i++)
+        {
+            // Matnni tekislash (Alignment)
+            TextAlignment alignment = TextAlignment.Center;
+            if (!isHeader)
+            {
+                if (i == 1 || i == 2) alignment = TextAlignment.Left; // Turi va Nomi
+                if (i >= 3 && i != 6) alignment = TextAlignment.Right; // Raqamli ustunlar
+            }
+
+            var tb = new TextBlock
+            {
+                Text = values[i],
+                Padding = new Thickness(4),
+                FontSize = isHeader ? 11 : 10,
+                FontWeight = isHeader ? FontWeights.Bold : FontWeights.Normal,
+                TextAlignment = alignment,
+                VerticalAlignment = VerticalAlignment.Center,
+                TextWrapping = TextWrapping.Wrap
+            };
+
+            var border = new Border
+            {
+                BorderBrush = Brushes.Black,
+                BorderThickness = new Thickness(0.5),
+                Background = isHeader ? Brushes.LightGray : Brushes.Transparent,
+                Child = tb
+            };
+
+            Grid.SetRow(border, row);
+            Grid.SetColumn(border, i);
+            grid.Children.Add(border);
+        }
     }
 
     public async Task LoadWarehouseItemsAsync()

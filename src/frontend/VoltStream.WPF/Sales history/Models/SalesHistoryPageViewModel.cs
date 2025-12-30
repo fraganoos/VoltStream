@@ -174,34 +174,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void Preview()
-    {
-        if (FilteredSaleItems == null || !FilteredSaleItems.Any())
-        {
-            MessageBox.Show("Ko‘rsatish uchun ma’lumot yo‘q.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
-
-        FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
-
-
-        var fixedDoc = CreateFixedDocumentForPrint();
-        var previewWindow = new Window
-        {
-            Title = "Print Preview",
-            Width = 900,
-            Height = 800,
-            WindowStartupLocation = WindowStartupLocation.CenterScreen,
-            Content = new DocumentViewer
-            {
-                Document = fixedDoc,
-                Margin = new Thickness(10, 5, 5, 5)
-            }
-        };
-        previewWindow.ShowDialog();
-    }
-
-    [RelayCommand]
     private void Print()
     {
         if (FilteredSaleItems == null || !FilteredSaleItems.Any())
@@ -215,6 +187,27 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         var dlg = new PrintDialog();
         if (dlg.ShowDialog() == true)
             dlg.PrintDocument(fixedDoc.DocumentPaginator, "Savdo tarixi");
+    }
+
+    [RelayCommand]
+    private void Preview()
+    {
+        if (FilteredSaleItems == null || !FilteredSaleItems.Any())
+        {
+            MessageBox.Show("Ko‘rsatish uchun ma’lumot yo‘q.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
+        var fixedDoc = CreateFixedDocumentForPrint();
+        var previewWindow = new Window
+        {
+            Title = "Print Preview",
+            Width = 1050,
+            Height = 850,
+            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+            Content = new DocumentViewer { Document = fixedDoc, Margin = new Thickness(20) }
+        };
+        previewWindow.ShowDialog();
     }
 
     private FixedDocument CreateFixedDocumentForPrint()
@@ -244,7 +237,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
             var headers = new[]
             {
-            "Sana","Xaridor","Mahsulot turi","Nomi","Rulon uzunligi","Rulon soni","Jami","O‘lchov","Narxi","Umumiy summa"
+            "Sana","    Mijoz    ","Mahsulot turi","  Nomi  ","To'plamda","To'plam soni","   Jami   ","O‘lchov","   Narxi  ","   Umumiy summa  "
         };
 
             for (int i = 0; i < headers.Length; i++)
@@ -255,7 +248,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
             for (int i = 0; i < headers.Length; i++)
             {
-                var border = new Border
+                var border = new System.Windows.Controls.Border
                 {
                     BorderBrush = Brushes.Black,
                     BorderThickness = new Thickness(0.5),
@@ -266,7 +259,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 {
                     Text = headers[i],
                     FontWeight = FontWeights.Bold,
-                    TextAlignment = TextAlignment.Center
+                    TextAlignment = System.Windows.TextAlignment.Center
                 };
                 border.Child = text;
                 Grid.SetRow(border, row);
@@ -297,7 +290,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
                 for (int i = 0; i < values.Length; i++)
                 {
-                    var border = new Border
+                    var border = new System.Windows.Controls.Border
                     {
                         BorderBrush = Brushes.Black,
                         BorderThickness = new Thickness(0.5),
@@ -307,7 +300,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                     {
                         Text = values[i],
                         FontSize = 11,
-                        TextAlignment = (i >= 4 ? TextAlignment.Right : TextAlignment.Left)
+                        TextAlignment = (i >= 4 ? System.Windows.TextAlignment.Right : System.Windows.TextAlignment.Left)
                     };
                     border.Child = text;
                     Grid.SetRow(border, row);
@@ -326,7 +319,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 {
                     Text = "Jami:",
                     FontWeight = FontWeights.Bold,
-                    TextAlignment = TextAlignment.Center
+                    TextAlignment = System.Windows.TextAlignment.Center
                 };
                 Grid.SetRow(totalLabel, row);
                 Grid.SetColumn(totalLabel, headers.Length - 10);
@@ -336,7 +329,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 {
                     Text = (FinalAmount ?? 0).ToString("N2"),
                     FontWeight = FontWeights.Bold,
-                    TextAlignment = TextAlignment.Center
+                    TextAlignment = System.Windows.TextAlignment.Center
                 };
                 Grid.SetRow(totalValue, row);
                 Grid.SetColumn(totalValue, headers.Length - 1);
@@ -348,7 +341,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 Text = "Sotilgan mahsulotlar ro‘yxati",
                 FontSize = 18,
                 FontWeight = FontWeights.Bold,
-                TextAlignment = TextAlignment.Right,
+                TextAlignment = System.Windows.TextAlignment.Right,
                 Margin = new Thickness(0, 10, 0, 5)
             };
             FixedPage.SetTop(title, 10);

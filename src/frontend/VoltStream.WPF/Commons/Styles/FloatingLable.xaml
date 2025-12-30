@@ -5,12 +5,12 @@
     xmlns:local="clr-namespace:VoltStream.WPF.Commons.Utils">
 
     <Style x:Key="FloatingLabelStyle" TargetType="TextBlock">
-    
+
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="Margin" Value="10,2" />
         <Setter Property="Foreground" Value="#b0b9c6" />
         <Style.Triggers>
-        
+
             <DataTrigger Binding="{Binding Tag.Text, RelativeSource={RelativeSource Self}, Converter={StaticResource StringIsNotEmptyConverter}}" Value="True">
                 <Setter Property="FontSize" Value="11" />
                 <Setter Property="VerticalAlignment" Value="Top" />
