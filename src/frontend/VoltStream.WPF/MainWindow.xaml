@@ -7,8 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:VoltStream.WPF"
     Title="Volt Stream"
-    Width="1300"
-    Height="750"
+    Width="1350"
+    Height="700"
     AllowsTransparency="True"
     Background="Transparent"
     Loaded="MainWindow_Loaded"
@@ -93,6 +93,7 @@
                     <RadioButton
                         Command="{Binding ShowDashboardViewCommand}"
                         GroupName="MenuGroup"
+                        IsChecked="True"
                         Style="{DynamicResource menuButton}"
                         Tag="{DynamicResource color1}">
                         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
@@ -131,7 +132,7 @@
                         Tag="{DynamicResource color6}">
                         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                             <fa:IconImage Icon="MoneyBillWave" Style="{StaticResource menuButtonIcon}" />
-                            <TextBlock Style="{StaticResource menuButtonText}" Text="Oldi-berdi" />
+                            <TextBlock Style="{StaticResource menuButtonText}" Text="O'tkazmalar" />
                         </StackPanel>
                     </RadioButton>
 
@@ -153,7 +154,7 @@
                         Tag="{DynamicResource color7}">
                         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                             <fa:IconImage Icon="FileAlt" Style="{StaticResource menuButtonIcon}" />
-                            <TextBlock Style="{StaticResource menuButtonText}" Text="Sotuv tarixi" />
+                            <TextBlock Style="{StaticResource menuButtonText}" Text="Savdo tarixi" />
                         </StackPanel>
                     </RadioButton>
 
@@ -164,7 +165,7 @@
                         Tag="{DynamicResource color5}">
                         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                             <fa:IconImage Icon="BalanceScale" Style="{StaticResource menuButtonIcon}" />
-                            <TextBlock Style="{StaticResource menuButtonText}" Text="Debitor va Kreditor" />
+							<TextBlock Style="{StaticResource menuButtonText}" Text="Kontragentlar" />
                         </StackPanel>
                     </RadioButton>
 
@@ -175,7 +176,7 @@
                         Tag="{DynamicResource color10}">
                         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                             <fa:IconImage Icon="ArrowsRotate" Style="{StaticResource menuButtonIcon}" />
-                            <TextBlock Style="{StaticResource menuButtonText}" Text="Aylanma hisoboti" />
+							<TextBlock Style="{StaticResource menuButtonText}" Text="Mijoz hisoboti" />
                         </StackPanel>
                     </RadioButton>
 

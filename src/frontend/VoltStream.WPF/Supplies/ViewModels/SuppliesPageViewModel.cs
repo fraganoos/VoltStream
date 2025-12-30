@@ -52,7 +52,6 @@ public partial class SuppliesPageViewModel : ViewModelBase
     [ObservableProperty] private WarehouseStockViewModel? selectedWarehouseStock;
     [ObservableProperty] private decimal? warehouseStockValue;
 
-    [ObservableProperty] private decimal? perRollCount;
     [ObservableProperty] private int? rollCount;
     [ObservableProperty] private decimal? unitPrice;
     [ObservableProperty] private decimal? discountRate;
@@ -64,6 +63,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
     [ObservableProperty] private SupplyViewModel? editingItemBackup;
     private int editingItemIndex = -1;
+    private bool _isFilingForm;
 
     #region Property Change Handlers
 
@@ -74,6 +74,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
     partial void OnSelectedCategoryChanged(CategoryViewModel? value)
     {
+        if (_isFilingForm) return;
         if (value is not null)
         {
             CategoryText = value.Name;
@@ -83,6 +84,8 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
     partial void OnCategoryTextChanged(string? oldValue, string newValue)
     {
+        if (_isFilingForm) return;
+
         var old = Categories.FirstOrDefault(c => string.Equals(c.Name, oldValue, StringComparison.OrdinalIgnoreCase) && c.Id < 1);
         if (old is not null)
             Categories.Remove(old);
@@ -108,20 +111,18 @@ public partial class SuppliesPageViewModel : ViewModelBase
         {
             Categories.Add(new() { Name = newValue });
             SelectedCategory = null;
-
-            return;
         }
         else
         {
             WeakReferenceMessenger.Default.Send(new FocusControlMessage("Category"));
             CategoryText = string.Empty;
             SelectedCategory = null;
-            return;
         }
     }
 
     partial void OnSelectedProductChanged(ProductViewModel? value)
     {
+        if (_isFilingForm) return;
         if (value is not null)
         {
             ProductText = value.Name;
@@ -132,6 +133,8 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
     partial void OnProductTextChanged(string? oldValue, string newValue)
     {
+        if (_isFilingForm) return;
+
         var old = Products.FirstOrDefault(c => string.Equals(c.Name, oldValue, StringComparison.OrdinalIgnoreCase) && c.Id < 1);
         if (old is not null)
             Products.Remove(old);
@@ -157,15 +160,12 @@ public partial class SuppliesPageViewModel : ViewModelBase
         {
             Products.Add(new() { Name = newValue });
             SelectedProduct = null;
-
-            return;
         }
         else
         {
             WeakReferenceMessenger.Default.Send(new FocusControlMessage("Product"));
             ProductText = string.Empty;
             SelectedProduct = null;
-            return;
         }
     }
 
@@ -176,8 +176,8 @@ public partial class SuppliesPageViewModel : ViewModelBase
             UnitPrice = value.UnitPrice;
             DiscountRate = value.DiscountRate;
         }
+        CalculateTotal();
     }
-
 
     partial void OnWarehouseStockValueChanged(decimal? oldValue, decimal? newValue)
     {
@@ -192,8 +192,11 @@ public partial class SuppliesPageViewModel : ViewModelBase
         if (existing is not null)
         {
             SelectedWarehouseStock = existing;
+            if (!_isFilingForm) CalculateTotal();
             return;
         }
+
+        if (_isFilingForm) return;
 
         var result = MessageBox.Show($"'{newValue}' ro'yxatda yo'q. Yangi to'plam sifatida qo'shilsinmi?",
                             "Tasdiqlash", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -208,9 +211,9 @@ public partial class SuppliesPageViewModel : ViewModelBase
             WarehouseStockValue = null;
             WeakReferenceMessenger.Default.Send(new FocusControlMessage("WarehouseStock"));
         }
+        CalculateTotal();
     }
 
-    partial void OnPerRollCountChanged(decimal? value) => CalculateTotal();
     partial void OnRollCountChanged(int? value) => CalculateTotal();
 
     #endregion Property Change Handlers
@@ -307,8 +310,8 @@ public partial class SuppliesPageViewModel : ViewModelBase
             CategoryId = SelectedCategory?.Id ?? 0,
             ProductId = SelectedProduct?.Id ?? 0,
             RollCount = RollCount ?? 0,
-            Unit = Unit,
-            LengthPerRoll = PerRollCount ?? 0,
+            Unit = Unit!,
+            LengthPerRoll = WarehouseStockValue ?? 0,
             TotalLength = TotalQuantity ?? 0,
             ProductName = ProductText,
             CategoryName = CategoryText,
@@ -424,7 +427,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         if (!string.IsNullOrWhiteSpace(CategoryText) ||
             !string.IsNullOrWhiteSpace(ProductText) ||
             RollCount > 0 ||
-            PerRollCount > 0 ||
+            WarehouseStockValue > 0 ||
             UnitPrice > 0 ||
             DiscountRate > 0)
         {
@@ -435,22 +438,46 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
     private async void FillFormFromItem(SupplyViewModel item)
     {
-        if (SelectedCategory?.Id != item.CategoryId)
+        _isFilingForm = true;
+        try
         {
-            var cat = Categories.FirstOrDefault(c => c.Id == item.CategoryId);
-            SelectedCategory = cat;
-            CategoryText = cat?.Name ?? item.CategoryName;
+            if (SelectedCategory?.Id != item.CategoryId)
+            {
+                var cat = Categories.FirstOrDefault(c => c.Id == item.CategoryId);
+                SelectedCategory = cat;
+                CategoryText = cat?.Name ?? item.CategoryName;
 
-            await LoadProductsAsync(item.CategoryId);
+                await LoadProductsAsync(item.CategoryId);
+            }
+
+            if (SelectedProduct?.Id != item.ProductId)
+            {
+                SelectedProduct = Products.FirstOrDefault(p => p.Id == item.ProductId) ?? item.Product;
+                ProductText = SelectedProduct?.Name ?? item.ProductName;
+            }
+
+            if (SelectedProduct is not null)
+            {
+                await LoadWarehouseStocksAsync(SelectedProduct.Id);
+            }
+
+            WarehouseStockValue = item.LengthPerRoll;
+            var existingStock = WarehouseStocks.FirstOrDefault(w => w.LengthPerRoll == item.LengthPerRoll);
+            if (existingStock is not null)
+            {
+                SelectedWarehouseStock = existingStock;
+            }
+
+            RollCount = item.RollCount;
+            UnitPrice = item.UnitPrice;
+            DiscountRate = item.DiscountRate;
+            Unit = item.Unit;
+            CalculateTotal();
         }
-
-        SelectedProduct = item.Product;
-        ProductText = item.ProductName;
-        PerRollCount = item.LengthPerRoll;
-        RollCount = item.RollCount;
-        UnitPrice = item.UnitPrice;
-        DiscountRate = item.DiscountRate;
-        CalculateTotal();
+        finally
+        {
+            _isFilingForm = false;
+        }
     }
 
     private void ClearForm()
@@ -461,7 +488,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         SelectedProduct = null;
         ProductText = string.Empty;
 
-        PerRollCount = null;
+        WarehouseStockValue = null;
         RollCount = null;
         TotalQuantity = null;
         UnitPrice = null;
@@ -484,13 +511,14 @@ public partial class SuppliesPageViewModel : ViewModelBase
             TotalLength = viewModel.TotalLength,
             UnitPrice = viewModel.UnitPrice,
             DiscountRate = viewModel.DiscountRate,
-            Unit = viewModel.Product?.Unit ?? "metr"
+            Unit = viewModel.Product?.Unit ?? "metr",
+            Product = mapper.Map<ProductViewModel>(viewModel.Product)
         };
     }
 
     private void CalculateTotal()
     {
-        TotalQuantity = PerRollCount * RollCount;
+        TotalQuantity = WarehouseStockValue * RollCount;
     }
 
     #endregion Helper Methods
