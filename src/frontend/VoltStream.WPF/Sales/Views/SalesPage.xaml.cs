@@ -762,7 +762,10 @@ public partial class SalesPage : Page
             return;
         }
 
-        sale.OperationDate = saleDate.SelectedDate.Value;
+        if (saleDate.SelectedDate.Value.Date == DateTime.Today)
+            sale.OperationDate = DateTime.Now;
+        else
+            sale.OperationDate = saleDate.SelectedDate.Value;
 
         if (sale.SaleItems.Count == 0)
         {

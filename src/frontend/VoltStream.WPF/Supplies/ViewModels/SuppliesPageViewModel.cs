@@ -258,7 +258,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         var request = new SupplyRequest
         {
             Id = IsEditing && EditingItemBackup is not null ? EditingItemBackup.Id : 0,
-            Date = SelectedDate.ToUniversalTime(),
+            Date = (SelectedDate.Date == DateTime.Today ? DateTime.Now : SelectedDate).ToUniversalTime(),
             CategoryId = SelectedCategory?.Id ?? 0,
             ProductId = SelectedProduct?.Id ?? 0,
             RollCount = RollCount ?? 0,

@@ -35,9 +35,13 @@ public class DeleteCustomerOperationCommandHandler(
             {
                 case OperationType.Payment:
                     await RevertPaymentAsync(customerOperation, account, cancellationToken);
+                    if (customerOperation.Payment != null)
+                        context.Payments.Remove(customerOperation.Payment);
                     break;
                 case OperationType.Sale:
                     await RevertSaleAsync(customerOperation, account, cancellationToken);
+                    if (customerOperation.Sale != null)
+                        context.Sales.Remove(customerOperation.Sale);
                     break;
                 case OperationType.Discount:
                     await RevertDiscountAppliedAsync(customerOperation, account, cancellationToken);

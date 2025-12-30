@@ -129,7 +129,7 @@
                         Tag="{DynamicResource color10}">
                         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                             <fa:IconImage Icon="ArrowsRotate" Style="{StaticResource menuButtonIcon}" />
-                            <TextBlock Style="{StaticResource menuButtonText}" Text="Oborotka" />
+                            <TextBlock Style="{StaticResource menuButtonText}" Text="Aylanma hisoboti" />
                         </StackPanel>
                     </RadioButton>
 
@@ -217,8 +217,7 @@
                             Margin="10"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Top"
-                            Panel.ZIndex="1"
-                            IsHitTestVisible="False"
+                            Panel.ZIndex="100"
                             Orientation="Vertical" />
                 
                 <Frame Grid.Row="1"

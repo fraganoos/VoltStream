@@ -32,6 +32,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         optionsBuilder.AddInterceptors(new AuditInterceptor());
     }
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        base.OnModelCreating(modelBuilder);
+    }
+
     public async Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
         if (currentTransaction is not null)

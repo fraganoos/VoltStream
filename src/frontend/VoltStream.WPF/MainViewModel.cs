@@ -86,7 +86,7 @@ public partial class MainViewModel : ViewModelBase
     [RelayCommand] private void ShowProductView() => NavigateTo<ProductsPage>("Mahsulotlar qoldig'i");
     [RelayCommand] private void ShowSalesHistoryView() => NavigateTo<SalesHistoryPage>("Savdo Tarixi");
     [RelayCommand] private void ShowDebitorCreditor() => NavigateTo<DebitorCreditorPage>("Debitor va Kreditor");
-    [RelayCommand] private void ShowTurnoversPage() => NavigateTo<TurnoversPage>("Oborotka");
+    [RelayCommand] private void ShowTurnoversPage() => NavigateTo<TurnoversPage>("Aylanma hisoboti");
     [RelayCommand] private void ShowSettings() => NavigateTo<SettingsPage>("Sozlamalar");
 
     private void NavigateTo<T>(string title) where T : notnull
