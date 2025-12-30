@@ -64,6 +64,9 @@ partial class PaymentPageViewModel : ViewModelBase
             return;
         }
 
+        if (Payment.PaidAt.Date == DateTime.Today)
+            Payment.PaidAt = DateTime.Now;
+
         var request = mapper.Map<PaymentRequest>(Payment);
         request.CustomerId = Customer.Id;
 
@@ -110,7 +113,7 @@ partial class PaymentPageViewModel : ViewModelBase
 
         var request = new ApplyDiscountRequest
         {
-            Date = Payment.PaidAt,
+            Date = Payment.PaidAt.Date == DateTime.Today ? DateTime.Now : Payment.PaidAt,
             CustomerId = customerId,
             DiscountAmount = result!.discountSum,
             IsCash = result.discountCash,
