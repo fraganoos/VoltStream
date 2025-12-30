@@ -307,95 +307,117 @@
                         Margin="0,0,15,0"
                         VerticalAlignment="Center"
                         Orientation="Horizontal">
+                        <StackPanel.Resources>
+                            <Style x:Key="WindowControlButtonStyle" TargetType="Button">
+                                <Setter Property="Width" Value="32" />
+                                <Setter Property="Height" Value="24" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Cursor" Value="Hand" />
+                                <Setter Property="Focusable" Value="False" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </StackPanel.Resources>
+
                         <Button
-                            Width="18"
-                            Height="18"
-                            Margin="0,0,10,0"
                             Click="BtnMinimize_Click"
-                            Cursor="Hand"
-                            Focusable="False">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Background" Value="#28AEED" />
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#278BEF" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border CornerRadius="9" Background="{TemplateBinding Background}">
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"
-                                            FontSize="14"
-                                            Foreground="White"
-                                            Text="-" />
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
+                            Style="{StaticResource WindowControlButtonStyle}">
+                            <Button.Triggers>
+                                <EventTrigger RoutedEvent="MouseEnter">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                To="#25FFFFFF"
+                                                Duration="0:0:0.1" />
+											</Storyboard>
+									</BeginStoryboard>
+                                </EventTrigger>
+                                <EventTrigger RoutedEvent="MouseLeave">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                To="Transparent"
+                                                Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Button.Triggers>
+                            <Path
+                                Data="M 0,8 H 10"
+                                Stroke="White"
+                                StrokeThickness="1.5" />
                         </Button>
 
                         <Button
-                            Width="18"
-                            Height="18"
-                            Margin="0,0,10,0"
                             Click="BtnMaximize_Click"
-                            Cursor="Hand"
-                            Focusable="False">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Background" Value="#2ecc71" />
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#27ae60" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border CornerRadius="9" Background="{TemplateBinding Background}">
-                                        <fa:IconImage
-                                            Width="10"
-                                            Height="10"
-                                            Foreground="White"
-                                            Icon="WindowMaximize" />
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
+                            Style="{StaticResource WindowControlButtonStyle}">
+                            <Button.Triggers>
+                                <EventTrigger RoutedEvent="MouseEnter">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                To="#25FFFFFF"
+                                                Duration="0:0:0.1" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                                <EventTrigger RoutedEvent="MouseLeave">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                To="Transparent"
+                                                Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Button.Triggers>
+                            <Path
+                                Data="M 0,0 H 10 V 10 H 0 Z"
+                                Stroke="White"
+                                StrokeThickness="1.5" />
                         </Button>
 
                         <Button
-                            Width="18"
-                            Height="18"
                             Click="BtnClose_Click"
-                            Cursor="Hand"
-                            Focusable="False">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Background" Value="#DA34AE" />
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#C62DAE" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border CornerRadius="9" Background="{TemplateBinding Background}">
-                                        <TextBlock
-                                            HorizontalAlignment="Center"
-                                            VerticalAlignment="Center"
-                                            FontSize="10"
-                                            Foreground="White"
-                                            Text="X" />
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
+                            Style="{StaticResource WindowControlButtonStyle}">
+                            <Button.Triggers>
+                                <EventTrigger RoutedEvent="MouseEnter">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                To="#E81123"
+                                                Duration="0:0:0.1" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                                <EventTrigger RoutedEvent="MouseLeave">
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                To="Transparent"
+                                                Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </EventTrigger>
+                            </Button.Triggers>
+                            <Path
+                                Data="M 0,0 L 10,10 M 0,10 L 10,0"
+                                Stroke="White"
+                                StrokeThickness="1.5" />
                         </Button>
                     </StackPanel>
                 </Grid>

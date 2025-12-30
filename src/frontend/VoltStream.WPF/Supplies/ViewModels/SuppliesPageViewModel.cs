@@ -35,7 +35,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
         SelectedDate = DateTime.Now;
 
-        _ = LoadDataAsync();
+        _ = Task.Run(LoadDataAsync);
     }
 
     [ObservableProperty] private DateTime selectedDate;
@@ -55,7 +55,6 @@ public partial class SuppliesPageViewModel : ViewModelBase
     [ObservableProperty] private int? rollCount;
     [ObservableProperty] private decimal? unitPrice;
     [ObservableProperty] private decimal? discountRate;
-    [ObservableProperty] private decimal? totalQuantity;
     [ObservableProperty] private string? unit;
 
     [ObservableProperty] private ObservableCollection<SupplyViewModel> supplies = [];
@@ -65,156 +64,98 @@ public partial class SuppliesPageViewModel : ViewModelBase
     private int editingItemIndex = -1;
     private bool _isFilingForm;
 
+    public decimal? TotalQuantity => WarehouseStockValue * RollCount;
+
     #region Property Change Handlers
 
-    partial void OnSelectedDateChanged(DateTime value)
-    {
-        _ = LoadSuppliesAsync();
-    }
+    partial void OnSelectedDateChanged(DateTime value) => _ = LoadSuppliesAsync();
 
     partial void OnSelectedCategoryChanged(CategoryViewModel? value)
     {
-        if (_isFilingForm) return;
-        if (value is not null)
-        {
-            CategoryText = value.Name;
-            _ = LoadProductsAsync(value.Id);
-        }
+        if (_isFilingForm || value == null) return;
+        CategoryText = value.Name;
+        _ = LoadProductsAsync(value.Id);
     }
 
     partial void OnCategoryTextChanged(string? oldValue, string newValue)
     {
-        if (_isFilingForm) return;
+        if (_isFilingForm || string.IsNullOrWhiteSpace(newValue) || (SelectedCategory?.Name == newValue)) return;
 
-        var old = Categories.FirstOrDefault(c => string.Equals(c.Name, oldValue, StringComparison.OrdinalIgnoreCase) && c.Id < 1);
-        if (old is not null)
-            Categories.Remove(old);
-
-        if (string.IsNullOrWhiteSpace(newValue)) return;
-
-        if (SelectedCategory is not null && string.Equals(SelectedCategory.Name, newValue, StringComparison.OrdinalIgnoreCase))
-            return;
-
+        Categories.Remove(Categories.FirstOrDefault(c => c.Name == oldValue && c.Id < 1)!);
         var existing = Categories.FirstOrDefault(c => string.Equals(c.Name, newValue, StringComparison.OrdinalIgnoreCase));
-        if (existing is not null)
-        {
-            SelectedCategory = existing;
-            return;
-        }
 
-        var result = MessageBox.Show($"'{newValue}' bu kategoriyalar ro'yxatida mavjud emas. Yangi kategoriya sifatida qo'shishni istaysizmi?",
-                            "Tasdiqlash",
-                            MessageBoxButton.YesNo,
-                            MessageBoxImage.Question);
-
-        if (result == MessageBoxResult.Yes)
+        if (existing != null) SelectedCategory = existing;
+        else if (ConfirmNew($"'{newValue}' yangi kategoriya sifatida qo'shilsinmi?")) 
         {
             Categories.Add(new() { Name = newValue });
             SelectedCategory = null;
         }
-        else
-        {
-            WeakReferenceMessenger.Default.Send(new FocusControlMessage("Category"));
-            CategoryText = string.Empty;
-            SelectedCategory = null;
-        }
+        else { CategoryText = string.Empty; WeakReferenceMessenger.Default.Send(new FocusControlMessage("Category")); }
     }
 
     partial void OnSelectedProductChanged(ProductViewModel? value)
     {
-        if (_isFilingForm) return;
-        if (value is not null)
-        {
-            ProductText = value.Name;
-            Unit = value.Unit ?? "metr";
-            _ = LoadWarehouseStocksAsync(value.Id);
-        }
+        if (_isFilingForm || value == null) return;
+        ProductText = value.Name;
+        Unit = value.Unit ?? "metr";
+        _ = LoadWarehouseStocksAsync(value.Id);
     }
 
     partial void OnProductTextChanged(string? oldValue, string newValue)
     {
-        if (_isFilingForm) return;
+        if (_isFilingForm || string.IsNullOrWhiteSpace(newValue) || (SelectedProduct?.Name == newValue)) return;
 
-        var old = Products.FirstOrDefault(c => string.Equals(c.Name, oldValue, StringComparison.OrdinalIgnoreCase) && c.Id < 1);
-        if (old is not null)
-            Products.Remove(old);
+        Products.Remove(Products.FirstOrDefault(p => p.Name == oldValue && p.Id < 1)!);
+        var existing = Products.FirstOrDefault(p => string.Equals(p.Name, newValue, StringComparison.OrdinalIgnoreCase));
 
-        if (string.IsNullOrWhiteSpace(newValue)) return;
-
-        if (SelectedProduct is not null && string.Equals(SelectedProduct.Name, newValue, StringComparison.OrdinalIgnoreCase))
-            return;
-
-        var existing = Products.FirstOrDefault(c => string.Equals(c.Name, newValue, StringComparison.OrdinalIgnoreCase));
-        if (existing is not null)
-        {
-            SelectedProduct = existing;
-            return;
-        }
-
-        var result = MessageBox.Show($"'{newValue}' bu mahsulotlar ro'yxatida mavjud emas. Yangi mahsulot sifatida qo'shishni istaysizmi?",
-                            "Tasdiqlash",
-                            MessageBoxButton.YesNo,
-                            MessageBoxImage.Question);
-
-        if (result == MessageBoxResult.Yes)
+        if (existing != null) SelectedProduct = existing;
+        else if (ConfirmNew($"'{newValue}' yangi mahsulot sifatida qo'shilsinmi?"))
         {
             Products.Add(new() { Name = newValue });
             SelectedProduct = null;
+            WarehouseStocks = [];
         }
-        else
-        {
-            WeakReferenceMessenger.Default.Send(new FocusControlMessage("Product"));
-            ProductText = string.Empty;
-            SelectedProduct = null;
-        }
+        else { ProductText = string.Empty; WeakReferenceMessenger.Default.Send(new FocusControlMessage("Product")); }
     }
 
     partial void OnSelectedWarehouseStockChanged(WarehouseStockViewModel? value)
     {
-        if (value is not null)
-        {
-            UnitPrice = value.UnitPrice;
-            DiscountRate = value.DiscountRate;
-        }
-        CalculateTotal();
+        if (value == null) return;
+        UnitPrice = value.UnitPrice;
+        DiscountRate = value.DiscountRate;
+        OnPropertyChanged(nameof(TotalQuantity));
     }
 
     partial void OnWarehouseStockValueChanged(decimal? oldValue, decimal? newValue)
     {
-        var old = WarehouseStocks.FirstOrDefault(c => c.LengthPerRoll == oldValue && c.Id < 1);
-        if (old is not null) WarehouseStocks.Remove(old);
+        if (_isFilingForm || newValue == null || SelectedWarehouseStock?.LengthPerRoll == newValue) return;
 
-        if (newValue == null) return;
+        WarehouseStocks.Remove(WarehouseStocks.FirstOrDefault(w => w.LengthPerRoll == oldValue && w.Id < 1)!);
+        var existing = WarehouseStocks.FirstOrDefault(w => w.LengthPerRoll == newValue);
 
-        if (SelectedWarehouseStock?.LengthPerRoll == newValue) return;
-
-        var existing = WarehouseStocks.FirstOrDefault(c => c.LengthPerRoll == newValue);
-        if (existing is not null)
-        {
-            SelectedWarehouseStock = existing;
-            if (!_isFilingForm) CalculateTotal();
-            return;
-        }
-
-        if (_isFilingForm) return;
-
-        var result = MessageBox.Show($"'{newValue}' ro'yxatda yo'q. Yangi to'plam sifatida qo'shilsinmi?",
-                            "Tasdiqlash", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-        if (result == MessageBoxResult.Yes)
+        if (existing != null) SelectedWarehouseStock = existing;
+        else if (ConfirmNew($"'{newValue}' yangi to'plam o'lchami sifatida qo'shilsinmi?"))
         {
             WarehouseStocks.Add(new() { LengthPerRoll = newValue.Value });
             SelectedWarehouseStock = null;
+            UnitPrice = null;
+            DiscountRate = null;
         }
-        else
-        {
-            WarehouseStockValue = null;
-            WeakReferenceMessenger.Default.Send(new FocusControlMessage("WarehouseStock"));
-        }
-        CalculateTotal();
+        else { WarehouseStockValue = null; WeakReferenceMessenger.Default.Send(new FocusControlMessage("WarehouseStock")); }
+
+        OnPropertyChanged(nameof(TotalQuantity));
     }
 
-    partial void OnRollCountChanged(int? value) => CalculateTotal();
+    partial void OnDiscountRateChanged(decimal? value)
+    {
+        if (value > 100)
+        {
+            Warning = "Chegirma 100% dan yuqori bo'lishi mumkin emas!";
+            DiscountRate = 100;
+        }
+    }
+
+    partial void OnRollCountChanged(int? value) => OnPropertyChanged(nameof(TotalQuantity));
 
     #endregion Property Change Handlers
 
@@ -337,19 +278,11 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
         if (isSuccess)
         {
-            ClearForm();
-            if (IsEditing)
-            {
-                IsEditing = false;
-                EditingItemBackup = null;
-                editingItemIndex = -1;
-            }
-            await LoadDataAsync();
+            if (IsEditing) ResetEditState();
+            else ClearForm();
+            await LoadSuppliesAsync();
         }
-        else
-        {
-            MessageBox.Show(errorMsg, "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
+        else MessageBox.Show(errorMsg, "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
     }
 
     [RelayCommand]
@@ -378,24 +311,22 @@ public partial class SuppliesPageViewModel : ViewModelBase
 
         Supplies.Remove(item);
 
-        FillFormFromItem(item);
+        await FillFormFromItem(item);
     }
 
     [RelayCommand]
-    private void CancelEdit()
-    {
-        if (IsEditing && EditingItemBackup is not null)
-        {
-            if (editingItemIndex >= 0 && editingItemIndex <= Supplies.Count)
-                Supplies.Insert(editingItemIndex, EditingItemBackup);
-            else
-                Supplies.Add(EditingItemBackup);
+    private void CancelEdit() => ResetEditState();
 
-            ClearForm();
-            IsEditing = false;
-            EditingItemBackup = null;
-            editingItemIndex = -1;
-        }
+    private void ResetEditState()
+    {
+        if (!IsEditing || EditingItemBackup == null) return;
+        if (editingItemIndex >= 0) Supplies.Insert(editingItemIndex, EditingItemBackup);
+        else Supplies.Add(EditingItemBackup);
+        
+        ClearForm();
+        IsEditing = false;
+        EditingItemBackup = null;
+        editingItemIndex = -1;
     }
 
     [RelayCommand]
@@ -407,14 +338,8 @@ public partial class SuppliesPageViewModel : ViewModelBase
         if (result == MessageBoxResult.Yes)
         {
             var ViewModel = await suppliesApi.DeleteSupplyAsync(item.Id).Handle(isLoading => IsLoading = isLoading);
-            if (ViewModel.IsSuccess)
-            {
-                Supplies.Remove(item);
-            }
-            else
-            {
-                MessageBox.Show($"O'chirishda xatolik: {ViewModel.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            if (ViewModel.IsSuccess) Supplies.Remove(item);
+            else MessageBox.Show($"O'chirishda xatolik: {ViewModel.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -436,18 +361,16 @@ public partial class SuppliesPageViewModel : ViewModelBase
         return false;
     }
 
-    private async void FillFormFromItem(SupplyViewModel item)
+    private async Task FillFormFromItem(SupplyViewModel item)
     {
         _isFilingForm = true;
         try
         {
             if (SelectedCategory?.Id != item.CategoryId)
             {
-                var cat = Categories.FirstOrDefault(c => c.Id == item.CategoryId);
-                SelectedCategory = cat;
-                CategoryText = cat?.Name ?? item.CategoryName;
-
-                await LoadProductsAsync(item.CategoryId);
+                SelectedCategory = Categories.FirstOrDefault(c => c.Id == item.CategoryId);
+                CategoryText = SelectedCategory?.Name ?? item.CategoryName;
+                if (SelectedCategory != null) await LoadProductsAsync(SelectedCategory.Id);
             }
 
             if (SelectedProduct?.Id != item.ProductId)
@@ -456,70 +379,46 @@ public partial class SuppliesPageViewModel : ViewModelBase
                 ProductText = SelectedProduct?.Name ?? item.ProductName;
             }
 
-            if (SelectedProduct is not null)
-            {
-                await LoadWarehouseStocksAsync(SelectedProduct.Id);
-            }
+            if (SelectedProduct != null) await LoadWarehouseStocksAsync(SelectedProduct.Id);
 
             WarehouseStockValue = item.LengthPerRoll;
-            var existingStock = WarehouseStocks.FirstOrDefault(w => w.LengthPerRoll == item.LengthPerRoll);
-            if (existingStock is not null)
-            {
-                SelectedWarehouseStock = existingStock;
-            }
+            SelectedWarehouseStock = WarehouseStocks.FirstOrDefault(w => w.LengthPerRoll == item.LengthPerRoll);
 
             RollCount = item.RollCount;
             UnitPrice = item.UnitPrice;
             DiscountRate = item.DiscountRate;
             Unit = item.Unit;
-            CalculateTotal();
+            OnPropertyChanged(nameof(TotalQuantity));
         }
-        finally
-        {
-            _isFilingForm = false;
-        }
+        finally { _isFilingForm = false; }
     }
 
     private void ClearForm()
     {
         SelectedCategory = null;
         CategoryText = string.Empty;
-
         SelectedProduct = null;
         ProductText = string.Empty;
-
         WarehouseStockValue = null;
+        SelectedWarehouseStock = null;
         RollCount = null;
-        TotalQuantity = null;
         UnitPrice = null;
         DiscountRate = null;
         Unit = null!;
+        OnPropertyChanged(nameof(TotalQuantity));
     }
 
     private SupplyViewModel MapToViewModel(SupplyResponse viewModel)
     {
-        return new SupplyViewModel
-        {
-            Id = viewModel.Id,
-            Date = viewModel.Date,
-            CategoryId = viewModel.Product?.CategoryId ?? 0,
-            CategoryName = viewModel.Product?.Category?.Name ?? "",
-            ProductId = viewModel.ProductId,
-            ProductName = viewModel.Product?.Name ?? "",
-            RollCount = viewModel.RollCount,
-            LengthPerRoll = viewModel.LengthPerRoll,
-            TotalLength = viewModel.TotalLength,
-            UnitPrice = viewModel.UnitPrice,
-            DiscountRate = viewModel.DiscountRate,
-            Unit = viewModel.Product?.Unit ?? "metr",
-            Product = mapper.Map<ProductViewModel>(viewModel.Product)
-        };
+        var vm = mapper.Map<SupplyViewModel>(viewModel);
+        vm.CategoryName = viewModel.Product?.Category?.Name ?? "";
+        vm.ProductName = viewModel.Product?.Name ?? "";
+        vm.Product = mapper.Map<ProductViewModel>(viewModel.Product!);
+        return vm;
     }
-
-    private void CalculateTotal()
-    {
-        TotalQuantity = WarehouseStockValue * RollCount;
-    }
+    
+    private static bool ConfirmNew(string message) =>
+        MessageBox.Show(message, "Tasdiqlash", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
 
     #endregion Helper Methods
 }

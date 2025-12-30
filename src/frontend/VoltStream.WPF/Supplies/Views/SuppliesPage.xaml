@@ -178,7 +178,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="0"
                              x:Name="totalMeters"
-                             utils:NumericInput.Value="{Binding TotalQuantity, UpdateSourceTrigger=PropertyChanged}"
+                             utils:NumericInput.Value="{Binding TotalQuantity, Mode=OneWay}"
                              utils:NumericInput.Precision="2"
                              VerticalAlignment="Center"
                              HorizontalAlignment="Stretch"
