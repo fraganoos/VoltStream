@@ -431,12 +431,13 @@ public partial class TurnoversPageViewModel : ViewModelBase
         const int renderDPI = 300;
 
         // A4 o'lchamlari (96 DPI da)
-        const double pageWidth96DPI = 793.7;
-        const double pageHeight96DPI = 1122.5;
+        const double pageWidth96DPI = 2480;
+        const double pageHeight96DPI = 3508;
+
 
         // DPI o'zgarishi tufayli piksel o'lchamlarini hisoblash
-        int pixelWidth = (int)(pageWidth96DPI / 96.0 * renderDPI);
-        int pixelHeight = (int)(pageHeight96DPI / 96.0 * renderDPI);
+        int pixelWidth = (int)(pageWidth96DPI / 300.0 * renderDPI);
+        int pixelHeight = (int)(pageHeight96DPI / 300.0 * renderDPI);
 
         // PdfSharp sahifasi uchun o'lchamlar (ular 96 DPI ga asoslanadi, shuning uchun 96 DPI qiymatlari ishlatiladi)
         double pdfPageWidth = pageWidth96DPI;
