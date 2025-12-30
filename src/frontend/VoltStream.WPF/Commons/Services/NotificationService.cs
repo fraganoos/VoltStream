@@ -29,6 +29,78 @@ public static class NotificationService
         var background = GetBackground(type);
         var wrappedMessage = message.WrapWithNewLines(maxLineLength);
 
+        // 📋 Copy Button (Custom Template to remove hover background)
+        var copyButton = new Button
+        {
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            Margin = new Thickness(10, 12, 5, 0),
+            Cursor = System.Windows.Input.Cursors.Hand,
+            ToolTip = "Nusxa olish",
+            Focusable = false,
+            IsHitTestVisible = true,
+            Content = new FontAwesome.Sharp.IconImage
+            {
+                Icon = FontAwesome.Sharp.IconChar.Copy,
+                Foreground = Brushes.White,
+                Width = 16,
+                Height = 16,
+                Opacity = 1.0
+            }
+        };
+
+        // Override Default Template to avoid standard grey hover background
+        var template = new ControlTemplate(typeof(Button));
+        var borderFactory = new FrameworkElementFactory(typeof(Border));
+        borderFactory.SetValue(Border.BackgroundProperty, Brushes.Transparent); // Always transparent
+        borderFactory.SetValue(Border.BorderThicknessProperty, new Thickness(0));
+        
+        var contentPresenter = new FrameworkElementFactory(typeof(ContentPresenter));
+        contentPresenter.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+        contentPresenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+        
+        borderFactory.AppendChild(contentPresenter);
+        template.VisualTree = borderFactory;
+        copyButton.Template = template;
+
+        // Z-Index yuqori
+        Panel.SetZIndex(copyButton, 100);
+
+        copyButton.Click += (_, _) => 
+        {
+            try { Clipboard.SetText(message); } catch {}
+        };
+
+        // 📝 Text Message
+        var textBlock = new TextBlock
+        {
+            Text = wrappedMessage,
+            Foreground = Brushes.White,
+            FontSize = 16,
+            TextWrapping = TextWrapping.Wrap,
+            Margin = new Thickness(35, 10, 15, 10) // Button uchun joy ajratish (Left Margin oshirildi)
+        };
+
+        // Ikkalasini ustma-ust qo'yamiz (Grid Column sizing muammosi bo'lmasligi uchun)
+        // Yoki ColumnDefinition ishlatish mumkin, lekin Grid ichida oddiy joylashtirish ishonchliroq.
+        // Hozirgi Grid logikasini biroz o'zgartiramiz:
+        
+        var contentGrid = new Grid();
+        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // Button
+        contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); // Text
+
+        // Qayta joylashtirish
+        copyButton.Margin = new Thickness(10, 12, 0, 0); // Marginni to'g'irlash
+        textBlock.Margin = new Thickness(10, 10, 15, 10); // Buttondan keyingi margin
+
+        Grid.SetColumn(copyButton, 0);
+        Grid.SetColumn(textBlock, 1);
+        
+        contentGrid.Children.Add(copyButton);
+        contentGrid.Children.Add(textBlock);
+
         // ✉️ Message UI
         var messageBorder = new Border
         {
@@ -36,14 +108,7 @@ public static class NotificationService
             CornerRadius = new CornerRadius(8),
             Opacity = 0,
             Margin = new Thickness(0, 0, 0, 10),
-            Child = new TextBlock
-            {
-                Text = wrappedMessage,
-                Foreground = Brushes.White,
-                FontSize = 16,
-                TextWrapping = TextWrapping.Wrap,
-                Margin = new Thickness(15, 10, 15, 10)
-            }
+            Child = contentGrid
         };
 
         // ➕ Insert at top

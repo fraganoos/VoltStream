@@ -217,8 +217,7 @@
                             Margin="10"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Top"
-                            Panel.ZIndex="1"
-                            IsHitTestVisible="False"
+                            Panel.ZIndex="100"
                             Orientation="Vertical" />
                 
                 <Frame Grid.Row="1"
