@@ -1,6 +1,7 @@
 namespace VoltStream.WPF.Commons.Utils;
 
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,101 +9,98 @@ using System.Windows.Input;
 
 public static class NumericInput
 {
+    #region Dependency Properties
+
     public static readonly DependencyProperty IsNumericProperty =
-        DependencyProperty.RegisterAttached(
-            "IsNumeric",
-            typeof(bool),
-            typeof(NumericInput),
-            new PropertyMetadata(false, OnIsNumericChanged));
+        DependencyProperty.RegisterAttached("IsNumeric", typeof(bool), typeof(NumericInput), new PropertyMetadata(false, OnIsNumericChanged));
 
     public static readonly DependencyProperty ValueProperty =
-        DependencyProperty.RegisterAttached(
-            "Value",
-            typeof(object),
-            typeof(NumericInput),
-            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnValueChanged));
+        DependencyProperty.RegisterAttached("Value", typeof(object), typeof(NumericInput), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnValueChanged));
 
     public static readonly DependencyProperty PrecisionProperty =
-        DependencyProperty.RegisterAttached(
-            "Precision",
-            typeof(int?),
-            typeof(NumericInput),
-            new PropertyMetadata(null));
-
-    public static bool GetIsNumeric(DependencyObject obj) => (bool)obj.GetValue(IsNumericProperty);
-    public static void SetIsNumeric(DependencyObject obj, bool value) => obj.SetValue(IsNumericProperty, value);
-
-    public static object GetValue(DependencyObject obj) => obj.GetValue(ValueProperty);
-    public static void SetValue(DependencyObject obj, object value) => obj.SetValue(ValueProperty, value);
-
-    public static int? GetPrecision(DependencyObject obj) => (int?)obj.GetValue(PrecisionProperty);
-    public static void SetPrecision(DependencyObject obj, int? value) => obj.SetValue(PrecisionProperty, value);
+        DependencyProperty.RegisterAttached("Precision", typeof(int?), typeof(NumericInput), new PropertyMetadata(null));
 
     private static readonly DependencyProperty IsSubscribedProperty =
         DependencyProperty.RegisterAttached("IsSubscribed", typeof(bool), typeof(NumericInput), new PropertyMetadata(false));
 
-    private static bool GetIsSubscribed(DependencyObject obj) => (bool)obj.GetValue(IsSubscribedProperty);
-    private static void SetIsSubscribed(DependencyObject obj, bool value) => obj.SetValue(IsSubscribedProperty, value);
-
     private static readonly DependencyProperty IsInternalChangeProperty =
         DependencyProperty.RegisterAttached("IsInternalChange", typeof(bool), typeof(NumericInput), new PropertyMetadata(false));
 
-    private static bool GetIsInternalChange(DependencyObject obj) => (bool)obj.GetValue(IsInternalChangeProperty);
-    private static void SetIsInternalChange(DependencyObject obj, bool value) => obj.SetValue(IsInternalChangeProperty, value);
+    public static bool GetIsNumeric(DependencyObject obj) => obj != null && (bool)obj.GetValue(IsNumericProperty);
+    public static void SetIsNumeric(DependencyObject obj, bool value) => obj?.SetValue(IsNumericProperty, value);
+
+    public static object GetValue(DependencyObject obj) => obj?.GetValue(ValueProperty)!;
+    public static void SetValue(DependencyObject obj, object value) => obj?.SetValue(ValueProperty, value);
+
+    public static int? GetPrecision(DependencyObject obj) => obj != null ? (int?)obj.GetValue(PrecisionProperty) : null;
+    public static void SetPrecision(DependencyObject obj, int? value) => obj?.SetValue(PrecisionProperty, value);
+
+    #endregion
 
     private static void OnIsNumericChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is not TextBox textBox) return;
-
-        if ((bool)e.NewValue)
+        if (d is TextBox textBox)
         {
-            if (!GetIsSubscribed(textBox))
-            {
-                textBox.TextAlignment = TextAlignment.Right;
-                textBox.GotFocus += OnGotFocus;
-                textBox.PreviewTextInput += OnPreviewTextInput;
-                textBox.TextChanged += OnTextChanged;
-                textBox.LostFocus += OnLostFocus;
-                DataObject.AddPastingHandler(textBox, OnPaste);
+            ManageSubscription(textBox, (bool)e.NewValue);
+        }
+        else if (d is ComboBox comboBox)
+        {
+            if (comboBox.IsLoaded) SetupComboBox(comboBox);
+            else comboBox.Loaded += (s, _) => SetupComboBox(comboBox);
+        }
+    }
 
-                SetIsSubscribed(textBox, true);
+    private static void SetupComboBox(ComboBox cb)
+    {
+        if (cb.Template.FindName("PART_EditableTextBox", cb) is TextBox textBox)
+        {
+            ManageSubscription(textBox, GetIsNumeric(cb));
+        }
+    }
 
-                FormatValue(textBox);
-            }
+    private static void ManageSubscription(TextBox textBox, bool subscribe)
+    {
+        if (subscribe)
+        {
+            if ((bool)textBox.GetValue(IsSubscribedProperty)) return;
+            textBox.TextAlignment = TextAlignment.Right;
+            textBox.GotFocus += OnGotFocus;
+            textBox.PreviewTextInput += OnPreviewTextInput;
+            textBox.TextChanged += OnTextChanged;
+            textBox.LostFocus += OnLostFocus;
+            DataObject.AddPastingHandler(textBox, OnPaste);
+            textBox.SetValue(IsSubscribedProperty, true);
+            FormatValue(textBox);
         }
         else
         {
-            if (GetIsSubscribed(textBox))
-            {
-                textBox.GotFocus -= OnGotFocus;
-                textBox.PreviewTextInput -= OnPreviewTextInput;
-                textBox.TextChanged -= OnTextChanged;
-                textBox.LostFocus -= OnLostFocus;
-                DataObject.RemovePastingHandler(textBox, OnPaste);
-
-                SetIsSubscribed(textBox, false);
-            }
+            textBox.GotFocus -= OnGotFocus;
+            textBox.PreviewTextInput -= OnPreviewTextInput;
+            textBox.TextChanged -= OnTextChanged;
+            textBox.LostFocus -= OnLostFocus;
+            DataObject.RemovePastingHandler(textBox, OnPaste);
+            textBox.SetValue(IsSubscribedProperty, false);
         }
     }
 
     private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is not TextBox textBox || !GetIsNumeric(textBox)) return;
+        if (d is not FrameworkElement fe || (bool)d.GetValue(IsInternalChangeProperty)) return;
 
-        if (GetIsInternalChange(textBox)) return;
+        TextBox target = d as TextBox;
+        if (d is ComboBox cb) target = cb.Template?.FindName("PART_EditableTextBox", cb) as TextBox;
 
-        if (!textBox.IsFocused)
-        {
-            FormatValue(textBox);
-        }
+        if (target != null && !target.IsFocused) FormatValue(target);
     }
 
     private static void FormatValue(TextBox textBox)
     {
-        SetIsInternalChange(textBox, true);
+        textBox.SetValue(IsInternalChangeProperty, true);
 
-        var value = GetValue(textBox);
-        var precision = GetPrecision(textBox);
+        // O'zidan yoki TemplatedParent (ComboBox) dan qiymatlarni olish
+        var parent = textBox.TemplatedParent as DependencyObject;
+        var value = GetValue(textBox) ?? (parent != null ? GetValue(parent) : null);
+        var precision = GetPrecision(textBox) ?? (parent != null ? GetPrecision(parent) : null);
 
         if (value == null)
         {
@@ -112,254 +110,107 @@ public static class NumericInput
         {
             decimal decimalValue = ConvertToDecimal(value);
             string format = precision.HasValue ? $"N{precision.Value}" : "N" + GetOptimalDecimalPlaces(decimalValue);
-
             var culture = (CultureInfo)CultureInfo.InvariantCulture.Clone();
             culture.NumberFormat.NumberGroupSeparator = " ";
-            culture.NumberFormat.NumberDecimalSeparator = ".";
-
             textBox.Text = decimalValue.ToString(format, culture);
         }
 
-        SetIsInternalChange(textBox, false);
-    }
-
-    private static int GetOptimalDecimalPlaces(decimal value)
-    {
-        string text = value.ToString(CultureInfo.InvariantCulture);
-        int index = text.IndexOf('.');
-        return index == -1 ? 0 : text.Length - index - 1;
-    }
-
-    private static void OnGotFocus(object sender, RoutedEventArgs e)
-    {
-        if (sender is TextBox textBox && !textBox.IsReadOnly && !string.IsNullOrEmpty(textBox.Text))
-        {
-            textBox.Dispatcher.BeginInvoke(new Action(() => textBox.SelectAll()), System.Windows.Threading.DispatcherPriority.Input);
-        }
-    }
-
-    private static void OnPreviewTextInput(object sender, TextCompositionEventArgs e)
-    {
-        if (sender is not TextBox textBox) return;
-
-        if (!IsDigitOrSeparator(e.Text))
-        {
-            e.Handled = true;
-            return;
-        }
-
-        string fullText = GetFullText(textBox, e.Text);
-
-        if (fullText.Count(c => c == '.') > 1)
-        {
-            e.Handled = true;
-            return;
-        }
-
-        var precision = GetPrecision(textBox);
-        if (precision.HasValue)
-        {
-            int separatorIndex = fullText.IndexOf('.');
-            if (separatorIndex >= 0 && fullText.Length - separatorIndex - 1 > precision.Value)
-            {
-                e.Handled = true;
-            }
-        }
+        textBox.SetValue(IsInternalChangeProperty, false);
     }
 
     private static void OnTextChanged(object sender, TextChangedEventArgs e)
     {
-        if (sender is not TextBox textBox || !GetIsNumeric(textBox)) return;
-        if (GetIsInternalChange(textBox)) return;
+        if (sender is not TextBox textBox || (bool)textBox.GetValue(IsInternalChangeProperty)) return;
 
-        SetIsInternalChange(textBox, true);
+        textBox.SetValue(IsInternalChangeProperty, true);
+        string clean = textBox.Text.Replace(" ", "");
+        string original = textBox.Text;
+        int caret = textBox.CaretIndex;
+        textBox.SetValue(IsInternalChangeProperty, false);
 
-        int caretIndex = textBox.CaretIndex;
-        string originalText = textBox.Text;
-        string cleanValues = originalText.Replace(" ", "");
+        if (decimal.TryParse(clean, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
+            UpdateSource(textBox, val);
+        else if (string.IsNullOrEmpty(clean))
+            UpdateSource(textBox, null);
 
-        SetIsInternalChange(textBox, false);
-
-        if (string.IsNullOrEmpty(cleanValues))
+        textBox.SetValue(IsInternalChangeProperty, true);
+        string formatted = ApplyFormatting(clean);
+        if (formatted != original)
         {
-            SetValue(textBox, null!);
+            textBox.Text = formatted;
+            RestoreCaretPosition(textBox, original, formatted, caret);
         }
-        else if (cleanValues == ".")
-        {
-        }
-        else if (decimal.TryParse(cleanValues, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
-        {
-            var bindingExpression = textBox.GetBindingExpression(ValueProperty);
-            if (bindingExpression?.ResolvedSourcePropertyName != null)
-            {
-                var source = bindingExpression.ResolvedSource;
-                var propertyInfo = source?.GetType().GetProperty(bindingExpression.ResolvedSourcePropertyName);
-                var targetType = propertyInfo?.PropertyType;
-
-                var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
-
-                if (underlyingType == typeof(int))
-                {
-                    SetValue(textBox, (int)Math.Round(val));
-                }
-                else if (underlyingType == typeof(long))
-                {
-                    SetValue(textBox, (long)Math.Round(val));
-                }
-                else if (underlyingType == typeof(double))
-                {
-                    SetValue(textBox, (double)val);
-                }
-                else if (underlyingType == typeof(float))
-                {
-                    SetValue(textBox, (float)val);
-                }
-                else
-                {
-                    SetValue(textBox, val);
-                }
-            }
-            else
-            {
-                SetValue(textBox, val);
-            }
-        }
-
-        SetIsInternalChange(textBox, true);
-
-        string formattedText = ApplyFormatting(cleanValues);
-
-        if (formattedText != originalText)
-        {
-            textBox.Text = formattedText;
-            RestoreCaretPosition(textBox, originalText, formattedText, caretIndex);
-        }
-
-        SetIsInternalChange(textBox, false);
+        textBox.SetValue(IsInternalChangeProperty, false);
     }
 
-    private static string ApplyFormatting(string cleanText)
+    private static void UpdateSource(TextBox textBox, decimal? val)
     {
-        if (string.IsNullOrEmpty(cleanText)) return string.Empty;
-        if (cleanText == ".") return ".";
+        DependencyObject targetObj = (textBox.TemplatedParent is ComboBox cb) ? cb : textBox;
 
-        string[] parts = cleanText.Split('.');
-        string integerPart = parts[0];
-        string decimalPart = parts.Length > 1 ? parts[1] : null!;
-
-        string formattedInteger = "";
-        if (!string.IsNullOrEmpty(integerPart))
+        // ValueProperty ni yangilash (binding orqali ViewModelga boradi)
+        if (val == null)
         {
-            if (decimal.TryParse(integerPart, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
-            {
-                var culture = (CultureInfo)CultureInfo.InvariantCulture.Clone();
-                culture.NumberFormat.NumberGroupSeparator = " ";
-                formattedInteger = val.ToString("N0", culture);
-            }
-            else
-            {
-                formattedInteger = integerPart;
-            }
-        }
-
-        if (cleanText.EndsWith("."))
-        {
-            return formattedInteger + ".";
-        }
-
-        if (decimalPart != null)
-        {
-            return formattedInteger + "." + decimalPart;
-        }
-
-        return formattedInteger;
-    }
-
-    private static void RestoreCaretPosition(TextBox textBox, string original, string formatted, int originalCaret)
-    {
-        int digitsBefore = 0;
-        for (int i = 0; i < originalCaret && i < original.Length; i++)
-        {
-            if (original[i] != ' ') digitsBefore++;
-        }
-
-        int newCaret = 0;
-        int digitsSeen = 0;
-
-        while (newCaret < formatted.Length && digitsSeen < digitsBefore)
-        {
-            if (formatted[newCaret] != ' ') digitsSeen++;
-            newCaret++;
-        }
-
-        while (newCaret < formatted.Length && formatted[newCaret] != ' ' && !char.IsDigit(formatted[newCaret]) && formatted[newCaret] != '.')
-        {
-            newCaret++;
-        }
-
-        textBox.CaretIndex = newCaret;
-    }
-
-    private static void OnLostFocus(object sender, RoutedEventArgs e)
-    {
-        if (sender is TextBox textBox)
-        {
-            FormatValue(textBox);
-        }
-    }
-
-    private static void OnPaste(object sender, DataObjectPastingEventArgs e)
-    {
-        if (sender is not TextBox textBox)
-        {
-            e.CancelCommand();
+            targetObj.SetCurrentValue(ValueProperty, null);
             return;
         }
 
-        if (e.DataObject.GetDataPresent(DataFormats.Text))
+        // To'g'ri tipga o'girish (int, double, decimal...)
+        var binding = (targetObj as FrameworkElement)?.GetBindingExpression(ValueProperty);
+        if (binding?.ResolvedSourcePropertyName != null)
         {
-            string paste = (string)e.DataObject.GetData(DataFormats.Text);
-            if (!IsTextValid(textBox, paste))
+            var prop = binding.ResolvedSource?.GetType().GetProperty(binding.ResolvedSourcePropertyName);
+            if (prop != null)
             {
-                e.CancelCommand();
+                var type = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                object finalVal = type switch
+                {
+                    var t when t == typeof(int) => (int)Math.Round(val.Value),
+                    var t when t == typeof(double) => (double)val.Value,
+                    _ => val.Value
+                };
+                targetObj.SetCurrentValue(ValueProperty, finalVal);
+                return;
             }
         }
-        else
+        targetObj.SetCurrentValue(ValueProperty, val.Value);
+    }
+
+    // Yordamchi metodlar (O'zgarishsiz)
+    private static void OnGotFocus(object sender, RoutedEventArgs e) => (sender as TextBox)?.SelectAll();
+    private static void OnLostFocus(object sender, RoutedEventArgs e) => FormatValue((TextBox)sender);
+    private static void OnPreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+        var tb = (TextBox)sender;
+        string nextText = tb.Text.Remove(tb.SelectionStart, tb.SelectionLength).Insert(tb.SelectionStart, e.Text).Replace(" ", "");
+        if (!Regex.IsMatch(e.Text, @"^[\d\.,]+$") || nextText.Count(c => c == '.') > 1) e.Handled = true;
+    }
+    private static void OnPaste(object sender, DataObjectPastingEventArgs e)
+    {
+        if (e.DataObject.GetDataPresent(DataFormats.Text))
         {
-            e.CancelCommand();
+            if (!Regex.IsMatch((string)e.DataObject.GetData(DataFormats.Text), @"^[\d\s\.]+$")) e.CancelCommand();
         }
     }
-
-    private static bool IsTextValid(TextBox textBox, string text)
+    private static string ApplyFormatting(string clean)
     {
-        return Regex.IsMatch(text, @"^[\d\s\.]+$");
-    }
-
-    private static bool IsDigitOrSeparator(string text)
-    {
-        return Regex.IsMatch(text, @"^[\d\.,]+$");
-    }
-
-    private static string GetFullText(TextBox textBox, string input)
-    {
-        string text = textBox.Text;
-        int index = textBox.CaretIndex;
-        if (index < 0) index = 0;
-        if (index > text.Length) index = text.Length;
-        return text.Insert(index, input).Replace(" ", "");
-    }
-
-    private static decimal ConvertToDecimal(object value)
-    {
-        if (value == null) return 0;
-        try
+        if (string.IsNullOrEmpty(clean) || clean == ".") return clean;
+        string[] p = clean.Split('.');
+        if (decimal.TryParse(p[0], NumberStyles.Any, CultureInfo.InvariantCulture, out decimal v))
         {
-            return Convert.ToDecimal(value, CultureInfo.InvariantCulture);
+            var c = (CultureInfo)CultureInfo.InvariantCulture.Clone();
+            c.NumberFormat.NumberGroupSeparator = " ";
+            string f = v.ToString("N0", c);
+            return p.Length > 1 ? f + "." + p[1] : (clean.EndsWith(".") ? f + "." : f);
         }
-        catch
-        {
-            return 0;
-        }
+        return clean;
     }
+    private static void RestoreCaretPosition(TextBox tb, string old, string n, int oldC)
+    {
+        int d = old.Substring(0, Math.Min(oldC, old.Length)).Count(c => c != ' ');
+        int newC = 0, f = 0;
+        while (newC < n.Length && f < d) { if (n[newC] != ' ') f++; newC++; }
+        tb.CaretIndex = newC;
+    }
+    private static int GetOptimalDecimalPlaces(decimal v) { string s = v.ToString(CultureInfo.InvariantCulture); int i = s.IndexOf('.'); return i == -1 ? 0 : s.Length - i - 1; }
+    private static decimal ConvertToDecimal(object v) { try { return Convert.ToDecimal(v, CultureInfo.InvariantCulture); } catch { return 0; } }
 }
-

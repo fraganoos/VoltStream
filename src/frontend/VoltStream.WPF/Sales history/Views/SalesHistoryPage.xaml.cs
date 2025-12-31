@@ -1,5 +1,6 @@
 ﻿namespace VoltStream.WPF.Sales_history.Views;
 
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using VoltStream.WPF.Sales_history.Models;
@@ -24,9 +25,14 @@ public partial class SalesHistoryPage : Page
             return;
         }
 
-        if (DateTime.TryParse(beginDate.TextBox.Text, out DateTime parsedDate))
+        string[] formats = { "dd.MM.yyyy", "dd-MM-yyyy", "dd/MM/yyyy" };
+
+        if (DateTime.TryParseExact(beginDate.TextBox.Text, formats,
+                                   CultureInfo.InvariantCulture,
+                                   DateTimeStyles.None,
+                                   out DateTime parsedDate))
         {
-            beginDate.SelectedDate = parsedDate;
+            endDate.SelectedDate = parsedDate;
         }
         else
         {
@@ -46,7 +52,12 @@ public partial class SalesHistoryPage : Page
             return;
         }
 
-        if (DateTime.TryParse(endDate.TextBox.Text, out DateTime parsedDate))
+        string[] formats = { "dd.MM.yyyy", "dd-MM-yyyy", "dd/MM/yyyy" };
+
+        if (DateTime.TryParseExact(endDate.TextBox.Text, formats,
+                                   CultureInfo.InvariantCulture,
+                                   DateTimeStyles.None,
+                                   out DateTime parsedDate))
         {
             endDate.SelectedDate = parsedDate;
         }

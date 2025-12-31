@@ -217,7 +217,8 @@ public partial class ProductPageViewModel : ViewModelBase
 
         // --- 1. Jami summani hisoblab olamiz ---
         // Agar TotalAmount string bo'lsa, uni parse qilamiz
-        decimal totalSumma = itemsList.Sum(item => {
+        decimal totalSumma = itemsList.Sum(item =>
+        {
             decimal.TryParse(item.TotalAmount?.ToString(), out decimal val);
             return val;
         });

@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:VoltStream.WPF.Commons.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:VoltStream.WPF.Sales_history.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
     Title="Sotuv tarixi"
@@ -12,234 +11,169 @@
     d:DesignWidth="900"
     mc:Ignorable="d">
 
-    <Grid>
+    <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="80" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
         </Grid.RowDefinitions>
 
-        <!--  🔍 Filter panel  -->
-        <Grid Grid.Row="0" Margin="10,5">
+        <Grid Margin="0,0,0,10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-            <!--  🧾 Filtr bo‘limi  -->
-            <!--  👤 Mijoz  -->
-            <Grid Grid.Column="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+            <TextBlock
+                VerticalAlignment="Center"
+                FontSize="13"
+                Text="Mijoz" />
+            <ComboBox
+                x:Name="cbxCustomer"
+                Grid.Column="1"
+                Width="200"
+                Margin="10,0"
+                DisplayMemberPath="Name"
+                FontSize="14"
+                IsEditable="True"
+                ItemsSource="{Binding Customers}"
+                SelectedItem="{Binding SelectedCustomer}" />
+
+            <TextBlock
+                Grid.Row="1"
+                Margin="0,5,0,0"
+                VerticalAlignment="Center"
+                FontSize="13"
+                Text="Xisobot davri" />
+            <StackPanel
+                Grid.Row="1"
+                Grid.Column="1"
+                Margin="10,5,10,0"
+                Orientation="Horizontal">
+                <controls:UserCalendar
+                    x:Name="beginDate"
+                    Width="110"
+                    FontSize="14"
+                    LostFocus="BeginDate_LostFocus"
+                    SelectedDate="{Binding BeginDate, Mode=TwoWay}"
+                    utils:EnterKeyTab.IsEnabled="True" />
                 <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
                     Margin="5,0"
                     VerticalAlignment="Center"
                     FontSize="13"
-                    Text="Mijoz" />
-                <!--  Foreground="{DynamicResource PrimaryTextColor}"  -->
-                <ComboBox
-                    x:Name="cbxCustomer"
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    Margin="0"
-                    Padding="4,2"
-                    VerticalAlignment="Center"
-                    BorderBrush="#ccc"
-                    BorderThickness="1"
-                    DisplayMemberPath="Name"
+                    Text="dan" />
+                <controls:UserCalendar
+                    x:Name="endDate"
+                    Width="110"
                     FontSize="14"
-                    IsEditable="True"
-                    ItemsSource="{Binding Customers}"
-                    SelectedItem="{Binding SelectedCustomer}" />
-                <!--  📅 Sana oralig‘i  -->
+                    LostFocus="EndDate_LostFocus"
+                    SelectedDate="{Binding EndDate, Mode=TwoWay}"
+                    utils:EnterKeyTab.IsEnabled="True" />
                 <TextBlock
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Margin="05,0"
+                    Margin="5,0"
                     VerticalAlignment="Center"
                     FontSize="13"
-                    Text="Xisobot davri" />
-                <Grid Grid.Row="1" Grid.Column="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <controls:UserCalendar
-                        x:Name="beginDate"
-                        Grid.Column="0"
-                        Width="110"
-                        Margin="0"
-                        VerticalAlignment="Center"
-                        utils:EnterKeyTab.IsEnabled="True"
-                        FontSize="14"
-                        LostFocus="BeginDate_LostFocus"
-                        SelectedDate="{Binding BeginDate, Mode=TwoWay}" />
-                    <TextBlock
-                        Grid.Column="1"
-                        Width="25"
-                        Margin="2,0"
-                        VerticalAlignment="Center"
-                        FontSize="13"
-                        Text="dan" />
-                    <controls:UserCalendar
-                        x:Name="endDate"
-                        Grid.Column="2"
-                        Width="110"
-                        Margin="0"
-                        VerticalAlignment="Center"
-                        utils:EnterKeyTab.IsEnabled="True"
-                        FontSize="14"
-                        LostFocus="EndDate_LostFocus"
-                        SelectedDate="{Binding EndDate, Mode=TwoWay}" />
-                    <TextBlock
-                        Grid.Column="3"
-                        Width="35"
-                        Margin="0"
-                        VerticalAlignment="Center"
-                        FontSize="13"
-                        Text="gacha" />
-                </Grid>
+                    Text="gacha" />
+            </StackPanel>
 
-            </Grid>
-            <Grid Grid.Column="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <!--  🧩 Mahs8ulot turi  -->
-                <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    Margin="15,0,3,0"
-                    VerticalAlignment="Center"
-                    FontSize="13"
-                    Text="Mahsulot turi" />
-                <ComboBox
-                    x:Name="cbxCategory"
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    Width="180"
-                    Margin="0"
-                    VerticalAlignment="Center"
-                    DisplayMemberPath="Name"
-                    FontSize="14"
-                    IsEditable="True"
-                    ItemsSource="{Binding Categories}"
-                    SelectedItem="{Binding SelectedCategory}" />
-                <TextBlock
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Margin="3,0"
-                    VerticalAlignment="Center"
-                    FontSize="13"
-                    Text="Nomi"
-                    TextAlignment="Right" />
-                <ComboBox
-                    x:Name="cbxProductName"
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Width="180"
-                    Margin="2,0"
-                    VerticalAlignment="Center"
-                    DisplayMemberPath="Name"
-                    FontSize="14"
-                    IsEditable="True"
-                    ItemsSource="{Binding Products}"
-                    SelectedItem="{Binding SelectedProduct}" />
-            </Grid>
-            <!--  🔘 Tugmalar  -->
-            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Button
-                    Grid.Row="0"
-                    Margin="5"
-                    Padding="10,3"
-                    VerticalAlignment="Center"
-                    Command="{Binding PreviewCommand}"
-                    Content="📄 Ko‘rish"
-                    FontSize="13"
-                    ToolTip="Chop etishdan oldin ma'lumotlarni ko‘rish (Print Preview)" />
-                <Button
-                    Grid.Row="1"
-                    Margin="5"
-                    Padding="10,3"
-                    VerticalAlignment="Center"
-                    Command="{Binding ClearFilterCommand}"
-                    Content="🧹 Tozalash"
-                    FontSize="13"
-                    ToolTip="Filterni tozalash yoki barcha ma'lumotlarni qayta ko‘rsatish" />
-            </Grid>
-            <Grid Grid.Column="3">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Button
-                    Grid.Row="0"
-                    Margin="5"
-                    Padding="10,3"
-                    VerticalAlignment="Center"
-                    Command="{Binding PrintCommand}"
-                    Content="🖨 Pechat"
-                    FontSize="13"
-                    ToolTip="Chiqarish (Printerga yuborish)" />
+            <TextBlock
+                Grid.Column="2"
+                VerticalAlignment="Center"
+                FontSize="13"
+                Text="Mahsulot turi" />
+            <ComboBox
+                x:Name="cbxCategory"
+                Grid.Column="3"
+                Width="180"
+                Margin="10,0"
+                DisplayMemberPath="Name"
+                FontSize="14"
+                IsEditable="True"
+                ItemsSource="{Binding Categories}"
+                SelectedItem="{Binding SelectedCategory}" />
 
-                <Button
-                    Grid.Row="1"
-                    Margin="5"
-                    Padding="10,3"
-                    VerticalAlignment="Center"
-                    Command="{Binding ExportToExcelCommand}"
-                    Content="📊 Excel"
-                    FontSize="13"
-                    ToolTip="Excel faylga eksport qilish" />
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="2"
+                Margin="0,5,0,0"
+                VerticalAlignment="Center"
+                FontSize="13"
+                Text="Nomi" />
+            <ComboBox
+                x:Name="cbxProductName"
+                Grid.Row="1"
+                Grid.Column="3"
+                Width="180"
+                Margin="10,5,10,0"
+                DisplayMemberPath="Name"
+                FontSize="14"
+                IsEditable="True"
+                ItemsSource="{Binding Products}"
+                SelectedItem="{Binding SelectedProduct}" />
 
-            </Grid>
+            <Button
+                Grid.Column="4"
+                Width="100"
+                Command="{Binding PreviewCommand}"
+                Content="📄 Ko‘rish"
+                FontSize="13" />
+            <Button
+                Grid.Row="1"
+                Grid.Column="4"
+                Width="100"
+                Margin="0,5,0,0"
+                Command="{Binding ClearFilterCommand}"
+                Content="🧹 Tozalash"
+                FontSize="13" />
+
+            <Button
+                Grid.Column="5"
+                Width="100"
+                Margin="10,0"
+                Command="{Binding PrintCommand}"
+                Content="🖨 Pechat"
+                FontSize="13" />
+            <Button
+                Grid.Row="1"
+                Grid.Column="5"
+                Width="100"
+                Margin="10,5,10,0"
+                Command="{Binding ExportToExcelCommand}"
+                Content="📊 Excel"
+                FontSize="13" />
         </Grid>
-        <!--  📋 DataGrid  -->
+
         <DataGrid
             Grid.Row="1"
-            Margin="10,5,10,-5"
             AlternatingRowBackground="#F5F5F5"
             AutoGenerateColumns="False"
             CanUserAddRows="False"
             CanUserDeleteRows="False"
             FontSize="14"
             HeadersVisibility="Column, Row"
-            utils:DataGridRowNumbering.IsEnabled="True"
             IsReadOnly="True"
             ItemsSource="{Binding FilteredSaleItems, Mode=TwoWay}"
-            SelectionMode="Single">
-
+            SelectionMode="Single"
+            utils:DataGridRowNumbering.IsEnabled="True">
             <DataGrid.Columns>
-                <!--  🕓 Sana  -->
                 <DataGridTextColumn
                     Width="*"
                     Binding="{Binding OperationDate, StringFormat={}{0:dd.MM.yyyy}}"
                     Header="Sana">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Center" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
@@ -249,27 +183,26 @@
                     Header="Mijoz">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Left" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Left" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <!--  Mahsulot turi  -->
                 <DataGridTextColumn
                     Width="*"
                     Binding="{Binding Category}"
                     Header="Mahsulot turi">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Left" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Left" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox">
-                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                             <Setter Property="TextAlignment" Value="Right" />
+                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                     <DataGridTextColumn.HeaderStyle>
@@ -285,14 +218,14 @@
                     Header="Nomi">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Left" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Left" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox">
-                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                             <Setter Property="TextAlignment" Value="Right" />
+                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                     <DataGridTextColumn.HeaderStyle>
@@ -308,14 +241,14 @@
                     Header="To'plamda">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Right" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Right" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox">
-                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                             <Setter Property="TextAlignment" Value="Right" />
+                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                     <DataGridTextColumn.HeaderStyle>
@@ -331,14 +264,14 @@
                     Header="To'plam soni">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Right" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Right" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox">
-                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                             <Setter Property="TextAlignment" Value="Right" />
+                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                     <DataGridTextColumn.HeaderStyle>
@@ -354,14 +287,14 @@
                     Header="Jami">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Right" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Right" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox">
-                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                             <Setter Property="TextAlignment" Value="Right" />
+                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                     <DataGridTextColumn.HeaderStyle>
@@ -377,14 +310,14 @@
                     Header="O‘lchov birligi">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Center" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox">
-                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                             <Setter Property="TextAlignment" Value="Right" />
+                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                     <DataGridTextColumn.HeaderStyle>
@@ -400,14 +333,14 @@
                     Header="Narxi">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Right" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Right" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox">
-                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                             <Setter Property="TextAlignment" Value="Right" />
+                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                     <DataGridTextColumn.HeaderStyle>
@@ -423,14 +356,14 @@
                     Header="Umumiy summa">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
-                            <Setter Property="TextAlignment" Value="Right" />
                             <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Right" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox">
-                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                             <Setter Property="TextAlignment" Value="Right" />
+                            <Setter Property="utils:NumericInput.IsNumeric" Value="True" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                     <DataGridTextColumn.HeaderStyle>
@@ -439,8 +372,8 @@
                         </Style>
                     </DataGridTextColumn.HeaderStyle>
                 </DataGridTextColumn>
-
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
 </Page>
+

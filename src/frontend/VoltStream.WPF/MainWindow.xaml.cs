@@ -36,6 +36,28 @@ public partial class MainWindow : Window
         }
     }
 
+    private void Header_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+        {
+            DragMove();
+        }
+    }
+
+    private void BtnMinimize_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState.Minimized;
+    }
+
+    private void BtnMaximize_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
+
+    private void BtnClose_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
 
     private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -58,20 +80,17 @@ public partial class MainWindow : Window
         };
         SidebarColumn.BeginAnimation(ColumnDefinition.WidthProperty, animation);
 
-        // Matnlarni yashirish
         foreach (var tb in FindVisualChildren<TextBlock>(Sidebar))
         {
             if (tb.Name != "LogoText")
                 tb.Visibility = Visibility.Collapsed;
         }
 
-        // StackPanel’larni markazga joylashtirish
         foreach (var sp in FindVisualChildren<StackPanel>(Sidebar))
         {
             if (sp.Orientation == Orientation.Horizontal)
                 sp.HorizontalAlignment = HorizontalAlignment.Center;
         }
-
     }
 
     private void ExpandSidebar()
@@ -84,19 +103,16 @@ public partial class MainWindow : Window
         };
         SidebarColumn.BeginAnimation(ColumnDefinition.WidthProperty, animation);
 
-        // Matnlarni ko‘rsatish
         foreach (var tb in FindVisualChildren<TextBlock>(Sidebar))
         {
             tb.Visibility = Visibility.Visible;
         }
 
-        // StackPanel’larni chapga qaytarish
         foreach (var sp in FindVisualChildren<StackPanel>(Sidebar))
         {
             if (sp.Orientation == Orientation.Horizontal)
                 sp.HorizontalAlignment = HorizontalAlignment.Left;
         }
-
     }
 
     private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
@@ -125,13 +141,13 @@ public partial class MainWindow : Window
                 ServerStatusIndicator.Fill = api.Status switch
                 {
                     ConnectionStatus.Disconnected =>
-                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF0000")), // 🔴 Red
+                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF0000")),
                     ConnectionStatus.Connected =>
-                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00FF00")), // 🟢 Green
+                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00FF00")),
                     ConnectionStatus.Connecting =>
-                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFF00")), // 🟡 Yellow
+                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFF00")),
                     _ =>
-                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#808080")), // ⚪ Gray
+                        new SolidColorBrush((Color)ColorConverter.ConvertFromString("#808080")),
                 };
             });
     }
