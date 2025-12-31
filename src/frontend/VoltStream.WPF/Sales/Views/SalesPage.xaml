@@ -78,7 +78,7 @@
                         VerticalAlignment="Center"
                         utils:EnterKeyTab.IsEnabled="True"
                         FontSize="14"
-                        LostFocus="supplyDate_LostFocus"
+                        LostFocus="SupplyDate_LostFocus"
                         SelectedDate="{Binding OperationDate}" />
 				</Grid>
 				<Grid Grid.Row="1" Grid.Column="1">

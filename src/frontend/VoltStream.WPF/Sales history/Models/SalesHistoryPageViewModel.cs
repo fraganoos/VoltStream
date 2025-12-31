@@ -384,6 +384,9 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 }
             };
 
+            if (SelectedCustomer is not null)
+                request.Filters.Add("custonerid", [SelectedCustomer.Id.ToString()]);
+
             var srvc = services.GetRequiredService<ISaleApi>();
             var response = await srvc.Filtering(request).Handle(isLoading => IsLoading = isLoading);
 

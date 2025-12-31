@@ -6,6 +6,7 @@ using ApiServices.Models;
 using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -882,23 +883,21 @@ public partial class SalesPage : Page
         await LoadCurrencyAsync();
     }
 
-    private void supplyDate_LostFocus(object sender, RoutedEventArgs e)
+    private void SupplyDate_LostFocus(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(saleDate.TextBox.Text))
-        {
-            MessageBox.Show("Sana kiritilmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-            saleDate.Focus();
-            return;
-        }
+        string[] formats = { "dd.MM.yyyy", "dd-MM-yyyy", "dd/MM/yyyy" };
 
-        if (DateTime.TryParse(saleDate.TextBox.Text, out DateTime parsedDate))
+        if (DateTime.TryParseExact(saleDate.TextBox.Text, formats,
+                                   CultureInfo.InvariantCulture,
+                                   DateTimeStyles.None,
+                                   out DateTime parsedDate))
         {
             saleDate.SelectedDate = parsedDate;
         }
         else
         {
             MessageBox.Show("Kiritilgan sana noto‘g‘ri formatda!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-            saleDate.Focus();
+            saleDate.TextBox.Focus();
             return;
         }
     }
