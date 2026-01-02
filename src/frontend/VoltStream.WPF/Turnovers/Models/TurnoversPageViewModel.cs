@@ -396,7 +396,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 if (File.Exists(pdfPath))
                 {
                     Process.Start("explorer.exe", $"/select,\"{pdfPath}\"");
-                    MessageBox.Show($"Hisobot \"{fileName}\" nomli fayl sifatida \"Documents\\Volt\" papkasida saqlandi.", "Muvaffaqiyatli", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"Hisobot \"{fileName}\" nomli fayl sifatida \"Documents\\VoltStream\" papkasida saqlandi.", "Muvaffaqiyatli", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
@@ -427,40 +427,36 @@ public partial class TurnoversPageViewModel : ViewModelBase
     {
         PdfDocument pdf = new PdfDocument();
 
-        // Yuqori sifat uchun DPI qiymati
-        const int renderDPI = 300;
+        // Sifatni oshirish uchun 300 DPI yaxshi, 
+        // lekin FixedDocument o'lchamlari 96 DPI (DIPs) da hisoblanadi.
+        const double dpi = 300;
+        const double scale = dpi / 96.0;
 
-        // A4 o'lchamlari (96 DPI da)
-        const double pageWidth96DPI = 2480;
-        const double pageHeight96DPI = 3508;
-
-
-        // DPI o'zgarishi tufayli piksel o'lchamlarini hisoblash
-        int pixelWidth = (int)(pageWidth96DPI / 300.0 * renderDPI);
-        int pixelHeight = (int)(pageHeight96DPI / 300.0 * renderDPI);
-
-        // PdfSharp sahifasi uchun o'lchamlar (ular 96 DPI ga asoslanadi, shuning uchun 96 DPI qiymatlari ishlatiladi)
-        double pdfPageWidth = pageWidth96DPI;
-        double pdfPageHeight = pageHeight96DPI;
-
-        int pageCount = doc.Pages.Count;
-
-        for (int i = 0; i < pageCount; i++)
+        for (int i = 0; i < doc.Pages.Count; i++)
         {
-            FixedPage fixedPage = doc.Pages[i].Child;
+            // Sahifani olish
+            PageContent pageContent = doc.Pages[i];
+            FixedPage fixedPage = pageContent.Child;
 
-            // 1. Sahifani vizual element sifatida o'lchash (96 DPI da joylashuv uchun)
-            fixedPage.Measure(new Size(pdfPageWidth, pdfPageHeight));
-            fixedPage.Arrange(new Rect(0, 0, pdfPageWidth, pdfPageHeight));
+            // Sahifa o'lchamlarini olish (odatda 793.7 x 1122.5)
+            double width = fixedPage.Width;
+            double height = fixedPage.Height;
 
-            // 2. Render target Bitmap yaratish (Yuqori DPI va hisoblangan PIXEL o'lchamlari bilan)
+            // Sahifa hali yuklanmagan bo'lsa, uni majburan yangilaymiz
+            fixedPage.UpdateLayout();
+
+            // Render o'lchamlarini hisoblash
+            int pixelWidth = (int)(width * scale);
+            int pixelHeight = (int)(height * scale);
+
             RenderTargetBitmap rtb = new RenderTargetBitmap(
-                pixelWidth, pixelHeight, renderDPI, renderDPI, PixelFormats.Pbgra32);
-            // ^ PIXEL, ^ PIXEL, ^ DPI, ^ DPI
+                pixelWidth, pixelHeight, dpi, dpi, PixelFormats.Pbgra32);
 
+            // MUHIM: Sahifani vizual Tree ga qaytadan bog'lamaslik va buzmaslik uchun
+            // faqat vizual render qilish kifoya
             rtb.Render(fixedPage);
 
-            // 3. PNG koderidan foydalangan holda MemoryStreamga yozish
+            // Koder orqali MemoryStream ga saqlash
             PngBitmapEncoder pngEncoder = new PngBitmapEncoder();
             pngEncoder.Frames.Add(BitmapFrame.Create(rtb));
 
@@ -469,20 +465,21 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 pngEncoder.Save(stream);
                 stream.Seek(0, SeekOrigin.Begin);
 
-                // 4. PdfSharp sahifasini yaratish
+                // PDF sahifasini yaratish
                 PdfPage pdfPage = pdf.AddPage();
-                pdfPage.Width = XUnit.FromPoint(pdfPageWidth);
-                pdfPage.Height = XUnit.FromPoint(pdfPageHeight);
+
+                // PDF sahifasi o'lchamini FixedPage bilan bir xil qilish (Point birligida)
+                pdfPage.Width = XUnit.FromPoint(width);
+                pdfPage.Height = XUnit.FromPoint(height);
 
                 XGraphics gfx = XGraphics.FromPdfPage(pdfPage);
-
-                // 5. Rasmni PDFga chizish. Rasm to'liq sahifani qoplashi kerak.
                 XImage image = XImage.FromStream(stream);
+
+                // Rasmni PDF ga chizish
                 gfx.DrawImage(image, 0, 0, pdfPage.Width, pdfPage.Height);
             }
         }
 
-        // 6. PDF faylini saqlash
         pdf.Save(path);
     }
     #endregion Commands
@@ -553,40 +550,39 @@ public partial class TurnoversPageViewModel : ViewModelBase
             var page = new FixedPage { Width = pageWidth, Height = pageHeight, Background = Brushes.White };
             var container = new StackPanel { Margin = new Thickness(margin, 30, margin, margin) };
 
-            // --- HEADER QISMI (Pastki footer joyini e'lon qilmasdan) ---
+            // 1. HEADER
             if (isFirstPage)
             {
                 currentY = AddHeaderContent(container, pageNumber, true);
+
+                // --- BOSHLANG'ICH QOLDIQ JADVALGA YOPISHGAN ---
+                var beginBalanceBlock = CreateBalanceInfoBlock("Boshlang'ich qoldiq", BeginBalance?.ToString("N2") ?? "0.00", Brushes.AliceBlue);
+                beginBalanceBlock.Margin = new Thickness(0); // Yopishib turishi uchun
+                container.Children.Add(beginBalanceBlock);
+
+                currentY += 30;
             }
             else
             {
-                // Headerda faqat Sahifa raqami bo'lmasligi uchun bu yerda pageNumber ni ko'rsatmaymiz
                 currentY = AddHeaderContent(container, pageNumber, false);
             }
 
-            // ... (Jadvalni yaratish va to'ldirish logikasi o'zgarishsiz qoladi) ...
+            // 2. JADVAL
             var table = new Grid();
-            double[] widths = [70, 105, 105, 460];
+            double[] widths = [70, 430, 120, 120];
             foreach (var w in widths)
                 table.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(w) });
 
-            AddRowHeader(table, "Sana", "Debit", "Kredit", "Izoh", approxSingleRowHeight);
+            AddRowHeader(table, "Sana", "Izoh", "Kredit", "Debit", approxSingleRowHeight);
 
-            if (isFirstPage)
-            {
-                AddBalanceRow(table, "Boshlang'ich qoldiq", BeginBalance?.ToString("N2") ?? "0.00", approxSingleRowHeight);
-            }
-
-            // Minimal Footer uchun 40-50 piksel (Sahifa raqami pastda)
-            double footerSpace = approxSingleRowHeight * 2.5 + 40;
+            double footerSpace = approxSingleRowHeight * 2.5 + 50;
             var opsOnPage = new List<CustomerOperationForDisplayViewModel>();
 
             int tempIndex = currentIndex;
             while (tempIndex < operations.Count)
             {
                 var op = operations[tempIndex];
-                double requiredHeight = CalculateOperationRowHeight(op, widths[3]);
-
+                double requiredHeight = CalculateOperationRowHeight(op, widths[1]);
                 double availableSpace = pageHeight - (margin * 2) - currentY - footerSpace;
 
                 if (requiredHeight > availableSpace && tempIndex > currentIndex) break;
@@ -604,43 +600,157 @@ public partial class TurnoversPageViewModel : ViewModelBase
             currentIndex += opsOnPage.Count;
             bool isLastPage = (currentIndex >= operations.Count);
 
+            // 3. JAMI VA OXIRGI QOLDIQ
             if (isLastPage)
             {
                 decimal totalDebit = operations.Sum(x => x.Debit);
                 decimal totalCredit = operations.Sum(x => x.Credit);
-                AddRowTotal(table, "JAMI", totalDebit.ToString("N2"), totalCredit.ToString("N2"), approxSingleRowHeight);
-                AddBalanceRow(table, "Oxirgi qoldiq", LastBalance?.ToString("N2") ?? "0.00", approxSingleRowHeight);
+                AddRowTotal(table, "JAMI", totalCredit.ToString("N2"), totalDebit.ToString("N2"), approxSingleRowHeight);
+
+                container.Children.Add(table); // Jadvalni qo'shish
+
+                // --- OXIRGI QOLDIQ JADVALGA YOPISHGAN ---
+                var lastBalanceBlock = CreateBalanceInfoBlock("Oxirgi qoldiq", LastBalance?.ToString("N2") ?? "0.00", Brushes.GhostWhite);
+                lastBalanceBlock.Margin = new Thickness(0); // Yopishib turishi uchun
+                container.Children.Add(lastBalanceBlock);
+            }
+            else
+            {
+                container.Children.Add(table);
             }
 
-            container.Children.Add(table);
             page.Children.Add(container);
-
-            tempPages.Add(page); // Sahifani vaqtincha ro'yxatga qo'shamiz
+            tempPages.Add(page);
 
             pageNumber++;
             currentY = 0;
         }
 
-        // --- Yakuniy Sahifa Raqamlarini Qo'shish ---
-
+        // Sahifalash...
         int totalPages = tempPages.Count;
         int finalPageNumber = 1;
-
         foreach (var finalPage in tempPages)
         {
-            // Pastki o'ng qismga sahifalash ma'lumotini qo'shamiz
             AddFooterContent(finalPage, finalPageNumber, totalPages);
-
             var pageContent = new PageContent();
             ((IAddChild)pageContent).AddChild(finalPage);
             doc.Pages.Add(pageContent);
-
             finalPageNumber++;
         }
 
         return doc;
     }
 
+    private Border CreateBalanceInfoBlock(string label, string value, Brush background)
+    {
+        var grid = new Grid();
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+        var lblText = new TextBlock
+        {
+            Text = label,
+            FontSize = 13,
+            FontWeight = FontWeights.Bold,
+            Padding = new Thickness(5, 2, 5, 2),
+            HorizontalAlignment = HorizontalAlignment.Left
+        };
+
+        var valText = new TextBlock
+        {
+            Text = value,
+            FontSize = 13,
+            FontWeight = FontWeights.Bold,
+            Padding = new Thickness(5, 2, 5, 2),
+            HorizontalAlignment = HorizontalAlignment.Right
+        };
+
+        Grid.SetColumn(lblText, 0);
+        Grid.SetColumn(valText, 1);
+        grid.Children.Add(lblText);
+        grid.Children.Add(valText);
+
+        return new Border
+        {
+            Background = background,
+            BorderBrush = Brushes.Black,
+            BorderThickness = new Thickness(0.5), // Jadval chiziqlari bilan bir xil bo'lishi uchun
+            Child = grid
+        };
+    }
+
+    private void AddOperationRow(Grid grid, CustomerOperationForDisplayViewModel op, double approxSingleRowHeight)
+    {
+        int row = grid.RowDefinitions.Count;
+        double requiredHeight = CalculateOperationRowHeight(op, 450); // Izoh ustuni kengligi 450
+        grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(requiredHeight) });
+
+        // Sana (0-ustun) - Normal qolgani ma'qul, o'qishga oson bo'ladi
+        AddSimpleCell(grid, row, 0, op.Date.ToString("dd.MM.yyyy"), TextAlignment.Center, FontWeights.Normal, 12, new Thickness(0.5, 0.5, 0, 0.5));
+
+        // Izoh (1-ustun)
+        AddSimpleCell(grid, row, 1, op.Description ?? op.FormattedDescription ?? "", TextAlignment.Left, FontWeights.Normal, 12, new Thickness(0.5, 0.5, 0, 0.5));
+
+        // >>> Kredit (2-ustun) - ENDI BOLD <<<
+        AddSimpleCell(grid, row, 2, op.Credit == 0 ? "" : op.Credit.ToString("N2"), TextAlignment.Right, FontWeights.Bold, 12, new Thickness(0.5, 0.5, 0, 0.5));
+
+        // >>> Debit (3-ustun) - ENDI BOLD <<<
+        AddSimpleCell(grid, row, 3, op.Debit == 0 ? "" : op.Debit.ToString("N2"), TextAlignment.Right, FontWeights.Bold, 12, new Thickness(0.5, 0.5, 0.5, 0.5));
+    }
+
+    private void AddRowHeader(Grid grid, string date, string description, string credit, string debit, double height)
+    {
+        int row = grid.RowDefinitions.Count;
+        grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(height) });
+
+        AddSimpleCell(grid, row, 0, date, TextAlignment.Center, FontWeights.Bold, 13, new Thickness(0.5, 0.5, 0, 0.5));
+        AddSimpleCell(grid, row, 1, description, TextAlignment.Center, FontWeights.Bold, 13, new Thickness(0.5, 0.5, 0, 0.5));
+        AddSimpleCell(grid, row, 2, credit, TextAlignment.Center, FontWeights.Bold, 13, new Thickness(0.5, 0.5, 0, 0.5));
+        AddSimpleCell(grid, row, 3, debit, TextAlignment.Center, FontWeights.Bold, 13, new Thickness(0.5));
+    }
+
+    private void AddRowTotal(Grid grid, string label, string totalCredit, string totalDebit, double height)
+    {
+        int row = grid.RowDefinitions.Count;
+        grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(height) });
+
+        // Label (0-ustun)
+        var labelBorder = CreateBorderWithText(label, TextAlignment.Center, FontWeights.Bold, 12, new Thickness(0.5, 0.5, 0, 0.5));
+        Grid.SetRow(labelBorder, row);
+        Grid.SetColumn(labelBorder, 0);
+        grid.Children.Add(labelBorder);
+
+        // Bo'sh joy (Izoh qismi - 1-ustun)
+        var blankBorder = new Border { BorderBrush = Brushes.Black, BorderThickness = new Thickness(0.5, 0.5, 0, 0.5) };
+        Grid.SetRow(blankBorder, row);
+        Grid.SetColumn(blankBorder, 1);
+        grid.Children.Add(blankBorder);
+
+        // Kredit (2-ustun)
+        AddSimpleCell(grid, row, 2, totalCredit, TextAlignment.Right, FontWeights.Bold, 12, new Thickness(0.5, 0.5, 0, 0.5));
+
+        // Debit (3-ustun)
+        AddSimpleCell(grid, row, 3, totalDebit, TextAlignment.Right, FontWeights.Bold, 12, new Thickness(0.5, 0.5, 0.5, 0.5));
+    }
+
+    private Border CreateBorderWithText(string text, TextAlignment align, FontWeight weight, double size, Thickness borderThickness)
+    {
+        return new Border
+        {
+            BorderBrush = Brushes.Black,
+            BorderThickness = borderThickness,
+            Child = new TextBlock
+            {
+                Text = text,
+                Padding = new Thickness(5, 2, 5, 2),
+                FontSize = size,
+                FontWeight = weight,
+                TextAlignment = align,
+                TextWrapping = TextWrapping.Wrap
+            }
+        };
+    }
+    
     private void AddFooterContent(FixedPage page, int currentPage, int totalPages)
     {
         const double margin = 40;
@@ -661,6 +771,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
         page.Children.Add(pageInfo);
     }
+    
     private double AddHeaderContent(StackPanel container, int pageNumber, bool isFullHeader)
     {
         if (isFullHeader)
@@ -701,6 +812,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
             return 30; // Kamroq joy oladi
         }
     }
+    
     private double CalculateOperationRowHeight(CustomerOperationForDisplayViewModel op, double commentColumnWidth)
     {
         // Izohning necha satrni egallashini hisoblaymiz
@@ -722,27 +834,6 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
         // Eng kam balandlikni hisobga olish
         return Math.Max(25, actualHeight); // Eng kamida 25 piksel bo'lishi kerak
-    }
-
-    private void AddOperationRow(Grid grid, CustomerOperationForDisplayViewModel op, double approxSingleRowHeight)
-    {
-        int row = grid.RowDefinitions.Count;
-
-        // Balandlikni hisoblash
-        double requiredHeight = CalculateOperationRowHeight(op, 460);
-
-        // Balandlikni RowDefinition ga kiritish
-        grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(requiredHeight) });
-
-        // Sana
-        AddSimpleCell(grid, row, 0, op.Date.ToString("dd.MM.yyyy"), TextAlignment.Center, FontWeights.Normal, 12, new Thickness(0.5, 0.5, 0, 0.5));
-        // Debit
-        AddSimpleCell(grid, row, 1, op.Debit == 0 ? "" : op.Debit.ToString("N2"), TextAlignment.Right, FontWeights.Normal, 12, new Thickness(0.5, 0.5, 0, 0.5));
-        // Kredit
-        AddSimpleCell(grid, row, 2, op.Credit == 0 ? "" : op.Credit.ToString("N2"), TextAlignment.Right, FontWeights.Normal, 12, new Thickness(0.5, 0.5, 0, 0.5));
-
-        // Izoh (Wrap bilan)
-        AddSimpleCell(grid, row, 3, op.Description ?? op.FormattedDescription ?? "", TextAlignment.Left, FontWeights.Normal, 12, new Thickness(0.5, 0.5, 0.5, 0.5));
     }
 
     private void AddSimpleCell(Grid grid, int row, int column, string value, TextAlignment align, FontWeight weight, double size, Thickness borderThickness)
@@ -769,109 +860,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
         Grid.SetColumn(border, column);
         grid.Children.Add(border);
     }
-
-    private void AddRowHeader(Grid grid, string date, string debit, string credit, string description, double height)
-    {
-        // ... (oldingi yechimdagi AddRowHeader ni o'xshashi)
-        int row = grid.RowDefinitions.Count;
-        grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(height) });
-
-        AddSimpleCell(grid, row, 0, date, TextAlignment.Center, FontWeights.Bold, 13, new Thickness(0.5, 0.5, 0, 0.5));
-        AddSimpleCell(grid, row, 1, debit, TextAlignment.Center, FontWeights.Bold, 13, new Thickness(0.5, 0.5, 0, 0.5));
-        AddSimpleCell(grid, row, 2, credit, TextAlignment.Center, FontWeights.Bold, 13, new Thickness(0.5, 0.5, 0, 0.5));
-        AddSimpleCell(grid, row, 3, description, TextAlignment.Center, FontWeights.Bold, 13, new Thickness(0.5));
-    }
-
-    private void AddBalanceRow(Grid grid, string label, string value, double height)
-    {
-        // ... (oldingi yechimdagi AddBalanceRow ni o'xshashi)
-        int row = grid.RowDefinitions.Count;
-        grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(height) });
-
-        // Label (4 ustunni birlashtiramiz, faqat chap qirrasi ko'rinadi)
-        var labelTb = new TextBlock
-        {
-            Text = label,
-            Padding = new Thickness(5, 2, 5, 2),
-            FontWeight = FontWeights.Bold,
-            FontSize = 12,
-            TextAlignment = TextAlignment.Left
-        };
-        var labelBorder = new Border
-        {
-            BorderBrush = Brushes.Black,
-            BorderThickness = new Thickness(0.5),
-            Child = labelTb
-        };
-
-        Grid.SetRow(labelBorder, row);
-        Grid.SetColumn(labelBorder, 0);
-        Grid.SetColumnSpan(labelBorder, 4);
-        grid.Children.Add(labelBorder);
-
-        // Value (Izoh ustunida ko'rsatamiz)
-        var valueTb = new TextBlock
-        {
-            Text = value,
-            Padding = new Thickness(5, 2, 5, 2),
-            FontWeight = FontWeights.Bold,
-            FontSize = 12,
-            TextAlignment = TextAlignment.Right,
-            TextWrapping = TextWrapping.Wrap
-        };
-        var valueBorder = new Border
-        {
-            BorderBrush = Brushes.Black,
-            BorderThickness = new Thickness(0.5),
-            Child = valueTb
-        };
-
-        Grid.SetRow(valueBorder, row);
-        Grid.SetColumn(valueBorder, 3);
-        grid.Children.Add(valueBorder);
-    }
-
-    private void AddRowTotal(Grid grid, string label, string totalDebit, string totalCredit, double height)
-    {
-        // ... (oldingi yechimdagi AddRowTotal ni o'xshashi)
-        int row = grid.RowDefinitions.Count;
-        grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(height) });
-
-        // Label (0-ustun)
-        var labelTb = new TextBlock
-        {
-            Text = label,
-            Padding = new Thickness(5, 2, 5, 2),
-            FontWeight = FontWeights.Bold,
-            FontSize = 12,
-            TextAlignment = TextAlignment.Center
-        };
-        var labelBorder = new Border
-        {
-            BorderBrush = Brushes.Black,
-            BorderThickness = new Thickness(0.5, 0.5, 0, 0.5),
-            Child = labelTb
-        };
-        Grid.SetRow(labelBorder, row);
-        Grid.SetColumn(labelBorder, 0);
-        grid.Children.Add(labelBorder);
-
-        // Bo'sh joylarni to'ldirish (Izoh ustuni)
-        var blankBorder = new Border
-        {
-            BorderBrush = Brushes.Black,
-            BorderThickness = new Thickness(0.5, 0.5, 0.5, 0.5),
-        };
-        Grid.SetRow(blankBorder, row);
-        Grid.SetColumn(blankBorder, 3);
-        grid.Children.Add(blankBorder);
-
-        // Debit
-        AddSimpleCell(grid, row, 1, totalDebit, TextAlignment.Right, FontWeights.Bold, 12, new Thickness(0.5, 0.5, 0, 0.5));
-        // Kredit
-        AddSimpleCell(grid, row, 2, totalCredit, TextAlignment.Right, FontWeights.Bold, 12, new Thickness(0.5, 0.5, 0, 0.5));
-    }
-
+ 
     public class PaginatedOperation
     {
         // Asosiy operatsiya ma'lumotlari
