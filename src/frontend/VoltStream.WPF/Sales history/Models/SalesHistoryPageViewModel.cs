@@ -360,9 +360,9 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
     private FixedDocument CreateFixedDocumentForPrint()
     {
-        double pageWidth = 793.7;
-        double pageHeight = 1122.5;
-        double margin = 25;
+        double pageWidth = 793.7; // A4 Width
+        double pageHeight = 1122.5; // A4 Height
+        double margin = 20;
 
         var fixedDoc = new FixedDocument();
         fixedDoc.DocumentPaginator.PageSize = new Size(pageWidth, pageHeight);
@@ -379,17 +379,38 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             pageNumber++;
 
             var page = new FixedPage { Width = pageWidth, Height = pageHeight, Background = Brushes.White };
-            var grid = new Grid { Margin = new Thickness(margin, 5, margin, 5) };
-            FixedPage.SetLeft(grid, margin);
-            FixedPage.SetTop(grid, margin + 40);
+
+            // Sarlavha faqat birinchi betda chiqishi uchun shart
+            if (pageNumber == 1)
+            {
+                var title = new TextBlock
+                {
+                    Text = "Sotilgan mahsulotlar ro‘yxati",
+                    FontSize = 16,
+                    FontWeight = FontWeights.Bold,
+                    TextAlignment = TextAlignment.Center,
+                    Width = pageWidth
+                };
+                FixedPage.SetTop(title, 10);
+                page.Children.Add(title);
+            }
+
+            // Agar 1-bet bo'lsa jadval sal pastroqdan (45), qolgan betlarda yuqoriroqdan (20) boshlanadi
+            double gridTopMargin = (pageNumber == 1) ? 45 : 20;
+            var grid = new Grid { Margin = new Thickness(margin, gridTopMargin, margin, 40) };
+
+            // Ustun kengliklari
+            double[] columnWidths = { 60, 90, 80, 90, 60, 60, 50, 50, 80, 100 };
 
             var headers = new[]
             {
-            "Sana","    Mijoz    ","Mahsulot turi","  Nomi  ","To'plamda","To'plam soni","   Jami   ","O‘lchov","   Narxi  ","   Umumiy summa  "
-        };
+                "Sana","Mijoz","Mahsulot turi","Nomi","To'plamda","To'plam soni","Jami","O‘lchov","Narxi","Umumiy summa"
+            };
 
             for (int i = 0; i < headers.Length; i++)
-                grid.ColumnDefinitions.Add(new ColumnDefinition());
+            {
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(columnWidths[i], GridUnitType.Pixel) });
+            }
 
             int row = 0;
             grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -401,13 +422,15 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                     BorderBrush = Brushes.Black,
                     BorderThickness = new Thickness(0.5),
                     Background = Brushes.LightGray,
-                    Padding = new Thickness(4)
+                    Padding = new Thickness(2)
                 };
                 var text = new TextBlock
                 {
                     Text = headers[i],
                     FontWeight = FontWeights.Bold,
-                    TextAlignment = System.Windows.TextAlignment.Center
+                    FontSize = 10,
+                    TextAlignment = TextAlignment.Center,
+                    TextWrapping = TextWrapping.Wrap
                 };
                 border.Child = text;
                 Grid.SetRow(border, row);
@@ -423,18 +446,18 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
                 string[] values =
-                [
+                {
                     item.OperationDate?.ToString("dd.MM.yyyy") ?? "",
-                item.Customer ?? "",
-                item.Category ?? "",
-                item.Name ?? "",
-                item.RollLength?.ToString("N0") ?? "",
-                item.Quantity?.ToString("N0") ?? "",
-                item.TotalCount?.ToString("N0") ?? "",
-                item.Unit ?? "",
-                item.Price?.ToString("N2") ?? "",
-                item.TotalAmount?.ToString("N2") ?? ""
-                ];
+                    item.Customer ?? "",
+                    item.Category ?? "",
+                    item.Name ?? "",
+                    item.RollLength?.ToString("N0") ?? "",
+                    item.Quantity?.ToString("N0") ?? "",
+                    item.TotalCount?.ToString("N0") ?? "",
+                    item.Unit ?? "",
+                    item.Price?.ToString("N2") ?? "",
+                    item.TotalAmount?.ToString("N2") ?? ""
+                };
 
                 for (int i = 0; i < values.Length; i++)
                 {
@@ -447,8 +470,9 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                     var text = new TextBlock
                     {
                         Text = values[i],
-                        FontSize = 11,
-                        TextAlignment = (i >= 4 ? System.Windows.TextAlignment.Right : System.Windows.TextAlignment.Left)
+                        FontSize = 9,
+                        TextAlignment = (i >= 4 ? TextAlignment.Right : TextAlignment.Left),
+                        TextWrapping = TextWrapping.Wrap
                     };
                     border.Child = text;
                     Grid.SetRow(border, row);
@@ -463,51 +487,61 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             {
                 row++;
                 grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                var totalBorder = new Border
+                {
+                    BorderBrush = Brushes.Black,
+                    BorderThickness = new Thickness(0.5),
+                    Padding = new Thickness(4, 4, 10, 4)
+                };
+
                 var totalLabel = new TextBlock
                 {
-                    Text = "Jami:",
+                    Text = "JAMI:",
                     FontWeight = FontWeights.Bold,
-                    TextAlignment = System.Windows.TextAlignment.Center
+                    FontSize = 10,
+                    TextAlignment = TextAlignment.Left
                 };
-                Grid.SetRow(totalLabel, row);
-                Grid.SetColumn(totalLabel, headers.Length - 10);
-                grid.Children.Add(totalLabel);
+                totalBorder.Child = totalLabel;
+
+                Grid.SetRow(totalBorder, row);
+                Grid.SetColumn(totalBorder, 0);
+                Grid.SetColumnSpan(totalBorder, 9);
+                grid.Children.Add(totalBorder);
+
+                var valueBorder = new Border
+                {
+                    BorderBrush = Brushes.Black,
+                    BorderThickness = new Thickness(0.5),
+                    Padding = new Thickness(4)
+                };
 
                 var totalValue = new TextBlock
                 {
                     Text = (FinalAmount ?? 0).ToString("N2"),
                     FontWeight = FontWeights.Bold,
-                    TextAlignment = System.Windows.TextAlignment.Center
+                    FontSize = 10,
+                    TextAlignment = TextAlignment.Right
                 };
-                Grid.SetRow(totalValue, row);
-                Grid.SetColumn(totalValue, headers.Length - 1);
-                grid.Children.Add(totalValue);
-            }
+                valueBorder.Child = totalValue;
 
-            var title = new TextBlock
-            {
-                Text = "Sotilgan mahsulotlar ro‘yxati",
-                FontSize = 18,
-                FontWeight = FontWeights.Bold,
-                TextAlignment = TextAlignment.Right,
-                Margin = new Thickness(0, 10, 0, 5)
-            };
-            FixedPage.SetTop(title, 10);
-            FixedPage.SetLeft(title, (pageWidth - 300) / 2);
-            page.Children.Add(title);
+                Grid.SetRow(valueBorder, row);
+                Grid.SetColumn(valueBorder, 9);
+                grid.Children.Add(valueBorder);
+            }
 
             var pageNumberText = new TextBlock
             {
                 Text = $"{pageNumber}-bet / {totalPages}",
-                FontSize = 12,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                VerticalAlignment = VerticalAlignment.Bottom,
-                Margin = new Thickness(0, 0, 30, 10)
+                FontSize = 10,
+                HorizontalAlignment = HorizontalAlignment.Right
             };
-            FixedPage.SetBottom(pageNumberText, 10);
+            FixedPage.SetBottom(pageNumberText, 15);
             FixedPage.SetRight(pageNumberText, 30);
             page.Children.Add(pageNumberText);
 
+            FixedPage.SetLeft(grid, margin);
+            FixedPage.SetTop(grid, gridTopMargin); // Dinamik top margin
             page.Children.Add(grid);
 
             var pageContent = new PageContent();
@@ -517,6 +551,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
         return fixedDoc;
     }
+
 
     #endregion Print Helpers
 
