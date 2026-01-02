@@ -11,52 +11,38 @@
       d:DesignHeight="450"
       d:DesignWidth="950"
       Title="PaymentsPage">
-    <Page.Resources>
-        <Style x:Key="RightAlignedCellStyle" TargetType="TextBlock">
-            <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="TextAlignment" Value="Right" />
-        </Style>
-    </Page.Resources>
+	<Page.Resources>
+		<Style x:Key="RightAlignedCellStyle" TargetType="TextBlock">
+			<Setter Property="HorizontalAlignment" Value="Right" />
+			<Setter Property="TextAlignment" Value="Right" />
+		</Style>
+	</Page.Resources>
 
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
+	<Grid Margin="10">
+		<Grid.RowDefinitions>
 			<RowDefinition Height="80" />
 			<RowDefinition Height="5" />
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="350" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Label Grid.Row="0"
-                       Grid.Column="0"
-                       Content="Sana:"
+		<Grid>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="350" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="*" />
+					<RowDefinition Height="*" />
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+				<Label Content="Sana:"
                        VerticalAlignment="Center"
                        FontSize="14"/>
-                <Label Grid.Row="1"
-                       Grid.Column="0"
-                       Content="Mijoz:"
-                       VerticalAlignment="Center"
-                       FontSize="14"/>
-				<Label Grid.Row="2"
-                       Grid.Column="0"
-                       Content="Val. turi:"
-                       VerticalAlignment="Center"
-                       FontSize="14"/>
-
-				<Grid Grid.Column="1">
-					<controls:UserCalendar x:Name="PaymentDate"
+				<controls:UserCalendar x:Name="PaymentDate"
                                 Grid.Column="1"
                                 Width="150"
                                 HorizontalAlignment="Left"
@@ -65,29 +51,36 @@
                                 FontSize="14"
                                 SelectedDate="{Binding Payment.PaidAt, Mode=TwoWay}" />
 
-                </Grid>
-                <Grid Grid.Row="1"
+				<Label Grid.Row="1"
+                       Content="Mijoz:"
+                       VerticalAlignment="Center"
+                       FontSize="14"/>
+				<ComboBox x:Name="CustomerName"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        IsEditable="True"
+                        ItemsSource="{Binding AvailableCustomers}"
+                        DisplayMemberPath="Name"
+                        SelectedItem="{Binding Customer}"
+                        VerticalAlignment="Center"
+                        PreviewLostKeyboardFocus="CustomerName_PreviewLostKeyboardFocus"
+                        HorizontalAlignment="Stretch"
+                        FontSize="14"
+                        Margin="0 2"
+                        utils:ComboBoxQuickNavBehavior.EnableQuickNavigation="True"/>
+
+				<Label Grid.Row="2"
+                       Content="Val. turi:"
+                       VerticalAlignment="Center"
+                       FontSize="14"/>
+				<Grid Grid.Row="2"
                       Grid.Column="1">
-                    <ComboBox x:Name="CustomerName"
-                              IsEditable="True"
-                              ItemsSource="{Binding AvailableCustomers}"
-                              DisplayMemberPath="Name"
-                              SelectedItem="{Binding Customer}"
-                              VerticalAlignment="Center"
-                              PreviewLostKeyboardFocus="CustomerName_PreviewLostKeyboardFocus"
-                              HorizontalAlignment="Stretch"
-                              FontSize="14"
-                              Margin="0 2"
-                              utils:ComboBoxQuickNavBehavior.EnableQuickNavigation="True"/>
-                </Grid>
-                <Grid Grid.Row="2"
-                      Grid.Column="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="70" />
-                        <ColumnDefinition Width="70" />
-                    </Grid.ColumnDefinitions>
-                    <ComboBox x:Name="CurrencyType"
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*" />
+						<ColumnDefinition Width="70" />
+						<ColumnDefinition Width="70" />
+					</Grid.ColumnDefinitions>
+					<ComboBox x:Name="CurrencyType"
                               IsEditable="True"
                               ItemsSource="{Binding AvailableCurrencies}"
                               DisplayMemberPath="Name"
@@ -97,59 +90,47 @@
                               FontSize="14"
                               Margin="0 2"
                               utils:ComboBoxQuickNavBehavior.EnableQuickNavigation="True"/>
-                    <TextBlock Grid.Column="1"
+					<TextBlock Grid.Column="1"
                                Text="kurs /(%)"
                                VerticalAlignment="Center"
                                HorizontalAlignment="Right"
                                FontSize="14"
                                Margin="2 2" />
-                    <TextBox x:Name="Kurs"
+					<TextBox x:Name="Kurs"
                              Grid.Column="2"
                              Margin="0 2"
                              Validation.ErrorTemplate="{x:Null}"
                              IsEnabled="{Binding Payment.Currency.IsEditable}"
-                             Text="{Binding Payment.ExchangeRate, Mode=TwoWay}"
+                             utils:NumericInput.Value="{Binding Payment.ExchangeRate, UpdateSourceTrigger=LostFocus}"
                              utils:NumericInput.IsNumeric="True"
+                             utils:NumericInput.Precision="2"
                              utils:TextBoxTabBehavior.EnableTabOnKeys="True" />
-                </Grid>
-            </Grid>
-            <Grid Grid.Column="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="210" />
-                    <ColumnDefinition Width="Auto" MinWidth="350"
+				</Grid>
+			</Grid>
+			<Grid Grid.Column="1">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="210" />
+					<ColumnDefinition Width="Auto" MinWidth="350"
                                       MaxWidth="500" />
-                </Grid.ColumnDefinitions>
-                <Grid Grid.Column="0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Label Grid.Column="0"
-                           Grid.Row="0"
-                           Content="Summa:"
+				</Grid.ColumnDefinitions>
+				<Grid Grid.Column="0">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="*" />
+						<RowDefinition Height="*" />
+						<RowDefinition Height="*" />
+					</Grid.RowDefinitions>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="*" />
+					</Grid.ColumnDefinitions>
+
+					<Label Content="Summa:"
                            VerticalAlignment="Center"
                            FontSize="12"
                            Foreground="#888"
                            Margin="5,0,0,0"
                            FontStyle="Italic" />
-                    <Label Grid.Column="0"
-                           Grid.Row="1"
-                           Content="Kirim:"
-                           VerticalAlignment="Center"
-                           FontSize="14"
-                           Margin="5,0,0,0" />
-                    <Label Grid.Column="0"
-                           Grid.Row="2"
-                           Content="Chiqim:"
-                           VerticalAlignment="Center"
-                           FontSize="14"
-                           Margin="5 0 0 0" />
-                    <TextBox Grid.Column="1"
+					<TextBox Grid.Column="1"
                              Grid.Row="0"
                              x:Name="Summa"
                              IsReadOnly="True"
@@ -157,12 +138,17 @@
                              FontSize="14" 
                              BorderThickness="0"
                              Margin="5,2"
-                             utils:NumericInput.Value="{Binding Payment.Amount, UpdateSourceTrigger=PropertyChanged}"
-                             utils:NumericInput.Precision="2"
                              FontStyle="Italic"
                              Background="Transparent"
+                             utils:NumericInput.Value="{Binding Payment.Amount}"
+                             utils:NumericInput.Precision="2"
                              utils:NumericInput.IsNumeric="True" />
 
+					<Label Grid.Row="1"
+                           Content="Kirim:"
+                           VerticalAlignment="Center"
+                           FontSize="14"
+                           Margin="5,0,0,0" />
 					<TextBox Grid.Column="1"
                              Grid.Row="1"
                              x:Name="Kirim"
@@ -170,11 +156,16 @@
                              Margin="5 2"
                              Validation.ErrorTemplate="{x:Null}"
                              IsEnabled="{Binding Payment.IsIncomeEnabled}"
-                                 utils:TextBoxTabBehavior.EnableTabOnKeys="True" 
+                             utils:TextBoxTabBehavior.EnableTabOnKeys="True" 
                              utils:NumericInput.IsNumeric="True"
                              utils:NumericInput.Precision="2"
                              utils:NumericInput.Value="{Binding Payment.IncomeAmount, UpdateSourceTrigger=LostFocus}"/>
 
+					<Label Grid.Row="2"
+                           Content="Chiqim:"
+                           VerticalAlignment="Center"
+                           FontSize="14"
+                           Margin="5 0 0 0" />
 					<TextBox Grid.Column="1"
                              Grid.Row="2"
                              x:Name="Chiqim"
@@ -182,44 +173,48 @@
                              Margin="5,2"
                              Validation.ErrorTemplate="{x:Null}"
                              IsEnabled="{Binding Payment.IsExpenseEnabled}"
-                                 utils:TextBoxTabBehavior.EnableTabOnKeys="True" 
+                             utils:TextBoxTabBehavior.EnableTabOnKeys="True" 
                              utils:NumericInput.IsNumeric="True"
                              utils:NumericInput.Precision="2"
                              utils:NumericInput.Value="{Binding Payment.ExpenseAmount, UpdateSourceTrigger=LostFocus}"/>
-                   
-                </Grid>
-                <Grid Grid.Column="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <Grid Grid.Row="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                                   Text="Balans:"
+				</Grid>
+				<Grid Grid.Column="1">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="*" />
+						<RowDefinition Height="*" />
+						<RowDefinition Height="*" />
+					</Grid.RowDefinitions>
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Text="Balans:"
                                    VerticalAlignment="Center"
                                    FontSize="12"
                                    Foreground="#888"
                                    Margin="5,0,0,0"
                                    FontStyle="Italic"
                                    Visibility="{Binding ElementName=beginBalans, Path=Text.IsEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
-                        <TextBox Grid.Column="1"
+						<TextBox Grid.Column="1"
                                  x:Name="beginBalans"
-                                 IsReadOnly="True" IsTabStop="False"
-                                 FontSize="14" Margin="5,2"
-                                 FontStyle="Italic" BorderThickness="0"
+                                 IsReadOnly="True"
+                                 IsTabStop="False"
+                                 FontSize="14" 
+                                 Margin="5,2"
+                                 FontStyle="Italic" 
+                                 BorderThickness="0"
                                  Background="Transparent"
-                                 utils:NumericInput.IsNumeric="   True"
-                                 Text="{Binding Customer.Balance}" />
-                        <TextBlock Grid.Column="2"
+                                 utils:NumericInput.Precision="2"
+                                 utils:NumericInput.IsNumeric="True"
+                                 utils:NumericInput.Value="{Binding Customer.Balance}" />
+
+						<TextBlock Grid.Column="2"
                                    Text="Natija:"
                                    VerticalAlignment="Center"
                                    FontSize="12"
@@ -227,16 +222,18 @@
                                    Margin="5,0,0,0"
                                    FontStyle="Italic"
                                    Visibility="{Binding ElementName=lastBalans, Path=Text.IsEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
-                        <TextBox Grid.Column="3"
-                                 Text="{Binding Payment.LastBalance}"
+						<TextBox Grid.Column="3"
                                  x:Name="lastBalans"
                                  IsReadOnly="True" IsTabStop="False"
                                  FontSize="14"
                                  Margin="5,2"
                                  FontStyle="Italic" BorderThickness="0"
                                  Background="Transparent"
+                                 utils:NumericInput.Precision="2"
+                                 utils:NumericInput.Value="{Binding Payment.LastBalance}"
                                  utils:NumericInput.IsNumeric="True" />
-                        <TextBlock Grid.Column="4"
+
+						<TextBlock Grid.Column="4"
                                    Text="Chegirma:"
                                    VerticalAlignment="Center"
                                    FontSize="12"
@@ -244,58 +241,60 @@
                                    Margin="2,0,0,0"
                                    FontStyle="Italic"
                                    Visibility="{Binding ElementName=Discount, Path=Text.IsEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
-                        <TextBox Grid.Column="5"
-                                 Text="{Binding Payment.Discount}"
+						<TextBox Grid.Column="5"
                                  x:Name="Discount"
                                  IsReadOnly="True" IsTabStop="False"
                                  FontSize="14"
                                  Margin="5,2"
                                  FontStyle="Italic" BorderThickness="0"
                                  Background="Transparent"
+                                 utils:NumericInput.Value="{Binding Payment.Discount}"
+                                 utils:NumericInput.Precision="2"
                                  utils:NumericInput.IsNumeric="True" />
-                    </Grid>
-                    <Grid Grid.Row="1">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="60" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Column="0"
-                               Content="Izox:"
+					</Grid>
+					<Grid Grid.Row="1">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="60" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<Label Content="Izox:"
                                VerticalAlignment="Center"
                                FontSize="14"
                                Margin="5,0,11,0" />
-                        <TextBox Grid.Column="1"
+						<TextBox Grid.Column="1"
                                  x:Name="Discription"
                                  Text="{Binding Payment.Description}"
                                  FontSize="14"
                                  Margin="5,2,5,2"
                                  utils:TextBoxTabBehavior.EnableTabOnKeys="True" />
-                    </Grid>
-                    <Grid Grid.Row="2">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="60" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="1"
+					</Grid>
+					<Grid Grid.Row="2">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="60" />
+							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+
+						<Button Grid.Column="1"
                                 x:Name="btnPaymant"
                                 Margin="5,2,2,2"
                                 Content="Saqlash"
                                 FontSize="14"
                                 Command="{Binding SubmitCommand}"
                                 FontWeight="Bold" />
-                        <Button Grid.Column="2"
+
+						<Button Grid.Column="2"
                                 x:Name="btnDiscount"
                                 Margin="50,2,5,2"
                                 Content=" Discount "
                                 FontSize="12"
                                 Command="{Binding OpenDiscountsWindowCommand}"
                                 FontWeight="Bold" />
-                    </Grid>
-                </Grid>
-            </Grid>
-        </Grid>
-        <DataGrid Grid.Row="2"
+					</Grid>
+				</Grid>
+			</Grid>
+		</Grid>
+		<DataGrid Grid.Row="2"
                   ItemsSource="{Binding HistoryPayments}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
@@ -307,91 +306,91 @@
                   GridLinesVisibility="Horizontal"
                   FontSize="14">
 
-            <!-- Barcha headerlarni o‘rtaga tekislash -->
-            <DataGrid.ColumnHeaderStyle>
-                <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                    <Setter Property="FontWeight" Value="SemiBold"/>
-                </Style>
-            </DataGrid.ColumnHeaderStyle>
+			<!-- Barcha headerlarni o‘rtaga tekislash -->
+			<DataGrid.ColumnHeaderStyle>
+				<Style TargetType="DataGridColumnHeader">
+					<Setter Property="HorizontalContentAlignment" Value="Center"/>
+					<Setter Property="FontWeight" Value="SemiBold"/>
+				</Style>
+			</DataGrid.ColumnHeaderStyle>
 
-            <DataGrid.Columns>
-                <!-- Sana -->
-                <DataGridTextColumn Header="Sana"
+			<DataGrid.Columns>
+				<!-- Sana -->
+				<DataGridTextColumn Header="Sana"
                                     Binding="{Binding PaidAt, StringFormat={}{0:dd.MM.yyyy}}"
                                     Width="120">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Center"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+					<DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock">
+							<Setter Property="HorizontalAlignment" Value="Center"/>
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
 
-                <!-- Mijoz -->
-                <DataGridTextColumn Header="Mijoz"
+				<!-- Mijoz -->
+				<DataGridTextColumn Header="Mijoz"
                                     Binding="{Binding Customer.Name}"
                                     Width="200" />
 
-                <!-- Net summa -->
-                <DataGridTextColumn Header="Net summa"
+				<!-- Net summa -->
+				<DataGridTextColumn Header="Net summa"
                                     Binding="{Binding NetAmount, StringFormat=N2}"
                                     Width="120">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Right"/>
-                            <Setter Property="Padding" Value="0,0,5,0"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+					<DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock">
+							<Setter Property="HorizontalAlignment" Value="Right"/>
+							<Setter Property="Padding" Value="0,0,5,0"/>
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
 
-                <!-- Valyuta turi -->
-                <DataGridTextColumn Header="Valyuta turi"
+				<!-- Valyuta turi -->
+				<DataGridTextColumn Header="Valyuta turi"
                                     Binding="{Binding Currency.Name}"
                                     Width="120">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Center"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+					<DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock">
+							<Setter Property="HorizontalAlignment" Value="Center"/>
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
 
-                <!-- Kurs -->
-                <DataGridTextColumn Header="Kurs"
+				<!-- Kurs -->
+				<DataGridTextColumn Header="Kurs"
                                     Binding="{Binding ExchangeRate, StringFormat=N2}"
                                     Width="100">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Right"/>
-                            <Setter Property="Padding" Value="0,0,5,0"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+					<DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock">
+							<Setter Property="HorizontalAlignment" Value="Right"/>
+							<Setter Property="Padding" Value="0,0,5,0"/>
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
 
-                <!-- Summa -->
-                <DataGridTextColumn Header="Summa"
+				<!-- Summa -->
+				<DataGridTextColumn Header="Summa"
                                     Binding="{Binding Amount, StringFormat=N2}"
                                     Width="120">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="HorizontalAlignment" Value="Right"/>
-                            <Setter Property="Padding" Value="0,0,5,0"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
+					<DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock">
+							<Setter Property="HorizontalAlignment" Value="Right"/>
+							<Setter Property="Padding" Value="0,0,5,0"/>
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
 
 
-                <!-- Izoh -->
-                <DataGridTextColumn Header="Izoh"
+				<!-- Izoh -->
+				<DataGridTextColumn Header="Izoh"
                                     Binding="{Binding Description}"
                                     Width="*">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Padding" Value="5,0,0,0"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+					<DataGridTextColumn.ElementStyle>
+						<Style TargetType="TextBlock">
+							<Setter Property="Padding" Value="5,0,0,0"/>
+						</Style>
+					</DataGridTextColumn.ElementStyle>
+				</DataGridTextColumn>
+			</DataGrid.Columns>
+		</DataGrid>
 
-    </Grid>
+	</Grid>
 </Page>

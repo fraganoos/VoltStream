@@ -7,17 +7,16 @@ using VoltStream.WPF.Sales_history.Models;
 
 public partial class SalesHistoryPage : Page
 {
-    private readonly IServiceProvider serviceProvider;
-    private SalesHistoryPageViewModel vm;
+    private readonly SalesHistoryPageViewModel vm;
     public SalesHistoryPage(IServiceProvider serviceProvider)
     {
         InitializeComponent();
-        this.serviceProvider = serviceProvider;
+
         vm = new SalesHistoryPageViewModel(serviceProvider);
         DataContext = vm;
     }
 
-    private async void BeginDate_LostFocus(object sender, System.Windows.RoutedEventArgs e)
+    private async void BeginDate_LostFocus(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(beginDate.TextBox.Text))
         {
