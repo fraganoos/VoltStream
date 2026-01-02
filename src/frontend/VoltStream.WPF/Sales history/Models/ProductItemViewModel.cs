@@ -5,6 +5,11 @@ using VoltStream.WPF.Commons;
 
 public partial class ProductItemViewModel : ViewModelBase
 {
+    public long Id { get; set; }
+    public long CustomerId { get; set; }
+    public long ProductId { get; set; }
+    public long CategoryId { get; set; }
+
     [ObservableProperty] private DateTimeOffset? operationDate;
     [ObservableProperty] private string? category = string.Empty;
     [ObservableProperty] private string? name = string.Empty;

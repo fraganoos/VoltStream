@@ -14,6 +14,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Media;
@@ -22,10 +23,17 @@ using VoltStream.WPF.Commons;
 public partial class SalesHistoryPageViewModel : ViewModelBase
 {
     private readonly IServiceProvider services;
+    private readonly IMapper mapper;
 
-    public SalesHistoryPageViewModel(IServiceProvider services)
+    public ICollectionView FilteredSaleItemsView { get; }
+    private ObservableCollection<ProductItemViewModel> allSaleItems = [];
+
+    public SalesHistoryPageViewModel(IMapper mapper, IServiceProvider services)
     {
         this.services = services;
+        this.mapper = mapper;
+        FilteredSaleItemsView = CollectionViewSource.GetDefaultView(allSaleItems);
+        FilteredSaleItemsView.Filter = FilterLogic;
         _ = LoadInitialDataAsync();
     }
 
@@ -39,11 +47,12 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<ProductResponse> allProducts = [];
     [ObservableProperty] private ObservableCollection<ProductResponse> products = [];
 
-    [ObservableProperty] private ObservableCollection<ProductItemViewModel> filteredSaleItems = [];
-
     [ObservableProperty] private decimal? finalAmount;
     [ObservableProperty] private DateTime beginDate = DateTime.Today.AddDays(-7);
     [ObservableProperty] private DateTime endDate = DateTime.Today;
+
+
+    #region Load Data
 
     private async Task LoadInitialDataAsync()
     {
@@ -55,12 +64,53 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         );
     }
 
+    public async Task LoadCategoriesAsync()
+    {
+        try
+        {
+            var response = await services.GetRequiredService<ICategoriesApi>().GetAllAsync().Handle(isLoading => IsLoading = isLoading);
+            if (response.IsSuccess)
+                Categories = mapper.Map<ObservableCollection<CategoryResponse>>(response.Data!);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Kategoriya yuklanmadi: {ex.Message}");
+        }
+    }
+
+    public async Task LoadProductsAsync()
+    {
+        try
+        {
+            FilteringRequest request = new()
+            {
+                Filters = new()
+                {
+                    ["Category"] = ["include"]
+                }
+            };
+
+            var response = await services.GetRequiredService<IProductsApi>().Filter(request).Handle(isLoading => IsLoading = isLoading);
+            if (response.IsSuccess)
+            {
+                AllProducts = mapper.Map<ObservableCollection<ProductResponse>>(response.Data!);
+
+                Products.Clear();
+                foreach (var product in AllProducts)
+                    Products.Add(product);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Mahsulotlar yuklanmadi: {ex.Message}");
+        }
+    }
+
     public async Task LoadCustomersAsync()
     {
         try
         {
             var response = await services.GetRequiredService<ICustomersApi>().GetAllAsync().Handle();
-            var mapper = services.GetRequiredService<IMapper>();
             if (response.IsSuccess)
                 Customers = mapper.Map<ObservableCollection<CustomerResponse>>(response.Data!);
         }
@@ -70,6 +120,56 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         }
     }
 
+    public async Task LoadSalesHistoryAsync()
+    {
+        FilteringRequest request = new()
+        {
+            Filters = new()
+            {
+                ["Items"] = ["include:Product.Category"],
+                ["Customer"] = ["include"],
+                ["date"] = [$">={BeginDate:o}", $"<{EndDate.AddDays(1):o}"]
+            }
+        };
+
+        var srvc = services.GetRequiredService<ISaleApi>();
+        var response = await srvc.Filtering(request).Handle(isLoading => IsLoading = isLoading);
+
+        if (!response.IsSuccess)
+        {
+            Error = response.Message ?? "Sotuv detallarini yuklashda xatolik!";
+            return;
+        }
+
+
+        allSaleItems.Clear();
+        foreach (var sale in response.Data!)
+        {
+            foreach (var item in sale.Items)
+            {
+                allSaleItems.Add(new ProductItemViewModel
+                {
+                    OperationDate = sale.Date.LocalDateTime,
+                    Category = item.Product!.Category.Name,
+                    CategoryId = item.Product.CategoryId,
+                    ProductId = item.Product.Id,
+                    Name = item.Product.Name,
+                    RollLength = item.LengthPerRoll,
+                    Quantity = item.RollCount,
+                    Price = item.UnitPrice,
+                    Unit = item.Product.Unit,
+                    TotalCount = (int)item.TotalLength,
+                    Customer = sale.Customer?.Name,
+                    CustomerId = sale.CustomerId
+                });
+            }
+        }
+        RefreshFilter();
+    }
+
+    #endregion Load Data
+
+    #region Commands
 
     [RelayCommand]
     private async Task ClearFilter()
@@ -82,11 +182,12 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     [RelayCommand]
     private void ExportToExcel()
     {
-        FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
+        var visibleItems = FilteredSaleItemsView.Cast<ProductItemViewModel>().ToList();
+        FinalAmount = visibleItems.Sum(x => x.TotalAmount);
 
         try
         {
-            if (FilteredSaleItems == null || !FilteredSaleItems.Any())
+            if (visibleItems == null || visibleItems.Count == 0)
             {
                 MessageBox.Show("Eksport qilish uchun ma'lumot topilmadi.",
                                 "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -132,7 +233,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 headerRange.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
 
                 int row = 3;
-                foreach (var item in FilteredSaleItems)
+                foreach (var item in visibleItems)
                 {
                     worksheet.Cell(row, 1).Value = item.OperationDate?.ToString("dd.MM.yyyy");
                     worksheet.Cell(row, 2).Value = item.Customer ?? "";
@@ -176,7 +277,9 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     [RelayCommand]
     private void Print()
     {
-        if (FilteredSaleItems == null || !FilteredSaleItems.Any())
+        var visibleItems = FilteredSaleItemsView.Cast<ProductItemViewModel>().ToList();
+
+        if (visibleItems == null || visibleItems.Count == 0)
         {
             MessageBox.Show("Chop etish uchun ma’lumot topilmadi.",
                             "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -192,12 +295,14 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     [RelayCommand]
     private void Preview()
     {
-        if (FilteredSaleItems == null || !FilteredSaleItems.Any())
+        var visibleItems = FilteredSaleItemsView.Cast<ProductItemViewModel>().ToList();
+
+        if (visibleItems == null || !visibleItems.Any())
         {
             MessageBox.Show("Ko‘rsatish uchun ma’lumot yo‘q.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
-        FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
+        FinalAmount = visibleItems.Sum(x => x.TotalAmount);
         var fixedDoc = CreateFixedDocumentForPrint();
         var previewWindow = new Window
         {
@@ -208,6 +313,49 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             Content = new DocumentViewer { Document = fixedDoc, Margin = new Thickness(20) }
         };
         previewWindow.ShowDialog();
+    }
+
+    #endregion Commands
+
+    #region Print Helpers
+
+    private bool FilterLogic(object obj)
+    {
+        if (obj is not ProductItemViewModel item) return false;
+
+        bool matchesCategory = SelectedCategory == null || item.CategoryId == SelectedCategory.Id;
+        bool matchesProduct = SelectedProduct == null || item.ProductId == SelectedProduct.Id;
+        bool matchesCustomer = SelectedCustomer == null || item.CustomerId == SelectedCustomer.Id;
+
+        return matchesCategory && matchesProduct && matchesCustomer;
+    }
+
+    private void RefreshFilter()
+    {
+        FilteredSaleItemsView.Refresh();
+        FinalAmount = allSaleItems.Cast<ProductItemViewModel>()
+                                  .Where(x => FilterLogic(x))
+                                  .Sum(x => x.TotalAmount);
+    }
+
+    private void UpdateProductList(CategoryResponse? category)
+    {
+        if (category != null)
+        {
+            var filtered = AllProducts.Where(p => p.CategoryId == category.Id).ToList();
+            Products.Clear();
+            foreach (var p in filtered) Products.Add(p);
+        }
+        else
+        {
+            Products.Clear();
+            foreach (var p in AllProducts) Products.Add(p);
+        }
+    }
+
+    private void RecalculateTotals()
+    {
+        FinalAmount = FilteredSaleItemsView.Cast<ProductItemViewModel>().ToList().Sum(x => x.TotalAmount);
     }
 
     private FixedDocument CreateFixedDocumentForPrint()
@@ -222,7 +370,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         int maxRowsPerPage = 45;
         int pageNumber = 0;
 
-        var items = FilteredSaleItems.ToList();
+        var items = FilteredSaleItemsView.Cast<ProductItemViewModel>().ToList();
         int totalPages = (int)Math.Ceiling(items.Count / (double)maxRowsPerPage);
         int processedItems = 0;
 
@@ -248,7 +396,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
             for (int i = 0; i < headers.Length; i++)
             {
-                var border = new System.Windows.Controls.Border
+                var border = new Border
                 {
                     BorderBrush = Brushes.Black,
                     BorderThickness = new Thickness(0.5),
@@ -290,7 +438,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
                 for (int i = 0; i < values.Length; i++)
                 {
-                    var border = new System.Windows.Controls.Border
+                    var border = new Border
                     {
                         BorderBrush = Brushes.Black,
                         BorderThickness = new Thickness(0.5),
@@ -341,7 +489,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 Text = "Sotilgan mahsulotlar ro‘yxati",
                 FontSize = 18,
                 FontWeight = FontWeights.Bold,
-                TextAlignment = System.Windows.TextAlignment.Right,
+                TextAlignment = TextAlignment.Right,
                 Margin = new Thickness(0, 10, 0, 5)
             };
             FixedPage.SetTop(title, 10);
@@ -370,133 +518,18 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         return fixedDoc;
     }
 
-    public async Task LoadSalesHistoryAsync()
-    {
-        try
-        {
-            FilteringRequest request = new()
-            {
-                Filters = new()
-                {
-                    ["Items"] = ["include:Product.Category"],
-                    ["Customer"] = ["include"],
-                    ["date"] = [$">={BeginDate:o}", $"<{EndDate.AddDays(1):o}"]
-                }
-            };
+    #endregion Print Helpers
 
-            if (SelectedCustomer is not null)
-                request.Filters.Add("custonerid", [SelectedCustomer.Id.ToString()]);
-
-            var srvc = services.GetRequiredService<ISaleApi>();
-            var response = await srvc.Filtering(request).Handle(isLoading => IsLoading = isLoading);
-
-            if (response.IsSuccess)
-            {
-                FilteredSaleItems.Clear();
-
-                foreach (var sale in response.Data!)
-                {
-                    foreach (var item in sale.Items)
-                    {
-                        FilteredSaleItems.Add(new ProductItemViewModel
-                        {
-                            OperationDate = sale.Date.LocalDateTime,
-                            Category = item.Product!.Category.Name,
-                            Name = item.Product.Name,
-                            RollLength = item.LengthPerRoll,
-                            Quantity = item.RollCount,
-                            Price = item.UnitPrice,
-                            Unit = item.Product.Unit,
-                            TotalCount = (int)item.TotalLength,
-                            Customer = sale.Customer?.Name
-                        });
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Xatolik: {ex.Message}");
-        }
-    }
+    #region Property Changed Handlers
 
     partial void OnSelectedCategoryChanged(CategoryResponse? value)
     {
-        if (value != null)
-        {
-            var filteredProducts = AllProducts
-                .Where(p => p.CategoryId == value.Id)
-                .ToList();
-
-            Products.Clear();
-            foreach (var product in filteredProducts)
-                Products.Add(product);
-
-            if (SelectedProduct != null && SelectedProduct.CategoryId != value.Id)
-                SelectedProduct = null;
-        }
-        else
-        {
-            Products.Clear();
-            foreach (var product in AllProducts)
-                Products.Add(product);
-        }
-
+        UpdateProductList(value);
+        RefreshFilter();
     }
 
-    partial void OnSelectedProductChanged(ProductResponse? value)
-    {
-        _ = LoadSalesHistoryAsync();
-    }
-
-    partial void OnSelectedCustomerChanged(CustomerResponse? value)
-    {
-        _ = LoadSalesHistoryAsync();
-    }
-
-    public async Task LoadCategoriesAsync()
-    {
-        try
-        {
-            var response = await services.GetRequiredService<ICategoriesApi>().GetAllAsync().Handle();
-            var mapper = services.GetRequiredService<IMapper>();
-            if (response.IsSuccess)
-                Categories = mapper.Map<ObservableCollection<CategoryResponse>>(response.Data!);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Kategoriya yuklanmadi: {ex.Message}");
-        }
-    }
-
-    public async Task LoadProductsAsync()
-    {
-        try
-        {
-            FilteringRequest request = new()
-            {
-                Filters = new()
-                {
-                    ["Category"] = ["include"]
-                }
-            };
-
-            var response = await services.GetRequiredService<IProductsApi>().Filter(request).Handle();
-            var mapper = services.GetRequiredService<IMapper>();
-            if (response.IsSuccess)
-            {
-                AllProducts = mapper.Map<ObservableCollection<ProductResponse>>(response.Data!);
-
-                Products.Clear();
-                foreach (var product in AllProducts)
-                    Products.Add(product);
-            }
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Mahsulotlar yuklanmadi: {ex.Message}");
-        }
-    }
+    partial void OnSelectedProductChanged(ProductResponse? value) => RefreshFilter();
+    partial void OnSelectedCustomerChanged(CustomerResponse? value) => RefreshFilter();
 
     private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -504,8 +537,5 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             RecalculateTotals();
     }
 
-    private void RecalculateTotals()
-    {
-        FinalAmount = FilteredSaleItems.Sum(x => x.TotalAmount);
-    }
+    #endregion Property Changed Handlers
 }
