@@ -31,7 +31,7 @@ public partial class SalesHistoryPage : Page
                                    DateTimeStyles.None,
                                    out DateTime parsedDate))
         {
-            endDate.SelectedDate = parsedDate;
+            beginDate.SelectedDate = parsedDate;
         }
         else
         {

@@ -42,7 +42,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<ProductItemViewModel> filteredSaleItems = [];
 
     [ObservableProperty] private decimal? finalAmount;
-    [ObservableProperty] private DateTime beginDate = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+    [ObservableProperty] private DateTime beginDate = DateTime.Today.AddDays(-7);
     [ObservableProperty] private DateTime endDate = DateTime.Today;
 
     private async Task LoadInitialDataAsync()
