@@ -132,7 +132,7 @@
                         Tag="{DynamicResource color6}">
                         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                             <fa:IconImage Icon="MoneyBillWave" Style="{StaticResource menuButtonIcon}" />
-                            <TextBlock Style="{StaticResource menuButtonText}" Text="O'tkazmalar" />
+                            <TextBlock Style="{StaticResource menuButtonText}" Text="To'lov" />
                         </StackPanel>
                     </RadioButton>
 
@@ -154,7 +154,7 @@
                         Tag="{DynamicResource color7}">
                         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                             <fa:IconImage Icon="FileAlt" Style="{StaticResource menuButtonIcon}" />
-                            <TextBlock Style="{StaticResource menuButtonText}" Text="Savdo tarixi" />
+							<TextBlock Style="{StaticResource menuButtonText}" Text="Sotuv tahlili" />
                         </StackPanel>
                     </RadioButton>
 

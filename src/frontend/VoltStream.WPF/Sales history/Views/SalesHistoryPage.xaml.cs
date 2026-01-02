@@ -1,5 +1,6 @@
 ﻿namespace VoltStream.WPF.Sales_history.Views;
 
+using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,7 +13,7 @@ public partial class SalesHistoryPage : Page
     {
         InitializeComponent();
 
-        vm = new SalesHistoryPageViewModel(serviceProvider);
+        vm = serviceProvider.GetRequiredService<SalesHistoryPageViewModel>();
         DataContext = vm;
     }
 
@@ -31,7 +32,7 @@ public partial class SalesHistoryPage : Page
                                    DateTimeStyles.None,
                                    out DateTime parsedDate))
         {
-            endDate.SelectedDate = parsedDate;
+            beginDate.SelectedDate = parsedDate;
         }
         else
         {
