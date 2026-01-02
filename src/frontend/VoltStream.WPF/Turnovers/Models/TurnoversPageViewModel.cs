@@ -743,7 +743,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
             }
         };
     }
-    
+
     private void AddFooterContent(FixedPage page, int currentPage, int totalPages)
     {
         const double margin = 40;
@@ -764,7 +764,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
         page.Children.Add(pageInfo);
     }
-    
+
     private double AddHeaderContent(StackPanel container, int pageNumber, bool isFullHeader)
     {
         if (isFullHeader)
@@ -805,7 +805,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
             return 30; // Kamroq joy oladi
         }
     }
-    
+
     private double CalculateOperationRowHeight(CustomerOperationForDisplayViewModel op, double commentColumnWidth)
     {
         // Izohning necha satrni egallashini hisoblaymiz
@@ -853,7 +853,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
         Grid.SetColumn(border, column);
         grid.Children.Add(border);
     }
- 
+
     public class PaginatedOperation
     {
         // Asosiy operatsiya ma'lumotlari

@@ -3,7 +3,7 @@
 public enum UserRole
 {
     Admin = 0,
-    Cashier = 1,
-    Manager = 2,
+    Manager = 1,
+    Cashier = 2,
     Seller = 3
 }

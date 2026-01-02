@@ -2,39 +2,61 @@
       x:Class="VoltStream.WPF.Settings.Views.SettingsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:vm="clr-namespace:VoltStream.WPF.Settings.ViewModels"
       xmlns:modules="clr-namespace:VoltStream.WPF.Settings.Views.Modules"
-      xmlns:conv="clr-namespace:VoltStream.WPF.Commons.Converters"
-      xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
-      xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+      xmlns:controls="clr-namespace:VoltStream.WPF.Commons.UserControls"
       Title="Sozlamalar">
+	<Grid Margin="10">
+		<TabControl x:Name="SettingsTabControl" FontSize="14" SelectionChanged="SettingsTabControl_SelectionChanged">
 
-    <Grid Margin="10">
-        <TabControl FontSize="14">
-            <!-- 🟢 Aloqa Sozlamalari -->
-            <TabItem Header="Aloqa">
-                <modules:ConnectionSettingsView DataContext="{Binding ApiConnection}" />
-            </TabItem>
+			<!-- 🟢 Aloqa Sozlamalari -->
+			<TabItem Header="Aloqa">
+				<modules:ConnectionSettingsView DataContext="{Binding ApiConnection}" />
+			</TabItem>
 
-            <!-- 💱 Valyuta Sozlamalari -->
-            <TabItem Header="Valyutalar">
-                <modules:CurrencySettingsView DataContext="{Binding}" />
-            </TabItem>
+			<!-- 💱 Valyuta Sozlamalari -->
+			<TabItem Header="Valyutalar">
+				<controls:AdminLockOverlay x:Name="CurrencyLock" 
+                                          DataContext="{Binding ElementName=RootPage, Path=DataContext}"
+                                          LockMessage="Valyuta sozlamalariga ruxsat olish uchun admin parolini kiriting">
+					<controls:AdminLockOverlay.InnerContent>
+						<modules:CurrencySettingsView />
+					</controls:AdminLockOverlay.InnerContent>
+				</controls:AdminLockOverlay>
+			</TabItem>
 
-            <!-- Categoriyalar -->
-            <TabItem Header="Kategoriyalar">
-                <modules:CategorySettingsView DataContext="{Binding CategorySettings}" />
-            </TabItem>
+			<!-- Kategoriyalar -->
+			<TabItem Header="Kategoriyalar">
+				<controls:AdminLockOverlay x:Name="CategoryLock"
+                                          DataContext="{Binding ElementName=RootPage, Path=DataContext.CategorySettings}"
+                                          LockMessage="Kategoriyalarni boshqarish uchun admin parolini kiriting">
+					<controls:AdminLockOverlay.InnerContent>
+						<modules:CategorySettingsView />
+					</controls:AdminLockOverlay.InnerContent>
+				</controls:AdminLockOverlay>
+			</TabItem>
 
-            <!-- Mahsulotlar -->
-            <TabItem Header="Mahsulotlar">
-                <modules:ProductSettingsView DataContext="{Binding ProductSettings}" />
-            </TabItem>
+			<!-- Mahsulotlar -->
+			<TabItem Header="Mahsulotlar">
+				<controls:AdminLockOverlay x:Name="ProductLock"
+                                          DataContext="{Binding ElementName=RootPage, Path=DataContext.ProductSettings}"
+                                          LockMessage="Mahsulotlar sozlamalariga ruxsat olish uchun admin parolini kiriting">
+					<controls:AdminLockOverlay.InnerContent>
+						<modules:ProductSettingsView />
+					</controls:AdminLockOverlay.InnerContent>
+				</controls:AdminLockOverlay>
+			</TabItem>
 
-            <!-- Mijozlar -->
-            <TabItem Header="Mijozlar">
-                <modules:CustomerSettingsView DataContext="{Binding CustomerSettings}" />
-            </TabItem>
-        </TabControl>
-    </Grid>
+			<!-- Mijozlar -->
+			<TabItem Header="Mijozlar">
+				<controls:AdminLockOverlay x:Name="CustomerLock"
+                                          DataContext="{Binding ElementName=RootPage, Path=DataContext.CustomerSettings}"
+                                          LockMessage="Mijozlar boshqaruviga ruxsat olish uchun admin parolini kiriting">
+					<controls:AdminLockOverlay.InnerContent>
+						<modules:CustomerSettingsView />
+					</controls:AdminLockOverlay.InnerContent>
+				</controls:AdminLockOverlay>
+			</TabItem>
+
+		</TabControl>
+	</Grid>
 </Page>

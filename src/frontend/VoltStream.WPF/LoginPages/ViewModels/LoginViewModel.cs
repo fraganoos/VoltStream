@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using VoltStream.WPF.Commons;
+using VoltStream.WPF.Commons.Services;
 using VoltStream.WPF.Configurations;
 using VoltStream.WPF.Settings.ViewModels;
 using VoltStream.WPF.Settings.Views;
@@ -72,7 +73,12 @@ public partial class LoginViewModel(
         var loginResult = await loginApi.LoginAsync(credentials)
             .Handle(loading => IsLoading = loading);
 
-        if (loginResult.IsSuccess) LoginSucceeded?.Invoke();
+        if (loginResult.IsSuccess && loginResult.Data != null)
+        {
+            var sessionService = services.GetRequiredService<ISessionService>();
+            sessionService.CurrentUser = loginResult.Data;
+            LoginSucceeded?.Invoke();
+        }
         else Error = loginResult.Message ?? "Noto'g'ri foydalanuvchi nomi yoki parol!";
     }
 

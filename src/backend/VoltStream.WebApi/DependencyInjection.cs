@@ -1,6 +1,7 @@
 ﻿namespace VoltStream.WebApi;
 
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 using System.Text.Json.Serialization;
 using VoltStream.Application;
@@ -19,7 +20,29 @@ public static class DependencyInjection
         services.AddControllers(opt => opt.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer())))
                 .AddJsonOptions(opt => opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
-        services.AddOpenApi();
+        services.AddOpenApi(options =>
+        {
+            options.AddDocumentTransformer((document, context, cancellationToken) =>
+            {
+                var securityScheme = new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "JWT tokenni kiriting (masalan: Bearer {token})"
+                };
+                document.Components ??= new OpenApiComponents();
+                document.Components.SecuritySchemes.Add("Bearer", securityScheme);
+
+                document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecurityScheme { Reference = new OpenApiReference { Id = "Bearer", Type = ReferenceType.SecurityScheme } }] = Array.Empty<string>()
+                });
+
+                return Task.CompletedTask;
+            });
+        });
     }
 
     public static void UseOpenApiDocumentation(this WebApplication app)
@@ -42,6 +65,7 @@ public static class DependencyInjection
         app.UseHttpsRedirection();
         app.UseStaticFiles();
         app.UseCors(s => s.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+        app.UseAuthentication();
         app.UseAuthorization();
     }
 }

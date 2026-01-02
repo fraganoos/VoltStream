@@ -7,27 +7,25 @@ using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
 
+using VoltStream.Application.Features.Users.DTOs;
+
 public record LoginUserCommand(
     string Username,
-    string Password) : IRequest<bool>;
+    string Password) : IRequest<AuthResponse>;
 
-public class LoginUserCommandHandler(IAppDbContext context)
-    : IRequestHandler<LoginUserCommand, bool>
+public class LoginUserCommandHandler(IAppDbContext context, IJwtProvider jwtProvider)
+    : IRequestHandler<LoginUserCommand, AuthResponse>
 {
-    public async Task<bool> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+    public async Task<AuthResponse> Handle(LoginUserCommand request, CancellationToken cancellationToken)
     {
         var user = await context.Users
             .FirstOrDefaultAsync(u => u.NormalizedUsername == request.Username.ToNormalized(), cancellationToken)
             ?? throw new NotFoundException("Login yoki parol xato!");
 
-        bool isPasswordValid = BCrypt.Verify(
-            request.Password,
-            user.PasswordHash
-        );
-
-        if (!isPasswordValid)
+        if (!BCrypt.Verify(request.Password, user.PasswordHash))
             throw new NotFoundException("Login yoki parol xato!");
 
-        return true;
+        var token = jwtProvider.Generate(user);
+        return new AuthResponse(user.Id, user.Username, token, user.Role);
     }
 }

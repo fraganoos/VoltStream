@@ -82,6 +82,7 @@ public partial class App : Application
         services.AddSingleton<DiscoveryClient>();
         services.AddHostedService<ConnectionMonitor>();
         services.AddSingleton<INavigationService, NavigationService>();
+        services.AddSingleton<ISessionService, SessionService>();
         services.AddSingleton<NamozTimeService>();
         ApiService.ConfigureServices(services);
     }
