@@ -175,6 +175,25 @@
                 </DataGridTextColumn>
 
                 <DataGridTextColumn
+                    Width="3*"
+                    Binding="{Binding FormattedDescription}"
+                    Header="Izoh">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Padding" Value="5,0" />
+                            <Setter Property="TextAlignment" Value="Left" />
+                            <Setter Property="TextWrapping" Value="Wrap" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
+                </DataGridTextColumn>
+
+                <DataGridTextColumn
                     Width="*"
                     Binding="{Binding Debit, StringFormat={}{0:N0}}"
                     Header="Debit">
@@ -200,25 +219,6 @@
                         <Style TargetType="TextBlock">
                             <Setter Property="Padding" Value="5,0" />
                             <Setter Property="TextAlignment" Value="Right" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                    <DataGridTextColumn.HeaderStyle>
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="HorizontalContentAlignment" Value="Center" />
-                            <Setter Property="VerticalContentAlignment" Value="Center" />
-                        </Style>
-                    </DataGridTextColumn.HeaderStyle>
-                </DataGridTextColumn>
-
-                <DataGridTextColumn
-                    Width="3*"
-                    Binding="{Binding FormattedDescription}"
-                    Header="Izoh">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Padding" Value="5,0" />
-                            <Setter Property="TextAlignment" Value="Left" />
-                            <Setter Property="TextWrapping" Value="Wrap" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.HeaderStyle>
