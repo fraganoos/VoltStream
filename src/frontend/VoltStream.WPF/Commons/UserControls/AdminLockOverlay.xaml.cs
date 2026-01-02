@@ -3,7 +3,6 @@ namespace VoltStream.WPF.Commons.UserControls;
 using ApiServices.Interfaces;
 using ApiServices.Models.Requests;
 using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -46,7 +45,6 @@ public partial class AdminLockOverlay : UserControl
         InitializeComponent();
         Loaded += (s, e) =>
         {
-            Debug.WriteLine("=== AdminLockOverlay Loaded ===");
             CheckAuth();
         };
     }
@@ -55,22 +53,14 @@ public partial class AdminLockOverlay : UserControl
     {
         if (d is AdminLockOverlay control)
         {
-            Debug.WriteLine($"=== InnerContent Changed ===");
-            Debug.WriteLine($"New Content: {e.NewValue?.GetType().Name}");
-
             if (e.NewValue is FrameworkElement element)
             {
-                Debug.WriteLine($"Element DataContext: {element.DataContext?.GetType().Name ?? "NULL"}");
-
-                // Agar DataContext null bo'lsa, parent'dan olishga harakat qilamiz
-                if (element.DataContext == null)
+                if (element.DataContext is null)
                 {
                     element.Loaded += (s, args) =>
                     {
-                        Debug.WriteLine($"Element Loaded, trying to set DataContext from parent...");
-                        if (element.DataContext == null && control.DataContext != null)
+                        if (element.DataContext is null && control.DataContext is not null)
                         {
-                            Debug.WriteLine($"Setting DataContext from control: {control.DataContext.GetType().Name}");
                             element.DataContext = control.DataContext;
                         }
                     };
@@ -83,20 +73,12 @@ public partial class AdminLockOverlay : UserControl
     {
         if (d is AdminLockOverlay control && e.NewValue is bool isLocked)
         {
-            Debug.WriteLine($"=== IsLocked Changed: {isLocked} ===");
-
             if (!isLocked)
             {
-                // Unlock bo'lganda DataContext'ni tekshiramiz
                 if (control.InnerContent is FrameworkElement element)
                 {
-                    Debug.WriteLine($"Content Type: {element.GetType().Name}");
-                    Debug.WriteLine($"Content DataContext: {element.DataContext?.GetType().Name ?? "NULL"}");
-
-                    // DataContext borligini ta'minlaymiz
-                    if (element.DataContext == null && control.DataContext != null)
+                    if (element.DataContext is null && control.DataContext is not null)
                     {
-                        Debug.WriteLine($"Setting DataContext to: {control.DataContext.GetType().Name}");
                         element.DataContext = control.DataContext;
                     }
                 }
@@ -109,16 +91,10 @@ public partial class AdminLockOverlay : UserControl
         var session = App.Services?.GetService<ISessionService>();
         var isAdmin = session?.IsAdmin ?? false;
 
-        Debug.WriteLine($"=== CheckAuth: IsAdmin={isAdmin} ===");
-
-        if (session != null && isAdmin)
-        {
+        if (session is not null && isAdmin)
             IsLocked = false;
-        }
         else
-        {
             IsLocked = true;
-        }
     }
 
     private async void UnlockButton_Click(object sender, RoutedEventArgs e)
@@ -135,51 +111,51 @@ public partial class AdminLockOverlay : UserControl
         var username = AdminUsernameBox.Text;
         var password = AdminPasswordBox.Password;
 
-        Debug.WriteLine($"=== Attempting Unlock: {username} ===");
-
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
-            return;
-
-        var loginApi = App.Services?.GetService<ILoginApi>();
-        if (loginApi == null)
         {
-            Debug.WriteLine("ERROR: LoginApi is NULL!");
+            SetViewModelError("Login va parolni to'ldiring!");
             return;
         }
 
-        ErrorMessage.Visibility = Visibility.Collapsed;
+        var loginApi = App.Services?.GetService<ILoginApi>();
+        if (loginApi is null) return;
 
         try
         {
-            var response = await loginApi.VerifyAdminAsync(
-                new VerifyAdminRequest(username, password));
-
-            Debug.WriteLine($"Response: Success={response.IsSuccess}, Data={response.Data}");
+            var response = await loginApi.VerifyAdminAsync(new VerifyAdminRequest(username, password));
 
             if (response.IsSuccess && response.Data)
             {
-                Debug.WriteLine("=== Unlock SUCCESS! ===");
                 IsLocked = false;
                 AdminUsernameBox.Text = string.Empty;
                 AdminPasswordBox.Password = string.Empty;
-
-                // DataContext'ni qayta tekshirish
-                if (InnerContent is FrameworkElement element)
-                {
-                    Debug.WriteLine($"After unlock - Content DataContext: {element.DataContext?.GetType().Name ?? "NULL"}");
-                }
+                if (this.DataContext is ViewModelBase vm)
+                    vm.Success = "Ruxsat muvaffaqiyatli o'rnatildi!.";
             }
             else
             {
-                ErrorMessage.Text = "Login yoki parol noto'g'ri!";
-                ErrorMessage.Visibility = Visibility.Visible;
+                SetViewModelError("Login yoki parol noto'g'ri!");
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Debug.WriteLine($"ERROR: {ex.Message}");
-            ErrorMessage.Text = "Xatolik: " + ex.Message;
-            ErrorMessage.Visibility = Visibility.Visible;
+            SetViewModelError("Tizimda ulanish xatoligi!");
+        }
+    }
+
+    private void SetViewModelError(string message)
+    {
+        if (this.DataContext is ViewModelBase vm)
+            vm.Error = message;
+    }
+
+    private void AdminPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+    {
+        if (sender is PasswordBox pb)
+        {
+            PassPlaceholder.Visibility = string.IsNullOrEmpty(pb.Password)
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
     }
 }

@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.Application.Commons.Extensions;
 using VoltStream.Application.Commons.Interfaces;
-
 using VoltStream.Application.Features.Users.DTOs;
 
 public record LoginUserCommand(

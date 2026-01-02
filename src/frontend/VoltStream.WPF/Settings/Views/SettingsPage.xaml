@@ -8,49 +8,44 @@
 	<Grid Margin="10">
 		<TabControl x:Name="SettingsTabControl" FontSize="14" SelectionChanged="SettingsTabControl_SelectionChanged">
 
-			<!-- 🟢 Aloqa Sozlamalari -->
 			<TabItem Header="Aloqa">
 				<modules:ConnectionSettingsView DataContext="{Binding ApiConnection}" />
 			</TabItem>
 
-			<!-- 💱 Valyuta Sozlamalari -->
 			<TabItem Header="Valyutalar">
 				<controls:AdminLockOverlay x:Name="CurrencyLock" 
                                           DataContext="{Binding ElementName=RootPage, Path=DataContext}"
-                                          LockMessage="Valyuta sozlamalariga ruxsat olish uchun admin parolini kiriting">
+                                          LockMessage="Valyuta sozlamalari bloklangan">
 					<controls:AdminLockOverlay.InnerContent>
 						<modules:CurrencySettingsView />
 					</controls:AdminLockOverlay.InnerContent>
 				</controls:AdminLockOverlay>
 			</TabItem>
 
-			<!-- Kategoriyalar -->
 			<TabItem Header="Kategoriyalar">
 				<controls:AdminLockOverlay x:Name="CategoryLock"
                                           DataContext="{Binding ElementName=RootPage, Path=DataContext.CategorySettings}"
-                                          LockMessage="Kategoriyalarni boshqarish uchun admin parolini kiriting">
+                                          LockMessage="Kategoriyalarni tahrirlash cheklangan">
 					<controls:AdminLockOverlay.InnerContent>
 						<modules:CategorySettingsView />
 					</controls:AdminLockOverlay.InnerContent>
 				</controls:AdminLockOverlay>
 			</TabItem>
 
-			<!-- Mahsulotlar -->
 			<TabItem Header="Mahsulotlar">
 				<controls:AdminLockOverlay x:Name="ProductLock"
                                           DataContext="{Binding ElementName=RootPage, Path=DataContext.ProductSettings}"
-                                          LockMessage="Mahsulotlar sozlamalariga ruxsat olish uchun admin parolini kiriting">
+                                          LockMessage="Mahsulotlar omboriga ruxsat talab qilinadi">
 					<controls:AdminLockOverlay.InnerContent>
 						<modules:ProductSettingsView />
 					</controls:AdminLockOverlay.InnerContent>
 				</controls:AdminLockOverlay>
 			</TabItem>
 
-			<!-- Mijozlar -->
 			<TabItem Header="Mijozlar">
 				<controls:AdminLockOverlay x:Name="CustomerLock"
                                           DataContext="{Binding ElementName=RootPage, Path=DataContext.CustomerSettings}"
-                                          LockMessage="Mijozlar boshqaruviga ruxsat olish uchun admin parolini kiriting">
+                                          LockMessage="Mijozlar ma'lumotlari himoyalangan">
 					<controls:AdminLockOverlay.InnerContent>
 						<modules:CustomerSettingsView />
 					</controls:AdminLockOverlay.InnerContent>
