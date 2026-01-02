@@ -40,7 +40,7 @@ partial class PaymentPageViewModel : ViewModelBase
     [ObservableProperty] private ObservableCollection<PaymentViewModel> availablePayments = [];
     [ObservableProperty] private ObservableCollection<CurrencyViewModel> availableCurrencies = [];
     [ObservableProperty] private ObservableCollection<CustomerViewModel> availableCustomers = [];
-    [ObservableProperty] private PaymentViewModel payment = new();
+    [ObservableProperty] private PaymentViewModel payment;
     [ObservableProperty] private CustomerViewModel? customer;
 
     private long customerId;
