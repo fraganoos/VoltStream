@@ -162,7 +162,7 @@
             FontSize="14"
             HeadersVisibility="Column, Row"
             IsReadOnly="True"
-            ItemsSource="{Binding FilteredSaleItems, Mode=TwoWay}"
+            ItemsSource="{Binding FilteredSaleItemsView}"
             SelectionMode="Single"
             utils:DataGridRowNumbering.IsEnabled="True">
             <DataGrid.Columns>
