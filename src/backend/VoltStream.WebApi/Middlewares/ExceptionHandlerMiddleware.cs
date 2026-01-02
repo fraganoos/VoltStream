@@ -1,5 +1,7 @@
 ﻿namespace VoltStream.WebApi.Middlewares;
 
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using System.Net;
 using VoltStream.Application.Commons.Exceptions;
 using VoltStream.WebApi.Models;
@@ -14,29 +16,60 @@ public class ExceptionHandlerMiddleware(RequestDelegate next)
         }
         catch (AppException ex)
         {
-            context.Response.StatusCode = (int)ex.StatusCode;
-            context.Response.ContentType = "application/json";
-
-            var errorResponse = new Response
-            {
-                StatusCode = (int)ex.StatusCode,
-                Message = ex.Message
-            };
-
-            await context.Response.WriteAsJsonAsync(errorResponse);
+            await HandleExceptionAsync(context, ex.StatusCode, ex.Message);
+        }
+        catch (DbUpdateException ex)
+        {
+            var (statusCode, message) = MapDatabaseException(ex);
+            await HandleExceptionAsync(context, statusCode, message);
         }
         catch (Exception ex)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            context.Response.ContentType = "application/json";
-
-            var errorResponse = new Response
-            {
-                StatusCode = (int)HttpStatusCode.InternalServerError,
-                Message = ex.Message
-            };
-
-            await context.Response.WriteAsJsonAsync(errorResponse);
+            var message = $"Tizimda kutilmagan xatolik: {ex.Message}";
+            await HandleExceptionAsync(context, HttpStatusCode.InternalServerError, message);
         }
+    }
+
+    private static (HttpStatusCode code, string message) MapDatabaseException(DbUpdateException ex)
+    {
+        if (ex.InnerException is PostgresException pgEx)
+        {
+            return pgEx.SqlState switch
+            {
+                "23503" or "23001" => (HttpStatusCode.Conflict,
+                    "Ushbu ma'lumot boshqa hujjatlarga bog'langanligi sababli uni o'chirish imkonsiz."),
+
+                "23505" => (HttpStatusCode.Conflict,
+                    "Bunday ma'lumot tizimda allaqachon mavjud. Iltimos, boshqa qiymat kiriting."),
+
+                "23502" => (HttpStatusCode.BadRequest,
+                    "Majburiy maydonlar to'ldirilmagan. Iltimos, barcha ma'lumotlarni tekshiring."),
+
+                "23514" => (HttpStatusCode.BadRequest,
+                    "Kiritilgan ma'lumotlar tizim qoidalariga mos kelmadi (Check Constraint)."),
+
+                "22001" => (HttpStatusCode.BadRequest,
+                    "Kiritilgan ma'lumot haddan tashqari uzun. Iltimos, qisqaroq matn kiriting."),
+
+                _ => (HttpStatusCode.InternalServerError, $"Ma'lumotlar bazasi xatosi: {pgEx.MessageText}")
+            };
+        }
+
+        var genericMessage = ex.InnerException?.Message ?? "Ma'lumotni saqlashda xatolik yuz berdi.";
+        return (HttpStatusCode.InternalServerError, genericMessage);
+    }
+
+    private static Task HandleExceptionAsync(HttpContext context, HttpStatusCode code, string message)
+    {
+        context.Response.StatusCode = (int)code;
+        context.Response.ContentType = "application/json";
+
+        var response = new Response
+        {
+            StatusCode = (int)code,
+            Message = message
+        };
+
+        return context.Response.WriteAsJsonAsync(response);
     }
 }
