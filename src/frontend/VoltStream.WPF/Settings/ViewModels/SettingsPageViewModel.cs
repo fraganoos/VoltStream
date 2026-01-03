@@ -73,13 +73,7 @@ public partial class SettingsPageViewModel : ViewModelBase
 
     #region Load Data
 
-    private async Task LoadData()
-    {
-        await LoadCurrencies();
-        await CategorySettings.LoadCategories();
-        await ProductSettings.LoadData();
-        await CustomerSettings.LoadCustomers();
-    }
+    private async Task LoadData() => await Task.WhenAll(LoadCurrencies(), CategorySettings.LoadCategories(), ProductSettings.LoadData(), CustomerSettings.LoadCustomers());
 
     private async Task LoadCurrencies()
     {

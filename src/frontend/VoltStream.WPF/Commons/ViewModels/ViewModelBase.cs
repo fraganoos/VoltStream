@@ -6,7 +6,6 @@ using VoltStream.WPF.Commons.Services;
 
 public abstract partial class ViewModelBase : ObservableObject
 {
-
     [ObservableProperty] private bool isLoading;
     [ObservableProperty] private string? error;
     [ObservableProperty] private string? success;

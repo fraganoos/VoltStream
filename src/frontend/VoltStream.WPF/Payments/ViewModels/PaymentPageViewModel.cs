@@ -47,22 +47,22 @@ partial class PaymentPageViewModel : ViewModelBase
     [RelayCommand]
     private async Task Submit()
     {
-        if (Customer is null) 
-        { 
+        if (Customer is null)
+        {
             Warning = "To'lov amalga oshirilayotgan shaxs tanlanishi shart";
             WeakReferenceMessenger.Default.Send(new FocusRequestMessage("customer"));
-            return; 
+            return;
         }
-        if (Payment.PaidAt is null) 
-        { 
+        if (Payment.PaidAt is null)
+        {
             Warning = "To'lov sanasi kiritilishi shart!";
-            WeakReferenceMessenger.Default.Send(new FocusRequestMessage("date")); 
-            return; 
+            WeakReferenceMessenger.Default.Send(new FocusRequestMessage("date"));
+            return;
         }
         if ((Payment.IncomeAmount ?? 0) + (Payment.ExpenseAmount ?? 0) <= 0)
         {
             Warning = "To'lov summasini to'g'irlang!";
-            WeakReferenceMessenger.Default.Send(new FocusRequestMessage(Payment.IsIncomeEnabled ? "income":"expense"));
+            WeakReferenceMessenger.Default.Send(new FocusRequestMessage(Payment.IsIncomeEnabled ? "income" : "expense"));
             return;
         }
 
@@ -92,12 +92,12 @@ partial class PaymentPageViewModel : ViewModelBase
             WeakReferenceMessenger.Default.Send(new FocusRequestMessage("customer"));
             return Task.CompletedTask;
         }
-        
-        if (Payment.PaidAt is null) 
-        { 
+
+        if (Payment.PaidAt is null)
+        {
             Warning = "Chegirmani boshqarish uchun sana kiritilishi shart!";
-            WeakReferenceMessenger.Default.Send(new FocusRequestMessage("date")); 
-            return Task.CompletedTask; 
+            WeakReferenceMessenger.Default.Send(new FocusRequestMessage("date"));
+            return Task.CompletedTask;
         }
 
         var discountData = new PayDiscountData(customerId, Customer.Name, Payment.Discount.Value, Payment.PaidAt!.Value);
