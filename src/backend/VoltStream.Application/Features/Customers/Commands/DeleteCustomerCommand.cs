@@ -18,16 +18,14 @@ public class DeleteCustomerCommandHandler(
             .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Customer), nameof(request.Id), request.Id);
 
-        context.Customers.Remove(customer);
+        var hasOperations = await context.CustomerOperations
+            .AnyAsync(co => co.CustomerId == request.Id, cancellationToken);
 
-        try
-        {
-            await context.SaveAsync(cancellationToken);
-        }
-        catch (DbUpdateException)
-        {
-            throw new ForbiddenException("Ushbu mijozda operatsiyalar mavjud bo'lgani uchun o'chirib bo'lmaydi.");
-        }
+        if (hasOperations)
+            throw new ForbiddenException("Mijozni o'chirib bo'lmaydi: Unda savdo yoki to'lov operatsiyalari mavjud.");
+
+        context.Customers.Remove(customer);
+        await context.SaveAsync(cancellationToken);
 
         return true;
     }

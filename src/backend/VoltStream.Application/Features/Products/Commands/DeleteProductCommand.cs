@@ -8,25 +8,23 @@ using VoltStream.Domain.Entities;
 
 public record DeleteProductCommand(long Id) : IRequest<bool>;
 
-public class DeleteProductCommandHandler(
-    IAppDbContext context)
+public class DeleteProductCommandHandler(IAppDbContext context)
     : IRequestHandler<DeleteProductCommand, bool>
 {
     public async Task<bool> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
     {
-        var product = await context.Products.FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
+        var product = await context.Products
+            .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Product), nameof(request.Id), request.Id);
 
-        context.Products.Remove(product);
+        var isSold = await context.SaleItems
+            .AnyAsync(si => si.ProductId == request.Id, cancellationToken);
 
-        try
-        {
-            await context.SaveAsync(cancellationToken);
-        }
-        catch (DbUpdateException)
-        {
-            throw new ForbiddenException("Ushbu mahsulot savdoda ishtirok etgani uchun o'chirib bo'lmaydi.");
-        }
+        if (isSold)
+            throw new ForbiddenException("Ushbu mahsulotni o'chirib bo'lmaydi: U bilan bog'liq savdo operatsiyalari mavjud.");
+
+        context.Products.Remove(product);
+        await context.SaveAsync(cancellationToken);
 
         return true;
     }

@@ -9,15 +9,53 @@ using System.Windows.Input;
 public partial class UserCalendar : UserControl
 {
     public static readonly DependencyProperty SelectedDateProperty =
-        DependencyProperty.Register("SelectedDate", typeof(DateTime?), typeof(UserCalendar), new PropertyMetadata(DateTime.Now, OnSelectedDateChanged));
+        DependencyProperty.Register(
+            nameof(SelectedDate),
+            typeof(DateTime?),
+            typeof(UserCalendar),
+            new PropertyMetadata(null, OnSelectedDateChanged));
 
     public UserCalendar()
     {
         InitializeComponent();
         TextBox.PreviewTextInput += DateTextBox_PreviewTextInput;
         TextBox.TextChanged += DateTextBox_TextChanged;
-        Loaded += UserCalendar_Loaded;
-        SetDefaultDate();
+        TextBox.LostFocus += DateTextBox_LostFocus;
+    }
+
+    private void DateTextBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(TextBox.Text))
+        {
+            SelectedDate = null;
+            return;
+        }
+
+        if (TextBox.Text.Length == 10)
+        {
+            string[] parts = TextBox.Text.Split('.');
+            if (parts.Length == 3)
+            {
+                _ = int.TryParse(parts[0], out int day);
+                _ = int.TryParse(parts[1], out int month);
+                _ = int.TryParse(parts[2], out int year);
+
+                year = year < 1 ? DateTime.Now.Year : year;
+
+                month = Math.Clamp(month, 1, 12);
+
+                int daysInMonth = DateTime.DaysInMonth(year, month);
+                day = Math.Clamp(day, 1, daysInMonth);
+
+                DateTime correctedDate = new(year, month, day);
+
+                SelectedDate = correctedDate;
+            }
+        }
+        else
+        {
+            TextBox.Text = SelectedDate?.ToString("dd.MM.yyyy") ?? string.Empty;
+        }
     }
 
     public DateTime? SelectedDate
@@ -26,56 +64,15 @@ public partial class UserCalendar : UserControl
         set => SetValue(SelectedDateProperty, value);
     }
 
-    private void UserCalendar_Loaded(object sender, RoutedEventArgs e)
-    {
-        if (SelectedDate is DateTime date)
-            TextBox.Text = date.ToString("dd.MM.yyyy");
-    }
-
     private static void OnSelectedDateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is UserCalendar userCalendar)
         {
-            if (e.NewValue is DateTime newDate)
-            {
-                userCalendar.TextBox.Text = newDate.ToString("dd.MM.yyyy");
-            }
-            else
-            {
-                userCalendar.TextBox.Text = string.Empty;
-            }
-        }
-    }
+            var newDate = (DateTime?)e.NewValue;
 
-    private void SetDefaultDate()
-    {
-        if (SelectedDate == null)
-        {
-            SelectedDate = DateTime.Now.Date;
-        }
-    }
+            userCalendar.calendar.SelectedDate = newDate;
 
-    private void DateTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-    {
-        var textBox = (TextBox)sender;
-
-        if (!string.IsNullOrEmpty(textBox.SelectedText))
-        {
-            _ = textBox.Text.Remove(textBox.SelectionStart, textBox.SelectionLength)
-                            .Insert(textBox.SelectionStart, e.Text);
-        }
-        else
-        {
-            _ = textBox.Text.Insert(textBox.CaretIndex, e.Text);
-        }
-
-        if (TextBox.Text.Length > 10)
-        {
-            e.Handled = true;
-        }
-        else
-        {
-            e.Handled = !IsValidDateInput(e.Text);
+            userCalendar.TextBox.Text = newDate?.ToString("dd.MM.yyyy") ?? string.Empty;
         }
     }
 
@@ -83,48 +80,28 @@ public partial class UserCalendar : UserControl
     {
         if (sender is TextBox textBox)
         {
-            if (textBox.Text.Length == 2 || (textBox.Text.Length == 5 && textBox.Text[2] != '.'))
-            {
-                textBox.Text += ".";
-                textBox.CaretIndex = textBox.Text.Length;
-            }
-            if (textBox.Text.Length == 5 && textBox.Text[2] == '.')
+            if (textBox.Text.Length is 2 or 5 && !textBox.Text.EndsWith("."))
             {
                 textBox.Text += ".";
                 textBox.CaretIndex = textBox.Text.Length;
             }
 
+            // Sana to'liq bo'lganda
             if (textBox.Text.Length == 10 && DateTime.TryParseExact(
-                textBox.Text,
-                "dd.MM.yyyy",
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out DateTime parsedDate))
+                textBox.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
             {
-                textBox.TextChanged -= DateTextBox_TextChanged;
-
-                SelectedDate = parsedDate;
-
-                textBox.TextChanged += DateTextBox_TextChanged;
+                if (SelectedDate != parsedDate)
+                    SelectedDate = parsedDate;
             }
-            else if (textBox.Text.Length < 10)
+            // Sana o'chirilganda
+            else if (textBox.Text.Length < 10 && SelectedDate != null)
             {
-                if (SelectedDate.HasValue)
-                {
-                    textBox.TextChanged -= DateTextBox_TextChanged;
-
-                    SetValue(SelectedDateProperty, null);
-
-                    textBox.TextChanged += DateTextBox_TextChanged;
-                }
+                SelectedDate = null;
             }
         }
     }
 
-    private void OpenCalendar_Click(object sender, RoutedEventArgs e)
-    {
-        Popup.IsOpen = true;
-    }
+    private void OpenCalendar_Click(object sender, RoutedEventArgs e) => Popup.IsOpen = true;
 
     private void Calendar_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -135,8 +112,11 @@ public partial class UserCalendar : UserControl
         }
     }
 
-    private static bool IsValidDateInput(string input) => DateInputRegex().IsMatch(input);
+    private void DateTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+        e.Handled = TextBox.Text.Length >= 10 || !DateInputRegex().IsMatch(e.Text);
+    }
 
-    [GeneratedRegex("[0-9]", RegexOptions.Compiled)]
+    [GeneratedRegex("[0-9]")]
     private static partial Regex DateInputRegex();
 }

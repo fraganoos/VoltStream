@@ -148,16 +148,10 @@ public partial class TurnoversPageViewModel : ViewModelBase
 
     private async Task LoadCustomersAsync()
     {
-        try
-        {
-            var response = await customersApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
-            if (response.IsSuccess)
-                Customers = mapper.Map<ObservableCollection<CustomerResponse>>(response.Data!);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Mijozlar yuklanmadi: {ex.Message}");
-        }
+        var response = await customersApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
+        if (response.IsSuccess)
+            Customers = mapper.Map<ObservableCollection<CustomerResponse>>(response.Data!);
+        else Error = response.Message ?? "Mijozlarni yuklashda xatolik yuz berdi.";
     }
 
     #endregion Load Data
@@ -167,7 +161,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
     [RelayCommand]
     private async Task Delete(CustomerOperationForDisplayViewModel? operation)
     {
-        if (operation == null)
+        if (operation is null)
         {
             Warning = "O'chiriladigan operatsiya tanlanmagan!";
             return;
@@ -247,9 +241,9 @@ public partial class TurnoversPageViewModel : ViewModelBase
     {
         try
         {
-            if (CustomerOperationsForDisplay == null || !CustomerOperationsForDisplay.Any())
+            if (CustomerOperationsForDisplay is null || !CustomerOperationsForDisplay.Any())
             {
-                MessageBox.Show("Eksport qilish uchun ma'lumot topilmadi.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+                Info = "Eksport qilish uchun ma'lumot topilmadi.";
                 return;
             }
 
@@ -331,20 +325,20 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 workbook.SaveAs(dialog.FileName);
             }
 
-            MessageBox.Show("Excel fayl muvaffaqiyatli saqlandi.", "Tayyor", MessageBoxButton.OK, MessageBoxImage.Information);
+            Success = "Excel fayl muvaffaqiyatli saqlandi.";
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Xatolik: {ex.Message}");
+            Error = $"Xatolik: {ex.Message}";
         }
     }
 
     [RelayCommand]
     private void Print()
     {
-        if (CustomerOperationsForDisplay == null || !CustomerOperationsForDisplay.Any())
+        if (CustomerOperationsForDisplay is null || !CustomerOperationsForDisplay.Any())
         {
-            MessageBox.Show("Chop etish uchun ma'lumot yo'q.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+            Info = "Chop etish uchun ma'lumot topilmadi.";
             return;
         }
 
@@ -356,9 +350,9 @@ public partial class TurnoversPageViewModel : ViewModelBase
     [RelayCommand]
     private void Preview()
     {
-        if (CustomerOperationsForDisplay == null || !CustomerOperationsForDisplay.Any())
+        if (CustomerOperationsForDisplay is null || !CustomerOperationsForDisplay.Any())
         {
-            MessageBox.Show("Ko'rsatish uchun ma'lumot yo'q.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+            Info = "Oldindan ko'rish uchun ma'lumot topilmadi.";
             return;
         }
 
@@ -377,10 +371,10 @@ public partial class TurnoversPageViewModel : ViewModelBase
         {
             try
             {
-                if (SelectedCustomer == null) { /* ... xato */ return; }
+                if (SelectedCustomer is null) { /* ... xato */ return; }
 
                 string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                string voltFolder = Path.Combine(documentsPath, "VoltStream"); // Volt papkasi
+                string voltFolder = Path.Combine(documentsPath, "VoltStream");
 
                 if (!Directory.Exists(voltFolder)) Directory.CreateDirectory(voltFolder);
 
@@ -390,21 +384,20 @@ public partial class TurnoversPageViewModel : ViewModelBase
                 string fileName = $"{safeName}_{begin}-{end}.pdf";
                 string pdfPath = Path.Combine(voltFolder, fileName);
 
-                // >>> ENDI TO'G'RI FUNKSIYA CHAQQIRILYAPTI <<<
                 ExportToPdf(doc, pdfPath);
 
                 if (File.Exists(pdfPath))
                 {
                     Process.Start("explorer.exe", $"/select,\"{pdfPath}\"");
-                    MessageBox.Show($"Hisobot \"{fileName}\" nomli fayl sifatida \"Documents\\VoltStream\" papkasida saqlandi.", "Muvaffaqiyatli", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Success = $"Hisobot \"{fileName}\" nomli fayl sifatida \"Documents\\VoltStream\" papkasida saqlandi.";
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ulashish/Saqlashda xatolik yuz berdi: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+                Error = $"Ulashish/Saqlashda xatolik yuz berdi: {ex.Message}";
             }
         };
-        // UI Layout
+
         var toolbar = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
         toolbar.Children.Add(shareButton);
 

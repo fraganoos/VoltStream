@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using VoltStream.WPF.Commons.Messages;
+using VoltStream.WPF.Commons.Services;
 using VoltStream.WPF.Commons.Utils;
 using VoltStream.WPF.Customer;
 using VoltStream.WPF.Payments.PayDiscountWindow.Modela;
@@ -27,53 +28,48 @@ public partial class PaymentsPage : Page
 
     private async void CustomerName_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        bool accept = ComboBoxHelper.BeforeUpdate(sender, e, "Xaridor", true);
-        if (accept)
+        if (!ComboBoxHelper.BeforeUpdate(sender, e, "Xaridor", true))
         {
-            var win = new CustomerWindow(CustomerName.Text)
+            if (string.IsNullOrEmpty(CustomerName.Text))
             {
-                Owner = Window.GetWindow(this),
+                lastBalans.Clear();
+                beginBalans.Clear();
+                Discount.Clear();
+            }
+            return;
+        }
+
+        var win = new CustomerWindow(CustomerName.Text) { Owner = Window.GetWindow(this) };
+
+        if (win.ShowDialog() == true)
+        {
+            var result = win.Result!;
+            var newCustomer = new CustomerRequest
+            {
+                Name = result.name,
+                Phone = result.phone,
+                Address = result.address,
+                Description = result.description,
+                Accounts = [ new() {
+                OpeningBalance = result.beginningSum,
+                Balance = result.beginningSum,
+                CurrencyId = 1
+            }]
             };
 
-            if (win.ShowDialog() == true)
+            var response = await vm.customersApi.CreateAsync(newCustomer).Handle();
+            if (response.IsSuccess)
             {
-                var customer = win.Result;
-                CustomerRequest newCustomer = new()
-                {
-                    Name = customer!.name,
-                    Phone = customer.phone,
-                    Address = customer.address,
-                    Description = customer.description,
-                    Accounts = [new()
-                    {
-                        OpeningBalance = customer.beginningSum,
-                        Balance = customer.beginningSum,
-                        Discount = 0,
-                        CurrencyId = 1
-                    }]
-                };
-
-                var response = await vm.customersApi.CreateAsync(newCustomer).Handle();
-                if (response.IsSuccess)
-                {
-                    await vm.LoadCustomersAsync();
-                    CustomerName.SelectedItem = vm.AvailableCustomers.FirstOrDefault(c => c.Id == response.Data);
-                }
-                else
-                {
-                    e.Handled = true;
-                    MessageBox.Show($"Xatolik yuz berdi. {response.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                await vm.LoadCustomersAsync();
+                CustomerName.SelectedItem = vm.AvailableCustomers.FirstOrDefault(c => c.Id == response.Data);
             }
-            else { e.Handled = true; }
+            else
+            {
+                e.Handled = true;
+                MessageBox.Show($"Xatolik: {response.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
-        if (CustomerName.Text is null or "")
-        {
-            lastBalans.Clear();
-            beginBalans.Clear();
-            Discount.Clear();
-        }
-
+        else e.Handled = true;
     }
 
     #region Messenger for Focus
@@ -107,27 +103,18 @@ public partial class PaymentsPage : Page
 
     private async void OnFocusRequestMessage(object recipient, FocusRequestMessage m)
     {
-        if (m.Value == "Income" && Chiqim.IsEnabled)
+        UIElement element = m.Value switch
         {
-            await Dispatcher.InvokeAsync(() =>
-            {
-                Chiqim.Focus();
-            });
-        }
-        else if (m.Value == "Expense" && Kirim.IsEnabled)
-        {
-            await Dispatcher.InvokeAsync(() =>
-            {
-                Kirim.Focus();
-            });
-        }
-        else if (m.Value == "Discription")
-        {
-            await Dispatcher.InvokeAsync(() =>
-            {
-                Discription.Focus();
-            });
-        }
+            "income" => Kirim,
+            "expense" => Chiqim,
+            "description" => Discription,
+            "date" => PaymentDate.TextBox,
+            "customer" => CustomerName,
+            _ => null!
+        };
+
+        if (element is { IsEnabled: true })
+            FocusNavigator.FocusElement(element);
     }
 
     #endregion Messenger for Focus
