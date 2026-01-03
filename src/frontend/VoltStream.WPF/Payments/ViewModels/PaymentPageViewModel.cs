@@ -109,7 +109,7 @@ partial class PaymentPageViewModel : ViewModelBase
 
     private async Task LoadDatagrid()
     {
-        var request = new FilteringRequest { Filters = new() { ["paidAt"] = [$"{Payment.PaidAt:yyyy.MM.dd}"], ["customer"] = ["include"], ["currency"] = ["include"] } };
+        var request = new FilteringRequest { Filters = new() { ["paidAt"] = [$"{Payment.PaidAt ?? DateTime.Today:yyyy.MM.dd}"], ["customer"] = ["include"], ["currency"] = ["include"] } };
         var response = await paymentApi.FilterAsync(request).Handle(l => IsLoading = l);
         if (response.IsSuccess)
             HistoryPayments = mapper.Map<ObservableCollection<PaymentViewModel>>(response.Data);

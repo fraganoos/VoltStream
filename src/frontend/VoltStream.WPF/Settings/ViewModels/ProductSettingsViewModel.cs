@@ -2,6 +2,7 @@ namespace VoltStream.WPF.Settings.ViewModels;
 
 using ApiServices.Extensions;
 using ApiServices.Interfaces;
+using ApiServices.Models;
 using ApiServices.Models.Requests;
 using ApiServices.Models.Responses;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -38,7 +39,16 @@ public partial class ProductSettingsViewModel : ViewModelBase
 
     private async Task LoadProducts()
     {
-        var response = await productsApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
+        FilteringRequest request = new()
+        {
+            Filters = new()
+            {
+                ["category"] = ["include"]
+            },
+            SortBy = "name"
+        };
+
+        var response = await productsApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
         if (response.IsSuccess)
             Products = new ObservableCollection<ProductResponse>(response.Data);
         else
