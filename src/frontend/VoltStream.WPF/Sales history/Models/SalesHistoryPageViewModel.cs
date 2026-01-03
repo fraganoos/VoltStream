@@ -360,8 +360,8 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
     private FixedDocument CreateFixedDocumentForPrint()
     {
-        double pageWidth = 793.7; 
-        double pageHeight = 1122.5; 
+        double pageWidth = 793.7;
+        double pageHeight = 1122.5;
         double margin = 20;
 
         var fixedDoc = new FixedDocument();
@@ -538,7 +538,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             page.Children.Add(pageNumberText);
 
             FixedPage.SetLeft(grid, margin);
-            FixedPage.SetTop(grid, gridTopMargin); 
+            FixedPage.SetTop(grid, gridTopMargin);
             page.Children.Add(grid);
 
             var pageContent = new PageContent();
