@@ -360,8 +360,8 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
     private FixedDocument CreateFixedDocumentForPrint()
     {
-        double pageWidth = 793.7; // A4 Width
-        double pageHeight = 1122.5; // A4 Height
+        double pageWidth = 793.7; 
+        double pageHeight = 1122.5; 
         double margin = 20;
 
         var fixedDoc = new FixedDocument();
@@ -380,7 +380,6 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
             var page = new FixedPage { Width = pageWidth, Height = pageHeight, Background = Brushes.White };
 
-            // Sarlavha faqat birinchi betda chiqishi uchun shart
             if (pageNumber == 1)
             {
                 var title = new TextBlock
@@ -395,11 +394,9 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 page.Children.Add(title);
             }
 
-            // Agar 1-bet bo'lsa jadval sal pastroqdan (45), qolgan betlarda yuqoriroqdan (20) boshlanadi
             double gridTopMargin = (pageNumber == 1) ? 45 : 20;
             var grid = new Grid { Margin = new Thickness(margin, gridTopMargin, margin, 40) };
 
-            // Ustun kengliklari
             double[] columnWidths = { 60, 90, 80, 90, 60, 60, 50, 50, 80, 100 };
 
             var headers = new[]
@@ -541,7 +538,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
             page.Children.Add(pageNumberText);
 
             FixedPage.SetLeft(grid, margin);
-            FixedPage.SetTop(grid, gridTopMargin); // Dinamik top margin
+            FixedPage.SetTop(grid, gridTopMargin); 
             page.Children.Add(grid);
 
             var pageContent = new PageContent();
