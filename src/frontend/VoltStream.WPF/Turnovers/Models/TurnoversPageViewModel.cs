@@ -675,7 +675,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
     private void AddOperationRow(Grid grid, CustomerOperationForDisplayViewModel op, double approxSingleRowHeight)
     {
         int row = grid.RowDefinitions.Count;
-        double requiredHeight = CalculateOperationRowHeight(op, 450); // Izoh ustuni kengligi 450
+        double requiredHeight = CalculateOperationRowHeight(op, 430); // Izoh ustuni kengligi 450
         grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(requiredHeight) });
 
         // Sana (0-ustun) - Normal qolgani ma'qul, o'qishga oson bo'ladi
