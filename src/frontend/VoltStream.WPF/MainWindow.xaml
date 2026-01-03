@@ -15,6 +15,8 @@
     ResizeMode="CanResizeWithGrip"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
+    MaxHeight="{x:Static SystemParameters.MaximizedPrimaryScreenHeight}"
+    MaxWidth="{x:Static SystemParameters.MaximizedPrimaryScreenWidth}"
     mc:Ignorable="d">
 
     <WindowChrome.WindowChrome>
