@@ -35,7 +35,7 @@ public partial class CustomerSettingsViewModel : ViewModelBase
         if (response.IsSuccess)
             Customers = new ObservableCollection<CustomerResponse>(response.Data);
         else
-            Error = response.Message ?? "Error loading customers";
+            Error = response.Message ?? "Mijozlarni yuklashda xatolik!";
     }
 
     [RelayCommand]
@@ -58,13 +58,13 @@ public partial class CustomerSettingsViewModel : ViewModelBase
 
             if (response.IsSuccess)
             {
-                Success = "Saved successfully";
+                Success = "Muvaffaqiyatli saqlandi!";
                 await LoadCustomers();
                 Cancel();
             }
             else
             {
-                Error = response.Message ?? "Error updating customer";
+                Error = response.Message ?? "Mijoz ma'lumotlarini yangilashda xatolik!";
             }
         }
         else
@@ -81,13 +81,13 @@ public partial class CustomerSettingsViewModel : ViewModelBase
 
             if (response.IsSuccess)
             {
-                Success = "Created successfully";
+                Success = "Yangi mijoz muvaffaqiyatli qo'shildi";
                 await LoadCustomers();
                 Cancel();
             }
             else
             {
-                Error = response.Message ?? "Error creating customer";
+                Error = response.Message ?? "Mijoz yaratishda xatolik!";
             }
         }
     }
@@ -97,28 +97,28 @@ public partial class CustomerSettingsViewModel : ViewModelBase
     {
         SelectedCustomer = customer;
         Name = customer.Name;
-        Phone = customer.Phone;
-        Address = customer.Address;
-        Description = customer.Description;
+        Phone = customer.Phone!;
+        Address = customer.Address!;
+        Description = customer.Description!;
         IsEditing = true;
     }
 
     [RelayCommand]
     private async Task Delete(CustomerResponse customer)
     {
-        if (MessageBox.Show("Are you sure?", "Delete", MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
+        if (MessageBox.Show($"{customer.Name} mijozni o'chirishni tasdiqlaysizmi?", "O'chirish", MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
 
         var response = await customersApi.DeleteAsync(customer.Id).Handle(isLoading => IsLoading = isLoading);
 
         if (response.IsSuccess)
         {
-            Success = "Deleted successfully";
+            Success = "Muvaffaqiyatli o'chirildi!";
             await LoadCustomers();
             if (SelectedCustomer == customer) Cancel();
         }
         else
         {
-            Error = response.Message ?? "Error deleting customer";
+            Error = response.Message ?? "Mijozni o'chirishda xatolik!";
         }
     }
 

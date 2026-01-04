@@ -286,7 +286,7 @@
 						<Button Grid.Column="2"
                                 x:Name="btnDiscount"
                                 Margin="50,2,5,2"
-                                Content=" Discount "
+                                Content=" Chegirma "
                                 FontSize="12"
                                 Command="{Binding OpenDiscountsWindowCommand}"
                                 FontWeight="Bold" />
@@ -306,7 +306,6 @@
                   GridLinesVisibility="Horizontal"
                   FontSize="14">
 
-			<!-- Barcha headerlarni o‘rtaga tekislash -->
 			<DataGrid.ColumnHeaderStyle>
 				<Style TargetType="DataGridColumnHeader">
 					<Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -315,7 +314,6 @@
 			</DataGrid.ColumnHeaderStyle>
 
 			<DataGrid.Columns>
-				<!-- Sana -->
 				<DataGridTextColumn Header="Sana"
                                     Binding="{Binding PaidAt, StringFormat={}{0:dd.MM.yyyy}}"
                                     Width="120">
@@ -326,12 +324,10 @@
 					</DataGridTextColumn.ElementStyle>
 				</DataGridTextColumn>
 
-				<!-- Mijoz -->
 				<DataGridTextColumn Header="Mijoz"
                                     Binding="{Binding Customer.Name}"
                                     Width="200" />
 
-				<!-- Net summa -->
 				<DataGridTextColumn Header="Net summa"
                                     Binding="{Binding NetAmount, StringFormat=N2}"
                                     Width="120">
@@ -343,7 +339,6 @@
 					</DataGridTextColumn.ElementStyle>
 				</DataGridTextColumn>
 
-				<!-- Valyuta turi -->
 				<DataGridTextColumn Header="Valyuta turi"
                                     Binding="{Binding Currency.Name}"
                                     Width="120">
@@ -354,7 +349,6 @@
 					</DataGridTextColumn.ElementStyle>
 				</DataGridTextColumn>
 
-				<!-- Kurs -->
 				<DataGridTextColumn Header="Kurs"
                                     Binding="{Binding ExchangeRate, StringFormat=N2}"
                                     Width="100">
@@ -366,7 +360,6 @@
 					</DataGridTextColumn.ElementStyle>
 				</DataGridTextColumn>
 
-				<!-- Summa -->
 				<DataGridTextColumn Header="Summa"
                                     Binding="{Binding Amount, StringFormat=N2}"
                                     Width="120">
@@ -378,8 +371,6 @@
 					</DataGridTextColumn.ElementStyle>
 				</DataGridTextColumn>
 
-
-				<!-- Izoh -->
 				<DataGridTextColumn Header="Izoh"
                                     Binding="{Binding Description}"
                                     Width="*">

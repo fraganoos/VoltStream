@@ -47,12 +47,12 @@
             FontWeight="SemiBold"
             Text="Chegirmadan foydalanish:" />
 
-			<!--  Mijoz  -->
 			<TextBlock
             Grid.Row="1"
             Margin="0,5"
             VerticalAlignment="Center"
             Text="Mijoz:" />
+
 			<TextBox
             x:Name="txtCustomer"
             Grid.Row="1"
@@ -61,13 +61,14 @@
             utils:TextBoxTabBehavior.EnableTabOnKeys="True"
             FontSize="14"
             IsEnabled="False" />
-			<!--  Yeg'ilgan discount  -->
+
 			<TextBlock
             Grid.Row="2"
             Grid.Column="0"
             Margin="0,5"
             VerticalAlignment="Center"
             Text="Jami Bonuslar:" />
+
 			<TextBox
             x:Name="AmauntDiscount"
             Grid.Row="2"
@@ -78,7 +79,6 @@
             FontSize="14"
             IsEnabled="False" />
 
-			<!--  ishlatilgan bonus  -->
 			<TextBlock
             Grid.Row="3"
             Grid.Column="0"
@@ -107,8 +107,6 @@
                 IsTabStop="False" />
 			</Grid>
 
-
-			<!--  Начальная сумма  -->
 			<TextBlock
             Grid.Row="4"
             Grid.Column="0"
@@ -137,7 +135,7 @@
                 Content="Hisob-Kitob"
                 FontSize="14" />
 			</Grid>
-			<!--  Описание  -->
+
 			<TextBlock
             Grid.Row="5"
             Grid.Column="0"
@@ -152,7 +150,6 @@
             utils:TextBoxTabBehavior.EnableTabOnKeys="True"
             FontSize="14" />
 
-			<!--  Кнопки  -->
 			<StackPanel
             Grid.Row="6"
             Grid.Column="1"

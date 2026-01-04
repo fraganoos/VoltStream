@@ -29,7 +29,7 @@ public partial class App : Application
                 ConfigureCoreServices(services);
             }).Build();
 
-        await host.StartAsync();
+        //await host.StartAsync();
         Services = host.Services;
 
         var loginWindow = Services.GetRequiredService<LoginWindow>();

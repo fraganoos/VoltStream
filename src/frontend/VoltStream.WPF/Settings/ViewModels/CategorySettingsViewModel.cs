@@ -29,14 +29,8 @@ public partial class CategorySettingsViewModel : ViewModelBase
     public async Task LoadCategories()
     {
         var response = await categoriesApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
-        if (response.IsSuccess)
-        {
-            Categories = new ObservableCollection<CategoryResponse>(response.Data);
-        }
-        else
-        {
-            Error = response.Message ?? "Error loading categories";
-        }
+        if (response.IsSuccess) Categories = new ObservableCollection<CategoryResponse>(response.Data);
+        else Error = response.Message ?? "Kategoriyalarni yuklashda xatolik!";
     }
 
     [RelayCommand]
@@ -51,14 +45,11 @@ public partial class CategorySettingsViewModel : ViewModelBase
 
             if (response.IsSuccess)
             {
-                Success = "Saved successfully";
+                Success = "Kategoriya ma'lumotlari muvaffaqiyatli yangilandi!";
                 await LoadCategories();
                 Cancel();
             }
-            else
-            {
-                Error = response.Message ?? "Error updating category";
-            }
+            else Error = response.Message ?? "Kategoriya ma'lumotlarini yangilashda xatolik!";
         }
         else
         {
@@ -67,14 +58,11 @@ public partial class CategorySettingsViewModel : ViewModelBase
 
             if (response.IsSuccess)
             {
-                Success = "Created successfully";
+                Success = "Kategoriya muvaffaqiyatli yaratildi!";
                 await LoadCategories();
                 Cancel();
             }
-            else
-            {
-                Error = response.Message ?? "Error creating category";
-            }
+            else Error = response.Message ?? "Kategoriya yaratishda xatolik!";
         }
     }
 
@@ -89,21 +77,16 @@ public partial class CategorySettingsViewModel : ViewModelBase
     [RelayCommand]
     private async Task Delete(CategoryResponse category)
     {
-        if (MessageBox.Show("Are you sure?", "Delete", MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
+        if (MessageBox.Show($"{category.Name} kategoriyani o'chirishni tasdiqlaysizmi?", "O'chirish", MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
 
-        var response = await categoriesApi.DeleteAsync(category.Id)
-            .Handle(isLoading => IsLoading = isLoading);
-
+        var response = await categoriesApi.DeleteAsync(category.Id).Handle(isLoading => IsLoading = isLoading);
         if (response.IsSuccess)
         {
-            Success = "Deleted successfully";
+            Success = "Kategoriya muvaffaqiyatli o'chirildi!";
             await LoadCategories();
             if (SelectedCategory == category) Cancel();
         }
-        else
-        {
-            Error = response.Message ?? "Error deleting category";
-        }
+        else Error = response.Message ?? "Kategoriyani o'chirishda xatolik!";
     }
 
     [RelayCommand]

@@ -21,9 +21,11 @@ using VoltStream.WPF.Commons;
 public partial class ProductPageViewModel : ViewModelBase
 {
     private readonly IServiceProvider services;
+    private readonly IMapper mapper;
 
     public ProductPageViewModel(IServiceProvider services)
     {
+        mapper = services.GetRequiredService<IMapper>();
         this.services = services;
         _ = LoadInitialDataAsync();
     }
@@ -71,8 +73,7 @@ public partial class ProductPageViewModel : ViewModelBase
         {
             if (FilteredProductItems == null || !FilteredProductItems.Any())
             {
-                MessageBox.Show("Eksport qilish uchun ma'lumot topilmadi.",
-                                "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+                Error = "Eksport qilish uchun ma'lumot topilmadi.";
                 return;
             }
 
@@ -153,14 +154,9 @@ public partial class ProductPageViewModel : ViewModelBase
                 workbook.SaveAs(dialog.FileName);
             }
 
-            MessageBox.Show("Ma'lumotlar muvaffaqiyatli Excel faylga eksport qilindi ✅",
-                            "Tayyor", MessageBoxButton.OK, MessageBoxImage.Information);
+            Success = "Ma'lumotlar muvaffaqiyatli Excel faylga eksport qilindi ✅";
         }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Xatolik yuz berdi: {ex.Message}",
-                            "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
+        catch (Exception ex) { Error = $"Xatolik yuz berdi: {ex.Message}"; }
     }
 
 
@@ -169,7 +165,7 @@ public partial class ProductPageViewModel : ViewModelBase
     {
         if (FilteredProductItems == null || !FilteredProductItems.Any())
         {
-            MessageBox.Show("Chop etish uchun ma’lumot topilmadi.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+            Info = "Chop etish uchun ma’lumot topilmadi.";
             return;
         }
 
@@ -185,10 +181,9 @@ public partial class ProductPageViewModel : ViewModelBase
     [RelayCommand]
     private void Preview()
     {
-        // FilteredProductItems - bu sizning DataGrid bog'langan list
         if (FilteredProductItems == null || !FilteredProductItems.Any())
         {
-            MessageBox.Show("Ko‘rsatish uchun ma’lumot yo‘q!", "Xabar", MessageBoxButton.OK, MessageBoxImage.Information);
+            Info = "Ko‘rsatish uchun ma’lumot yo‘q!";
             return;
         }
 
@@ -215,17 +210,15 @@ public partial class ProductPageViewModel : ViewModelBase
 
         var itemsList = FilteredProductItems.ToList();
 
-        // --- 1. Jami summani hisoblab olamiz ---
-        // Agar TotalAmount string bo'lsa, uni parse qilamiz
         decimal totalSumma = itemsList.Sum(item =>
         {
-            decimal.TryParse(item.TotalAmount?.ToString(), out decimal val);
+            _ = decimal.TryParse(item.TotalAmount?.ToString(), out decimal val);
             return val;
         });
 
         int currentItemIndex = 0;
         int pageNumber = 1;
-        double[] widths = { 35, 90, 100, 70, 80, 75, 60, 80, 120 };
+        double[] widths = [35, 90, 100, 70, 80, 75, 60, 80, 120];
 
         while (currentItemIndex < itemsList.Count)
         {
@@ -248,16 +241,12 @@ public partial class ProductPageViewModel : ViewModelBase
             var grid = new Grid { Width = pageWidth - (margin * 2) };
             foreach (var w in widths) grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(w) });
 
-            // Header qatori
             AddRow(grid, true, "№", "Mahsulot turi", "Nomi", "To'plamda", "To'plam soni", "Jami", "Birligi", "Narxi", "Summasi");
 
-            // Ma'lumotlarni qo'shish
-            // 3. Ma'lumotlarni qo'shish
             while (currentItemIndex < itemsList.Count)
             {
                 var item = itemsList[currentItemIndex];
 
-                // Qiymatlarni formatlash (Xatolarni oldini olish uchun)
                 string rollLen = double.TryParse(item.RollLength?.ToString(), out double rl) ? rl.ToString("N0") : "0";
                 string qty = double.TryParse(item.Quantity?.ToString(), out double q) ? q.ToString("N0") : "0";
                 string totalCnt = double.TryParse(item.TotalCount?.ToString(), out double tc) ? tc.ToString("N0") : "0";
@@ -276,7 +265,6 @@ public partial class ProductPageViewModel : ViewModelBase
         amount
     };
 
-                // Sig'ishini tekshirish uchun formatlangan rowData ni beramiz
                 double rowHeight = EstimateRowHeight(grid.Width, widths, rowData, false);
 
                 if (currentTop + grid.DesiredSize.Height + rowHeight > pageHeight - bottomReservedSpace)
@@ -287,16 +275,14 @@ public partial class ProductPageViewModel : ViewModelBase
                 currentItemIndex++;
             }
 
-            // --- 2. Jami qatorini qo'shish (Faqat eng oxirgi sahifada) ---
             if (currentItemIndex == itemsList.Count)
             {
                 string[] footerRow = { "", "JAMI:", "", "", "", "", "", "", totalSumma.ToString("N2") };
 
-                // Jami qatori sig'adimi?
                 double footerHeight = 35;
                 if (currentTop + grid.DesiredSize.Height + footerHeight < pageHeight - bottomReservedSpace)
                 {
-                    AddRow(grid, true, footerRow); // true berdik, qalinroq chiqishi uchun
+                    AddRow(grid, true, footerRow);
                 }
                 else
                 {
@@ -309,7 +295,6 @@ public partial class ProductPageViewModel : ViewModelBase
             FixedPage.SetLeft(grid, margin);
             page.Children.Add(grid);
 
-            // Sahifa raqami
             var footer = new TextBlock
             {
                 Text = $"{pageNumber}-bet",
@@ -333,11 +318,8 @@ public partial class ProductPageViewModel : ViewModelBase
     private double EstimateRowHeight(double width, double[] widths, string[] data, bool isHeader)
     {
         var testGrid = new Grid { Width = width };
-        // Ustunlarni aniqlaymiz
         foreach (var w in widths)
-        {
             testGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(w) });
-        }
 
         // Vaqtincha qator qo'shamiz
         AddRow(testGrid, isHeader, data);
@@ -409,40 +391,29 @@ public partial class ProductPageViewModel : ViewModelBase
 
     public async Task LoadWarehouseItemsAsync()
     {
-        try
+        FilteringRequest request = new() { Filters = new() { ["Product"] = ["include:Category"] } };
+
+        var srvc = services.GetRequiredService<IWarehouseStocksApi>();
+        var response = await srvc.Filter(request).Handle(l => IsLoading = l);
+        if (!response.IsSuccess)
         {
-            FilteringRequest request = new()
-            {
-                Filters = new()
-                {
-                    ["Product"] = ["include:Category"]
-                }
-            };
-
-            var srvc = services.GetRequiredService<IWarehouseStocksApi>();
-            var response = await srvc.Filter(request).Handle();
-
-            if (response.IsSuccess)
-            {
-                ProductItems.Clear();
-                foreach (var item in response.Data!)
-                {
-                    ProductItems.Add(new ProductItemViewModel
-                    {
-                        Category = item.Product.Category.Name,
-                        Name = item.Product.Name,
-                        RollLength = item.LengthPerRoll,
-                        Quantity = item.RollCount,
-                        Price = item.UnitPrice,
-                        Unit = item.Product.Unit,
-                        TotalCount = (int)item.TotalLength,
-                    });
-                }
-            }
+            Error = response.Message ?? "Ombor qoldiqlarini yuklashda xatolik yuz berdi.";
+            return;
         }
-        catch (Exception ex)
+
+        ProductItems.Clear();
+        foreach (var item in response.Data!)
         {
-            MessageBox.Show($"Xatolik: {ex.Message}");
+            ProductItems.Add(new ProductItemViewModel
+            {
+                Category = item.Product.Category.Name,
+                Name = item.Product.Name,
+                RollLength = item.LengthPerRoll,
+                Quantity = item.RollCount,
+                Price = item.UnitPrice,
+                Unit = item.Product.Unit,
+                TotalCount = (int)item.TotalLength,
+            });
         }
     }
 
@@ -478,37 +449,22 @@ public partial class ProductPageViewModel : ViewModelBase
 
     public async Task LoadCategoriesAsync()
     {
-        try
-        {
-            var response = await services.GetRequiredService<ICategoriesApi>().GetAllAsync().Handle();
-            var mapper = services.GetRequiredService<IMapper>();
-            if (response.IsSuccess)
-                Categories = mapper.Map<ObservableCollection<CategoryResponse>>(response.Data!);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Kategoriya yuklanmadi: {ex.Message}");
-        }
+        var response = await services.GetRequiredService<ICategoriesApi>().GetAllAsync().Handle(l => IsLoading = l);
+        if (response.IsSuccess) Categories = mapper.Map<ObservableCollection<CategoryResponse>>(response.Data!);
+        else Error = response.Message ?? "Kategoriyalar yuklanmadi.";
     }
 
     public async Task LoadProductsAsync()
     {
-        try
+        var response = await services.GetRequiredService<IProductsApi>().GetAllAsync().Handle(l => IsLoading = l);
+        if (response.IsSuccess)
         {
-            var response = await services.GetRequiredService<IProductsApi>().GetAllAsync().Handle();
-            var mapper = services.GetRequiredService<IMapper>();
-            if (response.IsSuccess)
-            {
-                AllProducts = mapper.Map<ObservableCollection<ProductResponse>>(response.Data!);
-                Products.Clear();
-                foreach (var product in AllProducts)
-                    Products.Add(product);
-            }
+            AllProducts = mapper.Map<ObservableCollection<ProductResponse>>(response.Data!);
+            Products.Clear();
+            foreach (var product in AllProducts)
+                Products.Add(product);
         }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Mahsulotlar yuklanmadi: {ex.Message}");
-        }
+        else Error = response.Message ?? "Mahsulotlar yuklanmadi.";
     }
 
     private void ApplyFilter()

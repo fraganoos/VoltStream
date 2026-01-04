@@ -66,58 +66,32 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
     public async Task LoadCategoriesAsync()
     {
-        try
-        {
-            var response = await services.GetRequiredService<ICategoriesApi>().GetAllAsync().Handle(isLoading => IsLoading = isLoading);
-            if (response.IsSuccess)
-                Categories = mapper.Map<ObservableCollection<CategoryResponse>>(response.Data!);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Kategoriya yuklanmadi: {ex.Message}");
-        }
+        var response = await services.GetRequiredService<ICategoriesApi>().GetAllAsync().Handle(isLoading => IsLoading = isLoading);
+        if (response.IsSuccess) Categories = mapper.Map<ObservableCollection<CategoryResponse>>(response.Data!);
+        else Error = response.Message ?? "Kategoriya yuklashda xatolik!";
     }
 
     public async Task LoadProductsAsync()
     {
-        try
-        {
-            FilteringRequest request = new()
-            {
-                Filters = new()
-                {
-                    ["Category"] = ["include"]
-                }
-            };
+        FilteringRequest request = new() { Filters = new() { ["Category"] = ["include"] } };
 
-            var response = await services.GetRequiredService<IProductsApi>().Filter(request).Handle(isLoading => IsLoading = isLoading);
-            if (response.IsSuccess)
-            {
-                AllProducts = mapper.Map<ObservableCollection<ProductResponse>>(response.Data!);
-
-                Products.Clear();
-                foreach (var product in AllProducts)
-                    Products.Add(product);
-            }
-        }
-        catch (Exception ex)
+        var response = await services.GetRequiredService<IProductsApi>().Filter(request).Handle(isLoading => IsLoading = isLoading);
+        if (response.IsSuccess)
         {
-            MessageBox.Show($"Mahsulotlar yuklanmadi: {ex.Message}");
+            AllProducts = mapper.Map<ObservableCollection<ProductResponse>>(response.Data!);
+
+            Products.Clear();
+            foreach (var product in AllProducts)
+                Products.Add(product);
         }
+        else Error = response.Message ?? "Mahsulotlar yuklashda xatolik!";
     }
 
     public async Task LoadCustomersAsync()
     {
-        try
-        {
-            var response = await services.GetRequiredService<ICustomersApi>().GetAllAsync().Handle();
-            if (response.IsSuccess)
-                Customers = mapper.Map<ObservableCollection<CustomerResponse>>(response.Data!);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Mahsulotlar yuklanmadi: {ex.Message}");
-        }
+        var response = await services.GetRequiredService<ICustomersApi>().GetAllAsync().Handle();
+        if (response.IsSuccess) Customers = mapper.Map<ObservableCollection<CustomerResponse>>(response.Data!);
+        else Error = response.Message ?? "Mijozlarni yuklashda xatolik!";
     }
 
     public async Task LoadSalesHistoryAsync()
@@ -189,8 +163,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
         {
             if (visibleItems == null || visibleItems.Count == 0)
             {
-                MessageBox.Show("Eksport qilish uchun ma'lumot topilmadi.",
-                                "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+                Info = "Eksport qilish uchun ma'lumot topilmadi.";
                 return;
             }
 
@@ -265,13 +238,9 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
                 workbook.SaveAs(dialog.FileName);
             }
 
-            MessageBox.Show("Ma'lumotlar muvaffaqiyatli Excel faylga eksport qilindi ✅",
-                            "Tayyor", MessageBoxButton.OK, MessageBoxImage.Information);
+            Success = "Ma'lumotlar muvaffaqiyatli Excel faylga eksport qilindi ✅";
         }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
+        catch { Error = "Ma'lumotlarni Excel faylga eksport qilishda xatolik yuz berdi!"; }
     }
 
     [RelayCommand]
@@ -281,8 +250,7 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
 
         if (visibleItems == null || visibleItems.Count == 0)
         {
-            MessageBox.Show("Chop etish uchun ma’lumot topilmadi.",
-                            "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+            Info = "Chop etish uchun ma’lumot topilmadi.";
             return;
         }
 
@@ -297,9 +265,9 @@ public partial class SalesHistoryPageViewModel : ViewModelBase
     {
         var visibleItems = FilteredSaleItemsView.Cast<ProductItemViewModel>().ToList();
 
-        if (visibleItems == null || !visibleItems.Any())
+        if (visibleItems == null || visibleItems.Count == 0)
         {
-            MessageBox.Show("Ko‘rsatish uchun ma’lumot yo‘q.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+            Info = "Ko‘rsatish uchun ma’lumot yo‘q.";
             return;
         }
         FinalAmount = visibleItems.Sum(x => x.TotalAmount);
