@@ -139,7 +139,7 @@ public partial class SalePageViewModel : ViewModelBase
         var response = await categoriesApi.Filter(request).Handle(l => IsLoading = l);
         if (!response.IsSuccess) { Error = response.Message ?? "Kategoriyalarni yuklashda xatolik!"; return; }
 
-        Categories = mapper.Map <ObservableCollection<CategoryViewModel>>(response.Data!);
+        Categories = mapper.Map<ObservableCollection<CategoryViewModel>>(response.Data!);
         if (SelectedCategoryId > 0)
             SelectedCategory = Categories.FirstOrDefault(c => c.Id == SelectedCategoryId);
         RefreshProducts();

@@ -240,7 +240,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
 
             Success = "Ma'lumotlar muvaffaqiyatli eksport qilindi";
         }
-        catch(Exception ex) { Error = $"Excel faylga eksport qilishda xatolik yuz berdi: {ex.Message}"; }
+        catch (Exception ex) { Error = $"Excel faylga eksport qilishda xatolik yuz berdi: {ex.Message}"; }
     }
 
     [RelayCommand]

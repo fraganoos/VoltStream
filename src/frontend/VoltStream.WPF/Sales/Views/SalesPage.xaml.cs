@@ -94,45 +94,40 @@ public partial class SalesPage : Page
     {
 
         bool accept = ComboBoxHelper.BeforeUpdate(sender, e, "Xaridor", true);
-        if (accept)
-        {
-            var win = new CustomerWindow(CustomerName.Text)
-            {
-                Owner = Window.GetWindow(this),
-            };
+        if (!accept) return;
 
-            if (win.ShowDialog() == true)
+        var win = new CustomerWindow(CustomerName.Text)
+        {
+            Owner = Window.GetWindow(this),
+        };
+
+        if (win.ShowDialog() == true)
+        {
+            var customer = win.Result;
+            CustomerRequest newCustomer = new()
             {
-                var customer = win.Result;
-                CustomerRequest newCustomer = new()
-                {
-                    Name = customer!.name,
-                    Phone = customer.phone,
-                    Address = customer.address,
-                    Description = customer.description,
-                    Accounts = [new()
+                Name = customer!.name,
+                Phone = customer.phone,
+                Address = customer.address,
+                Description = customer.description,
+                Accounts = [new()
                     {
                         OpeningBalance = customer.beginningSum,
                         Balance = customer.beginningSum,
                     }]
-                };
+            };
 
-                var response = await customersApi.CreateAsync(newCustomer).Handle();
-                if (response.IsSuccess)
-                {
-                    await LoadCustomerByIdAsync(response.Data);
-                    CustomerName.Text = newCustomer.Name;
-                    sale.CustomerId = response.Data;
-                    await LoadCurrencyAsync();
-                }
-                else
-                {
-                    e.Handled = true;
-                    MessageBox.Show($"Xatolik yuz berdi. {response.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+            var response = await customersApi.CreateAsync(newCustomer).Handle();
+            if (response.IsSuccess)
+            {
+                await LoadCustomerByIdAsync(response.Data);
+                CustomerName.Text = newCustomer.Name;
+                sale.CustomerId = response.Data;
+                await LoadCurrencyAsync();
             }
-            else { e.Handled = true; }
+            else sale.Error = response.Message ?? "Xaridorni yaratishda xatolik yuz berdi!";
         }
+        else { e.Handled = true; }
     }
 
     private async void CustomerName_LostFocus(object sender, RoutedEventArgs e)
@@ -153,39 +148,30 @@ public partial class SalesPage : Page
 
     private async Task LoadCustomerByIdAsync(long? customerId)
     {
-        try
+        if (!customerId.HasValue || customerId.Value == 0)
+            return;
+
+
+        FilteringRequest request = new()
         {
-            if (customerId.HasValue && customerId.Value != 0)
+            Filters = new()
             {
-                FilteringRequest request = new()
-                {
-                    Filters = new()
-                    {
-                        ["id"] = [customerId.Value.ToString()],
-                        ["accounts"] = ["include:currency"]
-                    }
-                };
-
-                var response = await customersApi.FilterAsync(request).Handle();
-                if (response.IsSuccess)
-                {
-                    var customer = response.Data!.First();
-
-                    beginBalans.Text = GetAccountsSumInUzsString(customer);
-                    tel.Text = customer.Phone;
-                    CalcSaleSum();
-                }
-                else
-                {
-                    var errorMsg = response.Message ?? "Unknown error";
-                    sale.Error = errorMsg;
-                }
+                ["id"] = [customerId.Value.ToString()],
+                ["accounts"] = ["include:currency"]
             }
-        }
-        catch (Exception ex)
+        };
+
+        var response = await customersApi.FilterAsync(request).Handle();
+        if (response.IsSuccess)
         {
-            MessageBox.Show("An error occurred: " + ex.Message);
+            var customer = response.Data!.First();
+
+            beginBalans.Text = GetAccountsSumInUzsString(customer);
+            tel.Text = customer.Phone;
+            CalcSaleSum();
         }
+        else sale.Error = response.Message ?? "Xaridor ma'lumotlarini yuklashda xatolik yuz berdi!";
+
     }
 
 
@@ -213,32 +199,20 @@ public partial class SalesPage : Page
     }
     private async Task LoadCustomerNameAsync()
     {
-        try
+        var selectedValue = CustomerName.SelectedValue;
+        var response = await customersApi.GetAllAsync().Handle();
+
+        if (response.IsSuccess)
         {
-            var selectedValue = CustomerName.SelectedValue;
-            var response = await customersApi.GetAllAsync();
+            List<CustomerResponse> customers = response.Data!;
+            CustomerName.ItemsSource = customers;
+            CustomerName.DisplayMemberPath = "Name";
+            CustomerName.SelectedValuePath = "Id";
 
-            if (response.IsSuccess)
-            {
-                List<CustomerResponse> customers = response.Data!;
-                CustomerName.ItemsSource = customers;
-                CustomerName.DisplayMemberPath = "Name";
-                CustomerName.SelectedValuePath = "Id";
-
-                if (selectedValue is not null)
-                    CustomerName.SelectedValue = selectedValue;
-            }
-            else
-            {
-                var errorMsg = response.Message ?? "Unknown error";
-                MessageBox.Show("Error fetching customers: " + errorMsg);
-            }
-
+            if (selectedValue is not null)
+                CustomerName.SelectedValue = selectedValue;
         }
-        catch (Exception ex)
-        {
-            MessageBox.Show("An error occurred: " + ex.Message);
-        }
+        else sale.Error = response.Message ?? "Xaridorlarni yuklashda xatolik yuz berdi!";
     }
 
     private void TxtFinalSumProduct_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -248,7 +222,7 @@ public partial class SalesPage : Page
         {
             if (finalSum > sum)
             {
-                MessageBox.Show("Chegirmadan keyingi summa umumiy summadan katta bo'lishi mumkin emas.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                sale.Error = "Chegirmadan keyingi summa umumiy summadan katta bo'lishi mumkin emas.";
                 txtPerDiscount.Text = null;
                 txtDiscount.Text = null;
                 txtFinalSumProduct.Text = null;
@@ -275,7 +249,7 @@ public partial class SalesPage : Page
         {
             if (discount > sum)
             {
-                MessageBox.Show("Chegirma umumiy summadan katta bo'lishi mumkin emas.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                sale.Error = "Chegirma umumiy summadan katta bo'lishi mumkin emas.";
                 txtPerDiscount.Text = null;
                 txtDiscount.Text = null;
                 txtFinalSumProduct.Text = null;
@@ -302,7 +276,7 @@ public partial class SalesPage : Page
         {
             if (perDiscount >= 100)
             {
-                MessageBox.Show("Chegirma 100% dan katta bo'lishi mumkin emas.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+                sale.Error = "Chegirma 100% dan katta bo'lishi mumkin emas.";
                 txtPerDiscount.Text = null;
                 txtDiscount.Text = null;
                 txtFinalSumProduct.Text = null;
@@ -446,9 +420,8 @@ public partial class SalesPage : Page
     {
         long? categoryId = null;
         if (cbxCategoryName.SelectedValue is not null)
-        {
             categoryId = (long)cbxCategoryName.SelectedValue;
-        }
+
         await LoadProductAsync(categoryId);
     }
     private void CbxProductName_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -472,9 +445,8 @@ public partial class SalesPage : Page
     {
         long? productId = null;
         if (cbxProductName.SelectedValue is not null)
-        {
             productId = (long)cbxProductName.SelectedValue;
-        }
+
         await LoadWarehouseItemsAsync(productId);
     }
 
@@ -485,109 +457,68 @@ public partial class SalesPage : Page
 
     private async Task LoadCategoryAsync()
     {
-        try
-        {
-            var selectedValue = cbxCategoryName.SelectedValue;
+        var selectedValue = cbxCategoryName.SelectedValue;
 
-            var response = await categoriesApi.GetAllAsync().Handle();
-            if (response.IsSuccess)
-            {
-                List<CategoryResponse> categories = response.Data!;
-                cbxCategoryName.ItemsSource = categories;
-                cbxCategoryName.DisplayMemberPath = "Name";
-                cbxCategoryName.SelectedValuePath = "Id";
-
-                if (selectedValue is not null)
-                    cbxCategoryName.SelectedValue = selectedValue;
-            }
-            else
-            {
-                var errorMsg = response.Message ?? "Unknown error";
-                MessageBox.Show("Error fetching categories: " + errorMsg);
-            }
-        }
-        catch (Exception ex)
+        var response = await categoriesApi.GetAllAsync().Handle();
+        if (response.IsSuccess)
         {
-            MessageBox.Show("An error occurred: " + ex.Message);
+            List<CategoryResponse> categories = response.Data!;
+            cbxCategoryName.ItemsSource = categories;
+            cbxCategoryName.DisplayMemberPath = "Name";
+            cbxCategoryName.SelectedValuePath = "Id";
+
+            if (selectedValue is not null)
+                cbxCategoryName.SelectedValue = selectedValue;
         }
+        else sale.Error = response.Message ?? "Kategoriyalarni yuklashda xatolik yuz berdi!";
     }
 
     private async Task LoadProductAsync(long? categoryId)
     {
-        try
+        var selectedValue = cbxProductName.SelectedValue;
+        Response<List<ProductResponse>> response;
+
+        FilteringRequest request = new() { Filters = new() { ["category"] = ["include"] } };
+        if (categoryId.HasValue && categoryId.Value != 0)
+            request.Filters["CategoryId"] = [categoryId.Value.ToString()];
+
+        response = await productsApi.Filter(request).Handle();
+
+        if (response.IsSuccess)
         {
-            var selectedValue = cbxProductName.SelectedValue;
-            Response<List<ProductResponse>> response;
+            var products = response.Data;
+            cbxProductName.ItemsSource = products;
+            cbxProductName.DisplayMemberPath = "Name";
+            cbxProductName.SelectedValuePath = "Id";
 
-            FilteringRequest request = new()
-            {
-                Filters = new()
-                {
-                    ["category"] = ["include"]
-                }
-            };
-
-            if (categoryId.HasValue && categoryId.Value != 0)
-                request.Filters["CategoryId"] = [categoryId.Value.ToString()];
-
-            response = await productsApi.Filter(request).Handle();
-
-            if (response.IsSuccess)
-            {
-                var products = response.Data;
-                cbxProductName.ItemsSource = products;
-                cbxProductName.DisplayMemberPath = "Name";
-                cbxProductName.SelectedValuePath = "Id";
-
-                if (selectedValue is not null)
-                    cbxProductName.SelectedValue = selectedValue;
-            }
-            else
-            {
-                var errorMsg = response.Message ?? "Unknown error";
-                MessageBox.Show("Ошибка при получении продукции: " + errorMsg);
-            }
+            if (selectedValue is not null)
+                cbxProductName.SelectedValue = selectedValue;
         }
-        catch (Exception ex)
-        {
-            MessageBox.Show("Произошла ошибка: " + ex.Message);
-        }
+        else
+            sale.Error = response.Message ?? "Mahsulotlarni yuklashda xatolik yuz berdi!";
     }
 
     private async Task LoadWarehouseItemsAsync(long? productId)
     {
-        try
+        var selectedValue = cbxPerRollCount.SelectedValue;
+        Response<List<WarehouseStockResponse>> response;
+        if (!productId.HasValue || productId.Value == 0)
         {
-            var selectedValue = cbxPerRollCount.SelectedValue;
-            Response<List<WarehouseStockResponse>> response;
-            if (productId.HasValue && productId.Value != 0)
-            {
-                response = await warehouseItemsApi.GetProductDetailsFromWarehouseAsync(productId.Value).Handle();
-            }
-            else
-            {
-                cbxPerRollCount.ItemsSource = null;
-                return;
-            }
-            if (response.IsSuccess)
-            {
-                var warehouseItems = response.Data;
-                cbxPerRollCount.ItemsSource = warehouseItems;
-                cbxPerRollCount.DisplayMemberPath = "LengthPerRoll";
-                cbxPerRollCount.SelectedValuePath = "LengthPerRoll";
-                if (selectedValue is not null)
-                    cbxPerRollCount.SelectedValue = selectedValue;
-            }
-            else
-            {
-                var errorMsg = response.Message ?? "Unknown error";
-                MessageBox.Show("Ошибка при получении данных со склада: " + errorMsg);
-            }
+            cbxPerRollCount.ItemsSource = null;
+            return;
         }
-        catch (Exception ex)
+
+        response = await warehouseItemsApi.GetProductDetailsFromWarehouseAsync(productId.Value).Handle();
+        if (response.IsSuccess)
         {
-            MessageBox.Show("Произошла ошибка: " + ex.Message);
+            var warehouseItems = response.Data;
+            cbxPerRollCount.ItemsSource = warehouseItems;
+            cbxPerRollCount.DisplayMemberPath = "LengthPerRoll";
+            cbxPerRollCount.SelectedValuePath = "LengthPerRoll";
+            if (selectedValue is not null)
+                cbxPerRollCount.SelectedValue = selectedValue;
         }
+        else sale.Error = response.Message ?? "Ombor ma'lumotlarini yuklashda xatolik yuz berdi!";
     }
 
     private void AddButton_Click(object sender, RoutedEventArgs e)
@@ -647,69 +578,69 @@ public partial class SalesPage : Page
 
         else if (cbxProductName.SelectedValue == null)
         {
-            MessageBox.Show("Mahsulot tanlanmagan.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
             cbxProductName.Focus();
+            sale.Warning = "Mahsulot tanlanmagan.";
             isSuccess = false;
         }
 
         else if (cbxPerRollCount.SelectedValue == null)
         {
-            MessageBox.Show("Har bir rulondagi miqdor tanlanmagan.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
             cbxPerRollCount.Focus();
+            sale.Warning = "Har bir rulondagi miqdor tanlanmagan.";
             isSuccess = false;
         }
 
         else if (!int.TryParse(txtRollCount.Text, out int rollCount) || rollCount <= 0)
         {
-            MessageBox.Show("Rulon soni kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
             txtRollCount.Focus();
+            sale.Warning = "Rulon soni kiritilishi shart va 0 dan katta bo'lishi kerak.";
             isSuccess = false;
         }
 
         else if (!decimal.TryParse(txtQuantity.Text, out decimal quantity) || quantity <= 0)
         {
-            MessageBox.Show("Jami miqdor (metr) kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
             txtQuantity.Focus();
+            sale.Warning = "Jami miqdor (metr) kiritilishi shart va 0 dan katta bo'lishi kerak.";
             isSuccess = false;
         }
 
         else if (!decimal.TryParse(txtPrice.Text, out decimal price) || price <= 0)
         {
-            MessageBox.Show("Narx kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
             txtPrice.Focus();
+            sale.Warning = "Narx kiritilishi shart va 0 dan katta bo'lishi kerak.";
             isSuccess = false;
         }
 
         else if (!decimal.TryParse(txtSum.Text, out decimal sum) || sum <= 0)
         {
-            MessageBox.Show("Jami summa kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            sale.Warning = "Jami summa kiritilishi shart va 0 dan katta bo'lishi kerak.";
             txtSum.Focus();
             isSuccess = false;
         }
 
         else if (!decimal.TryParse(txtFinalSumProduct.Text, out decimal finalSumProduct) || finalSumProduct <= 0)
         {
-            MessageBox.Show("Umumiy summa kiritilishi shart va 0 dan katta bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            sale.Warning = "Umumiy summa kiritilishi shart va 0 dan katta bo'lishi kerak.";
             txtFinalSumProduct.Focus();
             isSuccess = false;
         }
         else if (!string.IsNullOrWhiteSpace(txtPerDiscount.Text) && !decimal.TryParse(txtPerDiscount.Text, out perDiscount))
         {
-            MessageBox.Show("Foiz chegirma noto'g'ri formatda.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            sale.Warning = "Foiz chegirma noto'g'ri formatda.";
             txtPerDiscount.Focus();
             isSuccess = false;
         }
 
         else if (!string.IsNullOrWhiteSpace(txtDiscount.Text) && !decimal.TryParse(txtDiscount.Text, out decimal discount))
         {
-            MessageBox.Show("Chegirma miqdori noto'g'ri formatda.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            sale.Warning = "Chegirma miqdori noto'g'ri formatda.";
             txtDiscount.Focus();
             isSuccess = false;
         }
 
         else if (perDiscount < 0 || perDiscount > 100)
         {
-            MessageBox.Show("Foiz chegirma 0% dan 100% gacha bo'lishi kerak.", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            sale.Warning = "Foiz chegirma 0% dan 100% gacha bo'lishi kerak.";
             txtPerDiscount.Focus();
             isSuccess = false;
         }
@@ -758,7 +689,7 @@ public partial class SalesPage : Page
     {
         if (saleDate.SelectedDate is null)
         {
-            MessageBox.Show("Sana tanlanmagan!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            sale.Warning = "Sana tanlanmagan!";
             saleDate.Focus();
             return;
         }
@@ -774,6 +705,8 @@ public partial class SalesPage : Page
             return;
         }
 
+        if (!Confirm($"{sale.OperationDate:yyy-MM-dd} sana uchun\n{sale.SaleItems.Select(si => si.ProductId).Distinct().Count()} turdagi mahsulot bilan savdo amalga oshirilmoqda.\n Savdoni tasdiqlaysizmi?"))
+            return;
 
         var saleRequest = new SaleRequest
         {
@@ -826,13 +759,7 @@ public partial class SalesPage : Page
 
     private async Task LoadCurrencyAsync()
     {
-        FilteringRequest request = new()
-        {
-            Filters = new()
-            {
-                ["isdefault"] = ["true"]
-            }
-        };
+        FilteringRequest request = new() { Filters = new() { ["isdefault"] = ["true"] } };
 
         var response = await currenciesApi.Filter(request).Handle();
 
@@ -885,7 +812,7 @@ public partial class SalesPage : Page
 
     private void SupplyDate_LostFocus(object sender, RoutedEventArgs e)
     {
-        string[] formats = { "dd.MM.yyyy", "dd-MM-yyyy", "dd/MM/yyyy" };
+        string[] formats = ["dd.MM.yyyy", "dd-MM-yyyy", "dd/MM/yyyy"];
 
         if (DateTime.TryParseExact(saleDate.TextBox.Text, formats,
                                    CultureInfo.InvariantCulture,
@@ -896,10 +823,15 @@ public partial class SalesPage : Page
         }
         else
         {
-            MessageBox.Show("Kiritilgan sana noto‘g‘ri formatda!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            sale.Error = "Kiritilgan sana noto‘g‘ri formatda!";
             saleDate.TextBox.Focus();
             return;
         }
     }
 
+    private static bool Confirm(string message, MessageBoxImage image = MessageBoxImage.Question)
+    {
+        var result = MessageBox.Show(message, "Tasdiqlash", MessageBoxButton.YesNo, image);
+        return result == MessageBoxResult.Yes;
+    }
 }
