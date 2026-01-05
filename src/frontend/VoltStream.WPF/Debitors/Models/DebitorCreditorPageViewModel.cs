@@ -110,40 +110,39 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
     private async Task LoadCustomers()
     {
         var response = await customersApi.GetAllAsync().Handle(isLoading => IsLoading = isLoading);
-        if (response.IsSuccess)
-        {
-            AvailableCustomers = mapper.Map<ObservableCollection<CustomerViewModel>>(response.Data);
-
-            var items = response.Data.Select(c =>
-            {
-                var discount = c.Accounts!.First().Discount;
-                var totalBalance = c.Accounts!.Sum(a => a.Balance);
-
-                return new DebitorCreditorItemViewModel
-                {
-                    Customer = c.Name,
-                    Phone = c.Phone!,
-                    Address = c.Address!,
-                    Discount = discount,
-                    Debitor = totalBalance < 0 ? -totalBalance : 0,
-                    Creditor = totalBalance > 0 ? totalBalance : 0,
-                    TotalBalance = totalBalance
-                };
-            }).ToList();
-
-            DebitorCreditorItems = new ObservableCollection<DebitorCreditorItemViewModel>(items);
-            FilteredDebitorCreditorItems = new ObservableCollection<DebitorCreditorItemViewModel>(items);
-
-            FinalDebitor = items.Sum(x => x.Debitor);
-            FinalKreditor = items.Sum(x => x.Creditor);
-            FinalDiscount = items.Sum(x => x.Discount);
-
-            FinalAmount = FinalDebitor - FinalKreditor - FinalDiscount;
-        }
-        else
+        if (!response.IsSuccess)
         {
             Error = response.Message ?? "Mijozlarni yuklashda xatolik!";
+            return;
         }
+
+        AvailableCustomers = mapper.Map<ObservableCollection<CustomerViewModel>>(response.Data);
+
+        var items = response.Data.Select(c =>
+        {
+            var discount = c.Accounts!.First().Discount;
+            var totalBalance = c.Accounts!.Sum(a => a.Balance);
+
+            return new DebitorCreditorItemViewModel
+            {
+                Customer = c.Name,
+                Phone = c.Phone!,
+                Address = c.Address!,
+                Discount = discount,
+                Debitor = totalBalance < 0 ? -totalBalance : 0,
+                Creditor = totalBalance > 0 ? totalBalance : 0,
+                TotalBalance = totalBalance
+            };
+        }).ToList();
+
+        DebitorCreditorItems = new ObservableCollection<DebitorCreditorItemViewModel>(items);
+        FilteredDebitorCreditorItems = new ObservableCollection<DebitorCreditorItemViewModel>(items);
+
+        FinalDebitor = items.Sum(x => x.Debitor);
+        FinalKreditor = items.Sum(x => x.Creditor);
+        FinalDiscount = items.Sum(x => x.Discount);
+
+        FinalAmount = FinalDebitor - FinalKreditor - FinalDiscount;
     }
 
     [RelayCommand]
@@ -162,7 +161,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
         {
             if (FilteredDebitorCreditorItems == null || !FilteredDebitorCreditorItems.Any())
             {
-                MessageBox.Show("Eksport qilish uchun ma'lumot topilmadi.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+                Info = "Eksport uchun ma'lumot yo'q.";
                 return;
             }
 
@@ -239,12 +238,9 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
                 workbook.SaveAs(dialog.FileName);
             }
 
-            MessageBox.Show("Ma'lumotlar muvaffaqiyatli eksport qilindi", "Tayyor", MessageBoxButton.OK, MessageBoxImage.Information);
+            Success = "Ma'lumotlar muvaffaqiyatli eksport qilindi";
         }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
+        catch (Exception ex) { Error = $"Excel faylga eksport qilishda xatolik yuz berdi: {ex.Message}"; }
     }
 
     [RelayCommand]
@@ -252,7 +248,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
     {
         if (FilteredDebitorCreditorItems == null || !FilteredDebitorCreditorItems.Any())
         {
-            MessageBox.Show("Chop etish uchun ma’lumot topilmadi.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+            Info = "Chop etish uchun ma’lumot topilmadi.";
             return;
         }
 
@@ -267,7 +263,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
     {
         if (FilteredDebitorCreditorItems == null || !FilteredDebitorCreditorItems.Any())
         {
-            MessageBox.Show("Ko‘rsatish uchun ma’lumot yo‘q.", "Eslatma", MessageBoxButton.OK, MessageBoxImage.Information);
+            Info = "Ko‘rsatish uchun ma’lumot yo‘q.";
             return;
         }
 
@@ -302,16 +298,13 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
 
                 if (!File.Exists(pdfPath))
                 {
-                    MessageBox.Show("PDF fayl yaratilmagan.", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Error = "PDF fayl yaratilmagan.";
                     return;
                 }
 
                 SharePdfFile(pdfPath);
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            catch (Exception ex) { Error = $"Faylni ulashishda xatolik yuz berdi: {ex.Message}"; }
         };
 
         toolbar.Children.Add(shareButton);
@@ -333,7 +326,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
         previewWindow.ShowDialog();
     }
 
-    private static void SaveFixedDocumentToPdf(FixedDocument fixedDoc, string pdfPath)
+    private void SaveFixedDocumentToPdf(FixedDocument fixedDoc, string pdfPath)
     {
         try
         {
@@ -373,19 +366,16 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
 
             document.Save(pdfPath);
         }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"PDF yaratishda xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
+        catch (Exception ex) { Error = $"PDF faylni saqlashda xatolik yuz berdi: {ex.Message}"; }
     }
 
-    private static void SharePdfFile(string pdfPath)
+    private void SharePdfFile(string pdfPath)
     {
         try
         {
             if (!File.Exists(pdfPath))
             {
-                MessageBox.Show("Fayl topilmadi.", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
+                Error = "Fayl topilmadi.";
                 return;
             }
 
@@ -397,10 +387,7 @@ public partial class DebitorCreditorPageViewModel : ViewModelBase
             });
 
         }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Ulashishda xatolik: {ex.Message}", "Xato", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
+        catch (Exception ex) { Error = $"Ulashishda xatolik yuz berdi: {ex.Message}"; }
     }
 
     private FixedDocument CreateFixedDocumentForPrint()

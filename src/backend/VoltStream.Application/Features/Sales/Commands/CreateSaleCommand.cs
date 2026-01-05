@@ -40,7 +40,6 @@ public class CreateSaleCommandHandler(
             await ProcessSaleItemsAsync(request.Items, warehouse, descriptionBuilder, cancellationToken);
             var sale = mapper.Map<Sale>(request);
 
-
             if (customer is not null)
             {
                 var account = customer.Accounts.FirstOrDefault(a => a.CurrencyId == request.CurrencyId);
@@ -101,6 +100,8 @@ public class CreateSaleCommandHandler(
 
             residue.RollCount -= item.RollCount;
             residue.TotalLength -= item.RollCount * item.LengthPerRoll;
+            residue.UnitPrice = item.UnitPrice;
+            residue.DiscountRate = item.DiscountRate;
 
             await HandleResidueAsync(item, warehouse, cancellationToken);
 

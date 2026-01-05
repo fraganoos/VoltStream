@@ -52,7 +52,7 @@ public partial class ProductSettingsViewModel : ViewModelBase
         if (response.IsSuccess)
             Products = new ObservableCollection<ProductResponse>(response.Data);
         else
-            Error = response.Message ?? "Error loading products";
+            Error = response.Message ?? "Mahsulotlarni yuklashda xatolik!";
     }
 
     private async Task LoadCategories()
@@ -81,13 +81,13 @@ public partial class ProductSettingsViewModel : ViewModelBase
 
             if (response.IsSuccess)
             {
-                Success = "Saved successfully";
+                Success = "Muvaffaqiyatli saqlandi!";
                 await LoadProducts();
                 Cancel();
             }
             else
             {
-                Error = response.Message ?? "Error updating product";
+                Error = response.Message ?? "Mahsulotni ma'lumotlarini yangilashda xatolik!";
             }
         }
         else
@@ -103,13 +103,13 @@ public partial class ProductSettingsViewModel : ViewModelBase
 
             if (response.IsSuccess)
             {
-                Success = "Created successfully";
+                Success = "Muvaffaqiyatli yaratildi";
                 await LoadProducts();
                 Cancel();
             }
             else
             {
-                Error = response.Message ?? "Error creating product";
+                Error = response.Message ?? "Mahsulot yaratishda xatolik";
             }
         }
     }
@@ -127,19 +127,19 @@ public partial class ProductSettingsViewModel : ViewModelBase
     [RelayCommand]
     private async Task Delete(ProductResponse product)
     {
-        if (MessageBox.Show("Are you sure?", "Delete", MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
+        if (MessageBox.Show($"{product.Name}  mahsulotni o'chirishni tasdiqlaysizmi?", "O'chirish", MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
 
         var response = await productsApi.DeleteAsync(product.Id).Handle(isLoading => IsLoading = isLoading);
 
         if (response.IsSuccess)
         {
-            Success = "Deleted successfully";
+            Success = "Muvaffaqiyatli o'chirildi!";
             await LoadProducts();
             if (SelectedProduct == product) Cancel();
         }
         else
         {
-            Error = response.Message ?? "Error deleting product";
+            Error = response.Message ?? "Mahsulotni o'chirishda xatolik!";
         }
     }
 

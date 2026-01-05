@@ -87,8 +87,8 @@ public static class NumericInput
     {
         if (d is not FrameworkElement fe || (bool)d.GetValue(IsInternalChangeProperty)) return;
 
-        TextBox target = d as TextBox;
-        if (d is ComboBox cb) target = cb.Template?.FindName("PART_EditableTextBox", cb) as TextBox;
+        TextBox target = (d as TextBox)!;
+        if (d is ComboBox cb) target = (cb.Template?.FindName("PART_EditableTextBox", cb) as TextBox)!;
 
         if (target != null && !target.IsFocused) FormatValue(target);
     }

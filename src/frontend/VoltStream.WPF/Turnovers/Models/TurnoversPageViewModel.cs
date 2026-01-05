@@ -442,7 +442,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
             int pixelWidth = (int)(width * scale);
             int pixelHeight = (int)(height * scale);
 
-            RenderTargetBitmap rtb = new RenderTargetBitmap(
+            RenderTargetBitmap rtb = new(
                 pixelWidth, pixelHeight, dpi, dpi, PixelFormats.Pbgra32);
 
             // MUHIM: Sahifani vizual Tree ga qaytadan bog'lamaslik va buzmaslik uchun
@@ -747,7 +747,7 @@ public partial class TurnoversPageViewModel : ViewModelBase
     private void AddFooterContent(FixedPage page, int currentPage, int totalPages)
     {
         const double margin = 40;
-        const double pageWidth = 793.7;
+        //const double pageWidth = 793.7;
 
         // Sahifa raqami matnini yaratish
         var pageInfo = new TextBlock

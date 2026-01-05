@@ -1,23 +1,23 @@
-<Page
-    x:Class="VoltStream.WPF.Sales.Views.SaleEditPage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="clr-namespace:VoltStream.WPF.Commons.UserControls"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
-    Title="Savdoni tahrirlash"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    mc:Ignorable="d">
-	<Grid>
+<Page x:Class="VoltStream.WPF.Sales.Views.SaleEditPage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:VoltStream.WPF.Commons.UserControls"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:utils="clr-namespace:VoltStream.WPF.Commons.Utils"
+        Title="Savdoni tahrirlash"
+        d:DesignHeight="450"
+        d:DesignWidth="800"
+        mc:Ignorable="d">
+
+	<Grid Margin="10">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="150" />
 			<RowDefinition Height="30" />
 			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto"/>
 		</Grid.RowDefinitions>
 
-		<!-- Yuqori qism - asosiy ma'lumotlar -->
 		<Grid>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*" MaxWidth="500" />
@@ -38,11 +38,11 @@
 					<RowDefinition Height="6" />
 				</Grid.RowDefinitions>
 
-				<Label Content="Sana:" FontSize="14" VerticalAlignment="Center" Margin="5,0,0,0" />
-				<Label Grid.Row="1" Content="Mijoz:" FontSize="14" VerticalAlignment="Center" Margin="5,0,0,0" />
-				<Label Grid.Row="2" Content="Val. turi:" FontSize="14" VerticalAlignment="Center" Margin="5,0,0,0" />
-				<Label Grid.Row="3" Content="Chegirma:" FontSize="14" VerticalAlignment="Center" Margin="5,0,0,0" />
-				<Label Grid.Row="4" Content="Izox:" FontSize="14" VerticalAlignment="Center" Margin="5,0,0,0" />
+				<Label Content="Sana:" FontSize="14" VerticalAlignment="Center" />
+				<Label Grid.Row="1" Content="Mijoz:" FontSize="14" VerticalAlignment="Center" />
+				<Label Grid.Row="2" Content="Val. turi:" FontSize="14" VerticalAlignment="Center" />
+				<Label Grid.Row="3" Content="Chegirma:" FontSize="14" VerticalAlignment="Center" />
+				<Label Grid.Row="4" Content="Izox:" FontSize="14" VerticalAlignment="Center" />
 
 				<controls:UserCalendar  x:Name="calendar"
                     Grid.Column="1"
@@ -190,7 +190,6 @@
 			</Grid>
 		</Grid>
 
-		<!-- O'rta qism - maxsulot qo'shish -->
 		<Grid Grid.Row="1">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="1.5*" MinWidth="120" />
@@ -348,68 +347,53 @@
                 Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}" />
 		</Grid>
 
-		<!-- Pastki qism - jadval va tugmalar -->
-		<Grid Grid.Row="2" Margin="0,5">
-			<Grid.RowDefinitions>
-				<RowDefinition Height="*" />
-				<RowDefinition Height="Auto" />
-			</Grid.RowDefinitions>
+		<DataGrid Grid.Row="2" Margin="0 5 0 0"
+                  x:Name="dataGrid"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="True"
+                  FontSize="14"
+                  IsReadOnly="True"
+                  ItemsSource="{Binding Sale.Items}"
+                  HeadersVisibility="Column, Row"
+                  utils:DataGridRowNumbering.IsEnabled="True"
+                  SelectionMode="Single"
+                  MouseDoubleClick="DataGrid_MouseDoubleClick">
+			<DataGrid.Resources>
+				<Style x:Key="RightAlignedText" TargetType="TextBlock">
+					<Setter Property="HorizontalAlignment" Value="Right" />
+					<Setter Property="TextAlignment" Value="Right" />
+				</Style>
+			</DataGrid.Resources>
+			<DataGrid.Columns>
+				<DataGridTextColumn Width="1.5*" MinWidth="120" Binding="{Binding Product.Category.Name}" Header="Maxsulot turi" />
+				<DataGridTextColumn Width="1.8*" MinWidth="120" Binding="{Binding Product.Name}" Header="Maxsulot nomi" />
+				<DataGridTextColumn Width="*" Binding="{Binding LengthPerRoll}" ElementStyle="{StaticResource RightAlignedText}" Header="Rulon metr" />
+				<DataGridTextColumn Width="*" Binding="{Binding RollCount}" ElementStyle="{StaticResource RightAlignedText}" Header="Rulon soni" />
+				<DataGridTextColumn Width="*" Binding="{Binding TotalLength, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Jami metr" />
+				<DataGridTextColumn Width="*" Binding="{Binding UnitPrice, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Narxi" />
+				<DataGridTextColumn Width="*" Binding="{Binding TotalAmount, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Jami summa" />
+				<DataGridTextColumn Width="*" Binding="{Binding DiscountRate, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Chegirma%" />
+				<DataGridTextColumn Width="*" Binding="{Binding DiscountAmount, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Chegirma summasi" />
+				<DataGridTextColumn Width="*" Binding="{Binding FinalAmount, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Umumiy summa" />
+			</DataGrid.Columns>
+		</DataGrid>
 
-			<DataGrid
-                x:Name="dataGrid"
-                AutoGenerateColumns="False"
-                CanUserAddRows="False"
-                CanUserDeleteRows="True"
-                FontSize="14"
-                IsReadOnly="True"
-                ItemsSource="{Binding Sale.Items}"
-                    HeadersVisibility="Column, Row"
-                    utils:DataGridRowNumbering.IsEnabled="True"
-                SelectionMode="Single"
-                MouseDoubleClick="DataGrid_MouseDoubleClick">
-				<DataGrid.Resources>
-					<Style x:Key="RightAlignedText" TargetType="TextBlock">
-						<Setter Property="HorizontalAlignment" Value="Right" />
-						<Setter Property="TextAlignment" Value="Right" />
-					</Style>
-				</DataGrid.Resources>
-				<DataGrid.Columns>
-					<DataGridTextColumn Width="1.5*" MinWidth="120" Binding="{Binding Product.Category.Name}" Header="Maxsulot turi" />
-					<DataGridTextColumn Width="1.8*" MinWidth="120" Binding="{Binding Product.Name}" Header="Maxsulot nomi" />
-					<DataGridTextColumn Width="*" 
-                        Binding="{Binding LengthPerRoll}" 
-                        ElementStyle="{StaticResource RightAlignedText}" 
-                        Header="Rulon metr" />
-					<DataGridTextColumn Width="*" Binding="{Binding RollCount}" ElementStyle="{StaticResource RightAlignedText}" Header="Rulon soni" />
-					<DataGridTextColumn Width="*" Binding="{Binding TotalLength, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Jami metr" />
-					<DataGridTextColumn Width="*" Binding="{Binding UnitPrice, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Narxi" />
-					<DataGridTextColumn Width="*" Binding="{Binding TotalAmount, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Jami summa" />
-					<DataGridTextColumn Width="*" Binding="{Binding DiscountRate, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Chegirma%" />
-					<DataGridTextColumn Width="*" Binding="{Binding DiscountAmount, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Chegirma summasi" />
-					<DataGridTextColumn Width="*" Binding="{Binding FinalAmount, Converter={StaticResource ToStringConverter}}" ElementStyle="{StaticResource RightAlignedText}" Header="Umumiy summa" />
-				</DataGrid.Columns>
-			</DataGrid>
+		<StackPanel Grid.Row="4" Margin="0 10 0 0" HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal">
+			<Button Margin="0,0,6,0"
+                    Padding="10,0"
+                    Background="#E74C3C"
+                    Command="{Binding CancelCommand}"
+                    Content="Bekor qilish"
+                    FontSize="14"
+                    Foreground="White" />
 
-			<Grid Grid.Row="1" Margin="0,0,10,5">
-				<StackPanel Margin="0,10,10,0" HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal">
-					<Button
-                        Margin="0,0,6,0"
-                        Padding="10,0"
-                        Background="#E74C3C"
-                        Command="{Binding CancelCommand}"
-                        Content="Bekor qilish"
-                        FontSize="14"
-                        Foreground="White" />
-
-					<Button
-                        Padding="10,0"
-                        Background="#27AE60"
-                        Command="{Binding SaveCommand}"
-                        Content="Saqlash"
-                        FontSize="14"
-                        Foreground="White" />
-				</StackPanel>
-			</Grid>
-		</Grid>
+			<Button Padding="10,0"
+                    Background="#27AE60"
+                    Command="{Binding SaveCommand}"
+                    Content="Saqlash"
+                    FontSize="14"
+                    Foreground="White" />
+		</StackPanel>
 	</Grid>
 </Page>

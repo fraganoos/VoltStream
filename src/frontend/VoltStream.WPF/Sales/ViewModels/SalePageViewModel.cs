@@ -79,14 +79,14 @@ public partial class SalePageViewModel : ViewModelBase
 
     private async Task LoadCurrenciesAsync()
     {
-        var response = await currenciesApi.GetAllAsync().Handle();
+        var response = await currenciesApi.GetAllAsync().Handle(l => IsLoading = l);
         if (response.IsSuccess)
         {
             Currencies = new(mapper.Map<ObservableCollection<CurrencyViewModel>>(response.Data!));
             if (CurrencyId > 0)
                 Currency = Currencies.FirstOrDefault(c => c.Id == CurrencyId)!;
         }
-        else Error = response.Message;
+        else Error = response.Message ?? "Valyutalarni yuklashda xatolik!";
     }
 
     partial void OnCurrencyChanged(CurrencyViewModel value)
@@ -102,13 +102,7 @@ public partial class SalePageViewModel : ViewModelBase
 
     private async Task LoadCustomersAsync()
     {
-        FilteringRequest request = new()
-        {
-            Filters = new()
-            {
-                ["Accounts"] = ["include:Currency"]
-            }
-        };
+        FilteringRequest request = new() { Filters = new() { ["Accounts"] = ["include:Currency"] } };
 
         var response = await customersApi.FilterAsync(request).Handle();
         if (response.IsSuccess)
@@ -117,7 +111,7 @@ public partial class SalePageViewModel : ViewModelBase
             if (CustomerId > 0)
                 Customer = Customers.FirstOrDefault(c => c.Id == CustomerId)!;
         }
-        else Error = response.Message;
+        else Error = response.Message ?? "Mijozlarni yuklashda xatolik!";
     }
 
     #endregion Customer combobox
@@ -140,26 +134,14 @@ public partial class SalePageViewModel : ViewModelBase
 
     private async Task LoadCategoryAndProductsAsync()
     {
-        var request = new FilteringRequest
-        {
-            Filters = new()
-            {
-                ["products"] = ["include"]
-            }
-        };
+        var request = new FilteringRequest { Filters = new() { ["products"] = ["include"] } };
 
-        var response = await categoriesApi.Filter(request).Handle();
-        if (!response.IsSuccess)
-        {
-            Error = response.Message;
-            return;
-        }
+        var response = await categoriesApi.Filter(request).Handle(l => IsLoading = l);
+        if (!response.IsSuccess) { Error = response.Message ?? "Kategoriyalarni yuklashda xatolik!"; return; }
 
-        var mapped = mapper.Map<List<CategoryViewModel>>(response.Data!);
-
-        Categories = new ObservableCollection<CategoryViewModel>(mapped);
+        Categories = mapper.Map<ObservableCollection<CategoryViewModel>>(response.Data!);
         if (SelectedCategoryId > 0)
-            SelectedCategory = mapped.FirstOrDefault(c => c.Id == SelectedCategoryId);
+            SelectedCategory = Categories.FirstOrDefault(c => c.Id == SelectedCategoryId);
         RefreshProducts();
     }
 
@@ -178,34 +160,10 @@ public partial class SalePageViewModel : ViewModelBase
                 Products = mapper.Map<ObservableCollection<ProductViewModel>>(Categories.SelectMany(c => c.Products));
                 Error = "Bunday category mavjud emas yoki o'chirilgan";
             }
-            else
-                Products = SelectedCategory.Products;
+            else Products = SelectedCategory.Products;
         }
         else Products = mapper.Map<ObservableCollection<ProductViewModel>>(Categories.SelectMany(c => c.Products));
     }
 
     #endregion Products combobox
-
-    #region Stocks
-
-    [ObservableProperty] private ObservableCollection<WarehouseStockViewModel> stocks = [];
-    private async Task LoadStocks()
-    {
-        FilteringRequest request = new()
-        {
-            Filters = new()
-            {
-                ["productId"] = [CurrentItem.Id.ToString()]
-            }
-        };
-
-        var response = await stocksApi.Filter(request).Handle();
-        if (response.IsSuccess)
-        {
-            Stocks = new(mapper.Map<ObservableCollection<WarehouseStockViewModel>>(response.Data!));
-        }
-        else Error = response.Message;
-    }
-
-    #endregion Stocks
 }

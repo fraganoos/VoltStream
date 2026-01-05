@@ -105,8 +105,7 @@ public partial class SaleEditViewModel : ViewModelBase
             Customers = mapper.Map<ObservableCollection<CustomerViewModel>>(response.Data!);
             RestoreOriginalCustomerBalance();
         }
-        else
-            Error = response.Message ?? "Mijozlarni yuklashda xatolik!";
+        else Error = response.Message ?? "Mijozlarni yuklashda xatolik!";
     }
 
     private void RestoreOriginalCustomerBalance()
@@ -137,8 +136,7 @@ public partial class SaleEditViewModel : ViewModelBase
 
         if (response.IsSuccess)
             Currencies = mapper.Map<ObservableCollection<CurrencyViewModel>>(response.Data!);
-        else
-            Error = response.Message ?? "Valyutalarni yuklashda xatolik!";
+        else Error = response.Message ?? "Valyutalarni yuklashda xatolik!";
     }
 
     private async Task LoadCategoriesAsync()
@@ -148,8 +146,7 @@ public partial class SaleEditViewModel : ViewModelBase
 
         if (response.IsSuccess)
             Categories = mapper.Map<ObservableCollection<CategoryViewModel>>(response.Data!);
-        else
-            Error = response.Message ?? "Kategoriyalarni yuklashda xatolik!";
+        else Error = response.Message ?? "Kategoriyalarni yuklashda xatolik!";
     }
 
     private async Task LoadProductsAsync()
@@ -167,8 +164,7 @@ public partial class SaleEditViewModel : ViewModelBase
 
         if (response.IsSuccess)
             Products = mapper.Map<ObservableCollection<ProductViewModel>>(response.Data!);
-        else
-            Error = response.Message ?? "Maxsulotlarni yuklashda xatolik!";
+        else Error = response.Message ?? "Maxsulotlarni yuklashda xatolik!";
     }
 
     private async Task LoadWarehouseStocksAsync()
@@ -180,8 +176,7 @@ public partial class SaleEditViewModel : ViewModelBase
 
         if (response.IsSuccess)
             WarehouseStocks = mapper.Map<ObservableCollection<WarehouseStockViewModel>>(response.Data!);
-        else
-            Error = response.Message ?? "Ombor ma'lumotlarini yuklashda xatolik!";
+        else Error = response.Message ?? "Ombor ma'lumotlarini yuklashda xatolik!";
     }
 
     #endregion
@@ -201,10 +196,7 @@ public partial class SaleEditViewModel : ViewModelBase
             Sale.Items.Insert(originalItemIndex, CurrentItem);
             ResetEditMode();
         }
-        else
-        {
-            Sale.Items.Insert(0, CurrentItem);
-        }
+        else Sale.Items.Insert(0, CurrentItem);
 
         RecalculateSaleTotals();
         ClearCurrentItem();
@@ -215,6 +207,8 @@ public partial class SaleEditViewModel : ViewModelBase
     {
         if (item is null) return;
 
+        await LoadItemRelatedDataAsync(item);
+
         originalItemIndex = Sale.Items.IndexOf(item);
         originalItem = item;
         CurrentItem = CloneItem(item);
@@ -223,10 +217,8 @@ public partial class SaleEditViewModel : ViewModelBase
         Sale.Items.RemoveAt(originalItemIndex);
         RecalculateSaleTotals();
 
-        await LoadItemRelatedDataAsync(item);
-
-        previousTotalLength = CurrentItem.TotalLength;
-        previousRollCount = CurrentItem.RollCount;
+        previousTotalLength = item.TotalLength;
+        previousRollCount = item.RollCount;
     }
 
     [RelayCommand]
@@ -783,7 +775,7 @@ public partial class SaleEditViewModel : ViewModelBase
         Product = item.Product
     };
 
-    private ProductViewModel MapProduct(ProductViewModel source) => new()
+    private static ProductViewModel MapProduct(ProductViewModel source) => new()
     {
         Id = source.Id,
         Name = source.Name,
@@ -859,7 +851,7 @@ public partial class SaleEditViewModel : ViewModelBase
         finally { isCalculating = false; }
     }
 
-    private bool ShowConfirmation(string message) =>
+    private static bool ShowConfirmation(string message) =>
         MessageBox.Show(message, "Tasdiqlash", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
 
     #endregion 

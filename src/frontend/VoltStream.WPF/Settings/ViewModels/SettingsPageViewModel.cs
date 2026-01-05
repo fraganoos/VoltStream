@@ -65,7 +65,7 @@ public partial class SettingsPageViewModel : ViewModelBase
         var response = await client.SaveAllAsync(dtoList)
             .Handle(isLoading => IsSelected = isLoading);
 
-        if (response.IsSuccess) Success = "O'zgarishlar muvaffaqiyatli saqlandi";
+        if (response.IsSuccess && response.Data) Success = "O'zgarishlar muvaffaqiyatli saqlandi";
         else Error = response.Message ?? "Valyutalarni saqlashda xatolik";
     }
 

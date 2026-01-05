@@ -85,7 +85,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         var existing = Categories.FirstOrDefault(c => string.Equals(c.Name, newValue, StringComparison.OrdinalIgnoreCase));
 
         if (existing != null) SelectedCategory = existing;
-        else if (ConfirmNew($"'{newValue}' yangi kategoriya sifatida qo'shilsinmi?"))
+        else if (Confirm($"'{newValue}' yangi kategoriya sifatida qo'shilsinmi?"))
         {
             Categories.Add(new() { Name = newValue });
             SelectedCategory = null;
@@ -109,7 +109,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         var existing = Products.FirstOrDefault(p => string.Equals(p.Name, newValue, StringComparison.OrdinalIgnoreCase));
 
         if (existing != null) SelectedProduct = existing;
-        else if (ConfirmNew($"'{newValue}' yangi mahsulot sifatida qo'shilsinmi?"))
+        else if (Confirm($"'{newValue}' yangi mahsulot sifatida qo'shilsinmi?"))
         {
             Products.Add(new() { Name = newValue });
             SelectedProduct = null;
@@ -134,7 +134,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         var existing = WarehouseStocks.FirstOrDefault(w => w.LengthPerRoll == newValue);
 
         if (existing != null) SelectedWarehouseStock = existing;
-        else if (ConfirmNew($"'{newValue}' yangi to'plam o'lchami sifatida qo'shilsinmi?"))
+        else if (Confirm($"'{newValue}' yangi to'plam o'lchami sifatida qo'shilsinmi?"))
         {
             WarehouseStocks.Add(new() { LengthPerRoll = newValue.Value });
             SelectedWarehouseStock = null;
@@ -209,23 +209,14 @@ public partial class SuppliesPageViewModel : ViewModelBase
         {
             Supplies.Clear();
             foreach (var item in result.Data)
-            {
                 Supplies.Add(MapToViewModel(item));
-            }
         }
         else Error = result.Message ?? "Ta'minotlarni yuklashda xatolik";
     }
 
     private async Task LoadWarehouseStocksAsync(long productId)
     {
-        FilteringRequest request = new()
-        {
-            Filters = new()
-            {
-                ["productId"] = [productId.ToString()]
-            }
-        };
-
+        FilteringRequest request = new() { Filters = new() { ["productId"] = [productId.ToString()] } };
         var response = await warehouseItemsApi.Filter(request).Handle(isLoading => IsLoading = isLoading);
         if (response.IsSuccess) WarehouseStocks = mapper.Map<ObservableCollection<WarehouseStockViewModel>>(response.Data);
         else Error = response.Message ?? "Ombor mahsulotlarini yuklashda xatolik yuz berdi.";
@@ -240,7 +231,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(CategoryText) || string.IsNullOrWhiteSpace(ProductText))
         {
-            MessageBox.Show("Kategoriya va Mahsulot nomi kiritilishi shart!", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+            Error = "Kategoriya va Mahsulot nomi kiritilishi shart!";
             return;
         }
 
@@ -282,7 +273,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
             else ClearForm();
             await LoadSuppliesAsync();
         }
-        else MessageBox.Show(errorMsg, "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
+        else Error = errorMsg;
     }
 
     [RelayCommand]
@@ -290,17 +281,8 @@ public partial class SuppliesPageViewModel : ViewModelBase
     {
         if (item is null) return;
 
-        if (IsFormDirty())
-        {
-            var result = MessageBox.Show(
-                "Formada saqlanmagan ma'lumotlar mavjud. Agar davom ettirsangiz, ular o'chib ketadi. Davom ettirishni istaysizmi?",
-                "Diqqat",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
-
-            if (result == MessageBoxResult.No)
-                return;
-        }
+        if (IsFormDirty() && !Confirm("Formada saqlanmagan ma'lumotlar mavjud. Agar davom ettirsangiz, ular o'chib ketadi. Davom ettirishni istaysizmi?"))
+            return;
 
         if (editingItemIndex > -1 && EditingItemBackup is not null)
             Supplies.Insert(editingItemIndex, EditingItemBackup);
@@ -308,7 +290,6 @@ public partial class SuppliesPageViewModel : ViewModelBase
         IsEditing = true;
         EditingItemBackup = item;
         editingItemIndex = Supplies.IndexOf(item);
-
         Supplies.Remove(item);
 
         await FillFormFromItem(item);
@@ -334,13 +315,11 @@ public partial class SuppliesPageViewModel : ViewModelBase
     {
         if (item is null) return;
 
-        var result = MessageBox.Show("Haqiqatan ham o'chirmoqchimisiz?", "O'chirish", MessageBoxButton.YesNo, MessageBoxImage.Question);
-        if (result == MessageBoxResult.Yes)
-        {
-            var ViewModel = await suppliesApi.DeleteSupplyAsync(item.Id).Handle(isLoading => IsLoading = isLoading);
-            if (ViewModel.IsSuccess) Supplies.Remove(item);
-            else MessageBox.Show($"O'chirishda xatolik: {ViewModel.Message}", "Xatolik", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
+        if (!Confirm("Haqiqatan ham o'chirmoqchimisiz?")) return;
+
+        var response = await suppliesApi.DeleteSupplyAsync(item.Id).Handle(isLoading => IsLoading = isLoading);
+        if (response.IsSuccess && response.Data) Supplies.Remove(item);
+        else Error = response.Message ?? "O'chirishda xatolik yuz berdi.";
     }
 
     #endregion Commands
@@ -417,7 +396,7 @@ public partial class SuppliesPageViewModel : ViewModelBase
         return vm;
     }
 
-    private static bool ConfirmNew(string message) =>
+    private static bool Confirm(string message) =>
         MessageBox.Show(message, "Tasdiqlash", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
 
     #endregion Helper Methods
